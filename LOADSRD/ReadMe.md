@@ -56,6 +56,7 @@ VRAMイメージバイナリ。ピクセルデータとパレットデータを�
 | [LOADSRD.ASM](LOADSRD.ASM) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
 | [LOADSRD.BAS](LOADSRD.BAS) |グラフィックローダープログラム本体
 | [LOADSRD.BOF](LOADSRD.BOF) |グラフィックローダー機械語プログラムバイナリ
+| [samples](samples)         |グラフィックデータサンプル
 
 [^1]: バックアップ活用テクニック PART16掲載。POCO氏制作 MSX2用「アセンブルシステム」
 
