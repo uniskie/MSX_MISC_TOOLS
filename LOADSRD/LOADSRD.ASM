@@ -26,11 +26,14 @@ ORGADR:	EQU	0D000H
 SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
 ACPAGE:	EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
 SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
-DMA:	EQU	0B000H	;B000H-CFFFH
-BUF:	EQU	0F55EH	;temp. buffer
+BUF:	EQU	0F55EH	;Temporary buffer
 VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
 VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
 ;
+;--- constant values
+; read buffer:  B000H-CFFFH
+DMA:	EQU	0B000H	;Read buffer address
+DMASIZ	EQU	2000H	;Read buffer size
 ;
 ;--- work area
 W_TYPE:	DB	0	;0:binary/ff:packed
@@ -162,13 +165,13 @@ GET_HEAD:	;
 	LD	(W_FSIZE),HL
 	RET
 ;
-;--- calc. record numbers
+;--- calc. read size & rest size
 CALREC:	; RET HL:SIZE
 	LD	HL,(W_FSIZE)
 	LD	A,H
 	OR	L
 	JR	Z,CALREC_
-	LD	DE,2001H
+	LD	DE,DMASIZ+1
 	SBC	HL,DE
 	EX	AF,AF'
 	ADD	HL,DE
@@ -178,10 +181,10 @@ CALREC:	; RET HL:SIZE
 	LD	(W_FSIZE),DE
 	RET
 CALREC_:	;
-	LD	DE,2000H
+	LD	DE,DMASIZ
 	SBC	HL,DE
 	LD	(W_FSIZE),HL
-	LD	HL,2000H
+	LD	HL,DMASIZ
 	RET
 ;
 ;--- read file
@@ -428,7 +431,7 @@ WRTCG_N:	;
 	RET
 ;
 ;
-; -- SR7 DECODE --
+; -- DECODE "Graph Saurus RLE" --
 REQ_ESR7:	;
 	LD	(W_MODE),A
 	LD	(W_LOOP),BC
