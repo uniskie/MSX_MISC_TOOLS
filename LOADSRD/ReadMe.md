@@ -113,8 +113,6 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 
 |ファイル     |説明|
 |-------------|---
-| [HIMEM.BAS  ](HIMEM.BAS  ) | フリーエリア先頭とスタックポインタのアドレスを表示。|
-| [GETPALAD.BAS](GETPALAD.BAS)|現在の画面モードでのVRAMパレットテーブルを返す(サンプルコード)
 | [LOADER.BAS  ](LOADER.BAS ) |アスキーセーブされたLOADSRD.BAS
 | [LOADSRD.ASF ](LOADSRD.ASF) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
 | [LOADSRD.ASM ](LOADSRD.ASM) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
