@@ -22,20 +22,14 @@ ORGADR:	EQU	0D000H
 	JP	SPR_TIME
 	JP	COPY_HI
 ;
-;--- symbol
-SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
-ACPAGE:	EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
-SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
-BUF:	EQU	0F55EH	;Temporary buffer
-VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
-VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
-;
+;--- work area
+
 ;--- constant values
 ; read buffer:  B000H-CFFFH
-DMA:	EQU	0B000H	;Read buffer address
-DMASIZ	EQU	2000H	;Read buffer size
+DMA:	DW	0B000H	;Read buffer address
+DMASIZ	DW	2000H	;Read buffer size
 ;
-;--- work area
+;
 W_TYPE:	DB	0	;0:binary/ff:packed
 W_FSIZE:	;
 	DW	0	;FILE SIZE
@@ -52,9 +46,15 @@ FCB:	;
 	DB	'FILENAMEEXT'	;*DM*
 	DS	37-12
 ;
-;---- sub routines ----
+;--- symbols
+SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
+ACPAGE:	EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
+SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
+BUF:	EQU	0F55EH	;Temporary buffer
+VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
+VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
 ;
-;
+;==== sub routines ========
 ;---- file access ----
 ;
 ;--- set fcb's filename by filemane string
@@ -131,7 +131,7 @@ FILEOPEN:	;
 	JP	NZ,ERROR
 ;
 ; (set dma)
-	LD	DE,DMA
+	LD	DE,(DMA)
 	LD	C,1AH
 	CALL	SYSCALL
 	RET
@@ -148,7 +148,8 @@ GET_HEAD:	;
 	JP	NZ,ERROR
 ;
 ; check head
-	LD	A,(DMA)	;bin:FEH / pack:FDH
+	LD	IX,(DMA)
+	LD	A,(IX+0)	;bin:FEH / pack:FDH
 	ADD	A,3
 	LD	(W_TYPE),A
 	CP	2
@@ -156,8 +157,10 @@ GET_HEAD:	;
 	JP	NC,ERROR	; A>=2
 ;
 ; calc file size
-	LD	HL,(DMA+3)
-	LD	DE,(DMA+1)
+	LD	L,(IX+3)
+	LD	H,(IX+4)
+	LD	E,(IX+1)
+	LD	D,(IX+2)
 	LD	(W_VRAM),DE
 	XOR	A
 	SBC	HL,DE
@@ -171,7 +174,8 @@ CALREC:	; RET HL:SIZE
 	LD	A,H
 	OR	L
 	JR	Z,CALREC_
-	LD	DE,DMASIZ+1
+	LD	DE,(DMASIZ)
+	INC	DE	;DE=DMASIZ+1
 	SBC	HL,DE
 	EX	AF,AF'
 	ADD	HL,DE
@@ -181,10 +185,10 @@ CALREC:	; RET HL:SIZE
 	LD	(W_FSIZE),DE
 	RET
 CALREC_:	;
-	LD	DE,DMASIZ
+	LD	DE,(DMASIZ)
 	SBC	HL,DE
 	LD	(W_FSIZE),HL
-	LD	HL,DMASIZ
+	LD	HL,(DMASIZ)
 	RET
 ;
 ;--- read file
@@ -408,7 +412,7 @@ WRTCG_F:	;
 	DEC	C
 	LD	DE,(W_VRAM)
 	EXX
-	LD	HL,DMA
+	LD	HL,(DMA)
 ;
 	LD	A,(W_TYPE)
 	CP	1
@@ -422,7 +426,7 @@ WRTCG_N:	;
 	LD	C,A
 	LD	DE,(W_VRAM)
 	EXX
-	LD	HL,DMA
+	LD	HL,(DMA)
 ;
 	LD	A,(W_TYPE)
 	CP	1
