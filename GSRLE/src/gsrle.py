@@ -165,13 +165,26 @@ def rleEncode(dat: bytes) -> "bytearray":
 ## setting
 output_gs_file = True # output GRAPH SAURUS FILE
 output_pixel_height = 212
+silent_mode = False
+
+## parse arguments
+argi = 1
+
+## silent mode ?
+if (len(sys.argv) > argi):
+    if (len(sys.argv[argi]) > 0):
+        if (sys.argv[argi].lower()=='/s'):
+            silent_mode = True
+            print('silent option: ' + sys.argv[argi])
+            argi += 1
 
 ## decide input file path
 inFileName = DEFAULT_INPUTFILENAME # sys.argv[1]
-if (len(sys.argv) > 1):
-    if (len(sys.argv[1]) > 0):
-        inFileName = sys.argv[1]
-        print('arg1:' + sys.argv[1])
+if (len(sys.argv) > argi):
+    if (len(sys.argv[argi]) > 0):
+        inFileName = sys.argv[argi]
+        print('arg:' + sys.argv[argi])
+        argi += 1
 
 print('inFileName:' + inFileName)
 
@@ -184,13 +197,15 @@ outFileName = os.path.splitext(inFileName)[0] + d.gs_ext # sys.argv[2]
 if (d.screen_no == 0):
     print('[ERROR] This file is not support type "' + ext + '"')
     print(d)
-    i=input()
+    if not silent_mode:
+        i=input()
     sys.exit(1) # error end
 
-if (len(sys.argv) > 2):
-    if (len(sys.argv[2]) > 0):
-        outFileName = sys.argv[2]
-        print(sys.argv[2])
+#if (len(sys.argv) > argi):
+#    if (len(sys.argv[argi]) > 0):
+#        outFileName = sys.argv[argi]
+#        print('outFineName arg: ' + sys.argv[argi])
+#        argi += 1
 
 print('outFileName' + outFileName)
 print('os.getcwd():' + os.getcwd())
@@ -217,7 +232,8 @@ print('data_size: ' + str(org_size))
 
 if ((org_size<1) or (type_id != HEAD_ID_LINEAR)):
     print('not support type. (already compressed, or missing type)')
-    i=input()
+    if not silent_mode:
+        i=input()
     sys.exit(1)
 
 ## calc size to be compressed 
@@ -305,5 +321,5 @@ if (not d.gs_type) and (d.screen_no < 8):
 
 ## end
 print('-- end -- hit enter key') 
-i=input()
-
+if not silent_mode:
+    i=input()
