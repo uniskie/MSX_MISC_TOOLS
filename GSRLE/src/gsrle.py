@@ -184,6 +184,7 @@ outFileName = os.path.splitext(inFileName)[0] + d.gs_ext # sys.argv[2]
 if (d.screen_no == 0):
     print('[ERROR] This file is not support type "' + ext + '"')
     print(d)
+    i=input()
     sys.exit(1) # error end
 
 if (len(sys.argv) > 2):
@@ -216,6 +217,7 @@ print('data_size: ' + str(org_size))
 
 if ((org_size<1) or (type_id != HEAD_ID_LINEAR)):
     print('not support type. (already compressed, or missing type)')
+    i=input()
     sys.exit(1)
 
 ## calc size to be compressed 
