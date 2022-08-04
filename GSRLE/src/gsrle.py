@@ -5,8 +5,8 @@ import sys
 import os
 import struct
 
-#DEFAULT_INPUTFILENAME = 'TEST.SC7'
-DEFAULT_INPUTFILENAME = 'BIKINI.SC8'
+DEFAULT_INPUTFILENAME = 'TEST.SC7'
+#DEFAULT_INPUTFILENAME = 'BIKINI.SC8'
 
 
 # for Python 3.4.5
@@ -283,6 +283,25 @@ print('out_file size = ' + str(len(outdata)))
 outfile = open( outFileName, 'wb')
 outfile.write(outdata)
 outfile.close()
+
+## palette file
+if (not d.gs_type) and (d.screen_no < 8):
+    print('---------------------')
+    print('-- palette file --')
+    plt_outFileName = os.path.splitext(outFileName)[0] + '.PL'+str(d.screen_no)
+    print('output: ' + plt_outFileName)
+
+    pal_adr = get_pal_table(d.screen_no)
+    print('palette table address: ' + hex(pal_adr))
+    pal_ofs = pal_adr + 7 # add header size
+
+    plt = bytearray()
+    plt[:] = data[pal_ofs:pal_ofs+32] * 8
+
+    ## write palette outfile
+    palOutfile = open( plt_outFileName, 'wb')
+    palOutfile.write(plt)
+    palOutfile.close()
 
 ## end
 print('-- end -- hit enter key') 
