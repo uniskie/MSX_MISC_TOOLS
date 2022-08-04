@@ -1,0 +1,14 @@
+VCRUNTIME140.dll は Windows 上では実行できないか、エラーを含んでいます。元のインストール メディアを使用して再インストールするか、システム管理者またはソフトウェアの製造元に問い合わせてください。エラー状態 0xc000007b。 
+が出る場合
+
+現状無駄->setuptoolsを19.2にする
+			pip install setuptools==19.2
+現状無駄->pyinstallをwin32指定する
+			pip install pyinstaller pypiwin32
+
+現在の正解->UPXが悪さをするので pyinstallerのオプションに --noupxを付ける
+			pyinstaller extract_cas.py --onefile --noupx
+
+
+
+
