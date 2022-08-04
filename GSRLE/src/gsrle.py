@@ -273,7 +273,7 @@ outdata = bytearray()
 if (use_compressed):
     type_id = HEAD_ID_COMPRESS
     end_address = start_address + encoded_size - 1
-if (output_gs_file): # graph saurus file
+if (output_gs_file and (not d.gs_type)): # BSAVE -> graph saurus file
     end_address+=1 # this entry is size (not end-address)
 outdata[:] = struct.pack('<BHHH', type_id, start_address, end_address, run_address)
 
