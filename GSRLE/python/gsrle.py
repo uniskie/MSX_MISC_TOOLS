@@ -5,8 +5,8 @@ import sys
 import os
 import struct
 
-DEFAULT_INPUTFILENAME = 'test/TEST.SC7'
-#DEFAULT_INPUTFILENAME = 'test/BIKINI.SC8'
+DEFAULT_INPUTFILENAME = '../test/TEST.SC7'
+#DEFAULT_INPUTFILENAME = '../test/BIKINI.SC8'
 
 
 # for Python 3.4.5
@@ -116,19 +116,19 @@ def get_end_address_with_pal(screen_no: int):
     table = END_ADDRESS_LIST_WITH_PALETTE
     if ((s<0) or (s>=len(table))):
         return -1
-    return table[screen_no+1]
+    return table[s]
 def get_end_address_y212(screen_no: int):
     s = screen_no+1
     table = END_ADDRESS_LIST_PIXEL
     if ((s<0) or (s>=len(table))):
         return -1
-    return table[screen_no+1]
+    return table[s]
 def get_end_address_y255(screen_no: int):
     s = screen_no+1
     table = END_ADDRESS_LIST_PIXEL_MAX
     if ((s<0) or (s>=len(table))):
         return -1
-    return table[screen_no+1]
+    return table[s]
 
 #===============================================
 # Run Length Encode
