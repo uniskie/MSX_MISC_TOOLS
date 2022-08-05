@@ -4,6 +4,8 @@
 
 - 圧縮済みデータや、対応していないフォーマットはエラーで中断します。
 
+**安全の為、扱うファイルはバックアップを取っておきましょう**
+
 ### 使い方
 gsrle.exeにドロップしてください。
 同じフォルダに圧縮後のファイルが出来ます。
@@ -16,7 +18,19 @@ gsrle.exeにドロップしてください。
 
 パレットファイルの有無、画面モードなどは拡張子から判断します。
 
-**安全の為、扱うファイルはバックアップを取っておきましょう**
+##" その他指定一覧：
+```
+GRAPH SAURUS like RLE ENCORDER
+
+GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME][/o:OUTPUT FILENAME]
+
+/s      Slient mode. (no input wait)
+/cp     Force output size : to palette table.
+/212    Force output size : to line 212.
+/256    Force output size : to line 256.
+/np     No output palette(pl?) file.
+/l      Do not overwrite input file.
+```
 
 ### gsrle_all.bat
 これは危険なものです。

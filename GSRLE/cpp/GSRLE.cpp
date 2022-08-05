@@ -8,13 +8,19 @@
     
 // GRAPH SAURUS"S COMPRESSION (GS RLE)
 //
-//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
-#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
 
+#define DEFAULT_INPUTFILENAME ""
+#if 0//defined(_DEBUG)
+	#undef DEFAULT_INPUTFILENAME 
+	//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
+	#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
+#endif
 
-// 手抜き
+// 
+#define USE_OUT_FILE_NAME_OPTION	1
+
+// cheat
 #define countof(x) (sizeof(x)/sizeof(x[0]))
-
 namespace fs = std::filesystem;
 typedef std::string     string;
 typedef uint32_t        u32;
@@ -45,6 +51,29 @@ string get_upper(const string& s)
     d.resize( s.size() );
     std::transform(s.begin(), s.end(), d.begin(), toupper);
     return d;
+}
+
+//===============================================
+// show help
+//===============================================
+void showHelp()
+{
+	print(
+		"GRAPH SAURUS like RLE ENCORDER"
+		"\n\n"
+		"GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME]"
+#if USE_OUT_FILE_NAME_OPTION
+		"[/o:OUTPUT FILENAME]"
+#endif
+		"\n\n"
+		"/s      Slient mode. (no input wait)\n"
+		"/cp     Force output size : to palette table.\n"
+		"/212    Force output size : to line 212.\n"
+		"/256    Force output size : to line 256.\n"
+		"/np     No output palette(pl?) file.\n"
+		"/l      Do not overwrite input file.\n"
+		"\n"
+	);
 }
 
 namespace gsrle {
@@ -291,41 +320,116 @@ const u8* rleEncode(const u8* src, const u8* src_end, u8* dst, u8* dst_end)
 int main(int argc, char *argv[])
 {
     // setting
-    int output_pixel_height = 212;
+    int output_pixel_height = 0;
+	bool force_output_vram_pal = false;
     bool output_gs_file = true; // output GRAPH SAURUS FILE
     bool silent_mode = false;
+	bool protect_infile = false;
+	bool output_pal_file = true;
+
+	string inFileName = DEFAULT_INPUTFILENAME;
+	string outFileNameReq = "";
+
 
     //// parse arguments
     int argi = 1;
+	int  filename_arg_step = 0;
 
-    //// silent mode ?
-    if (argc > argi)
+	bool arg_error = false;
+
+    while (argi < argc)
     {
         string arg(argv[argi]);
         if (arg.size())
         {
             string l = get_lower(arg);
-            if (l == "/s")
+
+			//// arg: protect input file
+			if (l == "/np")
+			{
+				output_pal_file = false;
+				print(string("arg: no output pal file: ") + arg);
+			}
+			else
+			//// arg: protect input file
+			if (l == "/l")
+			{
+				protect_infile = true;
+				print(string("arg: protect input file : ") + arg);
+			}
+			else
+			//// arg: force include palette
+			if (l == "/cp")
+			{
+				force_output_vram_pal = true;
+				print(string("arg: clip size = force include palette : ") + arg);
+			}
+			else
+			//// arg: force 255 line
+			if (l == "/256")
+			{
+				output_pixel_height = 256;
+				print(string("arg: clip size = force 256 line : ") + arg);
+			}
+			else
+			//// arg: force 212 line
+			if (l == "/212")
+			{
+				output_pixel_height =212;
+				print(string("arg: clip size = force 212 line : ") + arg);
+			}
+			else
+			//// arg: silent mode
+			if (l == "/s")
             {
                 silent_mode = true;
-                print(string("arg: silent option: ") + arg);
-                argi += 1;
+                print(string("arg: silent mode : ") + arg);
             }
-        }
-    }
+			else
+			//// arg: inFileName
+			if (filename_arg_step == 0)
+			{
+				inFileName = arg;
+				print(string("arg: inFIlename : ") + arg);
+				filename_arg_step += 1;
+			}
+#if USE_OUT_FILE_NAME_OPTION
+			else
+			//// arg: outFilename
+			if (l.substr(0,3) == "/o:")
+			{
+				if (filename_arg_step == 1)
+				{
+					outFileNameReq = arg.substr(3);
+					print(string("arg: outFileName : ") + arg);
+					filename_arg_step += 1;
+				}
+				else
+				{
+					print(string("arg: outFileName already specified. ") + arg);
+					arg_error = true;
+				}
+			}
+#endif
+			else
+			{
+				print(string("arg: [unknown arg] : ") + arg);
+				arg_error = true;
+			}
+		}
+		argi += 1;
+	}
 
-    //// inFileName
-    string inFileName = DEFAULT_INPUTFILENAME;
-    if (argc > argi)
-    {
-        string arg(argv[argi]);
-        if (arg.size())
-        {
-            inFileName = arg;
-            print(string("arg: inFIlename") + arg);
-            argi += 1;
-        }
-    }
+	if (arg_error || !inFileName.size())
+	{
+		if (arg_error)
+		{
+			print(string("[ERROR] argument error."));
+		}
+		showHelp();
+		if (!silent_mode)   std::cin.get();
+		return 1; // error end
+	}
 
     print(string("inFileName:") + inFileName);
     fs::path inPath(inFileName);
@@ -344,31 +448,39 @@ int main(int argc, char *argv[])
     fs::path outPath(inFileName);
     outPath.replace_extension(extd->gs_ext);
     string outFileName = outPath.generic_string();
-
-    // if (argc > argi)
-    // {
-    //     string arg(argv[argi]);
-    //     if (arg.size())
-    //     {
-    //         outFileName = arg;
-    //         print(string("arg: outFileName") + arg);
-    //         argi += 1;
-    //     }
-    // }
-
+#if USE_OUT_FILE_NAME_OPTION
+	if (outFileNameReq.size())
+	{
+		outFileName = outFileNameReq;
+	}
+#endif
     print(string("outFileName") + outFileName);
     print(string("fs::current_path():") + fs::current_path().generic_string());
+
+	// 上書きかどうか調べる
+	if (inFileName == outFileName)
+	{
+		print(string("[overwrite source file] ") + outFileName + " -> " + outFileName);
+		if (protect_infile)
+		{
+			// 上書き禁止
+			print(string("[ERROR] Overwriting the original file is prohibited."));
+			if (!silent_mode)   std::cin.get();
+			return 1; // error end
+		}
+	}
 
     //// read file
 
     FILE* inFile;
-	errno_t errno = fopen_s(&inFile, inFileName.c_str(), "rb");
-    if (errno != 0)
+	errno_t err_no = fopen_s(&inFile, inFileName.c_str(), "rb");
+    if (err_no != 0)
     {
         print(string("[ERROR] file can not open. \"") + inFileName + "\"");
         if (!silent_mode)   std::cin.get();
         return 1; // error end
     }
+	// get file size
     std::error_code ec{};
     auto inFileSize = fs::file_size(inFileName, ec);
     if (!ec)
@@ -417,29 +529,31 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    //// calc size to compress
-    // get pixel size
+    //// 圧縮対象のサイズを決定
     size_t pixel_size = 0;
     if (output_pixel_height==212)
     {
-        pixel_size = gsrle::get_end_address_y212(extd->screen_no);
+        pixel_size = gsrle::get_end_address_y212(extd->screen_no) + 1;
     }
-    else if (output_pixel_height==255)
+    else if (output_pixel_height==256)
     {
-        pixel_size = gsrle::get_end_address_y255(extd->screen_no);
+        pixel_size = gsrle::get_end_address_y255(extd->screen_no) + 1;
     }
-    else
+	else if (force_output_vram_pal)
+	{
+		pixel_size = gsrle::get_end_address_with_pal(extd->screen_no) + 1;
+	}
+    else // そのまま
     {
-        pixel_size = gsrle::get_end_address_with_pal(extd->screen_no);
+        pixel_size = org_size;
     }
-	pixel_size += 1;
     print(string("need_pixel_size: ") + std::to_string(pixel_size));
 
     // expand data to pixelsize
     if (pixel_size > org_size)
     {
         data.resize(pixel_size);
-        std::fill( &data[org_size], &data[pixel_size], 0);
+        std::fill( &data[0] + org_size, &data[0] + pixel_size, 0);
         org_size = data.size() - gsrle::HEADER_SIZE;
         print(string("(expand source pixel to ") + std::to_string(pixel_size));
     }
@@ -455,8 +569,7 @@ int main(int argc, char *argv[])
     size_t encoded_size = dst_end ? dst_end - &outdata[gsrle::HEADER_SIZE] : 0;
     print(string("encoded size: ") + std::to_string(encoded_size));
 
-    //// If the size after compression is large,
-    //  use the data before compression
+    // 圧縮後の方が大きくなったら元のベタデータを書き出す
     bool use_compressed =  (encoded_size && (encoded_size < use_size));
     if (!use_compressed)
     {
@@ -515,8 +628,8 @@ int main(int argc, char *argv[])
 
     //// write outfile
     FILE* outfile;
-	errno_t errno = fopen_s( &outfile, outFileName.c_str(), "wb");
-    if (errno != 0)
+	err_no = fopen_s( &outfile, outFileName.c_str(), "wb");
+    if (err_no != 0)
     {
         print(string("[ERROR] file can not open. \"") + outFileName + "\"");
         if (!silent_mode)   std::cin.get();
@@ -532,8 +645,8 @@ int main(int argc, char *argv[])
     fclose(outfile);
     outfile = nullptr;
 
-    //// palette file
-    if ((!extd->gs_type) && (extd->screen_no < 8))
+    //// write palette file
+    if ((!extd->gs_type) && (extd->screen_no < 8) && output_pal_file)
     {
         print(string("---------------------"));
         print(string("-- palette file --"));
@@ -560,8 +673,8 @@ int main(int argc, char *argv[])
         }
         //// write palette outfile
         FILE* palfile;
-		errno_t errno = fopen_s( &palfile, plt_outFileName.c_str(), "wb");
-        if (errno != 0)
+		errno_t err_no = fopen_s( &palfile, plt_outFileName.c_str(), "wb");
+        if (err_no != 0)
         {
             print(string("[ERROR] file can not open. \"") + plt_outFileName + "\"");
             if (!silent_mode)   std::cin.get();
@@ -578,7 +691,11 @@ int main(int argc, char *argv[])
         palfile = nullptr;
     }
     //// end
-    print(string("-- end -- hit enter key"));
-    if (!silent_mode)   std::cin.get();
+    print(string("-- end --"));
+    if (!silent_mode) 
+	{
+		print(string("hit enter key"));
+		std::cin.get();
+	}
     return 0;;
 }
