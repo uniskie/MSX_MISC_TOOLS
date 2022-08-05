@@ -8,7 +8,9 @@
     
 // GRAPH SAURUS"S COMPRESSION (GS RLE)
 //
-#define DEFAULT_INPUTFILENAME ",,/test/TEST.SC7"
+//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
+#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
+
 
 // 手抜き
 #define countof(x) (sizeof(x)/sizeof(x[0]))
@@ -330,13 +332,13 @@ int main(int argc, char *argv[])
     string ext = inPath.extension().generic_string();
 
     auto extd = gsrle::get_ext_data(inFileName);
-    print(string("screen no: ") + std::to_string(extd->screen_no));
-    if (extd->screen_no == 0)
+    if (!extd || extd->screen_no == 0)
     {
         print(string("[ERROR] This file is not support type \"") + ext + "\"");
         if (!silent_mode)   std::cin.get();
         return 1; // error end
     }
+	print(string("screen no: ") + std::to_string(extd->screen_no));
 
     //// decide output file path
     fs::path outPath(inFileName);
@@ -405,7 +407,7 @@ int main(int argc, char *argv[])
     print(string("run_address = ") + hex(header.run_address));
     print(string("----------------"));
 
-    size_t org_size = header.end_address - header.start_address + 1;
+    size_t org_size = header.end_address - header.start_address + ((extd->gs_type) ? 0 : 1);
     print(string("data_size: ") + std::to_string(org_size));
 
     if ((org_size < 1) || (header.type_id != gsrle::HEAD_ID_LINEAR))
@@ -430,6 +432,7 @@ int main(int argc, char *argv[])
     {
         pixel_size = gsrle::get_end_address_with_pal(extd->screen_no);
     }
+	pixel_size += 1;
     print(string("need_pixel_size: ") + std::to_string(pixel_size));
 
     // expand data to pixelsize
@@ -445,7 +448,7 @@ int main(int argc, char *argv[])
     print(string("use_size: ") + std::to_string(use_size));
 
     //// RLE encode
-    std::vector<u8> outdata(gsrle::HEADER_SIZE + use_size);
+    std::vector<u8> outdata(gsrle::HEADER_SIZE + use_size * 2); // double size
     const u8* dst_end = gsrle::rleEncode(
          &data[0] + gsrle::HEADER_SIZE, &data[0] + gsrle::HEADER_SIZE + use_size,
          &outdata[0] + gsrle::HEADER_SIZE, &outdata[0] + gsrle::HEADER_SIZE + use_size);
@@ -498,9 +501,9 @@ int main(int argc, char *argv[])
     {
         // writeback original pixels
         std::copy( 
-            &data.begin() + gsrle::HEADER_SIZE,
-            &data.begin() + std::min(data.size(), outdata.size()),
-            &outdata.begin() + gsrle::HEADER_SIZE
+            data.begin() + gsrle::HEADER_SIZE,
+            data.begin() + std::min(data.size(), outdata.size()),
+            outdata.begin() + gsrle::HEADER_SIZE
             );
     }
     else

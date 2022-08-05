@@ -5,8 +5,9 @@ import sys
 import os
 import struct
 
-DEFAULT_INPUTFILENAME = '../test/TEST.SC7'
+#DEFAULT_INPUTFILENAME = '../test/TEST.SC7'
 #DEFAULT_INPUTFILENAME = '../test/BIKINI.SC8'
+DEFAULT_INPUTFILENAME = '../test/JTHUNDER.SRC'
 
 
 # for Python 3.4.5
@@ -267,6 +268,7 @@ elif (output_pixel_height==255):
     pixel_size = get_end_address_y255(d.screen_no)
 else:
     pixel_size = get_end_address_with_pal(d.screen_no)
+pixel_size += 1
 print('need_pixel_size: ' + str(pixel_size))
 
 # expand data to pixelsize
