@@ -20,7 +20,7 @@ gsrle.exeにドロップしてください。
 
 ##" その他指定一覧：
 ```
-GRAPH SAURUS like RLE ENCORDER
+GRAPH SAURUS like RLE ENCODER
 
 GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME][/o:OUTPUT FILENAME]
 
