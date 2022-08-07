@@ -7,8 +7,8 @@ import struct
 
 #DEFAULT_INPUTFILENAME = '../test/TEST.SC7'
 #DEFAULT_INPUTFILENAME = '../test/BIKINI.SC8'
-DEFAULT_INPUTFILENAME = '../test/JTHUNDER.SRC'
-
+#DEFAULT_INPUTFILENAME = '../test/JTHUNDER.SRC'
+DEFAULT_INPUTFILENAME = "../test/RYUJO256.SC7"
 
 # for Python 3.4.5
 # 
@@ -16,12 +16,29 @@ DEFAULT_INPUTFILENAME = '../test/JTHUNDER.SRC'
 #
 
 #===============================================
+# show help
+#===============================================
+def showHelp():
+	print("GRAPH SAURUS like RLE ENCODER")
+	print("")
+	print("GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME]")
+	print("[/o:OUTPUT FILENAME]")
+	print("")
+	print("/s      Slient mode. (no input wait)")
+	print("/cp     Force output size : to palette table.")
+	print("/212    Force output size : to line 212.")
+	print("/256    Force output size : to line 256.")
+	print("/np     No output palette(pl?) file.")
+	print("/l      Do not overwrite input file.")
+	print("")
+
+#===============================================
 # CONSTAMTS
 #===============================================
 HEAD_ID_LINEAR   = 0xFE # BSAVE/GS LINEAR
-HEAD_ID_COMPRESS = 0xFD #GS RLE COMPLESS
+HEAD_ID_COMPRESS = 0xFD # GS RLE COMPLESS
 HEAD_FORMAT = '<BHHH'
-BSAVE_LIMIT = 65535
+BSAVE_LIMIT = 65534
 
 ## BSAVE END END ADDRESS LIMIT
 def cap_bsave_address(adr :int):
@@ -124,7 +141,7 @@ def get_end_address_y212(screen_no: int):
     if ((s<0) or (s>=len(table))):
         return -1
     return table[s]
-def get_end_address_y255(screen_no: int):
+def get_end_address_y256(screen_no: int):
     s = screen_no+1
     table = END_ADDRESS_LIST_PIXEL_MAX
     if ((s<0) or (s>=len(table))):
@@ -157,14 +174,14 @@ def rleEncode(dat: bytes) -> "bytearray":
                 res.append(0)
                 res.append(n)
                 res.append(b)
-                n-=n;
+                n-=n
             elif (n > 2) or (b < 16):
                 res.append(n)
                 res.append(b)
-                n-=n;
+                n-=n
             else:
                 res.append(b)
-                n-=1;
+                n-=1
     return res
 
 #===============================================
@@ -172,53 +189,104 @@ def rleEncode(dat: bytes) -> "bytearray":
 #===============================================
 
 ## setting
+output_pixel_height = 0
+force_output_vram_pal = False
 output_gs_file = True # output GRAPH SAURUS FILE
-output_pixel_height = 212
 silent_mode = False
+protect_infile = False
+output_pal_file = True
+
+inFileName = DEFAULT_INPUTFILENAME
+outFileNameReq = ""
 
 ## parse arguments
 argi = 1
+filename_arg_step = 0
 
-## silent mode ?
-if (len(sys.argv) > argi):
-    if (len(sys.argv[argi]) > 0):
-        if (sys.argv[argi].lower()=='/s'):
+arg_error = False
+
+while (argi < len(sys.argv)):
+    arg = sys.argv[argi]
+    if (len(arg)):
+        l = arg.lower()
+
+        ## arg: protect input file
+        if (l == "/np"):
+            output_pal_file = False
+            print("arg: no output pal file: " + arg)
+        ## arg: protect input file
+        elif (l == "/l"):
+            protect_infile = True
+            print("arg: protect input file : " + arg)
+        ## arg: force include palette
+        elif (l == "/cp"):
+            force_output_vram_pal = True
+            print("arg: clip size = force include palette : " + arg)
+        ## arg: force 255 line
+        elif (l == "/256"):
+            output_pixel_height = 256
+            print("arg: clip size = force 256 line : " + arg)
+        ## arg: force 212 line
+        elif (l == "/212"):
+            output_pixel_height =212
+            print("arg: clip size = force 212 line : " + arg)
+        ## arg: silent mode
+        elif (l == "/s"):
             silent_mode = True
-            print('silent option: ' + sys.argv[argi])
-            argi += 1
+            print("arg: silent mode : " + arg)
+        ## arg: inFileName
+        elif (filename_arg_step == 0):
+            inFileName = arg
+            print("arg: inFIlename : " + arg)
+            filename_arg_step += 1
+        ## arg: outFilename
+        elif (l.substr(0,3) == "/o:"):
+            if (filename_arg_step == 1):
+                outFileNameReq = arg.substr(3)
+                print("arg: outFileName : " + arg)
+                filename_arg_step += 1
+            else:
+                print("arg: outFileName already specified. " + arg)
+                arg_error = True
+        else:
+            print("arg: [unknown arg] : " + arg)
+            arg_error = True
+    argi += 1
 
-## decide input file path
-inFileName = DEFAULT_INPUTFILENAME # sys.argv[1]
-if (len(sys.argv) > argi):
-    if (len(sys.argv[argi]) > 0):
-        inFileName = sys.argv[argi]
-        print('arg:' + sys.argv[argi])
-        argi += 1
-
-print('inFileName:' + inFileName)
-
-ext, d = get_ext_data(inFileName)
-print('screen no: ' + str(d.screen_no))
-
-## decide output file path
-outFileName = os.path.splitext(inFileName)[0] + d.gs_ext # sys.argv[2]
-
-if (d.screen_no == 0):
-    print('[ERROR] This file is not support type "' + ext + '"')
-    print(d)
+if (arg_error or (not len(inFileName))):
+    if (arg_error):
+        print("[ERROR] argument error.")
+    showHelp()
     if not silent_mode:
         i=input()
     sys.exit(1) # error end
 
-#if (len(sys.argv) > argi):
-#    if (len(sys.argv[argi]) > 0):
-#        outFileName = sys.argv[argi]
-#        print('outFineName arg: ' + sys.argv[argi])
-#        argi += 1
+print('inFileName:' + inFileName)
+ext, extd = get_ext_data(inFileName)
+if (extd.screen_no == 0):
+    print('[ERROR] This file is not support type "' + ext + '"')
+    if not silent_mode:
+        i=input()
+    sys.exit(1) # error end
+print('screen no: ' + str(extd.screen_no))
 
+## decide output file path
+outFileName = os.path.splitext(inFileName)[0] + extd.gs_ext # sys.argv[2]
+if (len(outFileNameReq)):
+    outFileName = outFileNameReq
 print('outFileName' + outFileName)
 print('os.getcwd():' + os.getcwd())
 #i=input()
+
+# 上書きかどうか調べる
+if (inFileName == outFileName):
+    print("[overwrite source file] " + outFileName + " -> " + outFileName)
+    if (protect_infile):
+        # 上書き禁止
+        print("[ERROR] Overwriting the original file is prohibited.")
+        if not silent_mode:
+            i=input()
+        sys.exit(1) # error end
 
 ## read file
 
@@ -229,13 +297,14 @@ print('in_file size = ' + str(len(data)))
 
 ## get file Header infomation
 head_size = len(struct.pack(HEAD_FORMAT,0,0,0,0))
-body_size = len(data) - head_size;
+body_size = len(data) - head_size
 if (body_size < 0):
     print('[ERROR] Not enough file size.')
     if not silent_mode:
         i=input()
     sys.exit(1) # error end
 
+## get file Header infomation
 type_id, start_address, end_address, run_address = struct.unpack(HEAD_FORMAT, data[0:head_size])
 print('--- source file ---')
 print('type_id = ' + hex(type_id))
@@ -244,41 +313,68 @@ print('end_address = ' + hex(end_address))
 print('run_address = ' + hex(run_address))
 print('----------------')
 
-org_size = end_address - start_address + 1
-#if (d.gs_type):
-#    org_size = end_address - start_address
-if (body_size < org_size):
-    org_size = body_size
-    end_address = org_size - start_address - 1
-    print('*modify end_address = ' + hex(end_address))
-print('data_size: ' + str(org_size))
+# ピクセルデータサイズ
+# 0の場合は0x10000とみなす
+if (end_address):
+    org_size = end_address
+else:
+    org_size = 0x10000
+if (type_id == HEAD_ID_COMPRESS):
+    # GS COMPRESS type
+    # GS圧縮形式は
+    # 開始アドレス, データサイズ, 0
 
-if ((org_size<1) or (type_id != HEAD_ID_LINEAR)):
+    # そのまま
+    org_size = org_size
+else:
+    # BSAVE形式は
+    # 開始アドレス, 終了アドレス, 0
+    # GSベタ形式は
+    # 開始アドレス, データサイズ, 0
+    # 
+    # 中身が判定できないので簡易的に偶数丸め込み。
+    #
+    # ※ GSベタの場合は開始0固定前提で処理するため、
+    #    もし、開始アドレスが0以外のデータがあっても非対応。
+    #    (見たことはない)
+
+    org_size = org_size - start_address + 1 #BSAVE type
+    org_size &= 0xFFFFFFe #偶数丸め込み
+print("data_size: " + str(org_size))
+
+if ((org_size < 1) or (type_id != HEAD_ID_LINEAR)):
     print('not support type. (already compressed, or missing type)')
     if not silent_mode:
         i=input()
     sys.exit(1)
 print('----------------')
 
-## calc size to be compressed 
-# get pixel size
+## 圧縮対象のサイズを決定
+pixel_size = 0
 if (output_pixel_height==212):
-    pixel_size = get_end_address_y212(d.screen_no)
-elif (output_pixel_height==255):
-    pixel_size = get_end_address_y255(d.screen_no)
-else:
-    pixel_size = get_end_address_with_pal(d.screen_no)
-pixel_size += 1
-print('need_pixel_size: ' + str(pixel_size))
+    pixel_size = get_end_address_y212(extd.screen_no) + 1
+elif (output_pixel_height==256):
+    pixel_size = get_end_address_y256(extd.screen_no) + 1
+elif (force_output_vram_pal):
+    pixel_size = get_end_address_with_pal(extd.screen_no) + 1
+else: # そのまま
+    pixel_size = org_size
+print("need_pixel_size: " + str(pixel_size))
 
 # expand data to pixelsize
-if (pixel_size > org_size):
-    data2 = bytearray(data) + b'\x00' * (pixel_size+org_size)
+file_body_size = len(data) - head_size
+if (pixel_size > file_body_size):
+    data2 = bytearray(data) + b'\x00' * (pixel_size-file_body_size)
     data = bytes(data2)
-    org_size = body_size
-    print('(expand source pixel to ' + str(pixel_size))
+    file_body_size = len(data) - head_size
+    if (file_body_size < pixel_size):
+        print("[innner error] file_body_size < pixel_size")
+        if not silent_mode:
+            i=input()
+        sys.exit(1)
+    print("(expand source pixel to " + str(file_body_size))
 
-use_size = min(pixel_size, org_size)
+use_size = min(pixel_size, file_body_size)
 print('use_size: ' + str(use_size))
 
 ## RLE encode
@@ -286,8 +382,7 @@ compressed = rleEncode(data[head_size:head_size + use_size])
 encoded_size = len(compressed)
 print('encoded size: ' + str(encoded_size))
 
-## If the size after compression is large,
-#  use the data before compression
+   # 圧縮後の方が大きくなったら元のベタデータを書き出す
 use_compressed =  (encoded_size < use_size)
 if (not use_compressed):
     print('[CAUTION] original size < compressed size ')
@@ -297,12 +392,18 @@ print('----------------')
 ## set outdata
 outdata = bytearray()
 if (use_compressed):
+    output_gs_file = True
     type_id = HEAD_ID_COMPRESS
-    end_address = start_address + encoded_size - 1
-if (output_gs_file and (not d.gs_type)): # BSAVE -> graph saurus file
-    end_address+=1 # this entry is size (not end-address)
-limited_end_address = cap_bsave_address(end_address)
-outdata[:] = struct.pack(HEAD_FORMAT, type_id, start_address, limited_end_address, run_address)
+    end_address = encoded_size # this entry is size (not end-address)
+    limited_end_address = end_address
+elif (output_gs_file): # graph saurus file
+    # non-compressed graph saurus image
+    type_id = HEAD_ID_LINEAR
+    end_address = use_size # this entry is size (not end-address)
+    limited_end_address = end_address
+else:
+    limited_end_address = cap_bsave_address(end_address)
+outdata[:] = struct.pack(HEAD_FORMAT, type_id, start_address, end_address, run_address)
 
 print('--- out file ---')
 print('type_id = ' + hex(type_id))
@@ -330,13 +431,13 @@ outfile.write(outdata)
 outfile.close()
 
 ## palette file
-if (not d.gs_type) and (d.screen_no < 8):
+if output_pal_file and (not extd.gs_type) and (extd.screen_no < 8):
     print('---------------------')
     print('-- palette file --')
-    plt_outFileName = os.path.splitext(outFileName)[0] + '.PL'+str(d.screen_no)
+    plt_outFileName = os.path.splitext(outFileName)[0] + '.PL'+str(extd.screen_no)
     print('output: ' + plt_outFileName)
 
-    pal_adr = get_pal_table(d.screen_no)
+    pal_adr = get_pal_table(extd.screen_no)
     print('palette table address: ' + hex(pal_adr))
     pal_ofs = pal_adr + head_size
 
