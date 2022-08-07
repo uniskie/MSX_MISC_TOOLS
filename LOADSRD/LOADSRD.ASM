@@ -31,8 +31,10 @@ DMASIZ	DW	2000H	;Read buffer size
 ;
 ;
 W_TYPE:	DB	0	;0:binary/ff:packed
-W_FSIZE:	;
-	DW	0	;FILE SIZE
+W_DSIZE:	;
+	DW	0	;DATA SIZE LOW16
+W_DSIZH:	;
+	DB	0	;DATA SIZE HIGH8
 W_VRAM:	DW	0000H
 W_LOOP:	DW	0
 W_MODE:	DB	0
@@ -54,6 +56,8 @@ BUF:	EQU	0F55EH	;Temporary buffer
 VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
 VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
 ;
+ID_SRN:	EQU	0FEH	; LINER PIXEL
+ID_CMP:	EQU	0FDH	; COMPRESSED PIXEL
 ;==== sub routines ========
 ;---- file access ----
 ;
@@ -156,39 +160,55 @@ GET_HEAD:	;
 	LD	HL,_M_TYPE
 	JP	NC,ERROR	; A>=2
 ;
-; calc file size
-	LD	L,(IX+3)
+; calc dat size
+	LD	L,(IX+3)	; END ADDRESS
 	LD	H,(IX+4)
-	LD	E,(IX+1)
+	LD	E,(IX+1)	; START ADDRESS
 	LD	D,(IX+2)
 	LD	(W_VRAM),DE
 	XOR	A
 	SBC	HL,DE
-	INC	HL
-	LD	(W_FSIZE),HL
+	LD	A,(IX+0)	; ID
+	CP	0FDH		; COMMPRESSED
+	JR	Z,WRDSIZ	; ø…œœ … ±¿≤
+;
+	INC	HL		; END - START + 1
+	LD	A,L
+	AND	254		; ∏ﬁ≥Ω≥ œŸ“∫–
+	LD	L,A
+;
+WRDSIZ: ;
+	LD	(W_DSIZE),HL
+	LD	A,L
+	OR	H
+	JR	Z,WRDSZ1
+	XOR	A	; SIZE <= $0FFFF
+	LD	(W_DSIZH),A
+	RET
+WRDSZ1: ;
+	INC	A	; SIZE = $10000
+	LD	(W_DSIZH),A
 	RET
 ;
 ;--- calc. read size & rest size
 CALREC:	; RET HL:SIZE
-	LD	HL,(W_FSIZE)
-	LD	A,H
-	OR	L
-	JR	Z,CALREC_
+
+	LD	HL,(W_DSIZE)
+	LD	A,(W_DSIZH)
 	LD	DE,(DMASIZ)
-	INC	DE	;DE=DMASIZ+1
 	SBC	HL,DE
-	EX	AF,AF'
-	ADD	HL,DE
-	EX	AF,AF'
+	SBC	A,0
 	JR	NC,CALREC_
+	ADD	HL,DE	; HL = (W_DSIZE)
 	LD	DE,0
-	LD	(W_FSIZE),DE
+	LD	(W_DSIZE),DE
+	XOR	A
+	LD	(W_DSIZH),A
 	RET
 CALREC_:	;
-	LD	DE,(DMASIZ)
-	SBC	HL,DE
-	LD	(W_FSIZE),HL
-	LD	HL,(DMASIZ)
+	LD	(W_DSIZE),HL
+	LD	(W_DSIZH),A
+	LD	HL,(DMASIZ) ; HL = (DMASIZ)
 	RET
 ;
 ;--- read file
@@ -385,8 +405,9 @@ LOAD_SR7:	;
 	CALL	FILEREAD
 	POP	DE
 	CALL	WRTCG_F
-	LD	HL,(W_FSIZE)
-	LD	A,H
+	LD	HL,(W_DSIZE)
+	LD	A,(W_DSIZH)
+	OR	H
 	OR	L
 	JP	Z,END_OK
 L_MAIN:	;
@@ -395,8 +416,9 @@ L_MAIN:	;
 	CALL	FILEREAD
 	POP	DE
 	CALL	WRTCG_N
-	LD	HL,(W_FSIZE)
-	LD	A,H
+	LD	HL,(W_DSIZE)
+	LD	A,(W_DSIZH)
+	OR	H
 	OR	L
 	JP	NZ,L_MAIN
 END_OK:	;

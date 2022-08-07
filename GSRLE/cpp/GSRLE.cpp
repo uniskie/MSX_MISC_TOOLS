@@ -12,7 +12,8 @@
 #define DEFAULT_INPUTFILENAME ""
 #if defined(_DEBUG)
 	#undef DEFAULT_INPUTFILENAME 
-	#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
+	//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
+	#define DEFAULT_INPUTFILENAME "../test/RYUJO256.SC7"
 	//#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
 #endif
 
@@ -94,14 +95,14 @@ const int HEADER_SIZE = 7;
 const int HEAD_ID_LINEAR   = 0xFE; // BSAVE/GS LINEAR
 const int HEAD_ID_COMPRESS = 0xFD; // #GS RLE COMPLESS
 
-// BSAVE END END ADDRESS LIMIT
-const int BSAVE_LIMIT = 65535;
-int cap_bsave_address(int adr)
-{
-    if (adr > BSAVE_LIMIT)
-        adr = BSAVE_LIMIT;
-    return adr;
-}
+//// BSAVE END END ADDRESS LIMIT
+//const int BSAVE_LIMIT = 65535;
+//int cap_bsave_address(int adr)
+//{
+//    if (adr > BSAVE_LIMIT)
+//        adr = BSAVE_LIMIT;
+//    return adr;
+//}
 
 //===============================================
 // FILE EXTENSION INFO
@@ -233,7 +234,7 @@ int get_end_address_y212(int screen_no)
     }
     return END_ADDRESS_LIST_PIXEL[s];
 }
-int get_end_address_y255(int screen_no)
+int get_end_address_y256(int screen_no)
 {
     int s = screen_no + ((screen_no>0) ? 1 : 0);
     if ((s<0) || (s>=countof(END_ADDRESS_LIST_PIXEL_MAX)))
@@ -563,7 +564,7 @@ int main(int argc, char *argv[])
     }
     else if (output_pixel_height==256)
     {
-        pixel_size = gsrle::get_end_address_y255(extd->screen_no) + 1;
+        pixel_size = gsrle::get_end_address_y256(extd->screen_no) + 1;
     }
 	else if (force_output_vram_pal)
 	{
@@ -576,15 +577,23 @@ int main(int argc, char *argv[])
     print(string("need_pixel_size: ") + std::to_string(pixel_size));
 
     // expand data to pixelsize
-    if (pixel_size > org_size)
+	auto file_body_size = data.size() - gsrle::HEADER_SIZE;
+	if (pixel_size > file_body_size)
     {
-        data.resize(pixel_size);
-        std::fill( &data[0] + org_size, &data[0] + pixel_size, 0);
-        org_size = data.size() - gsrle::HEADER_SIZE;
+		auto old_size = data.size();
+        data.resize(pixel_size + gsrle::HEADER_SIZE);
+        std::fill( &data[0] + old_size, &data[0] + pixel_size, 0);
+		file_body_size = data.size() - gsrle::HEADER_SIZE;
+		if (file_body_size < pixel_size)
+		{
+			print(string("[innner error] file_body_size < pixel_size"));
+			if (!silent_mode)   std::cin.get();
+			return 1; // error end
+		}
         print(string("(expand source pixel to ") + std::to_string(pixel_size));
     }
 
-    size_t use_size = std::min(pixel_size, org_size);
+    size_t use_size = std::min(pixel_size, file_body_size);
     print(string("use_size: ") + std::to_string(use_size));
 
     //// RLE encode
@@ -607,13 +616,18 @@ int main(int argc, char *argv[])
     gsrle::BsaveHeader outHeader = header;
     if (use_compressed)
     {
-        outHeader.type_id = gsrle::HEAD_ID_COMPRESS;
-        outHeader.end_address = outHeader.start_address + encoded_size - 1;
-    }
-    if (output_gs_file && (!extd->gs_type)) // BSAVE -> graph saurus file
+		// compressed graph saurus image
+		output_gs_file = true;
+		outHeader.type_id = gsrle::HEAD_ID_COMPRESS;
+        outHeader.end_address = encoded_size; // this entry is size (not end-address)
+	}
+	else
+    if (output_gs_file) // graph saurus file
     {
-        outHeader.end_address+=1; // this entry is size (not end-address)
-    }
+		// non-compressed graph saurus image
+		outHeader.type_id = gsrle::HEAD_ID_LINEAR;
+		outHeader.end_address = use_size; // this entry is size (not end-address)
+	}
     outdata[0] = outHeader.type_id;
     outdata[1] = outHeader.start_address & 255;
     outdata[2] = outHeader.start_address >> 8;
