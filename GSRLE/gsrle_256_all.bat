@@ -6,6 +6,6 @@ REM Å¶ ã≠êß256ÉâÉCÉì & PLTèoóÕÇ»ÇµÇ≈Ç∑ÅB
 @ECHO OFF
 IF "%GSRLE%"=="" SET GSRLE=%~dp0gsrle.exe
 FOR /R %%i in (*.S??) DO (
-	%GSRLE% /S /256 /NP "%%~i"
+	%GSRLE% /S /256 "%%~i"
 )
 PAUSE

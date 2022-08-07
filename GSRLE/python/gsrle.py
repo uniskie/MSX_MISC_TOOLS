@@ -8,7 +8,8 @@ import struct
 #DEFAULT_INPUTFILENAME = '../test/TEST.SC7'
 #DEFAULT_INPUTFILENAME = '../test/BIKINI.SC8'
 #DEFAULT_INPUTFILENAME = '../test/JTHUNDER.SRC'
-DEFAULT_INPUTFILENAME = "../test/RYUJO256.SC7"
+#DEFAULT_INPUTFILENAME = "../test/RYUJO256.SC7"
+DEFAULT_INPUTFILENAME = ''
 
 # for Python 3.4.5
 # 
@@ -19,18 +20,21 @@ DEFAULT_INPUTFILENAME = "../test/RYUJO256.SC7"
 # show help
 #===============================================
 def showHelp():
-	print("GRAPH SAURUS like RLE ENCODER")
-	print("")
-	print("GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME]")
-	print("[/o:OUTPUT FILENAME]")
-	print("")
-	print("/s      Slient mode. (no input wait)")
-	print("/cp     Force output size : to palette table.")
-	print("/212    Force output size : to line 212.")
-	print("/256    Force output size : to line 256.")
-	print("/np     No output palette(pl?) file.")
-	print("/l      Do not overwrite input file.")
-	print("")
+    print("GRAPH SAURUS like RLE ENCODER")
+    print("")
+    print("GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME]")
+    print("[/o:OUTPUT FILENAME]")
+    print("")
+    print("/s      Slient mode. (no input wait)")
+    print("/cp     Force output size : to palette table.")
+    print("/212    Force output size : to line 212.")
+    print("/256    Force output size : to line 256.")
+    print("/np     No output palette(pl?) file.")
+    print("/fp     Force output palette(pl?) file")
+    print("        (at over 256 line data).")
+    print("/fp     Force output palette(pl?) file.")
+    print("/l      Do not overwrite input file.")
+    print("")
 
 #===============================================
 # CONSTAMTS
@@ -38,12 +42,13 @@ def showHelp():
 HEAD_ID_LINEAR   = 0xFE # BSAVE/GS LINEAR
 HEAD_ID_COMPRESS = 0xFD # GS RLE COMPLESS
 HEAD_FORMAT = '<BHHH'
-BSAVE_LIMIT = 65534
+BSAVE_END_LIMIT = 0xFFFE
+HEAD_END_LIMIT = 0xFFFF
 
 ## BSAVE END END ADDRESS LIMIT
 def cap_bsave_address(adr :int):
-    if (adr > BSAVE_LIMIT):
-        adr = BSAVE_LIMIT
+    if (adr > BSAVE_END_LIMIT):
+        adr = BSAVE_END_LIMIT
     return adr
 
 #===============================================
@@ -195,6 +200,7 @@ output_gs_file = True # output GRAPH SAURUS FILE
 silent_mode = False
 protect_infile = False
 output_pal_file = True
+force_output_pal_file = False
 
 inFileName = DEFAULT_INPUTFILENAME
 outFileNameReq = ""
@@ -210,10 +216,14 @@ while (argi < len(sys.argv)):
     if (len(arg)):
         l = arg.lower()
 
-        ## arg: protect input file
+        ## arg: no output pal file
         if (l == "/np"):
             output_pal_file = False
             print("arg: no output pal file: " + arg)
+        ## arg: force output pal file
+        elif (l == "/fp"):
+            force_output_pal_file = True
+            print("arg: force output pal file: " + arg)
         ## arg: protect input file
         elif (l == "/l"):
             protect_infile = True
@@ -269,6 +279,16 @@ if (extd.screen_no == 0):
         i=input()
     sys.exit(1) # error end
 print('screen no: ' + str(extd.screen_no))
+
+pal_adr = get_pal_table(extd.screen_no)
+print("palette table address: " + hex(pal_adr))
+
+pixel_end_212 = get_end_address_y212(extd.screen_no)
+pixel_end_256 = get_end_address_y256(extd.screen_no)
+pixel_end_with_pal = get_end_address_with_pal(extd.screen_no)
+print("pixel end address (line 212)    : " + hex(pixel_end_212))
+print("pixel end address (line 256)    : " + hex(pixel_end_256))
+print("pixel end address (with palette): " + hex(pixel_end_with_pal))
 
 ## decide output file path
 outFileName = os.path.splitext(inFileName)[0] + extd.gs_ext # sys.argv[2]
@@ -338,6 +358,10 @@ else:
     #    もし、開始アドレスが0以外のデータがあっても非対応。
     #    (見たことはない)
 
+    # BSAVE制限ぎりぎりであれば0xFFFFとして扱う
+    if (org_size == (BSAVE_END_LIMIT)):
+        org_size = HEAD_END_LIMIT
+
     org_size = org_size - start_address + 1 #BSAVE type
     org_size &= 0xFFFFFFe #偶数丸め込み
 print("data_size: " + str(org_size))
@@ -352,11 +376,11 @@ print('----------------')
 ## 圧縮対象のサイズを決定
 pixel_size = 0
 if (output_pixel_height==212):
-    pixel_size = get_end_address_y212(extd.screen_no) + 1
+    pixel_size = pixel_end_212 + 1
 elif (output_pixel_height==256):
-    pixel_size = get_end_address_y256(extd.screen_no) + 1
+    pixel_size = pixel_end_256 + 1
 elif (force_output_vram_pal):
-    pixel_size = get_end_address_with_pal(extd.screen_no) + 1
+    pixel_size = pixel_end_with_pal + 1
 else: # そのまま
     pixel_size = org_size
 print("need_pixel_size: " + str(pixel_size))
@@ -431,7 +455,14 @@ outfile.write(outdata)
 outfile.close()
 
 ## palette file
-if output_pal_file and (not extd.gs_type) and (extd.screen_no < 8):
+if (output_pal_file):
+	if (pixel_end_with_pal >= org_size):
+		print("[CAUTION] can't output palette file. (not enough data size)")
+		output_pal_file = False
+	if ((not force_output_pal_file) and (pixel_size > pixel_end_256)):
+		print("[INFO] skip output palette file. (It seems over 256line data)")
+		output_pal_file = False
+if (output_pal_file):
     print('---------------------')
     print('-- palette file --')
     plt_outFileName = os.path.splitext(outFileName)[0] + '.PL'+str(extd.screen_no)

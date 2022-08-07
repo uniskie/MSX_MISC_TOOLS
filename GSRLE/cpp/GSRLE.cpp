@@ -72,6 +72,8 @@ void showHelp()
 		"/212    Force output size : to line 212.\n"
 		"/256    Force output size : to line 256.\n"
 		"/np     No output palette(pl?) file.\n"
+		"/fp     Force output palette(pl?) file\n"
+		"        (at over 256 line data).\n"
 		"/l      Do not overwrite input file.\n"
 		"\n"
 	);
@@ -95,14 +97,15 @@ const int HEADER_SIZE = 7;
 const int HEAD_ID_LINEAR   = 0xFE; // BSAVE/GS LINEAR
 const int HEAD_ID_COMPRESS = 0xFD; // #GS RLE COMPLESS
 
-//// BSAVE END END ADDRESS LIMIT
-//const int BSAVE_LIMIT = 65535;
-//int cap_bsave_address(int adr)
-//{
-//    if (adr > BSAVE_LIMIT)
-//        adr = BSAVE_LIMIT;
-//    return adr;
-//}
+// BSAVE END END ADDRESS LIMIT
+const int BSAVE_END_LIMIT = 0xFFFE;
+const int HEAD_END_LIMIT = 0xFFFF;
+int cap_bsave_address(int adr)
+{
+    if (adr > BSAVE_END_LIMIT)
+        adr = BSAVE_END_LIMIT;
+    return adr;
+}
 
 //===============================================
 // FILE EXTENSION INFO
@@ -327,6 +330,7 @@ int main(int argc, char *argv[])
     bool silent_mode = false;
 	bool protect_infile = false;
 	bool output_pal_file = true;
+	bool force_output_pal_file = false;
 
 	string inFileName = DEFAULT_INPUTFILENAME;
 	string outFileNameReq = "";
@@ -345,11 +349,18 @@ int main(int argc, char *argv[])
         {
             string l = get_lower(arg);
 
-			//// arg: protect input file
+			//// arg: no output palette
 			if (l == "/np")
 			{
 				output_pal_file = false;
 				print(string("arg: no output pal file: ") + arg);
+			}
+			else
+			//// arg: force output palette
+			if (l == "/fp")
+			{
+				force_output_pal_file = true;
+				print(string("arg: force output pal file: ") + arg);
 			}
 			else
 			//// arg: protect input file
@@ -444,6 +455,16 @@ int main(int argc, char *argv[])
         return 1; // error end
     }
 	print(string("screen no: ") + std::to_string(extd->screen_no));
+
+	int pal_adr = gsrle::get_pal_table(extd->screen_no);
+	print(string("palette table address: ") + hex(pal_adr));
+
+	size_t pixel_end_212 = gsrle::get_end_address_y212(extd->screen_no);
+	size_t pixel_end_256 = gsrle::get_end_address_y256(extd->screen_no);
+	size_t pixel_end_with_pal = gsrle::get_end_address_with_pal(extd->screen_no);
+	print(string("pixel end address (line 212)    : ") + hex(pixel_end_212));
+	print(string("pixel end address (line 256)    : ") + hex(pixel_end_256));
+	print(string("pixel end address (with palette): ") + hex(pixel_end_with_pal));
 
     //// decide output file path
     fs::path outPath(inFileName);
@@ -544,6 +565,12 @@ int main(int argc, char *argv[])
         //    もし、開始アドレスが0以外のデータがあっても非対応。
         //    (見たことはない)
 
+		// BSAVE制限ぎりぎりであれば0xFFFFとして扱う
+		if (org_size == (gsrle::BSAVE_END_LIMIT))
+		{
+			org_size = gsrle::HEAD_END_LIMIT;
+		}
+
 		org_size = org_size - header.start_address + 1; //BSAVE type
         org_size &= SIZE_MAX ^ 1; // 偶数丸め込み 0xFFFFFFFF xor 1
     }
@@ -558,17 +585,17 @@ int main(int argc, char *argv[])
 
     //// 圧縮対象のサイズを決定
     size_t pixel_size = 0;
-    if (output_pixel_height==212)
+	if (output_pixel_height==212)
     {
-        pixel_size = gsrle::get_end_address_y212(extd->screen_no) + 1;
-    }
+        pixel_size = pixel_end_212 + 1;
+	}
     else if (output_pixel_height==256)
     {
-        pixel_size = gsrle::get_end_address_y256(extd->screen_no) + 1;
-    }
+        pixel_size = pixel_end_256 + 1;
+	}
 	else if (force_output_vram_pal)
 	{
-		pixel_size = gsrle::get_end_address_with_pal(extd->screen_no) + 1;
+		pixel_size = pixel_end_with_pal + 1;
 	}
     else // そのまま
     {
@@ -686,8 +713,21 @@ int main(int argc, char *argv[])
     outfile = nullptr;
 
     //// write palette file
-    if ((!extd->gs_type) && (extd->screen_no < 8) && output_pal_file)
+    if (output_pal_file)// && (!extd->gs_type) && (extd->screen_no < 8))
     {
+		if (pixel_end_with_pal >= org_size)
+		{
+			print(string("[CAUTION] can't output palette file. (not enough data size)"));
+			output_pal_file = false;
+		}
+		if ((!force_output_pal_file) && (pixel_size > pixel_end_256))
+		{
+			print(string("[INFO] skip output palette file. (It seems over 256line data)"));
+			output_pal_file = false;
+		}
+	}
+	if (output_pal_file)
+	{
         print(string("---------------------"));
         print(string("-- palette file --"));
         fs::path pltPath(outFileName);
@@ -695,11 +735,9 @@ int main(int argc, char *argv[])
         string plt_outFileName = pltPath.generic_string();
         print(string("output: ") + plt_outFileName);
 
-        int pal_adr = gsrle::get_pal_table(extd->screen_no);
-        print(string("palette table address: ") + hex(pal_adr));
-        int pal_ofs = pal_adr + gsrle::HEADER_SIZE;
-
-        const int plt_entry = 2;
+		int pal_ofs = pal_adr + gsrle::HEADER_SIZE;
+		
+		const int plt_entry = 2;
         const int plt_num = 16;
         const int plt_track_num = 8;
         std::vector<u8> paldata(plt_track_num * plt_num * plt_entry);
