@@ -10,10 +10,10 @@
 //
 
 #define DEFAULT_INPUTFILENAME ""
-#if 0//defined(_DEBUG)
+#if defined(_DEBUG)
 	#undef DEFAULT_INPUTFILENAME 
-	//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
-	#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
+	#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
+	//#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
 #endif
 
 // 
@@ -59,7 +59,7 @@ string get_upper(const string& s)
 void showHelp()
 {
 	print(
-		"GRAPH SAURUS like RLE ENCORDER"
+		"GRAPH SAURUS like RLE ENCODER"
 		"\n\n"
 		"GSRLE [/np][/l][/cp][/256][/212][/s][INPUT FILENAME]"
 #if USE_OUT_FILE_NAME_OPTION
@@ -519,7 +519,33 @@ int main(int argc, char *argv[])
     print(string("run_address = ") + hex(header.run_address));
     print(string("----------------"));
 
-    size_t org_size = header.end_address - header.start_address + ((extd->gs_type) ? 0 : 1);
+	// ピクセルデータサイズ
+	// 0の場合は0x10000とみなす
+    size_t org_size = (header.end_address) ? header.end_address : 0x10000;
+	if (header.type_id == gsrle::HEAD_ID_COMPRESS)
+    {
+		// GS COMPRESS type
+        // GS圧縮形式は
+        // 開始アドレス, データサイズ, 0
+
+		// そのまま
+    }
+    else
+    {
+        // BSAVE形式は
+        // 開始アドレス, 終了アドレス, 0
+        // GSベタ形式は
+        // 開始アドレス, データサイズ, 0
+        // 
+        // 中身が判定できないので簡易的に偶数丸め込み。
+        //
+        // ※ GSベタの場合は開始0固定前提で処理するため、
+        //    もし、開始アドレスが0以外のデータがあっても非対応。
+        //    (見たことはない)
+
+		org_size = org_size - header.start_address + 1; //BSAVE type
+        org_size &= SIZE_MAX ^ 1; // 偶数丸め込み 0xFFFFFFFF xor 1
+    }
     print(string("data_size: ") + std::to_string(org_size));
 
     if ((org_size < 1) || (header.type_id != gsrle::HEAD_ID_LINEAR))
