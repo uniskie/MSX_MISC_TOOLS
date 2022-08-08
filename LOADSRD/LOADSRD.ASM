@@ -20,14 +20,14 @@ ORGADR:	EQU	0D000H
 	JP	LOAD_SR7
 	JP	SET_PLT
 	JP	SPR_TIME
-	JP	COPY_HI
+	DB	0,0,0		;dummy
 ;
 ;--- work area
 
 ;--- constant values
 ; read buffer:  B000H-CFFFH
 DMA:	DW	0B000H	;Read buffer address
-DMASIZ	DW	2000H	;Read buffer size
+DMASIZ:	DW	2000H	;Read buffer size
 ;
 ;
 W_TYPE:	DB	0	;0:binary/ff:packed
@@ -47,17 +47,21 @@ FCB:	;
 	DB	0
 	DB	'FILENAMEEXT'	;*DM*
 	DS	37-12
+FCB_BS:	EQU	16	;Ì§²Ù»²½Þ(32bit)É µÌ¾¯Ä
 ;
 ;--- symbols
 SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
-ACPAGE:	EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
-SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
-BUF:	EQU	0F55EH	;Temporary buffer
-VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
-VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
+ACPAGE:		EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
+SCRMOD:		EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
+BUF:		EQU	0F55EH	;Temporary buffer
+VDPIOR:		EQU	0006H	;VDP I/O port m (READ)
+VDPIOW:		EQU	0007H	;VDP I/O port n (WRITE)
 ;
-ID_SRN:	EQU	0FEH	; LINER PIXEL
-ID_CMP:	EQU	0FDH	; COMPRESSED PIXEL
+ID_SRN:		EQU	0FEH	; LINER PIXEL
+ID_CMP:		EQU	0FDH	; COMPRESSED PIXEL
+;
+BSVHSZ:		EQU	7	; BSAVE HEADER SIZE
+;
 ;==== sub routines ========
 ;---- file access ----
 ;
@@ -88,9 +92,9 @@ STNAM_1:	;
 	DJNZ	STNAM_1
 STNAM_2:	;
 ; filename=OK -> ¶¸Á®³¼
-	LD	B,3	; ¶¸Á®³¼ = 3Ó¼Þ
+	LD	B,3		; ¶¸Á®³¼ = 3Ó¼Þ
 	LD	A,(HL)
-	CP	'.'	; 9 Ó¼ÞÒ = '.' Å× ½·¯Ìß
+	CP	'.'		; 9 Ó¼ÞÒ = '.' Å× ½·¯Ìß
 	JR	NZ,STNAM_3
 	INC	HL
 	DEC	C
@@ -102,7 +106,7 @@ STNAM_3:	;
 	LD	(DE),A
 	INC	DE
 	DEC	B
-	RET	Z	; complete
+	RET	Z		; complete
 	DEC	C
 	JP	NZ,STNAM_3
 	JR	STNAM_F2
@@ -160,35 +164,53 @@ GET_HEAD:	;
 	LD	HL,_M_TYPE
 	JP	NC,ERROR	; A>=2
 ;
-; calc dat size
-	LD	L,(IX+3)	; END ADDRESS
-	LD	H,(IX+4)
 	LD	E,(IX+1)	; START ADDRESS
 	LD	D,(IX+2)
 	LD	(W_VRAM),DE
-	XOR	A
+;
+;==> OLD (USE HEADER START ADDRESS & ENDADDRESS)
+;; calc dat size
+;	LD	L,(IX+3)	; END ADDRESS
+;	LD	H,(IX+4)
+;	XOR	A
+;	SBC	HL,DE
+;	LD	A,(IX+0)	; ID
+;	CP	0FDH		; COMMPRESSED
+;	JR	Z,WRDSIZ	; ¿ÉÏÏ É ±À²
+;;
+;	INC	HL		; END - START + 1
+;	LD	A,L
+;	AND	254		; ¸Þ³½³ ÏÙÒºÐ
+;	LD	L,A
+;WRDSIZ: ;
+;	LD	(W_DSIZE),HL
+;	LD	A,L
+;	OR	H
+;	JR	Z,WRDSZ1
+;	XOR	A		; SIZE <= $0FFFF
+;	LD	(W_DSIZH),A
+;	RET
+;WRDSZ1: ;
+;	INC	A		; SIZE = $10000
+;	LD	(W_DSIZH),A
+;	RET
+;==< OLD (USE HEADER START ADDRESS & ENDADDRESS)
+;
+;==> NEW (USE FCB File size)
+; calc dat size
+	LD	IY,FCB+FCB_BS	; FILE SIZE(32bit)
+	LD	L,(IY+0)
+	LD	H,(IY+1)
+	LD	A,(IY+2)	; 24bitÏÃÞÀ²µ³
+; File size - 7 = Data size
+	LD	DE,BSVHSZ	; HEADER SIZE = 7
+	OR	A
 	SBC	HL,DE
-	LD	A,(IX+0)	; ID
-	CP	0FDH		; COMMPRESSED
-	JR	Z,WRDSIZ	; ¿ÉÏÏ É ±À²
-;
-	INC	HL		; END - START + 1
-	LD	A,L
-	AND	254		; ¸Þ³½³ ÏÙÒºÐ
-	LD	L,A
-;
-WRDSIZ: ;
+	SBC	A,0
 	LD	(W_DSIZE),HL
-	LD	A,L
-	OR	H
-	JR	Z,WRDSZ1
-	XOR	A	; SIZE <= $0FFFF
 	LD	(W_DSIZH),A
 	RET
-WRDSZ1: ;
-	INC	A	; SIZE = $10000
-	LD	(W_DSIZH),A
-	RET
+;<== NEW (USE FCB File size)
 ;
 ;--- calc. read size & rest size
 CALREC:	; RET HL:SIZE
@@ -199,7 +221,7 @@ CALREC:	; RET HL:SIZE
 	SBC	HL,DE
 	SBC	A,0
 	JR	NC,CALREC_
-	ADD	HL,DE	; HL = (W_DSIZE)
+	ADD	HL,DE		; HL = (W_DSIZE)
 	LD	DE,0
 	LD	(W_DSIZE),DE
 	XOR	A
@@ -208,7 +230,7 @@ CALREC:	; RET HL:SIZE
 CALREC_:	;
 	LD	(W_DSIZE),HL
 	LD	(W_DSIZH),A
-	LD	HL,(DMASIZ) ; HL = (DMASIZ)
+	LD	HL,(DMASIZ) 	; HL = (DMASIZ)
 	RET
 ;
 ;--- read file
@@ -226,9 +248,9 @@ FILEREAD:	; IN H:SIZE
 CHKSCMD:	;
 	LD	A,(SCRMOD)	;screen mode
 	CP	7
-	LD	A,255	;max y = 255
+	LD	A,255		;max y = 255
 	JR	NC,CHKSCMD_
-	LD	A,127	;max y = 127
+	LD	A,127		;max y = 127
 CHKSCMD_:	;
 	LD	(W_YMAX),A
 	LD	L,A
@@ -252,31 +274,31 @@ VSETWR2:	;
 	JR	NC,VSETWR3	; page / 1
 ; SCREEN 5,6 = page : A16,15
 	LD	A,D
-	RRA	; c=d7
-	RRA	; c=d6
-	LD	A,(ACPAGE)	; ActivePage
-	RLA	;00000pp6
-	AND	7	; xxxxxpp6 ÈÝÉÀÒ
+	RLA			; c=d7
+	RLA			; c=d6
+	LD	A,(ACPAGE)	; Active Page
+	RLA			;00000pp6
+	AND	7		; xxxxxpp6 ÈÝÉÀÒ mask
 	JR	VSETWR4
 VSETWR3:	;
 ; SCREEN 7,8 = page : A16
-	LD	A,(ACPAGE)	; ActivePage
-	RRA	;c=page(p)
+	LD	A,(ACPAGE)	; Active Page
+	RRA			;c=page(p)
 	LD	A,D
-	RLA	;6543210p/c=7
-	RLA	;543210p7/c=6
-	RLA	;43210p76/c=5
-	AND	7	; xxxxxp76
+	RLA			;6543210p/c=7
+	RLA			;543210p7/c=6
+	RLA			;43210p76/c=5
+	AND	7		; xxxxxp76
 VSETWR4:	;
 	DI
-	OUT	(C),A	;bit2-0:A16-14 / bit7-3:00000
+	OUT	(C),A		;bit2-0:A16-14 / bit7-3:00000
 	LD	A,8EH
 	OUT	(C),A
 ;
-	OUT	(C),E	;A7-0
-	RES	7,D	;bit7:0
-	SET	6,D	;bit6:WRITE=1
-	OUT	(C),D	;bit5-0:A13-8
+	OUT	(C),E		;A7-0
+	RES	7,D		;bit7:0
+	SET	6,D		;bit6:WRITE=1
+	OUT	(C),D		;bit5-0:A13-8
 	RET
 ;
 ;--- wait until vdp-command terminated
@@ -342,9 +364,9 @@ ERROR_SP:	;
 	DW	0
 ;
 ;CRUNCH:	EQU	42B2H	; TEXT TO INTERMEDIATE CODE
-NEWSTT EQU 4601H ; EXEC BASIC INTERMEDIATE CODE
-;KBUF EQU 0F41FH ; INTERMEDIATE CODE BUFFER
-_M_OK:	EQU	0
+NEWSTT:		EQU	4601H ; EXEC BASIC INTERMEDIATE CODE
+;KBUF:		EQU	0F41FH ; INTERMEDIATE CODE BUFFER
+_M_OK:		EQU	0
 _M_OPEN:	;':ERROR53',0 ; File not found
 	DB	':'
 	DB	0A6H
@@ -426,7 +448,7 @@ END_OK:	;
 	JP	ERROR
 ;
 ; --WRITE CG DATA to VRAM --
-; in:  de = size+1
+; in:  DE = Size
 ;
 WRTCG_F:	;
 	EXX
@@ -619,10 +641,10 @@ SET_PLT:	;
 ;
 ;---- WRITE TIME to SPRITE ----
 ;     for CLOCK.BAS
-EXTROM:	EQU	015FH
-REDCLK:	EQU	01F5H
-WRTCLK:	EQU	01F9H
-ATRBAS:	EQU	0F928H
+EXTROM:		EQU	015FH
+REDCLK:		EQU	01F5H
+WRTCLK:		EQU	01F9H
+ATRBAS:		EQU	0F928H
 TIMEBUF:	;
 	DS	8
 TIMECNT:	;
@@ -697,245 +719,5 @@ TIMSPR_2:	;
 	EI
 	RET
 ;
-;
-;---- vdp command routine ----
-;
-; (VDP Command Operation Code)
-CMR_HMMC:	EQU	0F0H	;High  CPU->VRAM
-CMR_YMMM:	EQU	0E0H	;YÎ³º³ VRAM->VRAM
-CMR_HMMM:	EQU	0D0H	;High  VRAM->VRAM
-CMR_HMMV:	EQU	0C0H	;High  fill VRAM
-CMR_LMMC:	EQU	0B0H	;Logic CPU->VRAM
-CMR_LMCM:	EQU	0A0H	;Logic VRAM->CPU
-CMR_LMMM:	EQU	090H	;Logic VRAM->VRAM
-CMR_LMMV:	EQU	080H	;Logic fill VRAM
-CMR_LINE:	EQU	070H	;Draw Line
-;CMR_SRCH EQU 060H ;Search Color
-;CMR_PSET EQU 050H ;Write Pixel
-;CMRPOINT EQU 040H ;Read Pixel
-CMR_STOP:	EQU	000H	;Stop Command
-;
-; (Logical Operation Code)
-LOG_PSET:	EQU	0
-LOG_AND:	EQU	1
-LOG_OR:	EQU	2
-LOG_XOR:	EQU	3
-LOG_NOT:	EQU	4
-LOG_TPSET:	EQU	8
-;LOG_TAND EQU 9
-;LOG_TOR EQU 10
-;LOG_TXOR EQU 11
-;LOG_TNOT EQU 12
-;
-; (ARGUMENT BITS)
-;ARG : bit|__7|__6|__5|__4|__3|__2|__1|__0|
-;         | 0 | - |MXD|MXS|DIY|DIX| EQ|MAJ|
-; MXD : DESTINATION ¶Þ ¶¸Á®³VRAM
-; MXS : SORCE ¶Þ ¶¸Á®³VRAM
-; DIY : 0:¼À   (Y) + NY
-;       1:³´   (Y) - NY
-; DIX : 0:Ð·Þ  (X) + NX
-;       1:ËÀÞØ (X) - NX
-; EQ  : (SEARCH) 1:·®³¶²¼®¸ ²¶Þ² ÃÞÓ ¼­³Ø®³
-; MAJ : (LINE) 0:(NX > NY) ÖºÅ¶Þ
-;              1:(NX < NY) ÀÃÅ¶Þ
-ARG_DIY:	EQU	08H
-ARG_DIX:	EQU	04H
-;ARG_EQ EQU 02H
-ARG_MAJ:	EQU	01H
-;
-;--- work area ---
-;
-CMD_SRC:	;
-	DW	0,0	;SX,SY (R#32)
-CMD_DST:	;
-	DW	0,0	;DX,DY (R#36)
-CMD_SIZ:	;
-	DW	0,0	;NX,NY (R#40)
-CMD_CLR:	;
-	DB	0	;COLOR (R#44)
-CMD_ARG:	;
-	DB	0	;ARGUMENT (R#45)
-CMD_CMR:	;
-	DB	0	;OPERATION (R#46)
-CMD_DAT:	EQU	CMD_SRC
-;
-;--- do vdp command
-VDPCOMAND:	;
-	LD	A,(VDPIOW)
-	LD	C,A
-	INC	C
-	LD	A,32
-	DI
-	OUT	(C),A
-	LD	A,17+80H
-	OUT	(C),A
-	CALL	WAITVDP2
-	INC	C
-	INC	C
-	LD	B,15
-	LD	HL,CMD_DAT
-	OTIR
-	EI
-	RET
-;
-;--- add page size to y
-ADD_PAGE:	;
-; in: a = page no.
-;     hl = y
-	OR	A
-	RET	Z
-	LD	DE,(W_YSIZE)
-ADDPAGE_:	;
-	ADD	HL,DE
-	DEC	A
-	JP	NZ,ADDPAGE_
-	SBC	HL,DE
-	RET
-;
-;--- set copy parameter
-; hl = data's address
-;  (SX,SY)-S$(NX,NY),P_S TO (DX,DY),P_D
-;   X,Y:2byte / S$=00H or 0DCH(STEP) / P:1byte
-;
-SET_COPYP:	;
-	LD	DE,CMD_SRC
-	LDI
-	LDI
-	LDI
-	LDI
-	LD	A,(HL)
-	LDI
-	LDI
-	LDI
-	LDI
-	PUSH	HL
-	CP	0DCH
-	JR	Z,SET_DIXY
-;
-; calc. NX (signed)
-;
-	OR	A
-	LD	DE,(CMD_SRC)
-	LD	HL,(CMD_SIZ)
-	SBC	HL,DE
-	LD	(CMD_SIZ),HL
-; calc. NY (signed)
-	OR	A
-	LD	DE,(CMD_SRC+2)
-	LD	HL,(CMD_SIZ+2)
-	SBC	HL,DE
-	LD	(CMD_SIZ+2),HL
-;
-; set DIY,DIX and inc NX,NY
-;
-SET_DIXY:	;
-	LD	C,0	;ARG
-; check NX,DIX
-	LD	DE,(CMD_SIZ)
-	LD	A,D
-	RLCA	;sign check
-	JR	NC,NXEQPLUS
-	LD	A,ARG_DIX	; (NX=minus)
-	OR	C
-	LD	C,A
-	LD	HL,0
-	SBC	HL,DE
-	EX	DE,HL
-NXEQPLUS:	;
-	INC	DE
-	LD	(CMD_SIZ),DE
-; check NY,DIY
-	LD	DE,(CMD_SIZ+1)
-	LD	A,D
-	RLCA	;sign check
-	JR	NC,NYEQPLUS
-	LD	A,ARG_DIY	; (NY=minus)
-	OR	C
-	LD	C,A
-	LD	HL,0
-	SBC	HL,DE
-	EX	DE,HL
-NYEQPLUS:	;
-	INC	DE
-	LD	(CMD_SIZ+2),DE
-; write ARG
-	LD	A,C
-	LD	(CMD_ARG),A
-;
-; add Page to SY
-;
-	POP	HL
-	LD	A,(HL)
-	INC	HL
-	PUSH	HL
-	LD	HL,(CMD_SRC+2)
-	CALL	ADD_PAGE
-	LD	(CMD_SRC+2),HL
-	POP	HL
-;
-; set DX,DY
-;
-	LD	DE,CMD_DST
-	LDI
-	LDI
-	LDI
-	LDI
-;
-; add Page to DY
-;
-	LD	A,(HL)
-	LD	HL,(CMD_DST+2)
-	CALL	ADD_PAGE
-	LD	(CMD_DST+2),HL
-;
-	RET
-;
-;--- DO HMMV
-; a=usr(address)
-; DW 0,0 ;SX,SY (R#32)
-; DW 0,0 ;DX,DY (R#36)
-; DW 0,0 ;NX,NY (R#40)
-; DB 0 ;COLOR (R#44)
-; DB 0 ;ARGUMENT (R#45)
-COPY_HI:	;
-	SUB	2
-	RET	NZ
-;
-; --> ÃÇ· ÃÞ Á®¸¾Â ÍÝ½³ ±ÄÞÚ½ ¼­Ä¸
-; LD HL,(0F7F8H)
-; <--
-; --> Ã¸ÊÝ É ÔØ¶À : hl=(hl+2)
-	PUSH	HL
-	POP	IX	;IX := string descriptor
-	LD	L,(IX+2)	;get value(low)
-	LD	H,(IX+3)	;get value(high)
-; <--
-	LD	DE,BUF
-	LDI	;SX
-	LDI
-	LDI	;SY
-	LDI
-	LDI	;S$
-	INC	HL
-	LDI	;NX
-	LDI
-	LDI	;NY
-	LDI
-	LDI	;PAGE S
-	INC	HL
-	LDI	;DX
-	LDI
-	LDI	;DY
-	LDI
-	LDI	;PAGE D
-;
-DO_HMMV:	;
-	LD	HL,BUF
-	CALL	SET_COPYP
-	LD	A,CMR_HMMV
-	LD	(CMD_CMR),A
-	JP	VDPCOMAND
-;
-ENDFL:	;
+ENDFL: ;
 
