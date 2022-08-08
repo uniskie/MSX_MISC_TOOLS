@@ -68,6 +68,8 @@ void showHelp()
 #endif
 		"\n\n"
 		"/s      Slient mode. (no input wait)\n"
+		"/bh     Use BSAVE header address range."
+		"        (Default : use file size)"
 		"/cp     Force output size : to palette table.\n"
 		"/212    Force output size : to line 212.\n"
 		"/256    Force output size : to line 256.\n"
@@ -324,17 +326,17 @@ const u8* rleEncode(const u8* src, const u8* src_end, u8* dst, u8* dst_end)
 int main(int argc, char *argv[])
 {
     // setting
-    int output_pixel_height = 0;
-	bool force_output_vram_pal = false;
-    bool output_gs_file = true; // output GRAPH SAURUS FILE
-    bool silent_mode = false;
-	bool protect_infile = false;
-	bool output_pal_file = true;
-	bool force_output_pal_file = false;
+    int output_pixel_height = 0;	// 指定したラインまでのVRAMを出力する
+	bool out_put_pixel_to_vram_pal_table = false;	// パレットテーブルの位置までのVRAMを出力する
+    bool output_gs_file = true; // GRAPH SAURUS形式で書き出す
+    bool silent_mode = false; //!< キー入力待ちをしない
+	bool protect_infile = false; //!< 元ファイルへの上書きを禁止する
+	bool output_pal_file = true; //!< パレットファイルを出力する(条件を満たす場合)
+	bool force_output_pal_file = false; //!< パレットファイルを強制出力
+	bool use_bsave_header_address = false; //!< BSAVEヘッダの開始アドレス～終了アドレスの範囲を対象にする
 
 	string inFileName = DEFAULT_INPUTFILENAME;
 	string outFileNameReq = "";
-
 
     //// parse arguments
     int argi = 1;
@@ -373,7 +375,7 @@ int main(int argc, char *argv[])
 			//// arg: force include palette
 			if (l == "/cp")
 			{
-				force_output_vram_pal = true;
+				out_put_pixel_to_vram_pal_table = true;
 				print(string("arg: clip size = force include palette : ") + arg);
 			}
 			else
@@ -389,6 +391,13 @@ int main(int argc, char *argv[])
 			{
 				output_pixel_height =212;
 				print(string("arg: clip size = force 212 line : ") + arg);
+			}
+			else
+			//// arg: use BSABE header address
+			if (l == "/bh")
+			{
+				use_bsave_header_address = true;
+				print(string("arg: Use BSAVE header size specification : ") + arg);
 			}
 			else
 			//// arg: silent mode
@@ -542,39 +551,51 @@ int main(int argc, char *argv[])
     print(string("----------------"));
 
 	// ピクセルデータサイズ
-	// 0の場合は0x10000とみなす
-    size_t org_size = (header.end_address) ? header.end_address : 0x10000;
-	if (header.type_id == gsrle::HEAD_ID_COMPRESS)
-    {
-		// GS COMPRESS type
-        // GS圧縮形式は
-        // 開始アドレス, データサイズ, 0
+	//  = ヘッダ以降のサイズ
+    size_t org_size = data.size() - gsrle::HEADER_SIZE;
 
-		// そのまま
-    }
-    else
-    {
-        // BSAVE形式は
-        // 開始アドレス, 終了アドレス, 0
-        // GSベタ形式は
-        // 開始アドレス, データサイズ, 0
-        // 
-        // 中身が判定できないので簡易的に偶数丸め込み。
-        //
-        // ※ GSベタの場合は開始0固定前提で処理するため、
-        //    もし、開始アドレスが0以外のデータがあっても非対応。
-        //    (見たことはない)
-
-		// BSAVE制限ぎりぎりであれば0xFFFFとして扱う
-		if (org_size == (gsrle::BSAVE_END_LIMIT))
+	// ピクセルデータサイズをファイルサイズからではなくヘッダから決定する
+	//  色々ややこしいので使わない方がいい。
+	if (!use_bsave_header_address)
+	{
+		print(string("data_size (from file size) : ") + std::to_string(org_size));
+	}
+	else
+	{
+		// 0の場合は0x10000とみなす
+		org_size = (header.end_address) ? header.end_address : 0x10000;
+		if (header.type_id == gsrle::HEAD_ID_COMPRESS)
 		{
-			org_size = gsrle::HEAD_END_LIMIT;
-		}
+			// GS COMPRESS type
+			// GS圧縮形式は
+			// 開始アドレス, データサイズ, 0
 
-		org_size = org_size - header.start_address + 1; //BSAVE type
-        org_size &= SIZE_MAX ^ 1; // 偶数丸め込み 0xFFFFFFFF xor 1
-    }
-    print(string("data_size: ") + std::to_string(org_size));
+			// そのまま
+		}
+		else
+		{
+			// BSAVE形式は
+			// 開始アドレス, 終了アドレス, 0
+			// GSベタ形式は
+			// 開始アドレス, データサイズ, 0
+			// 
+			// 中身が判定できないので簡易的に偶数丸め込み。
+			//
+			// ※ GSベタの場合は開始0固定前提で処理するため、
+			//    もし、開始アドレスが0以外のデータがあっても非対応。
+			//    (見たことはない)
+
+			// BSAVE制限ぎりぎりであれば0xFFFFとして扱う
+			if (org_size == (gsrle::BSAVE_END_LIMIT))
+			{
+				org_size = gsrle::HEAD_END_LIMIT;
+			}
+
+			org_size = org_size - header.start_address + 1; //BSAVE type
+			org_size &= SIZE_MAX ^ 1; // 偶数丸め込み 0xFFFFFFFF xor 1
+		}
+		print(string("data_size (from HEADER): ") + std::to_string(org_size));
+	}
 
     if ((org_size < 1) || (header.type_id != gsrle::HEAD_ID_LINEAR))
     {
@@ -593,7 +614,7 @@ int main(int argc, char *argv[])
     {
         pixel_size = pixel_end_256 + 1;
 	}
-	else if (force_output_vram_pal)
+	else if (out_put_pixel_to_vram_pal_table)
 	{
 		pixel_size = pixel_end_with_pal + 1;
 	}

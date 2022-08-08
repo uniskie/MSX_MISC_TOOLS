@@ -26,6 +26,8 @@ def showHelp():
     print("[/o:OUTPUT FILENAME]")
     print("")
     print("/s      Slient mode. (no input wait)")
+    print("/bh     Use BSAVE header address range.")
+    print("        (Default : use file size)")
     print("/cp     Force output size : to palette table.")
     print("/212    Force output size : to line 212.")
     print("/256    Force output size : to line 256.")
@@ -194,13 +196,14 @@ def rleEncode(dat: bytes) -> "bytearray":
 #===============================================
 
 ## setting
-output_pixel_height = 0
-force_output_vram_pal = False
-output_gs_file = True # output GRAPH SAURUS FILE
-silent_mode = False
-protect_infile = False
-output_pal_file = True
-force_output_pal_file = False
+output_pixel_height = 0	# 指定したラインまでのVRAMを出力する
+out_put_pixel_to_vram_pal_table = False	# パレットテーブルの位置までのVRAMを出力する
+output_gs_file = True # GRAPH SAURUS形式で書き出す
+silent_mode = False #!< キー入力待ちをしない
+protect_infile = False #!< 元ファイルへの上書きを禁止する
+output_pal_file = True #!< パレットファイルを出力する(条件を満たす場合)
+force_output_pal_file = False #!< パレットファイルを強制出力
+use_bsave_header_address = False #!< BSAVEヘッダの開始アドレス～終了アドレスの範囲を対象にする
 
 inFileName = DEFAULT_INPUTFILENAME
 outFileNameReq = ""
@@ -230,7 +233,7 @@ while (argi < len(sys.argv)):
             print("arg: protect input file : " + arg)
         ## arg: force include palette
         elif (l == "/cp"):
-            force_output_vram_pal = True
+            out_put_pixel_to_vram_pal_table = True
             print("arg: clip size = force include palette : " + arg)
         ## arg: force 255 line
         elif (l == "/256"):
@@ -240,6 +243,10 @@ while (argi < len(sys.argv)):
         elif (l == "/212"):
             output_pixel_height =212
             print("arg: clip size = force 212 line : " + arg)
+        ## arg: use BSABE header address
+        elif (l == "/bh"):
+            use_bsave_header_address = True
+            print("arg: Use BSAVE header size specification : " + arg)
         ## arg: silent mode
         elif (l == "/s"):
             silent_mode = True
@@ -316,8 +323,8 @@ infile.close()
 print('in_file size = ' + str(len(data)))
 
 ## get file Header infomation
-head_size = len(struct.pack(HEAD_FORMAT,0,0,0,0))
-body_size = len(data) - head_size
+HEADER_SIZE = len(struct.pack(HEAD_FORMAT,0,0,0,0))
+body_size = len(data) - HEADER_SIZE
 if (body_size < 0):
     print('[ERROR] Not enough file size.')
     if not silent_mode:
@@ -325,7 +332,7 @@ if (body_size < 0):
     sys.exit(1) # error end
 
 ## get file Header infomation
-type_id, start_address, end_address, run_address = struct.unpack(HEAD_FORMAT, data[0:head_size])
+type_id, start_address, end_address, run_address = struct.unpack(HEAD_FORMAT, data[0:HEADER_SIZE])
 print('--- source file ---')
 print('type_id = ' + hex(type_id))
 print('start_address = ' + hex(start_address))
@@ -334,37 +341,47 @@ print('run_address = ' + hex(run_address))
 print('----------------')
 
 # ピクセルデータサイズ
-# 0の場合は0x10000とみなす
-if (end_address):
-    org_size = end_address
+#  = ヘッダ以降のサイズ
+org_size = body_size
+if (not use_bsave_header_address):
+    print("data_size (from file size) : " + str(org_size))
 else:
-    org_size = 0x10000
-if (type_id == HEAD_ID_COMPRESS):
-    # GS COMPRESS type
-    # GS圧縮形式は
-    # 開始アドレス, データサイズ, 0
+    # ピクセルデータサイズをファイルサイズからではなくヘッダから決定する
+    #  色々ややこしいので使わない方がいい。
+    # ピクセルデータサイズ
+    # 0の場合は0x10000とみなす
+    if (end_address):
+        org_size = end_address
+    else:
+        org_size = 0x10000
+    if (type_id == HEAD_ID_COMPRESS):
+        # GS COMPRESS type
+        # GS圧縮形式は
+        # 開始アドレス, データサイズ, 0
 
-    # そのまま
-    org_size = org_size
-else:
-    # BSAVE形式は
-    # 開始アドレス, 終了アドレス, 0
-    # GSベタ形式は
-    # 開始アドレス, データサイズ, 0
-    # 
-    # 中身が判定できないので簡易的に偶数丸め込み。
-    #
-    # ※ GSベタの場合は開始0固定前提で処理するため、
-    #    もし、開始アドレスが0以外のデータがあっても非対応。
-    #    (見たことはない)
+        # そのまま
+        org_size = org_size
+    else:
+        # BSAVE形式は
+        # 開始アドレス, 終了アドレス, 0
+        # GSベタ形式は
+        # 開始アドレス, データサイズ, 0
+        # 
+        # 中身が判定できないので簡易的に偶数丸め込み。
+        #
+        # ※ GSベタの場合は開始0固定前提で処理するため、
+        #    もし、開始アドレスが0以外のデータがあっても非対応。
+        #    (見たことはない)
 
-    # BSAVE制限ぎりぎりであれば0xFFFFとして扱う
-    if (org_size == (BSAVE_END_LIMIT)):
-        org_size = HEAD_END_LIMIT
+        # BSAVE制限ぎりぎりであれば0xFFFFとして扱う
+        if (org_size == (BSAVE_END_LIMIT)):
+            org_size = HEAD_END_LIMIT
 
-    org_size = org_size - start_address + 1 #BSAVE type
-    org_size &= 0xFFFFFFe #偶数丸め込み
-print("data_size: " + str(org_size))
+        org_size = org_size - start_address + 1 #BSAVE type
+        org_size &= 0xFFFFFFe #偶数丸め込み
+    
+    print("data_size (from Header): " + str(org_size))
+
 
 if ((org_size < 1) or (type_id != HEAD_ID_LINEAR)):
     print('not support type. (already compressed, or missing type)')
@@ -379,18 +396,18 @@ if (output_pixel_height==212):
     pixel_size = pixel_end_212 + 1
 elif (output_pixel_height==256):
     pixel_size = pixel_end_256 + 1
-elif (force_output_vram_pal):
+elif (out_put_pixel_to_vram_pal_table):
     pixel_size = pixel_end_with_pal + 1
 else: # そのまま
     pixel_size = org_size
 print("need_pixel_size: " + str(pixel_size))
 
 # expand data to pixelsize
-file_body_size = len(data) - head_size
+file_body_size = len(data) - HEADER_SIZE
 if (pixel_size > file_body_size):
     data2 = bytearray(data) + b'\x00' * (pixel_size-file_body_size)
     data = bytes(data2)
-    file_body_size = len(data) - head_size
+    file_body_size = len(data) - HEADER_SIZE
     if (file_body_size < pixel_size):
         print("[innner error] file_body_size < pixel_size")
         if not silent_mode:
@@ -402,7 +419,7 @@ use_size = min(pixel_size, file_body_size)
 print('use_size: ' + str(use_size))
 
 ## RLE encode
-compressed = rleEncode(data[head_size:head_size + use_size])
+compressed = rleEncode(data[HEADER_SIZE:HEADER_SIZE + use_size])
 encoded_size = len(compressed)
 print('encoded size: ' + str(encoded_size))
 
@@ -442,9 +459,9 @@ print('run_address = ' + hex(run_address))
 print('----------------')
 
 if (use_compressed):
-    outdata[head_size:]=compressed
+    outdata[HEADER_SIZE:]=compressed
 else:
-    outdata[head_size:]=data[head_size:head_size + use_size]
+    outdata[HEADER_SIZE:]=data[HEADER_SIZE:HEADER_SIZE + use_size]
 
 print('in_file size = ' + str(len(data)))
 print('out_file size = ' + str(len(outdata)))
@@ -470,7 +487,7 @@ if (output_pal_file):
 
     pal_adr = get_pal_table(extd.screen_no)
     print('palette table address: ' + hex(pal_adr))
-    pal_ofs = pal_adr + head_size
+    pal_ofs = pal_adr + HEADER_SIZE
 
     plt = bytearray()
     plt[:] = data[pal_ofs:pal_ofs+32] * 8
