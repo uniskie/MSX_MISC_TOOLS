@@ -20,8 +20,8 @@ ORGADR: EQU 0D000H
  JP LOAD_SRD
  JP SET_PLT
  JP SPR_TIME
- JP VDPC
- JP VDPC_D
+ JP VDPC ;VDPC_D
+ JP WAITVDPC
 ;
 ;--- work area
 LOADOFS: DW 0 ;LOAD_SRD VRAM offset
@@ -296,21 +296,21 @@ VSETWR4: ;
  OUT (C),D ;bit5-0:A13-8
  RET
 ;
-;--- wait until vdp-command terminated
-WAITVDP: ;
+;--- wait until vdp-command finish
+WAITCMD: ;
  LD A,(VDPIOW)
  LD C,A
  INC C
  DI
-WAITVDP2: ;
+WAITCMD2: ;
  LD A,2
  OUT (C),A
  LD A,15+80H
  OUT (C),A
-WAITVDP_: ;
+WAITCMD_: ;
  IN A,(C)
  RRCA
- JP C,WAITVDP_
+ JP C,WAITCMD_
  XOR A
  OUT (C),A
  LD A,15+80H
@@ -696,7 +696,7 @@ TIMSPR_0: ;
  XOR 4
  LD (TIMECNT),A
 ; (VDPºÏÝÄÞ ¼­³Ø®³ÏÁ)
- CALL WAITVDP
+ CALL WAITCMD
 ;
  LD DE,(ATRBAS) ;sprite atr.
  CALL VSETWR2
@@ -791,6 +791,13 @@ COPYPRM: ;
  LDIR
  RET
 ;
+;--- WAIT VDP COMMAND finish
+; A=USR(0)
+WAITVDPC: ;
+ CALL WAITCMD
+ EI
+ RET
+;
 ;--- DO VDP COMMAND (direct data)
 ; a=usr(address)
 ; DW 0,0 ;SX,SY (R#32)
@@ -829,12 +836,12 @@ VDPCOMAND: ;
  LD A,(VDPIOW)
  LD C,A
  INC C
- LD A,32
+ LD A,32 ;R#32
  DI
  OUT (C),A
- LD A,17+80H
+ LD A,17+80H ;ÚÝ¿Þ¸ ¶·ºÐ
  OUT (C),A
- CALL WAITVDP2
+ CALL WAITCMD2
  INC C
  INC C
  LD B,15
@@ -896,23 +903,26 @@ NY_PLUS: ;
  LD D,A
  LD (CMD_SIZ+2),DE
 ;
-; add Page to SY
-;
- POP HL
- LD A,(HL)
- INC HL
- PUSH HL
- LD HL,(CMD_SRC+2)
- CALL ADD_PAGE
- LD (CMD_SRC+2),HL
- POP HL
-;
-; add Page to DY
-;
- LD A,(HL)
- LD HL,(CMD_DST+2)
- CALL ADD_PAGE
- LD (CMD_DST+2),HL
+ LD A,C
+ LD (CMD_ARG),A ;ARG
+;;
+;; add Page to SY
+;;
+; POP HL
+; LD A,(HL)
+; INC HL
+; PUSH HL
+; LD HL,(CMD_SRC+2)
+; CALL ADD_PAGE
+; LD (CMD_SRC+2),HL
+; POP HL
+;;
+;; add Page to DY
+;;
+; LD A,(HL)
+; LD HL,(CMD_DST+2)
+; CALL ADD_PAGE
+; LD (CMD_DST+2),HL
 ;
  RET
 ;

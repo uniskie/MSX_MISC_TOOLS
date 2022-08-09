@@ -4,7 +4,7 @@
 ; 256 byte * n line ÃÞ¼®Ø»ÚÙ
 ; SCREEN5 Ê line½³ ÊÝÌÞÝ‚Å¼®Ø
 ;----------------------------------
-		FNAME	"LOADSR.BIN"	;*BINHEAD*
+		FNAME	"LOADSR.BOF"	;*BINHEAD*
 ;--> BIN FILE HEADER -->
 		DB	0FEH	;*BINHEAD*
 		DW	ORGADR	;*BINHEAD*
@@ -19,9 +19,9 @@ ORGADR:		EQU	0D000H
 ;--- jump table
 		JP	LOAD_SRD
 		JP	SET_PLT
-		DB	0,0,0	;JP	SPR_TIME
-		DB	0,0,0	;JP	VDPC
-		DB	0,0,0	;JP	VDPC_D
+		DB	0C9H,0,0	;JP	SPR_TIME
+		DB	0C9H,0,0	;JP	VDPC
+		DB	0C9H,0,0	;JP	WAITVDPC
 ;
 ;--- work area
 LOADOFS:	DW	0	;LOAD_SRD VRAM offset
