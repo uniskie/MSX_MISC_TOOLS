@@ -144,10 +144,13 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 |ファイル     |説明|
 |-------------|---
 | [LOADER.BAS  ](LOADER.BAS ) |アスキーセーブされたLOADSRD.BAS
-| [LOADSRD.ASF ](LOADSRD.ASF) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
-| [LOADSRD.ASM ](LOADSRD.ASM) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
 | [LOADSRD.BAS ](LOADSRD.BAS) |グラフィックローダープログラム本体
-| [LOADSRD.BOF ](LOADSRD.BOF) |グラフィックローダー機械語プログラムバイナリ
+| [LOADSRD.BOF ](LOADSR.BOF)  |グラフィックローダー機械語プログラムバイナリ
+| [LOADSR.ASF  ](LOADSR.ASF)  |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
+| [LOADSR.ASM  ](LOADSR.ASM)  |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
+| [LOADSR.BOF  ](LOADSRD.BOF) |(おまけ機能つき)グラフィックローダー機械語プログラムバイナリ
+| [LOADSRD.ASF ](LOADSRD.ASF) |(おまけ機能つき)機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
+| [LOADSRD.ASM ](LOADSRD.ASM) |(おまけ機能つき)機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
 | [samples     ](samples    ) |グラフィックデータサンプル
 | [CLS.BAS     ](CLS.BAS    ) |おまけ：PAGE0と1を＄CCで埋める
 | [CLS.BAS     ](CLS.BAS    ) |おまけ：PAGE0と1を＄CCで埋める
