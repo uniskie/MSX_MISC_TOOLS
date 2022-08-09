@@ -1,3 +1,3 @@
-*.asm text encoding=cp932
-*.asf text encoding=cp932
-*.bas encoding=cp932
+*.asm text encoding=sjis diff=sjis
+*.asf text encoding=sjis diff=sjis
+*.bas encoding=sjis diff=sjis
