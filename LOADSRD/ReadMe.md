@@ -150,22 +150,20 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 |-------------|---
 | [LOADER.BAS  ](LOADER.BAS ) |アスキーセーブされたLOADSRD.BAS
 | [LOADSRD.BAS ](LOADSRD.BAS) |グラフィックローダープログラム本体
-| [LOADSR.BOF  ](LOADS.BOF)   |グラフィックローダー機械語プログラムバイナリ
-| [LOADSR.ASF  ](LOADSR.ASF)  |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
-| [LOADSR.ASM  ](LOADSR.ASM)  |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
-
+| [LOADSRD.BIN ](LOADSED.BIN) |グラフィックローダー機械語プログラムバイナリ
+| [asm         ](asm        ) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
+| [asf         ](asf        ) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
+|
 おまけ
 
 |ファイル     |説明|
 |-------------|---
 | [samples     ](samples    ) |グラフィックデータサンプル
-| [LOADSRD.BOF  ](LOADSRD.BOF) |(おまけ機能つき)グラフィックローダー機械語プログラムバイナリ
-| [LOADSRD.ASF ](LOADSRD.ASF) |(おまけ機能つき)機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
-| [LOADSRD.ASM ](LOADSRD.ASM) |(おまけ機能つき)機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
-| [CLS.BAS     ](CLS.BAS    ) |おまけ：PAGE0と1を＄CCで埋める
-| [CLS.BAS     ](CLS.BAS    ) |おまけ：PAGE0と1を＄CCで埋める
-| [CC.BAS      ](CC.BAS     ) |おまけ：SCREEN8で128LINEを$CCで埋めてその範囲をBSAVEする
-| [55.BAS      ](55.BAS     ) |おまけ：SCREEN8で128LINEを$CCで埋めてその範囲をBSAVEする
+| [SRX.BIN     ](SRX.BIN    ) |機械語プログラムバイナリ(グラフィックローダー+VDPコマンド+スプライト時計)
+| [etc/CLS.BAS ](etc/CLS.BAS) |PAGE0と1を＄CCで埋める
+| [etc/CLS.BAS ](etc/CLS.BAS) |PAGE0と1を＄CCで埋める
+| [etc/CC.BAS  ](etc/CC.BAS ) |SCREEN8で128LINEを$CCで埋めてその範囲をBSAVEする
+| [etc/55.BAS  ](etc/55.BAS ) |SCREEN8で128LINEを$CCで埋めてその範囲をBSAVEする
 
 [^MSX2ASM]: バックアップ活用テクニック PART16掲載。POCO氏制作 MSX2用「アセンブルシステム」
 
