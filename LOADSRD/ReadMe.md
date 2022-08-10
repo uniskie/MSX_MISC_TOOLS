@@ -151,14 +151,14 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 | [LOADER.BAS  ](LOADER.BAS ) |アスキーセーブされたLOADSRD.BAS
 | [LOADSRD.BAS ](LOADSRD.BAS) |グラフィックローダープログラム本体
 | [LOADSRD.BIN ](LOADSED.BIN) |グラフィックローダー機械語プログラムバイナリ
-| [asm         ](asm        ) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
-| [asf         ](asf        ) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
-|
+
 おまけ
 
 |ファイル     |説明|
 |-------------|---
 | [samples     ](samples    ) |グラフィックデータサンプル
+| [asm         ](asm        ) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
+| [asf         ](asf        ) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
 | [SRX.BIN     ](SRX.BIN    ) |機械語プログラムバイナリ(グラフィックローダー+VDPコマンド+スプライト時計)
 | [etc/CLS.BAS ](etc/CLS.BAS) |PAGE0と1を＄CCで埋める
 | [etc/CLS.BAS ](etc/CLS.BAS) |PAGE0と1を＄CCで埋める
