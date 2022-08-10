@@ -147,18 +147,25 @@ VDPCOMAND: ;
  EI
  RET
 ;
-;--- add page size to y
-ADD_PAGE: ;
-; in: a = page no.
-;     hl = y
- OR A
- RET Z
- LD DE,(W_YSIZE)
-ADDPAGE_: ;
- ADD HL,DE
- DEC A
- JP NZ,ADDPAGE_
- SBC HL,DE
+;--- wait until vdp-command finish
+WAITCMD: ;
+ LD A,(VDPIOW)
+ LD C,A
+ INC C
+ DI
+WAITCMD2: ;
+ LD A,2
+ OUT (C),A
+ LD A,15+80H
+ OUT (C),A
+WAITCMD_: ;
+ IN A,(C)
+ RRCA
+ JP C,WAITCMD_
+ XOR A
+ OUT (C),A
+ LD A,15+80H
+ OUT (C),A
  RET
 ;
 ;--- modify nx,ny parameter
@@ -222,4 +229,18 @@ NY_PLUS: ;
 ; LD (CMD_DST+2),HL
 ;
  RET
+;
+;;--- add page size to y
+;ADD_PAGE: ;
+;; in: a = page no.
+;;     hl = y
+; OR A
+; RET Z
+; LD DE,(W_YSIZE)
+;ADDPAGE_: ;
+; ADD HL,DE
+; DEC A
+; JP NZ,ADDPAGE_
+; SBC HL,DE
+; RET
 

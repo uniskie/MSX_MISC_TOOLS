@@ -41,6 +41,8 @@ ID_CMP:		EQU	0FDH	;ID:COMPRESSED PIXEL
 BSVHSZ:		EQU	7	;BSAVE HEADER SIZE
 ;
 ;==== sub routines ========
+;
+;======================
 ;---- file access ----
 ;
 ;--- set fcb's filename by filemane string
@@ -219,7 +221,7 @@ FILEREAD:	; IN H:SIZE
 	OR	A
 	RET
 ;
-;
+;======================
 ;---- graphics ----
 ;
 ;--- check screen mode
@@ -279,48 +281,6 @@ VSETWR4:	;
 	OUT	(C),D		;bit5-0:A13-8
 	RET
 ;
-;--- wait until vdp-command finish
-WAITCMD:	;
-	LD	A,(VDPIOW)
-	LD	C,A
-	INC	C
-	DI
-WAITCMD2:	;
-	LD	A,2
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-WAITCMD_:	;
-	IN	A,(C)
-	RRCA
-	JP	C,WAITCMD_
-	XOR	A
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-	RET
-;
-;--- wait until v-sync cycle
-WAIT_VR:	;
-	LD	A,(VDPIOW)
-	LD	C,A
-	INC	C
-	DI
-WAIT_VR2:	;
-	LD	A,2
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-WAITVR_:	;
-	IN	A,(C)
-	AND	40H
-	JP	Z,WAITVR_
-	XOR	A
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-	RET
-;
 ;--- ERROR routine ---
 ;
 ERROR:	; ´×°¼®Ø
@@ -365,7 +325,7 @@ _M_UERR:	;':ERROR255',0 ; Unprintable error 244
 	DB	0
 ;
 ;
-;
+;======================
 ;--- LOAD CG DATA ----
 ;
 LOAD_SRD:	;
@@ -580,7 +540,7 @@ NORSR7_F:	;
 	JP	NC,NORSR7_F
 	JP	END_OK
 ;
-;
+;======================
 ;---- SET PALETTE ----
 ; a=usr(address)
 ; address:palette*16
@@ -616,4 +576,24 @@ SET_PLT:	;
 	EI
 	RET
 ;
+;--- wait until v-sync cycle
+WAIT_VR:	;
+	LD	A,(VDPIOW)
+	LD	C,A
+	INC	C
+	DI
+WAIT_VR2:	;
+	LD	A,2
+	OUT	(C),A
+	LD	A,15+80H
+	OUT	(C),A
+WAITVR_:	;
+	IN	A,(C)
+	AND	40H
+	JP	Z,WAITVR_
+	XOR	A
+	OUT	(C),A
+	LD	A,15+80H
+	OUT	(C),A
+	RET
 
