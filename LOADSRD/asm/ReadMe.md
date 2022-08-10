@@ -23,8 +23,8 @@
 
 | ファイル名 | LOADSRD | SRX | 説明 
 |---|---|---|---|
-| [GSF_LOAD.ASM](GSF_LOAD.ASM) | ● | ● | 1) *.SC?/*.SR? のロード&VRAM書き込み<BR>2) VDPへパレットセット
+| [GSF_LOAD.ASM](GSF_LOAD.ASM) | ● | ● | 1) *.SC?/*.SR? のロード&VRAM書き込み<BR> 2) VDPへパレットセット
 | [VDPCOMAN.ASM](VDPCOMAN.ASM) | × | ● | VDPコマンドの実行、VDPコマンドの終了待ち
-| [SPRCLOCK.ASM](SPRCLOCK.ASM) | × | ● | スプライト#0-7のパターンへ現在の時間を書き込む (HH:MM:SS形式)(16x16モード用=パターン番号はの4倍数)
+| [SPRCLOCK.ASM](SPRCLOCK.ASM) | × | ● | スプライト#0-7のパターンへ現在の時間を書き込む<br>(HH:MM:SS形式)(16x16モード用=パターン番号はの4倍数)
 
 
