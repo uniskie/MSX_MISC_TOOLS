@@ -4,10 +4,10 @@
 
 ### LOADSRD.BIN の作成
 
-tniasm LOADSRD.ASM
+```tniasm LOADSRD.ASM```
 
 ### SRX.BIN の作成
 
-tniasm SRX.ASM.
+```tniasm SRX.ASM```
 
 
