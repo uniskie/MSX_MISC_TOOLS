@@ -65,10 +65,6 @@ CMD_CLR: DB 0 ;COLOR (R#44)
 CMD_ARG: DB 0 ;ARGUMENT (R#45)
 CMD_CMR: DB 0 ;OPERATION (R#46)
 ;
-CMP_STP: DB 0 ;STEP(SIZE) OR END POINT
-CMP_SPG: DB 0 ;SRC PAGE
-CMP_DPG: DB 0 ;DST PAGE
-;
 CMD_DAT: EQU CMD_SRC
 ;
 COPYPRM: ;
@@ -125,6 +121,7 @@ VDPCMD: ;
  CALL COPYPRM
  RET NZ
  CALL M_VDPC
+ RET C ;cancel command
  JP VDPCOMAND
 ;
 ;--- exec. vdp command
@@ -133,12 +130,12 @@ VDPCOMAND: ;
  LD A,(VDPIOW)
  LD C,A
  INC C
+ CALL WAITCMD2
  LD A,32 ;R#32
  DI
  OUT (C),A
  LD A,17+80H ;ÚÝ¿Þ¸ ¶·ºÐ
  OUT (C),A
- CALL WAITCMD2
  INC C
  INC C
  LD B,15
@@ -152,25 +149,69 @@ WAITCMD: ;
  LD A,(VDPIOW)
  LD C,A
  INC C
- DI
 WAITCMD2: ;
  LD A,2
+ DI
  OUT (C),A
  LD A,15+80H
  OUT (C),A
 WAITCMD_: ;
  IN A,(C)
  RRCA
- JP C,WAITCMD_
+ EX AF,AF' ; use EI
  XOR A
  OUT (C),A
  LD A,15+80H
  OUT (C),A
+ EI ; use EI
+ EX AF,AF' ; use EI
+ JR C,WAITCMD2 ; use EI
+; JR C,WAITCMD_ ; no EI
  RET
 ;
 ;--- modify nx,ny parameter
-;
+; OUT: Cy = cancel command
 M_VDPC: ;
+;--- mofidy sx,dx minus
+ LD A,(CMD_SRC+1) ;SX-high
+ RLCA
+ JR NC,SX_PLUS
+ LD DE,(CMD_SRC) ;SX
+ XOR A
+ LD L,A
+ LD H,A
+ LD (CMD_SRC),HL
+ SBC HL,DE ;offset = minus -> plus
+ EX DE,HL
+ LD HL,(CMD_DST) ;DX+offset
+ ADD HL,DE
+ LD (CMD_DST),HL
+ XOR A
+ LD HL,(CMD_SIZ) ;NX+offset
+ SBC HL,DE
+ RET C ;ERROR: zero size
+ LD (CMD_SIZ),HL
+SX_PLUS: ;
+ LD A,(CMD_SRC+3) ;SY-high
+ RLCA
+ JR NC,SY_PLUS
+ LD DE,(CMD_SRC+2) ;SY
+ XOR A
+ LD L,A
+ LD H,A
+ LD (CMD_SRC+2),HL
+ SBC HL,DE ;offset = minus -> plus
+ EX DE,HL
+ LD HL,(CMD_DST+2) ;DY+offset
+ ADD HL,DE
+ LD (CMD_DST+2),HL
+ XOR A
+ LD HL,(CMD_SIZ+2) ;NY+offset
+ SBC HL,DE
+ RET C ;ERROR: zero size
+ LD (CMD_SIZ+2),HL
+SY_PLUS: ;
+;--- modify nx,ny parameter
  LD A,(CMD_ARG) ;ARG
  LD C,A
 ; check NX,DIX
@@ -209,38 +250,7 @@ NY_PLUS: ;
 ;
  LD A,C
  LD (CMD_ARG),A ;ARG
-;;
-;; add Page to SY
-;;
-; POP HL
-; LD A,(HL)
-; INC HL
-; PUSH HL
-; LD HL,(CMD_SRC+2)
-; CALL ADD_PAGE
-; LD (CMD_SRC+2),HL
-; POP HL
-;;
-;; add Page to DY
-;;
-; LD A,(HL)
-; LD HL,(CMD_DST+2)
-; CALL ADD_PAGE
-; LD (CMD_DST+2),HL
 ;
+ OR A
  RET
-;
-;;--- add page size to y
-;ADD_PAGE: ;
-;; in: a = page no.
-;;     hl = y
-; OR A
-; RET Z
-; LD DE,(W_YSIZE)
-;ADDPAGE_: ;
-; ADD HL,DE
-; DEC A
-; JP NZ,ADDPAGE_
-; SBC HL,DE
-; RET
 
