@@ -13,4 +13,4 @@
 | [KEYMTXB.BAS ](KEYMTXB.BAS )|少しリッチなキーマトリクス表示(turboR推奨)
 | [COLCOMB.BAS ](COLCOMB.BAS )|簡易スプライトモード2重ね合わせカラーリスト
 | [COLCOMBG.BAS](COLCOMBG.BAS)|少しリッチなスプライトモード2重ね合わせカラーリスト
-| [SPCDBL.BAS  ](SPCDBL.BAS  )|99x8Edit用ツール。スプライトカラーテーブルをCHR COLOR形式(2倍サイズ)にして出力。<BR>（VDPファイルのスプライトカラー情報がCHR COLOR形式のため、エクスポート出力したデータをそのまま貼り付けできないので）
+| [SPCDBL.BAS  ](SPCDBL.BAS  )|99x8Edit用ツール。スプライトカラーテーブルをCHR COLOR形式(2倍サイズ)にして出力。<BR>VDPファイルのスプライトカラー情報がCHR COLOR形式のため、エクスポート出力したデータをそのままVDPファイルに書き戻しできないので、このツールで出力したデータをVDPファイルの$1C21～の位置に張り付けるとインポートできます。<BR>**Note** 出力される```SPCDBL.BIN```は最後に余計なEOF($1A)がついてしまいますので、それを取り除いてから貼り付けてください。
