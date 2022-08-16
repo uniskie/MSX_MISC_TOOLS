@@ -32,6 +32,8 @@ DMA: DW 0B000H ;Read buffer address
 DMASIZ: DW 2000H ;Read buffer size
 ;
  FILE GSF_LOAD
+ FILE VRAM
+ FILE USR_FUNC
 ; FILE VDPCOMAN
 ; FILE SPRCLOCK
 ;

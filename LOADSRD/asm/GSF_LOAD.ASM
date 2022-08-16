@@ -1,7 +1,7 @@
 ; INCLUDE FILE for LOADSRD 
 ;================================
 ;USR():
-;	LOAD_SRD - Load SR?,SC? file
+;	LOAD_SRD - Load BSAVE/SRN(GRAPH SAURUS)
 ;	SET_PLT  - Set palette
 ;================================
 ;--- work area
@@ -29,16 +29,17 @@ FCB_BS:		EQU	16	;Ì§²Ù»²½Þ(32bit)É µÌ¾¯Ä
 ;BUF:		EQU	0F55EH	;Type char buffer(258 bytes)
 ;
 SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
-ACPAGE:		EQU	0FAF6H	;±¸Ã¨ÌÞÍß°¼Þ
-SCRMOD:		EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
 ;
-VDPIOR:		EQU	0006H	;VDP I/O port m (READ)
-VDPIOW:		EQU	0007H	;VDP I/O port n (WRITE)
+;(VRAM.ASM)
+;SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
+;VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
+;VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
 ;
+; BSAVE/SRN FILE ID
 ID_SRN:		EQU	0FEH	;ID:LINER PIXEL
 ID_CMP:		EQU	0FDH	;ID:COMPRESSED PIXEL
 ;
-BSVHSZ:		EQU	7	;BSAVE HEADER SIZE
+BSVHSZ:		EQU	7	;BSAVE/SRN HEADER SIZE
 ;
 ;==== sub routines ========
 ;
@@ -244,42 +245,7 @@ CHKSCMD_:	;
 ;
 VSETWR:	;
 	LD	DE,(W_VRAM)
-; de = vram address
-VSETWR2:	;
-	LD	A,(VDPIOW)
-	INC	A
-	LD	C,A
-	LD	A,(SCRMOD)	;screen mode
-	CP	7
-	JR	NC,VSETWR3	; page / 1
-; SCREEN 5,6 = page : A16,15
-	LD	A,D
-	RLA			; c=d7
-	RLA			; c=d6
-	LD	A,(ACPAGE)	; Active Page
-	RLA			;00000pp6
-	AND	7		; xxxxxpp6 ÈÝÉÀÒ mask
-	JR	VSETWR4
-VSETWR3:	;
-; SCREEN 7,8 = page : A16
-	LD	A,(ACPAGE)	; Active Page
-	RRA			;c=page(p)
-	LD	A,D
-	RLA			;6543210p/c=7
-	RLA			;543210p7/c=6
-	RLA			;43210p76/c=5
-	AND	7		; xxxxxp76
-VSETWR4:	;
-	DI
-	OUT	(C),A		;bit2-0:A16-14 / bit7-3:00000
-	LD	A,8EH
-	OUT	(C),A
-;
-	OUT	(C),E		;A7-0
-	RES	7,D		;bit7:0
-	SET	6,D		;bit6:WRITE=1
-	OUT	(C),D		;bit5-0:A13-8
-	RET
+	JP	VSETWRT
 ;
 ;--- ERROR routine ---
 ;
@@ -548,6 +514,7 @@ NORSR7_F:	;
 SET_PLT:	;
 	CP	2
 	RET	NZ
+	CALL	GETINT		;HL=USR(XXXX)
 ;
 	LD	A,(VDPIOW)
 	LD	C,A
@@ -562,38 +529,8 @@ SET_PLT:	;
 	CALL	WAIT_VR2
 	INC	C
 ;
-; --> ÃÇ· ÃÞ Á®¸¾Â Ó¼ÞÚÂ ±ÄÞÚ½ ¼­Ä¸
-; LD HL,(0F7F8H)
-; <--
-; --> Ã¸ÊÝ É ÔØ¶À : hl=(hl+2)
-	PUSH	HL
-	POP	IX	;IX := string descriptor
-	LD	L,(IX+2)	;get value(low)
-	LD	H,(IX+3)	;get value(high)
-; <--
 	LD	B,32
 	OTIR
 	EI
-	RET
-;
-;--- wait until v-sync cycle
-WAIT_VR:	;
-	LD	A,(VDPIOW)
-	LD	C,A
-	INC	C
-	DI
-WAIT_VR2:	;
-	LD	A,2
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-WAITVR_:	;
-	IN	A,(C)
-	AND	40H
-	JP	Z,WAITVR_
-	XOR	A
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
 	RET
 

@@ -37,16 +37,18 @@ WRTCRAM:	;
 	RET
 ;
 ;--- MAIN ---
-; U=USR()
-; RET: U=TIMEBUFF[8]
+; U=USR(ADR)
+;  IN: ADR= {int X,Y,P,F}*8
+; RET: ADR[0].P ... ADR[7].P = TIMEBUFF[n]
 ;	1-A = "0"-"9"
 ;	B=":"
-;	F=" "
+;	0=" "
 ;
 SPR_TIME:	;
-	CP	2
+	CALL	GETINT
 	RET	NZ
 	PUSH	HL
+;
 ; (24¼Þ¶ÝË®³¼Þ)
 	LD	A,1
 	LD	C,1AH
@@ -72,40 +74,50 @@ TIMSPR_0:	;
 	LD	(TIMEBUF+5),A
 ; (ÃÝÒÂ)
 	LD	A,(TIMECNT)
-	XOR	4
+	XOR	11
 	LD	(TIMECNT),A
 ;
-;---WRITE to SPRITE TABLE
-; (VDPºÏÝÄÞ ¼­³Ø®³ÏÁ)
-	CALL	WAITCMD
+;----disable for SPRSET.ASM
+;;---WRITE to SPRITE TABLE
+;; (VDPºÏÝÄÞ ¼­³Ø®³ÏÁ)
+;	CALL	WAITCMD
+;;
+;;	LD	DE,(ATRBAS)	;sprite atr.
+;;	CALL	VSETWRT	
+;;	DEC	C	
+;	LD	B,8
+;	LD	HL,TIMEBUF
+;TIMSPR_2:	;
+;;	IN	A,(C)	;SKIP
+;;	IN	A,(C)	;SKIP
+;	LD	A,(HL)
+;	INC	HL
+;	RLCA
+;	RLCA
+;;	OUT	(C),A
+;;	IN	A,(C)	;SKIP
+;	DJNZ	TIMSPR_2
+;;	EI	
 ;
-	LD	DE,(ATRBAS)	;sprite atr.
-	CALL	VSETWRT		
-	DEC	C		
-	LD	B,8
+	POP	DE	; DE=SPR_INT_ATR_ARRAY[8]
+	LD	A,E
+	OR	D
+	RET	Z	; NOP
+;
 	LD	HL,TIMEBUF
-;	LD	DE,SPRATB	;add for SPRSET.ASM
-TIMSPR_2:	;
-	IN	A,(C)	;SKIP	
-	IN	A,(C)	;SKIP	
+	LD	B,8
+TIMSPR_1:	;
 	LD	A,(HL)
 	INC	HL
-	RLCA
-	RLCA
-	OUT	(C),A	
-;
-;	INC	DE	;add for SPRSET.ASM
-;	INC	DE	;add for SPRSET.ASM
-;	INC	DE	;add for SPRSET.ASM
-;	LD	(DE),A	;add for SPRSET.ASM
-;
-	IN	A,(C)	;SKIP	
-	DJNZ	TIMSPR_2
-	EI		
-;
-	POP	IX
-	LD	HL,TIMEBUF
-	LD	(IX+2),L
-	LD	(IX+3),H
+	INC	DE	; SKIP X
+	INC	DE
+	INC	DE	; SKIP Y
+	INC	DE
+	LD	(DE),A	; WRITE P
+	INC	DE
+	INC	DE
+	INC	DE	; SKIP F
+	INC	DE
+	DJNZ	TIMSPR_1
 	RET
 

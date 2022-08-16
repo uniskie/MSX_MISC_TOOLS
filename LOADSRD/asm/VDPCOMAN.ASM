@@ -68,31 +68,26 @@ CMD_CMR:	DB	0	;OPERATION (R#46)
 CMD_DAT:	EQU	CMD_SRC
 ;
 COPYPRM:	;
-	SUB	2
+	CALL	GETINT		;HL=USR(XXXX)
 	RET	NZ
-; --> ÃÇ· ÃÞ Á®¸¾Â ÍÝ½³ ±ÄÞÚ½ ¼­Ä¸
-; 	LD	HL,(0F7F8H)
-; <--
-; --> Ã¸ÊÝ É ÔØ¶À : hl=(hl+2)
-	PUSH	HL
-	POP	IX	;IX := string descriptor
-	LD	L,(IX+2)	;get value(low)
-	LD	H,(IX+3)	;get value(high)
-; <--
+;
 	LD	DE,CMD_DAT
 	LD	BC,CMD_CMR-CMD_DAT+1
 	LDIR
 	RET
 ;
+;================================
 ;--- WAIT VDP COMMAND finish
-; A=USR(0)
+; U=USR(0)
+;================================
 WAITVDPC:	;
 	CALL	WAITCMD
 	EI
 	RET
 ;
+;================================
 ;--- DO VDP COMMAND (direct data)
-; a=usr(address)
+; U=USR(address)
 ;	DW	0,0	;SX,SY (R#32)
 ;	DW	0,0	;DX,DY (R#36)
 ;	DW	0,0	;NX,NY (R#40)
@@ -100,13 +95,15 @@ WAITVDPC:	;
 ;	DB	0	;ARGUMENT (R#45)
 ;	DB	0	;OPERATION (R#46)
 ;	-- 9 bytes
+;================================
 VDPCMDD:	;
 	CALL	COPYPRM
 	RET	NZ
 	JP	VDPCOMAND
 ;
+;================================
 ;--- DO VDP COMMAND (use nx,ny,page modify)
-; a=usr(address)
+; U=USR(address)
 ;	DW	0,0	;SX,SY (R#32)
 ;	DW	0,0	;DX,DY (R#36)
 ;	DW	0,0	;NX,NY (R#40)
@@ -117,6 +114,7 @@ VDPCMDD:	;
 ;
 ;	arg=0 ÃÞ nx,ny Ê Ï²Å½ÃÞÓ ok
 ;	sy,dy Ê active page É ´²·®³ ¦ ³¹Ù
+;================================
 VDPCMD:	;
 	CALL	COPYPRM
 	RET	NZ
@@ -124,8 +122,10 @@ VDPCMD:	;
 	RET	C		;cancel command
 	JP	VDPCOMAND
 ;
+;================================
 ;--- exec. vdp command
 ; HL=ADDRESS (CMD_DAT etc.)
+;================================
 VDPCOMAND:	;
 	LD	A,(VDPIOW)
 	LD	C,A
@@ -141,10 +141,13 @@ VDPCOMAND:	;
 	LD	B,15
 	LD	HL,CMD_DAT
 	OTIR
+	NOP
 	EI
 	RET
 ;
+;================================
 ;--- wait until vdp-command finish
+;================================
 WAITCMD:	;
 	LD	A,(VDPIOW)
 	LD	C,A
@@ -169,8 +172,35 @@ WAITCMD_:	;
 ;	JR	C,WAITCMD_	; no EI
 	RET
 ;
+;================================
+;--- CHECK vdp-command finish
+; OUT:	NC = ok
+;	RETURN with DI
+;================================
+CHKVCMD:	;
+	LD	A,(VDPIOW)
+	LD	C,A
+	INC	C
+CHKVCMD2:	;
+	LD	A,2
+	DI
+	OUT	(C),A
+	LD	A,15+80H
+	OUT	(C),A
+	IN	A,(C)
+	RRCA
+	EX	AF,AF'
+	XOR	A
+	OUT	(C),A
+	LD	A,15+80H
+	OUT	(C),A
+	EX	AF,AF'
+	RET
+;
+;================================
 ;--- modify nx,ny parameter
 ; OUT:	Cy = cancel command
+;================================
 M_VDPC:	;
 ;--- mofidy sx,dx minus
 	LD	A,(CMD_SRC+1)	;SX-high

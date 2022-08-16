@@ -1,0 +1,619 @@
+;================================
+; INCLUDE FILE for LOADSRD
+;================================
+; for SPRITE mode 2
+; for 16x16 * 2 combo use.
+; not for 8X8
+; for SCREEN 5/6/7/8/9/10/11
+; FLICKER is not support SCREEN 4.(not enough space for double buffer)
+;USR():
+; SPR_SET - write SPRITE for 16x16
+; SPC_SET - set SPRITE PAT COLOR TABLE for 16x16
+; SPR_INT - set / reset H.TIMI for SPRITE
+;================================
+;---- WRITE SPRITE from 16BIT(INT) ARRAY ----
+;SPR_ATU {
+; s16_t Y*2;
+; s16_t X*2;
+; s16_t PATTERN_NO;
+; s16_t FLAG;
+;} spr_attribute_list[32];
+SFG_AWAIT: EQU 0FH ;FLAG bit 3 -0  : auto anim wait (0-15)
+SFG_ATYPE: EQU 10H ;FLAG bit 4     : 0=2pattern / 1=4pattern ANIM
+SFG_ACNTR: EQU 0FH ;FLAG bit 11-8  : wait counter (0-15)
+SFG_APAT: EQU 30H ;FLAG bit 13-12 : pat offset (0-3)
+SFG_PBIT: EQU 10H ;                 lowest bit of pat offset
+SFG_SKIP: EQU 80H ;FLAG bit 15    : SKIP(ERASE)
+;SPR_COL {
+; u8 COLOR; // EC(1).CC(1).IC(1).0(1).COLOR(4)
+;} spr_color_list[64]
+;
+;VDPIOR: EQU 0006H ;VDP I/O port m (READ)
+;VDPIOW: EQU 0007H ;VDP I/O port n (WRITE)
+;ATRBAS:  EQU 0F928H
+;
+CCLSIZE: EQU 400H ;(16*64) for 16x16 SPRITE
+;CCLSIZE: EQU 800H ;(8*256) for 8x8 SPRITE
+;
+;--- BIOS / SYSTEM WORK
+H_TIMI: EQU 0FD9FH ;VSYNC INTERRUPT
+;
+;--- CONSTANTS ---
+;
+SPRU_OY: EQU 0 ; SPRITE ATTRIBUTE USR ARRAY offset : Y
+SPRU_OX: EQU 2 ; SPRITE ATTRIBUTE USR ARRAY offset : X
+SPRU_OP: EQU 4 ; SPRITE ATTRIBUTE USR ARRAY offset : PAT
+SPRU_OF: EQU 6 ; SPRITE ATTRIBUTE USR ARRAY offset : FLAG
+;
+SPRW_OY: EQU 0 ; SPRITE ATTRIBUTE WORK offset : Y
+SPRW_OX: EQU 1 ; SPRITE ATTRIBUTE WORK offset : X
+SPRW_OP: EQU 2 ; SPRITE ATTRIBUTE WORK offset : PAT
+SPRW_OF: EQU 3 ; SPRITE ATTRIBUTE WORK offset : FLAG
+;
+BIT_ND: EQU 10H ; NO DISPLAY
+BIT_EC: EQU 80H ; EC bit (LEFT SHIFT 32 dot)
+BIT_IC: EQU 10H ; NO COLLISION
+;SPW_SKIP: EQU 0FFH ; SKIP WRITE
+;
+SPRATS: EQU 080H ; SPRITE ATTRIBUTE TABLE BUFFER SIZE 4*32
+SPRCLS: EQU 200H ; SPRITE COLOR TABLE SIZE 16*32
+SPRMAX: EQU 32 ; SPRITE ENTRY COUNT
+SPCOFS: EQU 512 ; (ATRBAS)-SPCOFS = SPRITE COLOR TABLE
+;
+VRMSPGX: EQU 200H ; SPRITE Color & Atrtribute page address diff.
+;
+;================================
+;--- SET SPRITE COLOR DATA ---
+;================================
+; U=USR(ADR)
+; ADR = SPRITE COLOR / 16*64 bytes(for 16X16)
+SPC_SET: ;
+ CALL GETINT ;HL=USR(XXXX)
+ RET NZ
+;
+; LD (CCLTBL),HL
+ LD DE,CCLTBL
+ LD BC,CCLSIZE
+ LDIR
+ RET
+;
+;================================
+;--- SET SPRITE ATTRIBUTE ----
+;================================
+; U=USR(ADR)
+SPR_SET: ;
+ CALL GETINT ;HL=USR(XXXX)
+ RET NZ
+;
+ LD A,1
+ LD (SPRINTD),A ;DISALE HOOK
+;
+ PUSH HL
+ POP IX
+;
+ LD B,32
+;
+;;==> FLICKER
+; LD A,(SPTOFS) ; FLICKER
+; ADD A,10
+; AND SPRMAX-1 ; MASK
+; LD (SPTOFS),A
+; LD L,A
+; LD H,0
+; ADD HL,HL
+; ADD HL,HL ; offset*4
+; LD DE,SPRATB
+; ADD HL,DE
+;; LD (SPTCUR),HL ; offsted SPRATB
+; PUSH HL
+; POP IY
+;
+; JR SPRST0
+;<== FLICKER
+ LD IY,SPRATB
+;<== NOT FLICKER
+;
+SPRSETL: ;
+;==> FLICKER
+; LD A,B
+; AND 1
+; JR NZ,SPRST0 ; ODD for SPRITE COMBO
+; PUSH IY
+; POP HL
+; LD DE,SPRATB-16 ; BASE ADDRESS -4*4
+; OR A
+; SBC HL,DE ; HL=OFFSET + 4*4 (INCLEASE 1+1+4=6)
+; LD DE,SPRATS-1 ;MASK
+; LD A,L
+; AND E
+; LD L,A
+; LD A,H
+; AND D
+; LD H,A
+; LD DE,SPRATB ; BASE ADDRESS
+; ADD HL,DE ; HL=ADDRESS
+; PUSH HL
+; POP IY
+;SPRST0: ;
+;<== FLICKER
+;
+;--SKIP FLAG
+ LD D,(IX+SPRU_OF+1)
+ BIT 7,D ;FLAG bit15 (SFG_SKIP)
+ JR Z,SPRST_S
+; LD (IY+SPRW_OF),SPW_SKIP ;SKIP FLAG
+; JP SPRSTNX
+ LD A,BIT_ND ;bit4=NoDisp
+ JR SPRSTY2
+SPRST_S: ;
+;--ANIM FLAG
+ LD E,(IX+SPRU_OF)
+ LD A,E
+ AND SFG_AWAIT ;FLAG bit 3 -0  : auto anim wait (0-15)
+ JR Z,SPRSTY1
+ LD E,A
+ LD A,D
+ INC A
+ AND SFG_ACNTR ;FLAG bit 11-8  : wait counter (0-15)
+ LD D,A
+ CP E
+ JR C,SPRANIN ; COUNT < WAIT ?
+; add pattern ofs
+ LD A,(IX+SPRU_OF)
+ AND SFG_ATYPE ;FLAG bit 4     : 0=2pattern / 1=4pattern ANIM
+ RLCA
+ OR SFG_ATYPE ;pat mask : 30H or 10H
+ LD E,A
+ LD A,(IX+SPRU_OF+1)
+ ADD A,SFG_PBIT
+ AND E ;FLAG bit 13-12 : pat offset (0-3)
+ LD (IX+SPRU_OF+1),A
+ LD D,0 ; reset count
+SPRANIN: ;
+ LD A,(IX+SPRU_OF+1)
+ AND 0F0H
+ OR D
+ LD (IX+SPRU_OF+1),A
+;--SPR Y
+SPRSTY1: ;
+ LD E,(IX+SPRU_OY) ;DE=Y
+ LD D,(IX+SPRU_OY+1)
+;
+ SRA D ;Y/2
+ RR E
+; SRA D ;Y/4
+; RR E
+;
+ LD A,BIT_ND ;bit4=NoDisp
+ LD HL,31
+ OR A
+ ADC HL,DE ;ADD HL,rr not use Sign flag
+ JP M,SPRSTY2 ;Smaller than -31? = NoDisp
+ PUSH DE
+ LD DE,212+31
+ OR A
+ SBC HL,DE
+ POP DE
+ JR NC,SPRSTY2 ;Laeger than 211 = NoDisp
+;
+ LD A,(ERASEY) ;Y=216 : erase after sprite
+ CP E
+ LD A,0 ;Disp
+ JR NZ,SPRSTY2
+ DEC E ;avoid Y=216
+SPRSTY2: ;
+ LD (IY+SPRW_OF),A ;save NoDisp(bit4)
+ LD (IY+SPRW_OY),E ;save Y
+;
+;--SPR X
+ LD E,(IX+SPRU_OX) ;DE=X
+ LD D,(IX+SPRU_OX+1)
+;
+ SRA D ;X/2
+ RR E
+; SRA D ;X/4
+; RR E
+;
+ LD A,BIT_ND ;bit4=NoDisp
+ LD HL,31
+ OR A
+ ADC HL,DE ;ADD HL,rr not use Sign flag
+ JP M,SPRSTX2 ;Smaller than -31? = NoDisp
+ PUSH DE
+ LD DE,256+31
+ OR A
+ SBC HL,DE
+ POP DE
+ JR NC,SPRSTX2 ;Laeger than 255? = NoDisp
+;
+ XOR A ;Disp,no EC
+ RLC D
+ JR NC,SPRSTX2 ;PLUS?
+ LD A,E
+ ADD A,32 ;SHIFT 32dot
+ LD E,A
+ LD A,BIT_EC ;EC(bit7)
+SPRSTX2: ;
+ LD (IY+SPRW_OX),E ;save X
+;-- Process NoDisp bit
+ OR (IY+SPRW_OF)
+ LD (IY+SPRW_OF),A ;save EC(bit7),NoDisp(bit4)
+ AND BIT_ND ; No Disp?
+ JR Z,SPRSTP1 ; Disp
+ LD A,(NDISPY)
+ LD (IY+SPRW_OY),A ; Y=NoDisp
+ XOR A
+ LD (IY+SPRW_OP),A ; PAT No.=0
+ JR SPRSTNX
+SPRSTP1: ;
+;-- Pattern No.
+ LD E,(IX+SPRU_OP)
+ LD A,(IX+SPRU_OF+1)
+ AND SFG_APAT ;FLAG bit 13-12 : pat offset (0-3)
+ JR Z,SPRSTP2
+ RRCA
+ RRCA
+ RRCA ; 30H -> 06H = 2*n
+ ADD A,E
+ LD E,A ; pat += 2 * pat_ofs
+SPRSTP2: ;
+ SLA E ;n*4 (for 16x16)
+ SLA E
+ LD (IY+SPRW_OP),E ; PAT No.
+;-- Loop param
+SPRSTNX: ;
+ LD DE,4
+ ADD IY,DE ;IY+=4
+ ADD IX,DE
+ ADD IX,DE ;IX+=8
+ DEC B
+ JP NZ,SPRSETL ;over range: DJNZ SPRSETL
+;
+ LD A,(HTIMIB) ;USE HOOK?
+ OR A
+ JR NZ,SPRSTE1
+;
+;-- MAKE ATTRIBUTE TABLE (FLICKER)
+ CALL SPRFLIK
+ JR SPRSTE2
+;
+;-- MAKE ATTRIBUTE TABLE (LINER)
+SPRSTE1: ;
+ LD HL,SPRATB
+ LD DE,SPRATR
+ LD BC,SPRATS
+ LDIR
+;
+;-- MAKE COLOR TABLE
+SPRSTE2: ;
+ CALL SPCMAKE
+ XOR A
+ LD (SPRINTD),A
+;-- WRITE to VRAM
+ CALL WAITCMD ;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
+ CALL WAIT_VR ;wait v-sync
+ CALL SPRVRMT
+ EI
+ RET
+;
+;================================
+;--- FLICKER
+;================================
+;---ADD START OFFSET
+SPRFLIK: ;
+ LD A,(SPTOFS) ; FLICKER
+ ADD A,10 ; 5*2 (for SPRITE COMB)
+ AND SPRMAX-1 ; MASK
+ LD (SPTOFS),A
+;---SUFFLE
+;--> TEST
+; LD HL,SPRATB
+; LD DE,SPRATR
+; LD BC,SPRATS
+; LDIR
+; RET
+;<-- TEST
+ LD A,(SPTOFS) ; FLICKER
+ LD L,A
+ LD H,0
+ ADD HL,HL
+ ADD HL,HL ; offset*4
+ LD DE,SPRATB
+ ADD HL,DE
+ LD DE,SPRATR
+ LD A,32
+SPRFLKL: ;
+ LDI
+ LDI
+ LDI
+ LDI
+;
+ BIT 0,A
+ JR Z,SPRFLK0 ; ODD for SPRITE COMBO
+;
+ EX AF,AF'
+ LD BC,SPRATB-16 ; BASE ADDRESS - 4*4
+ OR A
+ SBC HL,BC ; HL=OFFSET + 4*4 (INCLEASE 1+1+4=6)
+ LD A,L
+ AND SPRATS-1 ; MASK
+ LD L,A
+ LD BC,SPRATB ; BASE ADDRESS
+ ADD HL,BC ; HL=ADDRESS
+ EX AF,AF'
+SPRFLK0: ;
+ DEC A
+ JR NZ,SPRFLKL
+ RET
+;
+;================================
+;--- MAKE SPRITE COLOR TABLE
+;================================
+;
+SPCMAKE: ;
+ LD B,32
+; LD IX,SPRATB
+ LD IX,SPRATR
+ LD HL,SPRCOL
+;--COL LOOP
+SPCLLP: ;
+;--GET FLAG & PAT No.
+ LD E,(IX+2) ;E=PAT No.
+ LD D,(IX+3) ;D=FLAG
+ INC IX
+ INC IX
+ INC IX
+ INC IX ;IX+=4
+ LD A,D ;A=FLAG
+ AND BIT_ND
+ JR Z,SPCMK0
+;--SKIP (CLEAR)
+ LD D,BIT_IC
+ LD A,16
+SPCSKL: ;
+ LD (HL),D
+ INC HL
+ DEC A
+ JR NZ,SPCSKL
+ DJNZ SPCLLP
+ RET
+;
+;--CALC COLOR SOURCE ADDRESS
+SPCMK0: ;
+ LD A,D ; A=FLAG
+ EX AF,AF' ; A'=FLAG
+ LD A,E ; A=PAT No.
+ EXX ; HL'=SPRCOL / B'=MAIN COUNTER
+ LD E,A ; DE=PAT No.
+ LD D,0
+ SLA E
+ RL D
+ SLA E
+ RL D ; DE=PAT*16/4
+; SLA E
+; RL D ; DE=PAT*16/2
+; SLA E
+; RL D ; DE=PAT*16
+ LD HL,CCLTBL
+ ADD HL,DE ;PATTERN COLOR ADDRESS
+ EX AF,AF' ; A=FLAG / A'=PAT No.
+ AND BIT_EC ; A=EC bit
+ LD C,A ; C=EC bit
+;
+;--WRITE TO SPRCOL (RAM)
+ LD B,16
+SPCLL2: ;
+ LD A,(HL)
+ INC HL
+; AND 15 ; TEST
+ OR C ; A=COLOR OR EC
+ EXX ; HL=SPRCOL / B=MAIN COUNTER
+ LD (HL),A
+ INC HL
+ EXX ; HL'=SPRCOL / B'=MAIN COUNTER
+ DJNZ SPCLL2
+ EXX ; HL=SPRCOL / B=MAIN COUNTER
+ DJNZ SPCLLP
+ RET
+;
+;================================
+;--- WRITE TO VRAM (SPRITE COLOR TABLE)
+;    with vsync and command wait
+;================================
+SPRVRMT: ;
+ LD HL,(ATRBAS) ;sprite atr.
+ LD DE,-SPCOFS ;-512
+ ADD HL,DE
+;#IF 1
+ EX DE,HL
+;#ELSE
+; PUSH HL ;(SP) = SPRATR-512 = SPRCOL
+; CALL WAITCMD ;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
+; CALL WAIT_VR ;wait v-sync
+; POP DE ;DE = SPRATR-512 = SPRCOL
+;#ENDIF
+ DI
+ CALL VSETWRT
+ DEC C
+;
+ LD HL,SPRCOL
+ LD B,0
+ OTIR ;OTIR=21state < 29state(TMS9918 VRAM access limit)
+ LD B,0
+ OTIR ;512 bytes
+;
+;--- WRITE TO VRAM (SPRITE PATTERN TABLE)
+;
+; LD HL,SPRATR
+ LD B,SPRATS ;4*32
+ OTIR
+;
+ LD A,1
+ LD (SPRINTW),A
+;
+ RET
+;
+;
+;================================
+;--- SET SPRITE V INTERRUPT ----
+;================================
+SPR_INT: ;
+ CALL GETINT
+ LD A,L
+ OR H
+ JR Z,SPRISET
+;
+SPRIRES: ;
+ LD A,(HTIMIB)
+ OR A
+ RET Z
+;
+ DI
+ LD HL,HTIMIB
+ LD DE,H_TIMI
+ LD BC,5
+ LDIR
+;
+ XOR A
+ LD (HTIMIB),A
+;
+ EI
+ RET
+;
+SPRISET: ;
+ LD A,(HTIMIB)
+ OR A
+ RET NZ
+;-- MAKE DOUBLE BUFFER
+ LD HL,(ATRBAS) ;sprite atr.
+ LD (ATRBASA),HL
+ CALL SETATRBAS
+ CALL REVATRBAS
+ LD (ATRBASB),HL
+ LD (ATRBAS),HL
+;-- CHANGE HOOK
+ DI
+ LD HL,H_TIMI
+ LD DE,HTIMIB
+ LD BC,5
+ LDIR
+ LD HL,SPRIJP
+ LD DE,H_TIMI
+ LD BC,3
+ LDIR
+ LD A,1
+ LD A,(SPRINTD)
+;
+ EI
+ RET
+SPRIJP: ;
+ JP SPRINTR
+;
+;================================
+;--- SPRITE V INTERRUPT ----
+;================================
+SPRINTR: ;
+ PUSH AF ;A=#S0 /**need SAVE**
+; BIT 7,A
+; JP Z,SPRINTNE
+;
+ LD A,(SPRINTD)
+ OR A
+ JP NZ,SPRINTNE
+;
+ LD A,(SPRINTW)
+ OR A
+ JP Z,SPRINTR0
+;
+ LD HL,(ATRBAS) ;sprite atr.
+ LD (ATRBASA),HL
+ CALL SETATRBAS
+ CALL REVATRBAS
+ LD (ATRBASB),HL
+ LD (ATRBAS),HL
+ ;
+ XOR A
+ LD (SPRINTW),A
+;
+SPRINTR0: ;
+;
+;-- CHECK VDP COMMAND
+ LD A,(VDPIOW)
+ LD C,A
+ INC C
+ LD A,2
+ OUT (C),A
+ LD A,15+80H
+ OUT (C),A
+ IN A,(C)
+ RLCA
+ JP C,SPRINRSE ;SKIP
+;
+;--- FLICKER
+ CALL SPRFLIK
+;-- MAKE COLOR TABLE
+ CALL SPCMAKE
+;--- WRITE TO VRAM (SPRITE COLOR TABLE BACK BUFFER)
+ CALL SPRVRMT
+;
+;-- END HOOK
+SPRINRSE: ;
+; XOR A
+; LD (SPRINTD),A
+;
+;-- SET S#0
+ LD A,(VDPIOW)
+ LD C,A
+ INC C
+ XOR A
+ OUT (C),A
+ LD A,15+80H
+ OUT (C),A
+;
+; LD A,(VDPIOW)
+; LD C,A
+; INC C
+; IN A,(C) ;trash #s1 vsync
+;
+SPRINTNE: ;
+ LD A,(HTIMIB)
+ OR A
+ JR Z,SPRITNHE
+;
+ POP AF
+ JP HTIMIB
+;
+;-- NO HOOK
+SPRITNHE: ;
+ POP AF
+ RET
+;
+;--- HL = HL XOR 400H
+REVATRBAS: ;
+ LD A,H
+ XOR 4
+ LD H,A
+ RET
+;
+;================================
+;--- WORK AREA ---
+HTIMIB: DB 0,0,0,0,0 ;H.TIMI backup
+SPRINTD: DB 1 ; disable SPRITE interrupt rutine
+SPRINTW: DB 0 ; bACK buffer is written
+NDISPY: DB 256-32 ; NO DISPLAY Y
+ERASEY: DB 216 ; ERASE AFTER SPR(216=mode2/208=mode1)
+SPTOFS: DW 0 ; OFFSET for BLINK
+;
+CCLTBL: ;DW 0 ; COLOR for each 16x16 PATTERN (16*64) ADDRESS
+ DS CCLSIZE ; COLOR for each 16x16 PATTERN (16*64) BUFFER
+SPRATB: DS SPRATS ; SPRITE ATTRIBUTE WORK BUFFER 4*32
+; : X,Y,PAT,FLAG
+;
+;-- for TRANSEFR to VRAM --
+ATRBASA: DW 7400H ; do set (ATRBAS)-512
+ATRBASB: DW 7000H ; do set (ATRBAS)-512 Back buffer
+;
+SPRCOL: DS SPRCLS ; SPRITE COLOR TABLE for VRAM (16*32)
+SPRATR: DS SPRATS ; SPRITE ATTRIBUTE TABLE for VRAM (4*32)
+;
+
