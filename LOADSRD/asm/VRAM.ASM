@@ -3,7 +3,7 @@
 ;================================
 ; not for USR()
 ;	VSETWRT  - SET to WRITE VRAM
-;	WAIT_VR  - WAIT VSYNC
+;	(no use)WAIT_VR  - WAIT VSYNC
 ;	SETATRBAS  - CHANGE SPRITE ATTRIBUTE ADDRESS
 ;================================
 ;---- VDP Command ----

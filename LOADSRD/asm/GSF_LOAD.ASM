@@ -8,7 +8,7 @@
 ;LOADOFS:	DW	0	;LOAD_SRD VRAM offset
 ; read buffer:  B000H-CFFFH
 ;DMA:		DW	0B000H	;Read buffer address
-;DMASIZ:		DW	2000H	;Read buffer size
+;DMASIZ:	DW	2000H	;Read buffer size
 ;
 W_TYPE:		DB	0	;0:binary/ff:packed
 W_DSIZE:	DW	0	;DATA SIZE LOW16

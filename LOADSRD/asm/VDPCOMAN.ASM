@@ -187,31 +187,6 @@ WAITCMD_:	;
 	RET
 ;
 ;================================
-;--- CHECK vdp-command finish
-; OUT:	NC = ok
-;	RETURN with DI
-;================================
-CHKVCMD:	;
-	LD	A,(VDPIOW)
-	LD	C,A
-	INC	C
-CHKVCMD2:	;
-	LD	A,2
-	DI
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-	IN	A,(C)
-	RRCA
-	EX	AF,AF'
-	XOR	A
-	OUT	(C),A
-	LD	A,15+80H
-	OUT	(C),A
-	EX	AF,AF'
-	RET
-;
-;================================
 ;--- modify nx,ny parameter
 ; OUT:	Cy = cancel command
 ;================================
