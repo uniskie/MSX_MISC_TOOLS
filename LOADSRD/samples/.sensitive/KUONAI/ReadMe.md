@@ -8,14 +8,14 @@ There is some sensitive data here.
 
 Please handle with care.
 
-## KUONAI.BAS / KUONAIV.BAS
+## TESTN.BAS / KUONAIV.BAS
 
 スプライトが8個以上並んだ時に点滅表示させるサンプルを兼ねています。
 
 32個のスプライトエントリを一括管理しています。  
 VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に収まらない為、ダブルバッファを使用して書き込んだ後に表示をスワップしています。
 
-1) KUONAI.BASはメインループで点滅並び替え実行
+1) TESTN.BASはメインループで点滅並び替え実行
 2) KUANNAIV.BASはVSYNCで点滅並び替え実行、メインループからも書き込み
 3) KUANNAIV.BASはVSYNCで点滅並び替え実行、1フレーム表示が遅れるがメインループからは書き込まない
 
@@ -30,10 +30,10 @@ BASICでの処理の遅さ対策で作った2ですが、デメリットが多�
 
 |FILE|DESC   |
 |---|---|
-| [KUONAI.BAS](KUONAI.BAS)| FLICK SPRITE IMMIDIATE MODE (Blinking is rough but light) |
-| [KUONAIV1.BAS](KUONAIV1.BAS)| FLICK SPRITE H.TIMI MODE 1 (Blinking is fine but very heavy) |
-| [KUONAIV2.BAS](KUONAIV2.BAS)| FLICK SPRITE H.TIMI MODE 2 (Blinking is fine but heavy) |
-| [SRX2.BIN](../../../asm)| [SRX2.ASM](../../../asm/SRX2.ASM) がソースファイル |
+| [TESTN.BAS](TESTN.BAS)| FLICK SPRITE IMMIDIATE MODE (Blinking is rough but light) |
+| [TESTV1.BAS](TESTV1.BAS)| FLICK SPRITE H.TIMI MODE 1 (Blinking is fine but very heavy) |
+| [TESTV2.BAS](TESTV2.BAS)| FLICK SPRITE H.TIMI MODE 2 (Blinking is fine but heavy) |
+| [SRX2.BIN](../../../asm)| [(../../../asm/SRX2.ASM](../../../asm/SRX2.ASM) がソースファイル |
 
 ### スプライト管理機能
 
