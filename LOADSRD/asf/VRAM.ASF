@@ -104,7 +104,7 @@ SETATRBAS: ;
  CP 7
  JR NC,SETATRBAS1 ; page / 1
 ; SCREEN 5,6 = page : A16,15
- LD A,D
+ LD A,H
  RLCA ;Cy=A15
  LD A,(ACPAGE)
  ADC A,0
