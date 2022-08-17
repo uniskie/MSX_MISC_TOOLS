@@ -38,6 +38,24 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 | [TESTV2.BAS](TESTV2.BAS)| FLICK SPRITE H.TIMI MODE 2 (Blinking is fine but heavy) |
 | [SRX2.BIN](../../../asm)| [../../../asm/SRX2.ASM](../../../asm/SRX2.ASM) がソースファイル |
 
+## LOADSRD.BIN エントリー
+
+> **Warning** 使用上の注意
+>
+> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
+>
+> プログラム本体は&D000～&hDFFFを使用します。  
+> 環境によってはメモリが足りないケースが多いかもしれません。   
+> 漢字BASICモードではまず暴走すると思います。
+>
+> 使用する際は、```CLEAR 100,&hB000``` 等で初期化をしてください。   
+> また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
+
+|宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
+|---|---|---|---|---|---|
+| DEFUSR1=&HD000| U$=USR1("FILENAME.EXT")|$D000| LOAD_SRD | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
+| DEFUSR2=&HD003| U=USR2(VARPTR(PL(0)))  |$D003| SET_PLT  | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
+
 ## SRX.BIN エントリー
 
 > **Warning** 使用上の注意
@@ -51,6 +69,24 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 > 使用する際は、```CLEAR 100,&hB000``` 等で初期化をしてください。   
 > また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
 
+|宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
+|---|---|---|---|---|---|
+| DEFUSR1=&HD000| U$=USR1("FILENAME.EXT")|$D000| LOAD_SRD | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
+| DEFUSR2=&HD003| U=USR2(VARPTR(PL(0)))  |$D003| SET_PLT  | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
+| DEFUSR3=&HD006| U=USR3(VARPTR(SR(0)))  |$D006| SPR_TIME | SPRCLOCK.ASM | スプライト#0-7のパターンへ現在の時間を書き込む<br>(HH:MM:SS形式)(16x16モード用=パターン番号はの4倍数)
+
+## SRX2.BIN エントリー
+
+> **Warning** 使用上の注意
+>
+> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
+>
+> プログラム本体は&D000～&hDFFFを使用します。  
+> 環境によってはメモリが足りないケースが多いかもしれません。   
+> 漢字BASICモードではまず暴走すると思います。
+>
+> 使用する際は、```CLEAR 100,&hB000``` 等で初期化をしてください。   
+> また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
 
 |宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
 |---|---|---|---|---|---|
