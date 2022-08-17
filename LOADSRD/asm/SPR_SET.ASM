@@ -253,7 +253,7 @@ SPRSTE2:	;
 	LD	(SPRINTD),A
 ;-- WRITE to VRAM
 	CALL	WAITCMD		;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
-	CALL	WAIT_VR		;wait v-sync
+; Not required VSYNC WAIT because flip is used -->	CALL	WAIT_VR		;wait v-sync
 	CALL	SPRVRMT
 ;
 	LD	A,(HTIMIB)	;USE HOOK?
@@ -409,7 +409,7 @@ SPRVRMT:	;
 ;#ELSE
 ;	PUSH	HL		;(SP) = SPRATR-512 = SPRCOL
 ;	CALL	WAITCMD		;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
-;	CALL	WAIT_VR		;wait v-sync
+;; Not required VSYNC WAIT because flip is used -->	CALL	WAIT_VR		;wait v-sync
 ;	POP	DE		;DE = SPRATR-512 = SPRCOL
 ;#ENDIF
 	DI
