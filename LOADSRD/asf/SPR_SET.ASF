@@ -62,8 +62,8 @@ SPCOFS: EQU 512 ; (ATRBAS)-SPCOFS = SPRITE COLOR TABLE
 ;
 VRMSPGX: EQU 200H ; SPRITE Color & Atrtribute page address diff.
 ;
-SSYNCMD0: EQU 0 ; NO USE VSYNC, TRUE IMMIDIATE MODE
-SSYNCMD1: EQU 1 ; VSYNC + IMMIDIATE DRAW MODE
+SSYNCMD0: EQU 0 ; NO USE VSYNC, TRUE IMMEDIATE MODE
+SSYNCMD1: EQU 1 ; VSYNC + IMMEDIATE DRAW MODE
 SSYNCMD2: EQU 2 ; VSYNC + LATE DRAW MODE
 ;
 ;================================
@@ -92,22 +92,22 @@ SPR_SET: ;
  LD A,1
  LD (SPRINTD),A ;DISALE HOOK
 ;
- PUSH HL
+ PUSH HL ;(SP)=USR ADR
 ;
  LD A,(SSYNCMD)
  CP SSYNCMD0
- JR NZ,SPRST_0
-;
-;--- Immidiate double buffer mode
+ JR NZ,SPRST_0 ;use vsync -> jump
+;  not use vsync -> ...
+;--- IMMEDIATE double buffer mode
  LD HL,(ATRBAS) ;sprite atr.
  CALL REVATRBAS
  LD (ATRBAS),HL ;write to back buffer
 ;
 SPRST_0: ;
- POP IX
+ POP IX ;IX=USR ADR
 ;
  LD B,32
- LD IY,SPRATB
+ LD IY,SPRATB ;IY=SPRATR WORK BUFFER
 ;
 SPRSETL: ;
 ;--SKIP FLAG
@@ -151,12 +151,10 @@ SPRANIN: ;
 SPRSTY1: ;
  LD E,(IX+SPRU_OY) ;DE=Y
  LD D,(IX+SPRU_OY+1)
-;
  SRA D ;Y/2
  RR E
 ; SRA D ;Y/4
 ; RR E
-;
  LD A,BIT_ND ;bit4=NoDisp
  LD HL,31
  OR A
@@ -181,16 +179,14 @@ SPRSTY2: ;
 ;--SPR X
  LD E,(IX+SPRU_OX) ;DE=X
  LD D,(IX+SPRU_OX+1)
-;
  SRA D ;X/2
  RR E
 ; SRA D ;X/4
 ; RR E
-;
- LD A,BIT_ND ;bit4=NoDisp
+ LD A,BIT_ND ;A=NoDisp(bit4)
  LD HL,31
  OR A
- ADC HL,DE ;ADD HL,rr not use Sign flag
+ ADC HL,DE ;* need ADC. (ADD HL,rr is not change sign flag)
  JP M,SPRSTX2 ;Smaller than -31? = NoDisp
  PUSH DE
  LD DE,256+31
@@ -211,27 +207,27 @@ SPRSTX2: ;
 ;-- Process NoDisp bit
  OR (IY+SPRW_OF)
  LD (IY+SPRW_OF),A ;save EC(bit7),NoDisp(bit4)
- AND BIT_ND ; No Disp?
- JR Z,SPRSTP1 ; Disp
- LD A,(NDISPY)
+ AND BIT_ND ;No Disp?
+ JR Z,SPRSTP1 ; Disp -> JUMP
+ LD A,(NDISPY) ; NoDisp -> ...
  LD (IY+SPRW_OY),A ; Y=NoDisp
  XOR A
  LD (IY+SPRW_OP),A ; PAT No.=0
- JR SPRSTNX
+ JR SPRSTNX ; goto Next entry
 SPRSTP1: ;
 ;-- Pattern No.
  LD E,(IX+SPRU_OP)
  LD A,(IX+SPRU_OF+1)
- AND SFG_APAT ;FLAG bit 13-12 : pat offset (0-3)
+ AND SFG_APAT ;FLAG bit13-12 : pat offset (0-3)
  JR Z,SPRSTP2
- RRCA
- RRCA
- RRCA ; 30H -> 06H = 2*n
- ADD A,E
- LD E,A ; pat += 2 * pat_ofs
+ RRCA ;..pp.... -> ...pp...
+ RRCA ;...pp... -> ....pp..
+ RRCA ;....pp.. -> .....pp.
+ ADD A,E ; pat + pp*2
+ LD E,A ; pat = pat + pat_ofs * 2
 SPRSTP2: ;
+ SLA E ;n*2
  SLA E ;n*4 (for 16x16)
- SLA E
  LD (IY+SPRW_OP),E ; PAT No.
 ;-- Loop param
 SPRSTNX: ;
@@ -240,8 +236,7 @@ SPRSTNX: ;
  ADD IX,DE
  ADD IX,DE ;IX+=8
  DEC B
- JP NZ,SPRSETL ;over range: DJNZ SPRSETL
-;
+ JP NZ,SPRSETL ;DJNZ is out of range
 SPRSTE1: ;
  XOR A
  LD (SPRINTD),A
@@ -250,34 +245,35 @@ SPRSTE1: ;
  CP SSYNCMD2 ;VSYNC + LATE DRAW MODE
  RET Z
 ;
-;-- MAKE ATTRIBUTE TABLE (FLICKER)
- CALL SPRFLIK
-;-- MAKE COLOR TABLE
- CALL SPCMAKE
-;-- WRITE to VRAM
+; LD A,(SPRFLKF) ;USE FLICKER?
+; OR A
+; JR Z,SPRLNER ;MAKE ATTRIBUTE TABLE (LNINER)
+;
+ CALL SPRFLIK ;MAKE ATTRIBUTE TABLE (FLICKER)
+SPRSTE2: ;
+;#IF SPRCOL_USE_RAM_BUFFER
+; CALL SPCMAKE ;MAKE COLOR TABLE
+;#ENDIF ;SPRCOL_USE_RAM_BUFFER
  CALL WAITCMD ;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
-; Not required VSYNC WAIT because flip is used --> CALL WAIT_VR ;wait v-sync
- CALL SPRVRMT
+ CALL SPRVRMT ;WRITE to VRAM
 ;
  LD A,(SSYNCMD) ;USE HOOK?
  OR A
- JR NZ,SPRSTEE
-;
-;--- Immidiate double buffer mode
+ JR NZ,SPRSTEE ; -> YSE = END
+;   -> NO = FLIP IMMEDIATELY
  LD HL,(ATRBAS) ;sprite atr.
  CALL SETATRBAS ;SWAP
-;
 SPRSTEE: ;
  EI
  RET
 ;
 ;;-- MAKE ATTRIBUTE TABLE (LINER)
-;SPRSTE2: ;
+;SPRLNER: ;
 ; LD HL,SPRATB
 ; LD DE,SPRATR
 ; LD BC,SPRATS
 ; LDIR
-; RET
+; JR SPRSTE2
 ;
 ;================================
 ;--- FLICKER
@@ -329,44 +325,119 @@ SPRFLK0: ;
  JR NZ,SPRFLKL
  RET
 ;
-;================================
-;--- MAKE SPRITE COLOR TABLE
-;================================
+;#IF SPRCOL_USE_RAM_BUFFER
+;;================================
+;;--- MAKE SPRITE COLOR TABLE to RAM
+;;================================
+;;      SPRATR + CCLTBL -> RAM SPRCOL
+;;
+;SPCMAKE: ;
+; LD B,32
+;; LD IX,SPRATB
+; LD IX,SPRATR
+; LD HL,SPRCOL
+;;--COL LOOP
+;SPCMAKL: ;
+;;--GET FLAG & PAT No.
+; LD E,(IX+2) ;E=PAT No.
+; LD D,(IX+3) ;D=FLAG
+; INC IX
+; INC IX
+; INC IX
+; INC IX ;IX+=4
+; LD A,D ;A=FLAG
+; AND BIT_ND
+; JR Z,SPCMK0
+;;--SKIP (CLEAR)
+; LD D,BIT_IC
+; LD A,16
+;SPCSKL: ;
+; LD (HL),D
+; INC HL
+; DEC A
+; JR NZ,SPCSKL
+; DJNZ SPCMAKL
+; RET
+;;
+;;--CALC COLOR SOURCE ADDRESS
+;SPCMK0:
+; LD A,D ; A=FLAG
+; EX AF,AF' ; A'=FLAG
+; LD A,E ; A=PAT No.
+; EXX ; HL'=SPRCOL / B'=MAIN COUNTER
+; LD E,A ; DE=PAT No.
+; LD D,0
+; SLA E
+; RL D
+; SLA E
+; RL D ; DE=PAT*16/4
+;; SLA E
+;; RL D ; DE=PAT*16/2
+;; SLA E
+;; RL D ; DE=PAT*16
+; LD HL,CCLTBL
+; ADD HL,DE ;PATTERN COLOR ADDRESS
+; EX AF,AF' ; A=FLAG / A'=PAT No.
+; AND BIT_EC ; A=EC bit
+; LD E,A ; C=EC bit
+;;
+;;--WRITE TO SPRCOL (RAM)
+; LD B,16
+;SPCMAK1: ;
+; LD A,(HL)
+; INC HL
+;; AND 15 ; TEST
+; OR E ; A=COLOR OR EC
+; EXX ; HL=SPRCOL / B=MAIN COUNTER
+; LD (HL),A
+; INC HL
+; EXX ; HL'=SPRCOL / B'=MAIN COUNTER
+; DJNZ SPCMAK1
+; EXX ; HL=SPRCOL / B=MAIN COUNTER
+; DJNZ SPCMAKL
+; RET
+;#ELSE ;SPRCOL_USE_RAM_BUFFER
 ;
-SPCMAKE: ;
+;================================
+;--- write SPRITE COLOR TABLE to VRAM
+;================================
+;  IN: C=VRAM PORT
+;      SPRATR + CCLTBL -> VRAM SPRCOL
+;
+SPCTVRM: ;
+ LD A,C ; A=PORT
+ EXX ; C'=PORT
+ LD C,A ; C=PORT
  LD B,32
-; LD IX,SPRATB
- LD IX,SPRATR
- LD HL,SPRCOL
+ LD HL,SPRATR
 ;--COL LOOP
-SPCLLP: ;
+SPCTVL: ;
 ;--GET FLAG & PAT No.
- LD E,(IX+2) ;E=PAT No.
- LD D,(IX+3) ;D=FLAG
- INC IX
- INC IX
- INC IX
- INC IX ;IX+=4
+ INC HL
+ INC HL
+ LD E,(HL) ;E=(HL+2) PAT No.
+ INC HL
+ LD D,(HL) ;D=(HL+3) FLAG
+ INC HL
  LD A,D ;A=FLAG
  AND BIT_ND
- JR Z,SPCMK0
+ JR Z,SPCTV0
 ;--SKIP (CLEAR)
- LD D,BIT_IC
- LD A,16
-SPCSKL: ;
- LD (HL),D
- INC HL
- DEC A
- JR NZ,SPCSKL
- DJNZ SPCLLP
+ LD A,BIT_IC
+ LD D,16
+SPCCVL: ;
+ OUT (C),A
+ DEC D
+ JR NZ,SPCCVL
+ DJNZ SPCTVL
  RET
 ;
 ;--CALC COLOR SOURCE ADDRESS
-SPCMK0: ;
+SPCTV0: ;
  LD A,D ; A=FLAG
  EX AF,AF' ; A'=FLAG
  LD A,E ; A=PAT No.
- EXX ; HL'=SPRCOL / B'=MAIN COUNTER
+ EXX ; HL'=SPRATR / B'=MAIN COUNTER / C'=PORT / C=PORT
  LD E,A ; DE=PAT No.
  LD D,0
  SLA E
@@ -381,23 +452,21 @@ SPCMK0: ;
  ADD HL,DE ;PATTERN COLOR ADDRESS
  EX AF,AF' ; A=FLAG / A'=PAT No.
  AND BIT_EC ; A=EC bit
- LD C,A ; C=EC bit
+ LD E,A ; C=EC bit
 ;
 ;--WRITE TO SPRCOL (RAM)
  LD B,16
-SPCLL2: ;
+SPCTV1: ;
  LD A,(HL)
  INC HL
 ; AND 15 ; TEST
- OR C ; A=COLOR OR EC
- EXX ; HL=SPRCOL / B=MAIN COUNTER
- LD (HL),A
- INC HL
- EXX ; HL'=SPRCOL / B'=MAIN COUNTER
- DJNZ SPCLL2
- EXX ; HL=SPRCOL / B=MAIN COUNTER
- DJNZ SPCLLP
+ OR E ; A=COLOR OR EC
+ OUT (C),A
+ DJNZ SPCTV1
+ EXX ; HL=SPRATR / B=MAIN COUNTER / C=PORT / C'=PORT
+ DJNZ SPCTVL
  RET
+;#ENDIFE ;SPRCOL_USE_RAM_BUFFER
 ;
 ;================================
 ;--- WRITE TO VRAM (SPRITE COLOR TABLE)
@@ -407,27 +476,24 @@ SPRVRMT: ;
  LD HL,(ATRBAS) ;sprite atr.
  LD DE,-SPCOFS ;-512
  ADD HL,DE
-;#IF 1
  EX DE,HL
-;#ELSE
-; PUSH HL ;(SP) = SPRATR-512 = SPRCOL
-; CALL WAITCMD ;VDPºÏÝÄÞ ¼­³Ø®³ÏÁ
-;; Not required VSYNC WAIT because flip is used --> CALL WAIT_VR ;wait v-sync
-; POP DE ;DE = SPRATR-512 = SPRCOL
-;#ENDIF
+;
  DI
  CALL VSETWRT
  DEC C
 ;
- LD HL,SPRCOL
- LD B,0
- OTIR ;OTIR=21state < 29state(TMS9918 VRAM access limit)
- LD B,0
- OTIR ;512 bytes
+;#IF SPRCOL_USE_RAM_BUFFER
+; LD HL,SPRCOL
+; LD B,0
+; OTIR ;OTIR=21state < 29state(TMS9918 VRAM access limit)
+; LD B,0
+; OTIR ;512 bytes
+;#ELSE ;SPRCOL_USE_RAM_BUFFER
+ CALL SPCTVRM ;MAKE SPRCOL ENTRY & WRITE to VRAM
+;#ENDIF ;SPRCOL_USE_RAM_BUFFER
 ;
 ;--- WRITE TO VRAM (SPRITE PATTERN TABLE)
-;
-; LD HL,SPRATR
+ LD HL,SPRATR
  LD B,SPRATS ;4*32
  OTIR
 ;
@@ -436,10 +502,9 @@ SPRVRMT: ;
 ;
  RET
 ;
-;
 ;================================
 ;--- SET/RESET SPRITE V INTERRUPT ----
-;  IN: U=USR(1)     ... SET VSYNC IMMIDIATE DRAW MODE (SLOW)
+;  IN: U=USR(1)     ... SET VSYNC IMMEDIATE DRAW MODE (SLOW)
 ;      U=USR(2)     ... SET VSYNC LATE DRAW MODE (FAST)
 ;      U=USR(OTHER) ... REMOVE VSYNC MODE (TOO FAST)
 ;================================
@@ -547,12 +612,12 @@ SPRINTR0: ;
  RLCA
  JP C,SPRINRSE ;SKIP
 ;
-;--- FLICKER
- CALL SPRFLIK
-;-- MAKE COLOR TABLE
- CALL SPCMAKE
-;--- WRITE TO VRAM (SPRITE COLOR TABLE BACK BUFFER)
- CALL SPRVRMT
+;
+ CALL SPRFLIK ;FLICKER
+;#IF SPRCOL_USE_RAM_BUFFER
+; CALL SPCMAKE ;MAKE COLOR TABLE
+;#ENDIF ;SPRCOL_USE_RAM_BUFFER
+ CALL SPRVRMT ;WRITE to VRAM
 ;
 ;-- END HOOK
 SPRINRSE: ;
@@ -595,7 +660,7 @@ REVATRBAS: ;
 ;
 ;================================
 ;--- WORK AREA ---
-SSYNCMD: DB SSYNCMD0 ; VSYNC MODE 0=NO USE / 1=IMMIDIATE / 2=LATE
+SSYNCMD: DB SSYNCMD0 ;VSYNC MODE: 0=NO USE / 1=IMMEDIATE / 2=LATE
 HTIMIB: DB 0,0,0,0,0 ;H.TIMI backup
 SPRINTD: DB 1 ; disable SPRITE interrupt rutine
 SPRINTW: DB 0 ; bACK buffer is written
@@ -612,7 +677,9 @@ SPRATB: DS SPRATS ; SPRITE ATTRIBUTE WORK BUFFER 4*32
 ATRBASA: DW 7400H ; do set (ATRBAS)-512
 ATRBASB: DW 7000H ; do set (ATRBAS)-512 Back buffer
 ;
-SPRCOL: DS SPRCLS ; SPRITE COLOR TABLE for VRAM (16*32)
+;#IF SPRCOL_USE_RAM_BUFFER
+;SPRCOL: DS SPRCLS ; SPRITE COLOR TABLE for VRAM (16*32)
+;#ENDIF ;SPRCOL_USE_RAM_BUFFER
 SPRATR: DS SPRATS ; SPRITE ATTRIBUTE TABLE for VRAM (4*32)
 ;
 

@@ -95,6 +95,13 @@ WAITVDPC:	;
 ;	DB	0	;ARGUMENT (R#45)
 ;	DB	0	;OPERATION (R#46)
 ;	-- 9 bytes
+;   OR
+;	DW	0,0	;SX,SY (R#32)
+;	DW	0,0	;DX,DY (R#36)
+;	DW	0,0	;NX,NY (R#40)
+;	DW	0	;COLOR (R#44) + ARGUMENT (R#45)*256
+;	DW	0	;OPERATION (R#46)
+;	-- 10 bytes
 ;================================
 VDPCMDD:	;
 	CALL	COPYPRM
@@ -111,6 +118,13 @@ VDPCMDD:	;
 ;	DB	0	;ARGUMENT (R#45)
 ;	DB	0	;OPERATION (R#46)
 ;	-- 9 bytes
+;   OR
+;	DW	0,0	;SX,SY (R#32)
+;	DW	0,0	;DX,DY (R#36)
+;	DW	0,0	;NX,NY (R#40)
+;	DW	0	;COLOR (R#44) + ARGUMENT (R#45)*256
+;	DW	0	;OPERATION (R#46)
+;	-- 10 bytes
 ;
 ;	arg=0 ÃÞ nx,ny Ê Ï²Å½ÃÞÓ ok
 ;	sy,dy Ê active page É ´²·®³ ¦ ³¹Ù
