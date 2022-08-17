@@ -16,10 +16,12 @@ Please handle with care.
 VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に収まらない為、ダブルバッファを使用して書き込んだ後に表示をスワップしています。
 
 1) KUONAI.BASはメインループで点滅並び替え実行
-2) KUANNAIV.BASはVSYNCで点滅並び替え実行
+2) KUANNAIV.BASはVSYNCで点滅並び替え実行、メインループからも書き込み
+3) KUANNAIV.BASはVSYNCで点滅並び替え実行、1フレーム表示が遅れるがメインループからは書き込まない
 
 1は点滅が粗い代わりに軽いです。  
-2は点滅が細かい代わりに嘘みたいに重いです。(メインループとVSYNCで並び替え&書き込みを行うため)
+2は点滅が細かい代わりに重いです。(メインループとVSYNCで並び替え&書き込みを行うため)
+3は1フレーム遅れる代わりに2よりも速度が少し早くなります。
 
 BASICでの処理の遅さ対策で作った2ですが、デメリットが多いので、1を使用した方が良さそうです。  
 また、管理するスプライトの範囲を32個全部ではなく、半分などにすればもっと軽くなりそうです。  
@@ -29,7 +31,8 @@ BASICでの処理の遅さ対策で作った2ですが、デメリットが多�
 |FILE|DESC   |
 |---|---|
 | [KUONAI.BAS](KUONAI.BAS)| FLICK SPRITE IMMIDIATE MODE (Blinking is rough but light) |
-| [KUONAIV.BAS](KUONAIV.BAS)| FLICK SPRITE H.TIMI MODE (Blinking is fine but heavy) |
+| [KUONAIV1.BAS](KUONAIV1.BAS)| FLICK SPRITE H.TIMI MODE 1 (Blinking is fine but very heavy) |
+| [KUONAIV2.BAS](KUONAIV2.BAS)| FLICK SPRITE H.TIMI MODE 2 (Blinking is fine but heavy) |
 | [SRX2.BIN](../../../asm)| [SRX2.ASM](../../../asm/SRX2.ASM) がソースファイル |
 
 ### スプライト管理機能
