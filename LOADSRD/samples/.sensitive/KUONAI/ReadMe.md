@@ -38,11 +38,13 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 | [TESTV2.BAS](TESTV2.BAS)| FLICK SPRITE H.TIMI MODE 2 (Blinking is fine but heavy) |
 | [SRX2.BIN](../../../asm)| [../../../asm/SRX2.ASM](../../../asm/SRX2.ASM) がソースファイル |
 
-## LOADSRD.BIN エントリー
+## SRX2.BINエントリー
+
+簡易スプライトエンジンやBGM DRIVERを組み込んであるため、機械語プログラムの先頭は$D000ではなく$COOOからになります。
 
 > **Warning** 使用上の注意
 >
-> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
+> ***&hB000～&hBFFFを画像ロード時のディスクバッファとして使用します。***  
 >
 > プログラム本体は&D000～&hDFFFを使用します。  
 > 環境によってはメモリが足りないケースが多いかもしれません。   
@@ -53,51 +55,20 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 
 |宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
 |---|---|---|---|---|---|
-| DEFUSR1=&HD000| U$=USR1("FILENAME.EXT")|$D000| LOAD_SRD | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
-| DEFUSR2=&HD003| U=USR2(VARPTR(PL(0)))  |$D003| SET_PLT  | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
-
-## SRX.BIN エントリー
-
-> **Warning** 使用上の注意
->
-> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
->
-> プログラム本体は&D000～&hDFFFを使用します。  
-> 環境によってはメモリが足りないケースが多いかもしれません。   
-> 漢字BASICモードではまず暴走すると思います。
->
-> 使用する際は、```CLEAR 100,&hB000``` 等で初期化をしてください。   
-> また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
-
-|宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
-|---|---|---|---|---|---|
-| DEFUSR1=&HD000| U$=USR1("FILENAME.EXT")|$D000| LOAD_SRD | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
-| DEFUSR2=&HD003| U=USR2(VARPTR(PL(0)))  |$D003| SET_PLT  | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
-| DEFUSR3=&HD006| U=USR3(VARPTR(SR(0)))  |$D006| SPR_TIME | SPRCLOCK.ASM | スプライト#0-7のパターンへ現在の時間を書き込む<br>(HH:MM:SS形式)(16x16モード用=パターン番号はの4倍数)
-
-## SRX2.BIN エントリー
-
-> **Warning** 使用上の注意
->
-> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
->
-> プログラム本体は&D000～&hDFFFを使用します。  
-> 環境によってはメモリが足りないケースが多いかもしれません。   
-> 漢字BASICモードではまず暴走すると思います。
->
-> 使用する際は、```CLEAR 100,&hB000``` 等で初期化をしてください。   
-> また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
-
-|宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
-|---|---|---|---|---|---|
-| DEFUSR1=&HD000| U$=USR1("FILENAME.EXT")|$D000| LOAD_SRD | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
-| DEFUSR2=&HD003| U=USR2(VARPTR(PL(0)))  |$D003| SET_PLT  | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
-| DEFUSR3=&HD006| U=USR3(VARPTR(SR(0)))  |$D006| SPR_TIME | SPRCLOC2.ASM | INTスプライト配列(8個)のパターン番号に時刻を反映。0=”"、1～10=数字の"0"～"9"、11=":"
-| DEFUSR4=&HD009| U=USR4(VARPTR(CM(0)))  |$D009| VDPCMD   | VDPCOMAN.ASM | VDPコマンドを実行。配列の中身はVDPコマンドリファレンス参照。（NX、NYがマイナスの場合や範囲外などの自動補正あり）
-| DEFUSR5=&HD00C| U=USR5(0)              |$D00C| WAITVDPC | VDPCOMAN.ASM | VDPコマンドの実行終了まで待つ
-| DEFUSR6=&HD00F| U=USR6(VARPTR(SR(0)))  |$D00F| SPR_SET  | SPR_SET.ASM  | [スプライト管理配列](#スプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
-| DEFUSR7=&HD012| U=USR7(VARPTR(SC(0)))  |$D012| SPC_SET  | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
-| DEFUSR8=&HD015| U=USR8(-1)             |$D015| SPR_INT  | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
+| DEFUSR1=&HC000| U$=USR1("FILENAME.EXT")|$C000| LOAD_SRD    | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
+| DEFUSR2=&HC003| U=USR2(VARPTR(PL(0)))  |$C003| SET_PLT     | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
+| DEFUSR3=&HC006| U=USR3(VARPTR(SR(0)))  |$C006| SPR_TIME    | SPRCLOC2.ASM | INTスプライト配列(8個)のパターン番号に時刻を反映。0=”"、1～10=数字の"0"～"9"、11=":"
+| DEFUSR4=&HC009| U=USR4(VARPTR(CM(0)))  |$D009| VDPCMD      | VDPCOMAN.ASM | VDPコマンドを実行。配列の中身はVDPコマンドリファレンス参照。（NX、NYがマイナスの場合や範囲外などの自動補正あり）
+| DEFUSR5=&HC00C| U=USR5(0)              |$D00C| WAITVDPC    | VDPCOMAN.ASM | VDPコマンドの実行終了まで待つ
+| DEFUSR6=&HC00F| U=USR6(VARPTR(SR(0)))  |$D00F| SPR_SET     | SPR_SET.ASM  | [スプライト管理配列](#SRX2.BINスプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
+| DEFUSR7=&HC012| U=USR7(VARPTR(SC(0)))  |$D012| SPC_SET     | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
+| DEFUSR8=&HC015| U=USR8(-1)             |$D015| SPR_INT     | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
+| DEFUSR9=&HC018| U=USR9(1)              |$C018| BGM_INIT    | BGM.ASM      | HRA BGM DRIVER 初期化/終了。パラメータが1なら開始（割り込み開始）、それ以外なら終了（割り込み開放）
+| DEFUSR9=&HC01B| U=USR9(&HB000)         |$C01B| BGM_PLAY    | BGM.ASM      | HRA BGM DRIVER 指定したアドレスのBGMデータを演奏する
+| DEFUSR9=&HC01E| U=USR9(0)              |$C01E| BGM_STOP    | BGM.ASM      | HRA BGM DRIVER BGMの演奏を停止する
+| DEFUSR9=&HC021| U=USR9(&HBF00)         |$C021| BGM_SE      | BGM.ASM      | HRA BGM DRIVER 指定したアドレスの効果音を再生する
+| DEFUSR9=&HC024| U=USR9(10)             |$C024| BGM_FADEOUT | BGM.ASM      | HRA BGM DRIVER フェードアウト開始。1～255を指定する。指定した値*15フレームでフェードアウトが終わる
+| DEFUSR9=&HC027| U=USR9(0)              |$C027| BGM_IS_PLAY | BGM.ASM      | HRA BGM DRIVER 演奏中なら0以外が返ってくる
 
 > **Warning**  
 > $D015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
@@ -105,7 +76,7 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 > タイマーフック```H.TIMI```を使用しますので機械語領域が破損した場合に暴走します。
 
 
-## ```SRX2.BIN``` スプライト管理機能
+## ```SRX2.BIN```スプライト管理機能
 
 1) 16x16サイズスプライトモード専用
 2) 実質2枚重ね合わせスプライト専用
@@ -134,7 +105,7 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 [^8]: 16x16スプライトモード専用なので、```16バイト*64個```のデータ
 
 
-## ```SRX2.BIN``` スプライト管理配列
+## ```SRX2.BIN```スプライト管理配列
 
 ```DIM SR(3,31)```または```DIM SR(8*32-1)```のように宣言
 
