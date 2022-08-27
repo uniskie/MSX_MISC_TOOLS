@@ -14,7 +14,7 @@ GETINT: ;
 ; <--
 ; --> √∏ › … ‘ÿ∂¿ : hl=(hl+2)
 		PUSH	HL
-		POP		IX				;IX := string descriptor
+		POP		IX				;(IX+2) = INT VALUE
 		LD		L,(IX+2)		;get value(low)
 		LD		H,(IX+3)		;get value(high)
 ; <--
