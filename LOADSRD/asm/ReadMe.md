@@ -33,7 +33,7 @@
 | [SPRCLOCK.ASM](SPRCLOCK.ASM) | × | ● | × | スプライト#0-7のパターンへ現在の時間を書き込む<br>(HH:MM:SS形式)(16x16モード用=パターン番号はの4倍数) |
 | [SPRCLOC2.ASM](SPRCLOC2.ASM) | × | × | ● | 渡した8バイト配列にHH:MM:SS形式で時刻を返す<BR>0=" "(空白)、1～10=数字の0～9、11=":"(区切り文字) |
 | [SPR_SET.ASM](SPR_SET.ASM)   | × | × | ● | 符号付16ビット*4でワンセット(Y、X、パターン番号、フラグ)が32個並んだ配列を渡してスプライトを表示する。<BR>優先度シャッフル、自動アニメ、左見切れ対策等あり<BR>座標は15.1固定小数点数。実際に表示される位置は(X/2,Y/2) |
-| [BGM.ASM](BGM.ASM)           | × | × | ● | HRA BGM DRIVER |
+| [BGM.ASM](BGM.ASM)           | × | × | ● | [HRA BGM DRIVER](https://github.com/hra1129/bgm_driver)を呼び出す |
 
 ### その他ファイル(共有ルーチン等)
 
@@ -41,8 +41,8 @@
 |---|---|
 | [USR_FUNC.ASM](USR_FUNC.ASM) | USR()関数で呼び出されたときに使う処理 |
 | [VRAM.ASM](VRAM.ASM)         | VRAM書き込み開始やスプライトアトリビュートテーブルの設定など |
-| [BGMDRV.ASM](BGMDRV.ASM)     | hra!さんのPSG用BGMドライバー 本体 |
-| [BGMDRV_D.ASM](BGMDRV_D.ASM) | hra!さんのPSG用BGMドライバー 定義など |
+| [BGMDRV.ASM](BGMDRV.ASM)     | [hra!さんのPSG用BGMドライバー](https://github.com/hra1129/bgm_driver)のTNIASMポート (本体) |
+| [BGMDRV_D.ASM](BGMDRV_D.ASM) | [hra!さんのPSG用BGMドライバー](https://github.com/hra1129/bgm_driver)のTNIASMポート (定義など) |
 
 ## LOADSRD.BINエントリー
 
@@ -106,12 +106,14 @@
 | DEFUSR6=&HC00F| U=USR6(VARPTR(SR(0)))  |$D00F| SPR_SET     | SPR_SET.ASM  | [スプライト管理配列](#srx2binスプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
 | DEFUSR7=&HC012| U=USR7(VARPTR(SC(0)))  |$D012| SPC_SET     | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
 | DEFUSR8=&HC015| U=USR8(-1)             |$D015| SPR_INT     | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
-| DEFUSR9=&HC018| U=USR9(1)              |$C018| BGM_INIT    | BGM.ASM      | HRA BGM DRIVER 初期化/終了。パラメータが1なら開始（割り込み開始）、それ以外なら終了（割り込み開放）
-| DEFUSR9=&HC01B| U=USR9(&HB000)         |$C01B| BGM_PLAY    | BGM.ASM      | HRA BGM DRIVER 指定したアドレスのBGMデータを演奏する
-| DEFUSR9=&HC01E| U=USR9(0)              |$C01E| BGM_STOP    | BGM.ASM      | HRA BGM DRIVER BGMの演奏を停止する
-| DEFUSR9=&HC021| U=USR9(&HBF00)         |$C021| BGM_SE      | BGM.ASM      | HRA BGM DRIVER 指定したアドレスの効果音を再生する
-| DEFUSR9=&HC024| U=USR9(10)             |$C024| BGM_FADEOUT | BGM.ASM      | HRA BGM DRIVER フェードアウト開始。1～255を指定する。指定した値*15フレームでフェードアウトが終わる
-| DEFUSR9=&HC027| U=USR9(0)              |$C027| BGM_IS_PLAY | BGM.ASM      | HRA BGM DRIVER 演奏中なら0以外が返ってくる
+| DEFUSR9=&HC018| U=USR9(1)              |$C018| BGM_INIT    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 初期化/終了。パラメータが1なら開始（割り込み開始）、それ以外なら終了（割り込み開放）
+| DEFUSR9=&HC01B| U=USR9(&HB000)         |$C01B| BGM_PLAY    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 指定したアドレスのBGMデータを演奏する
+| DEFUSR9=&HC01E| U=USR9(0)              |$C01E| BGM_STOP    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] BGMの演奏を停止する
+| DEFUSR9=&HC021| U=USR9(&HBF00)         |$C021| BGM_SE      | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 指定したアドレスの効果音を再生する
+| DEFUSR9=&HC024| U=USR9(10)             |$C024| BGM_FADEOUT | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] フェードアウト開始。1～255を指定する。指定した値*15フレームでフェードアウトが終わる
+| DEFUSR9=&HC027| U=USR9(0)              |$C027| BGM_IS_PLAY | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 演奏中なら0以外が返ってくる
+
+[HRA_BGM_DRIVER]:https://github.com/hra1129/bgm_driver
 
 > **Warning**  
 > $D015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
