@@ -158,7 +158,6 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 |-------------|---
 | [samples     ](samples    ) |グラフィックデータサンプル
 | [asm         ](asm        ) |機械語プログラムのアセンブラソース([TNIASM][TNIASM]用)
-| [asf         ](asf        ) |機械語プログラムのアセンブラソース(MSX2 SIMPLE ASSEMBLER[^MSX2ASM]用)
 | [SRX.BIN     ](SRX.BIN    ) |機械語プログラムバイナリ(グラフィックローダー+VDPコマンド+スプライト時計)
 | [SRX2.BIN    ](SRX2.BIN    ) |機械語プログラムバイナリ(グラフィックローダー+VDPコマンド+スプライト時計+スプライトエンジン試作)
 | [etc/CLS.BAS ](etc/CLS.BAS) |PAGE0と1を＄CCで埋める

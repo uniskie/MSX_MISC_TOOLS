@@ -6,7 +6,7 @@
 ;		bgmdriver_initialize
 ;		bgmdriver_play					;[HL]...DATA
 ;		bgmdriver_stop
-;		bgmdriver_check_playing			;Z ... STOP
+;		bgmdriver_check_playing			;Z ... Z=STOP / NZ=PLAYING
 ;		bgmdriver_fadeout				;A ... SPEED
 ;		bgmdriver_play_sound_effect		;[HL] ... DATA
 ;		bgmdriver_mute_psg
@@ -118,9 +118,10 @@ BGM_IS_PLAY:
 		PUSH	IX	;(IX+2) = INT VALUE
 		CALL	bgmdriver_check_playing
 		LD		HL,0
-		JR		NZ,BGM_IS_STOP
+		JR		Z,BGM_IS_STOP
 		INC		HL
 BGM_IS_STOP:
+		POP		IX
 		LD		(IX+2),L
 		LD		(IX+3),H
 		RET
