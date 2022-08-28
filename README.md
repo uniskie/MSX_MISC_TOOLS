@@ -4,6 +4,7 @@
 
 |ツール|説明|
 |---|---|
+| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor 用 MSX Bitmap Palette|
 | [CPU_MODE_FOR_BASIC](CPU_MODE_FOR_BASIC) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル
 | [GSRLE             ](GSRLE             ) |グラフサウルス圧縮ツール (派生型ランレングス圧縮) 
 | [LOADSRD           ](LOADSRD           ) |BSAVE画像とグラフサウルス画像を読み込み表示 (グラフサウルス圧縮対応) 
