@@ -72,6 +72,11 @@ VRAMへの書き込みはターボRのVDPウェイトが原因でVBLANK期間に
 
 [HRA_BGM_DRIVER]:https://github.com/hra1129/bgm_driver
 
+BGMコンパイラにBSAVE出力機能を付けたものがこちら   
+[bgm_driver_mod](https://github.com/uniskie/bgm_driver_mod/tree/mod)
+
+
+
 > **Warning**  
 > $D015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
 > プログラム終了時に開放を忘れないでください。  
