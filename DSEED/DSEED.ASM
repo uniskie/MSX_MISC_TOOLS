@@ -45,6 +45,7 @@ DS_INIT:
 ;======================================
 DS_MAIN:
 		CALL	STAR_MOVE
+;		CALL	WAIT_VDPC
 		RET
 		
 ;======================================
@@ -136,6 +137,8 @@ STAR_MOVE_L:
 		AND		0FH
 		JR		NZ,STAR_MOVE_V
 
+		CALL	WAIT_VDPC
+		XOR		A
 		CALL	DS_PSET				;PSET(X,Y,0),0
 
 STAR_MOVE_V:
@@ -179,7 +182,6 @@ STAR_MOVE_NX:
 		ADD		IX,DE				;IX=IX+STAR_STRUCT_SIZE
 		DJNZ	STAR_MOVE_L
 
-		CALL	WAIT_VDPC
 		RET
 
 ;======================================
