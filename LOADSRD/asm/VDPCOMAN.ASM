@@ -23,9 +23,9 @@ CMR_LMCM:		EQU		0A0H	;Logic VRAM->CPU
 CMR_LMMM:		EQU		090H	;Logic VRAM->VRAM
 CMR_LMMV:		EQU		080H	;Logic fill VRAM
 CMR_LINE:		EQU		070H	;Draw Line
-;CMR_SRCH:		EQU		060H	;Search Color
-;CMR_PSET:		EQU		050H	;Write Pixel
-;CMRPOINT:		EQU		040H	;Read Pixel
+CMR_SRCH:		EQU		060H	;Search Color
+CMR_PSET:		EQU		050H	;Write Pixel
+CMRPOINT:		EQU		040H	;Read Pixel
 CMR_STOP:		EQU		000H	;Stop Command
 
 ; (Logical Operation Code)
@@ -54,8 +54,8 @@ LOG_TNOT:		EQU		12
 ;			   1:(NX < NY) ÀÃÅ¶Þ
 ARG_DIY:		EQU		08H
 ARG_DIX:		EQU		04H
-;ARG_EQ:		EQU		02H
-;ARG_MAJ:		EQU		01H
+ARG_EQ:		EQU		02H
+ARG_MAJ:		EQU		01H
 
 ;--- work area ---
 
@@ -139,7 +139,8 @@ VDPCMD:
 
 ;================================
 ;--- exec. vdp command
-; HL=ADDRESS (CMD_DAT etc.)
+; IN:	HL=ADDRESS (CMD_DAT etc.)
+; USE:	AF,BC,HL
 ;================================
 VDPCOMAND:
 		LD		A,(VDPIOW)
@@ -162,9 +163,10 @@ VDPCOMAND:
 
 ;================================
 ;--- wait until vdp-command finish
+; USE: AF,AF',C
 ;================================
 WAITCMD:
-		LD		A,(VDPIOW)
+		LD		A,(VDPIOR)
 		LD		C,A
 		INC		C
 WAITCMD2:
@@ -182,14 +184,15 @@ WAITCMD_:
 		LD		A,15+80H
 		OUT		(C),A
 		EI						; use EI
-		EX		AF,AF'			; use EI
+		EX		AF,AF'
 		JR		C,WAITCMD2		; use EI
 ;		JR		C,WAITCMD_		; no EI
 		RET
 
 ;================================
-;--- modify nx,ny parameter
+;--- modify nx,ny parameter for USR()
 ; OUT:	Cy = cancel command
+; USE:	AF,HL,DE,BC
 ;================================
 M_VDPC:
 ;--- mofidy sx,dx minus
