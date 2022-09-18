@@ -1,0 +1,126 @@
+;[gain=1.0 name=DSEED_5 duration=300s fade=5s cpu=0 lpf=1]
+; The line above defines extra options, works only on msxplay.com 
+; name    : Name of mml, use as the base download filename.
+; gain    : Volume gain. (default: 1.0)
+; duration: Length of the song. (default: 300s)
+; fade    : Time of fading out. (default: 5s)
+; cpu     : CPU speed ratio. 0:auto, 1:3.58MHz (default: 0)
+; lpf     : Low-pass filter. 0:off, 1:on (default: 0)
+#opll_mode 1
+#tempo 154
+#title {"Dangerous Seed (MD) Jupiter (Stage 6&10) | YM2413+PSG | uniskie"}
+
+;@v15 = { ; Brass
+;;       TL FB
+;         0, 2,
+;; AR DR SL RR KL MT AM VB EG KR DT
+;  10, 9, 2, 1, 0, 1, 0, 0, 0, 0, 0,
+;  13, 7, 0, 7, 0, 6, 0, 0, 1, 0, 1 }
+
+@v15 = { ; Brass
+;       TL FB
+         0, 0,
+; AR DR SL RR KL MT AM VB EG KR DT
+  10, 9, 2, 1, 0, 1, 0, 0, 0, 0, 0,
+  13, 7, 0, 7, 0, 6, 0, 0, 1, 0, 1 }
+
+;@v15 = { ; Brass
+;;       TL FB
+;        10, 7,
+;; AR DR SL RR KL MT AM VB EG KR DT
+;   9, 8, 1, 1, 0, 1, 0, 0, 0, 0, 0,
+;  12, 7, 0, 2, 0, 3, 1, 0, 1, 0, 1 }
+
+@e1 = {1,0,cfed:50 [d:3.c:3.b:3.c:3]0 }
+@e10 = {1,0,fe.b=8 }
+
+;9ABCDE !
+9A @15 o5 h50,1,2,-2
+9 v12 @\3
+A v10  r @\7
+9A [ l8
+9A d+2&d+eg+b >d+4<b4g+4e4
+9A >c+2.<af+& f+2.f+g
+9A g+2&g+g+f+g+ e4g+4b4>d+4
+9A e2.e16d+16d16c+16& c+2.<b>c+
+9A d+2&d+<b4>c+ d+1&
+9A d+4c+d+e4f+4 c+4.g+4.f+e
+9A d+4.<b&b2& b2>c+d+ef+
+9A d+4.g+&g+2& g+2.<c+d
+9A ]0
+
+E @10 v12 q1sf o2 @\6
+D @13 v12 q1sf o2
+DE l16 o2 [
+DE [[c+c+c+>>c+8c+<<c+c+]3 
+DE   c+c+c+>>c+<c+c+c+c+<
+DE  [ddd>>d8d<<dd]3
+DE   ddd>>d8d<dd<
+DE ]2 
+DE [>c+c+>c+<c+<]4
+DE [bb>b<b]3 bb>bb<
+DE [a+a+>a+<a+]4
+DE [aa>a<a]3 aa>aa<
+DE [g+g+>g+<g+]4
+DE [aa>a<a]3 aa>aa<
+DE [bb>b<b]4
+DE [>cc>c<c<]3 >cc>cc<<
+DE ]0
+
+BC @10 v11 @\4 @e10
+BC l8 o5 [
+BC [
+B   [q8b b q1b 16b 16b 16q8b q1b 16q8b q1b 16b 16b 16b 16]2
+C   [q8g+g+q1g+16g+16g+16q8g+q1g+16q8g+q1g+16g+16g+16g+16]2
+B   [q8a a q1a 16a 16a 16q8a q1a 16q8a q1a 16a 16a 16a 16]2
+C   [q8f+f+q1f+16f+16f+16q8f+q1f+16q8f+q1f+16f+16f+16f+16]2
+BC ]2
+B   q8g+g+g+q1g+16q8g+g+q1g+16q8g+g+ f+f+f+q1f+16q8f+f+q1f+16q8f+f+
+C  [q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+]2
+B   q8f f f q1f 16q8f f q1f 16q8f f  e e e q1e 16q8e e q1e 16q8e e 
+C  [q8c+c+c+q1c+16q8c+c+q1c+16q8c+c+]2
+B   q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+ e e e q1e 16q8e e q1e 16q8e e
+C  <q8b b b q1b 16q8b b q1b 16q8b b >c+c+c+q1c+16q8c+c+q1c+16q8c+c+
+B   q8f+f+f+q1f+16q8f+f+q1f+16q8f+f+ g g g q1g 16q8g g q1g 16q8g g
+C  [q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+]2
+BC ]0
+
+23 v9 @e1 k4 h20,4,1,-1 @p3 @\1
+23 l1 o4 [
+2 [g+& g+ a& a]2  d+
+3 [d+& d+ e& e]2 <g+>
+2  d+ c+ c+ <b> c+ d+ d+
+3 <f+ g+ g+  f+ g+ f+ g+>
+23 ]0
+
+#macro_offset { b=0, s=20 }
+; b8,b16
+F y38,3 y22,106 ; bass-drum
+*04={hb64 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106 r8}
+*08={b64 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106}
+*16={b64 y22,94b64 y22,82b64 y22,70r64 y22,106}
+; s8,s16
+F y39,3 y23,90  ; snare,hi-hut
+F y40,2 y24,132 ; cynbal,tom-tom
+*24={sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y24,132 r8}
+*28={sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y24,132}
+*36={sm64 y24,120m64 y24,108m64 y24,96r64 y24,132}
+F v13 vh8 vs9vm12 ko
+F [
+F [[*b4*b4*b4|*b4]2 *b8*b16*b16]4 
+F [[*b4*s8r16*b16|*b4*s4]4 
+F                 *b16*b16*b8*s16*s16|*s8]2
+F                                     *s16*s16
+F ]0
+
+@e4={3,31,n31.*3.d.*1.b965.0=20}
+@e5={3,0,*3,f.*2.ed0=26}
+@e6={2,0,c8650=10}
+1 v13 o2 p26 \5
+1 [
+1 [[@4c4c4c4|c4]2 c8c16c16]4 
+1 [[@4c4@5g8.@4c16|c4@5g4]4 
+1                  c16c16c8@5g16g16|g8]2
+1                                   g16g16
+1 ]0
+

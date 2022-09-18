@@ -8,7 +8,7 @@
 		DW		ORGADR	;*BINHEAD*
 ;<-- BIN FILE HEADER <--
 
-ORGADR:	EQU		$C000
+ORGADR:	EQU		$D000
 		ORG		ORGADR
 
 ;--- jump table for USR()
