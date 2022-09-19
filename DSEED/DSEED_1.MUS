@@ -13,14 +13,14 @@
 
 @v15 = { ; E-Guiter
 ;       TL FB
-         9, 5,
+         0, 3,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
-  15, 7, 1, 7, 0, 6, 1, 0, 1, 0, 1 }
+  15, 7, 0, 7, 0, 6, 0, 0, 1, 0, 1 }
 
 @v16 = { ; Brass
 ;       TL FB
-        1, 4,
+         3, 4,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 9, 1, 1, 0, 1, 0, 0, 0, 0, 0,
   15, 7, 1, 7, 0, 2, 0, 0, 1, 0, 1 }
@@ -30,16 +30,16 @@
 
 9AB h48,1,2,-3
 9AB [
-9    o4 @15 v12 @\24
-A    o4 @15 v11 r8 @\3
-B    o5 @15 v13
+9    o4 @15 v11
+A    o4 @15 v10 r8 @\3
+B    o5 @15 v11    @\18
 9AB  [
 9AB   e1 &e4b_>c8&c8c_d8&d8e8<g8 &g1&
 9AB   g16.>f32g8f8d+8c8d8d+8f16.b32> c1& c8<a+8>c8<a+8f8c8c+8d+8
 9AB   f8d+8f16.a32a+8f8d+8a8e8 f+8e8f+8>c8d8<b8a8|g8<
 9AB  ]2
 9B                                                g8 
-9AB  @16 (
+9AB  @16
 A                                                 r8 
 9AB  [e1& e2a4e4 g1& g2>c4<g4 >d1& d2d4e4 |
 9AB   c+1& c+1<]2
