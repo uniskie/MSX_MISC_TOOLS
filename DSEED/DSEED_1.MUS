@@ -1,4 +1,4 @@
-;[gain=1.0 name=DSEED_1 duration=300s fade=5s cpu=0 lpf=1]
+;[gain=1.0 name=DSEED_1 duration=300s fade=5s cpu=0 lpf=0]
 ; The line above defines extra options, works only on msxplay.com
 ; name    : Name of mml, use as the base download filename.
 ; gain    : Volume gain. (default: 1.0)
@@ -9,62 +9,59 @@
 #opll_mode 1
 #tempo 154
 #title {"Dangerous Seed (MD) Tube (Stage 1&8) | uniskie"}
-#alloc { 0=100, 1=500,2=500,3=500, 9=500,A=500,B=500,C=500,D=500,E=500, F=1500}
+#alloc { 0=100, 1=500,2=500,3=500, 9=500,A=500,B=500,C=500,D=500,E=500, F=1700}
 
 @v15 = { ; E-Guiter
 ;       TL FB
-         0, 2,
+         9, 5,
 ; AR DR SL RR KL MT AM VB EG KR DT
-  14,14, 6, 1, 0, 3, 1, 0, 0, 0, 0,
-  15,14, 1, 4, 0, 1, 0, 0, 1, 0, 1 }
+  15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
+  15, 7, 1, 7, 0, 6, 1, 0, 1, 0, 1 }
 
 @v16 = { ; Brass
 ;       TL FB
-         5, 5,
+        1, 4,
 ; AR DR SL RR KL MT AM VB EG KR DT
-  15, 7, 1, 1, 0, 1, 0, 0, 0, 0, 0,
-  15, 7, 1, 4, 0, 2, 0, 0, 1, 0, 1 }
+  15, 9, 1, 1, 0, 1, 0, 0, 0, 0, 0,
+  15, 7, 1, 7, 0, 2, 0, 0, 1, 0, 1 }
 
 @e1 = {1,0,fed:50 [c:3.b:3.a:3.b:3]0 }
 @e2 = {1,0,fed:50 [d:3.c:3.b:3.c:3]0 }
 
-9A @15 o4 h48,1,2,4
-9 v13    @\0
-A v11 r8 @\3
-9A [
-9A [
-9A  e1 &e4b_>c8&c8c_d8&d8e8<g8 &g1&
-9A  g16.>f32g8f8d+8c8d8d+8f16.b32> c1& c8<a+8>c8<a+8f8c8c+8d+8
-9A  f8d+8f16.a32a+8f8d+8a8e8 f+8e8f+8>c8d8<b8a8|g8<
-9A ]2
-9                                               g8 
-9A @16
-A                                               r8 
-9A [e1& e2a4e4 g1& g2>c4<g4 >d1& d2d4e4 |
-9A  c+1& c+1<]2
-9A  f4.f+2&f+8g4& g8
-9                   g+2&g+8< 
-A                   g+2< 
-9A <
-9A @15
-A  r8
-9A ]0
+9AB h48,1,2,-3
+9AB [
+9    o4 @15 v12 @\24
+A    o4 @15 v11 r8 @\3
+B    o5 @15 v13
+9AB  [
+9AB   e1 &e4b_>c8&c8c_d8&d8e8<g8 &g1&
+9AB   g16.>f32g8f8d+8c8d8d+8f16.b32> c1& c8<a+8>c8<a+8f8c8c+8d+8
+9AB   f8d+8f16.a32a+8f8d+8a8e8 f+8e8f+8>c8d8<b8a8|g8<
+9AB  ]2
+9B                                                g8 
+9AB  @16 (
+A                                                 r8 
+9AB  [e1& e2a4e4 g1& g2>c4<g4 >d1& d2d4e4 |
+9AB   c+1& c+1<]2
+9AB   f4.f+2&f+8g4& g8
+9B                   g+2&g+8< 
+A                    g+2< 
+9AB ]0
 
-B v11 @10 q1   o2 
-C v10 @13 q1so o2
-BC [ l16
-BC [[aaaa]8 [g+g+g+g+]8 [f+f+f+f+]8 [dddd]3
-BC  >d<ddd [eeee]2 eeee a>cde<
-BC ]2
-BC [[frff>fr<ff]4 [g+rg+g+>g+r<g+g+]4
-BC  [eree>er<ee]4 | [araa>a<|raa]3
-BC                           aaa  aa>e<aa>e<aa
-BC ]2
-BC  a+ra+ra+ra+r brbrbrbr >crcrcrcr c+rc+rc+c+c+c+<
-BC ]0
+C v12 @13 q1so o2
+C [ l16
+C [[aaaa]8 [g+g+g+g+]8 [f+f+f+f+]8 [dddd]3
+C  >d<ddd [eeee]2 eeee a>cde<
+C ]2
+C [[frff>fr<ff]4 [g+rg+g+>g+r<g+g+]4
+C  [eree>er<ee]4 | [araa>a<|raa]3
+C                           aaa  aa>e<aa>e<aa
+C ]2
+C  a+ra+ra+ra+r brbrbrbr >crcrcrcr c+rc+rc+c+c+c+<
+C ]0
 
 1 v8
-2 v7 r8 @\3 
+2 v6 r8 @\3 
 12 o4 @e1 k4 h58,1,3,1 @p3
 12 [ l16 hf
 12 [<aa>eeaaeeaa>eeaa>ee aaee<aaee<aaeeaaee
@@ -124,15 +121,15 @@ E ]0
 
 #macro_offset { b=0, s=20, m=21, n=22, l=23 }
 ; b8,b16
-F y38,3 y22,106 ; bass-drum
-*08={b64 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106}
-*16={b64 y22,94b64 y22,82b64 y22,70r64 y22,106}
+F y38,35 y22,106 ; bass-drum (y38,32+3 -> sustain on)
+*08={b64 vb-1 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106 vb+1}
+*16={b64 vb-1 y22,94b64 y22,82r64 y22,70r64 y22,106 vb+1}
 ; s8,s16
-F y39,3 y23,90  ; snare,hi-hut
-F y40,2 y24,132 ; cynbal,tom-tom
-*28={sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y24,132}
-*36={sm64 y24,120m64 y24,108m64 y24,96r64 y24,132}
-F v11 vh8 vs8vm11 kf
+F y39,3  y23,130 ; snare,hi-hut (y39,32+3 -> sustain on)
+F y40,34 y24,142 ; cynbal,tom-tom (y40,32+2 -> sustain on)
+*28={y40,34sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y40,2y24,142}
+*36={y40,34sm64 y24,120m64 y24,108m64 y24,96r64 y40,2y24,142}
+F v13 vh9 vs9vm12 kf
 F [ 
 F [[[*b8h16h16*s8h16h16]3|*b8*b16*s16*s8h16h16]4 
 F                         *b16*b16*s16*b16*s16*b16*s16*s16 
@@ -146,10 +143,10 @@ F  *b16h16*s16*b16*s16|*s16*s16*b16]2
 F                    *b16*s16*s16 
 F ]0 
 
-@e4={3,31,*3.d.*1.ba865.0=20}
-@e5={3,1,*3,f.n0.*2.ee.0=20}
-@e6={2,0,c8520=6}
-3 v12 o2 \8
+@e4={3,31,*3.c.*1.975.0=20}
+@e5={2,1,f.n0.e0=24}
+@e6={2,0,b8520=6}
+3 v13 o2 \8 p24
 3 [ l16 
 3 [[[@4c8@6a@6a@5f8@6a@6a]3|@4c8@4c@5f@5f8@6a@6a]4 
 3                           @4c@4c@5f@4c@5f@4c@5f@5f 

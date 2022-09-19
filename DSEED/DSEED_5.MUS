@@ -1,4 +1,4 @@
-;[gain=1.0 name=DSEED_5 duration=300s fade=5s cpu=0 lpf=1]
+;[gain=1.0 name=DSEED_5 duration=300s fade=5s cpu=0 lpf=0]
 ; The line above defines extra options, works only on msxplay.com 
 ; name    : Name of mml, use as the base download filename.
 ; gain    : Volume gain. (default: 1.0)
@@ -8,7 +8,7 @@
 ; lpf     : Low-pass filter. 0:off, 1:on (default: 0)
 #opll_mode 1
 #tempo 154
-#title {"Dangerous Seed (MD) Jupiter (Stage 6&10) | YM2413+PSG | uniskie"}
+#title {"Dangerous Seed (MD) Jupiter (Stage 6&10) | uniskie"}
 
 ;@v15 = { ; Brass
 ;;       TL FB
@@ -49,7 +49,7 @@ A v10  r @\7
 9A d+4.g+&g+2& g+2.<c+d
 9A ]0
 
-E @10 v12 q1sf o2 @\6
+E @10 v13 q1sf o2 @\6
 D @13 v12 q1sf o2
 DE l16 o2 [
 DE [[c+c+c+>>c+8c+<<c+c+]3 
@@ -95,17 +95,17 @@ BC ]0
 
 #macro_offset { b=0, s=20 }
 ; b8,b16
-F y38,3 y22,106 ; bass-drum
-*04={hb64 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106 r8}
-*08={b64 y22,94b64 y22,82b64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106}
-*16={b64 y22,94b64 y22,82b64 y22,70r64 y22,106}
+F y38,35 y22,106 ; bass-drum (y38,32+3 -> sustain on)
+*04={hb64 y22,94b64 y22,82r64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106 r8}
+*08={b64 y22,94b64 y22,82r64 y22,70r64 y22,58r64 y22,46r64 y22,34r64 y22,22r64 y22,106}
+*16={b64 y22,94b64 y22,82r64 y22,70r64 y22,106}
 ; s8,s16
-F y39,3 y23,90  ; snare,hi-hut
-F y40,2 y24,132 ; cynbal,tom-tom
+F y39,3 y23,140 ; snare,hi-hut (y39,32+3 -> sustain on)
+F y40,2 y24,132 ; cynbal,tom-tom (y40,32+2 -> sustain on)
 *24={sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y24,132 r8}
 *28={sm64 y24,120m64 y24,108m64 y24,96r64 y24,84r64 y24,72r64 y24,60r64 y24,48r64 y24,132}
 *36={sm64 y24,120m64 y24,108m64 y24,96r64 y24,132}
-F v13 vh8 vs9vm12 ko
+F v13 vh9 vs9vm12 kf
 F [
 F [[*b4*b4*b4|*b4]2 *b8*b16*b16]4 
 F [[*b4*s8r16*b16|*b4*s4]4 
@@ -113,10 +113,10 @@ F                 *b16*b16*b8*s16*s16|*s8]2
 F                                     *s16*s16
 F ]0
 
-@e4={3,31,n31.*3.d.*1.b965.0=20}
+@e4={3,31,n31.*3.c.*1.986.0=20}
 @e5={3,0,*3,f.*2.ed0=26}
 @e6={2,0,c8650=10}
-1 v13 o2 p26 \5
+1 v13 o2 p26 \8
 1 [
 1 [[@4c4c4c4|c4]2 c8c16c16]4 
 1 [[@4c4@5g8.@4c16|c4@5g4]4 
