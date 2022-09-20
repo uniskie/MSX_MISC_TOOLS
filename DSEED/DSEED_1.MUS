@@ -13,14 +13,14 @@
 
 @v15 = { ; E-Guiter
 ;       TL FB
-         0, 3,
+         2, 3,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
   15, 7, 0, 7, 0, 6, 0, 0, 1, 0, 1 }
 
 @v16 = { ; Brass
 ;       TL FB
-         3, 4,
+         3, 3,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 9, 1, 1, 0, 1, 0, 0, 0, 0, 0,
   15, 7, 1, 7, 0, 2, 0, 0, 1, 0, 1 }
