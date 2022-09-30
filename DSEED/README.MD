@@ -1,4 +1,4 @@
-## namco "DANGEROUS SEED for MEGADRIVE" BGM PLAYER
+﻿## namco "DANGEROUS SEED for MEGADRIVE" BGM PLAYER
 
 ```RUN"AUTOEXEC.BAS"```
 ( install DM-SYSTEM2 -> run```DSEED.DS2```)
@@ -29,6 +29,22 @@
 
 ## 著作権情報
 
+DM-SYSTEM2 (C) Gigamix
+
+MGSDRV (C) Ain./Gigamix
+
+画像データと音楽データは商用利用禁止です。  
+転載する場合もこの条件を明記してください。
+
+### 無条件で再利用可能なものは
+- DSEED.BAS
+- DSEED.BIN
+- DSEED.ASM
+- DSEED0.BAS
+- DSEEDT.BAS
+
+他のファイルは再配布・改変ともに禁止とします。
+
 ### DM-SYSTEM2関連
 - AUTOEXEC.BAS
 - DISKINST.BIN
@@ -37,28 +53,8 @@
 - DS2.URL
 - DS2_HIS.TXT
 
-DM-SYSTEM2 (C) Gigamix
-
-MGSDRV (C) Ain./Gigamix
-
 DMシステム2関連に関しては
 「DMシステム2の組み込みライセンス」  
 https://www.gigamix.jp/ds2/embed.html  
 を参照ください。
 
-### 無条件で再利用可能なもの
-- DSEED.BAS
-- DSEED.BIN
-- DSEED.ASM
-- DSEED0.BAS
-- DSEEDT.BAS
-
-### 禁止事項の物
-
-上記以外の他のファイル、
-画像データと音楽データは商用利用禁止です。 
-転載する場合もこの条件を明記してください。
-
-### 音楽データのMUSファイルに関して
-
-音色や各種テクニックの参照・再利用はご自由にどうぞ。
