@@ -67,22 +67,22 @@ DE [bb>b<b]4
 DE [>cc>c<c<]3 >cc>cc<<
 DE ]0
 
-BC @10 v11 @\4 @e10
-BC l8 o5 [
+BC o5 @10 v12 @\4 @e10
 BC [
-B   [q8b b q1b 16b 16b 16q8b q1b 16q8b q1b 16b 16b 16b 16]2
-C   [q8g+g+q1g+16g+16g+16q8g+q1g+16q8g+q1g+16g+16g+16g+16]2
-B   [q8a a q1a 16a 16a 16q8a q1a 16q8a q1a 16a 16a 16a 16]2
-C   [q8f+f+q1f+16f+16f+16q8f+q1f+16q8f+q1f+16f+16f+16f+16]2
-BC ]2
-B   q8g+g+g+q1g+16q8g+g+q1g+16q8g+g+ f+f+f+q1f+16q8f+f+q1f+16q8f+f+
-C  [q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+]2
-B   q8f f f q1f 16q8f f q1f 16q8f f  e e e q1e 16q8e e q1e 16q8e e 
-C  [q8c+c+c+q1c+16q8c+c+q1c+16q8c+c+]2
-B   q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+ e e e q1e 16q8e e q1e 16q8e e
-C  <q8b b b q1b 16q8b b q1b 16q8b b >c+c+c+q1c+16q8c+c+q1c+16q8c+c+
-B   q8f+f+f+q1f+16q8f+f+q1f+16q8f+f+ g g g q1g 16q8g g q1g 16q8g g
-C  [q8d+d+d+q1d+16q8d+d+q1d+16q8d+d+]2
+BC  [ l16
+B    [q6b 8b 8q1b b b q6b 8q1b q6b 8q1b b b b ]2 
+C    [q6g+8g+8q1g+g+g+q6g+8q1g+q6g+8q1g+g+g+g+]2 
+B    [q6a 8a 8q1a a a q6a 8q1a q6a 8q1a a a a ]2 
+C    [q6f+8f+8q1f+f+f+q6f+8q1f+q6f+8q1f+f+f+f+]2 
+BC  ]2 l8
+B    q6g+g+g+q1g+16q6g+g+q1g+16q6g+g+ f+f+f+q1f+16q6f+f+q1f+16q6f+f+ 
+C   [q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+]2 
+B    q6f f f q1f 16q6f f q1f 16q6f f  e e e q1e 16q6e e q1e 16q6e e 
+C   [q6c+c+c+q1c+16q6c+c+q1c+16q6c+c+]2 
+B    q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+ e e e q1e 16q6e e q1e 16q6e e 
+C   <q6b b b q1b 16q6b b q1b 16q6b b >c+c+c+q1c+16q6c+c+q1c+16q6c+c+ 
+B    q6f+f+f+q1f+16q6f+f+q1f+16q6f+f+ g g g q1g 16q6g g q1g 16q6g g 
+C   [q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+]2 
 BC ]0
 
 23 v9 @e1 k4 h20,4,1,-1 @p3 @\1

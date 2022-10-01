@@ -1,0 +1,89 @@
+;[gain=1.0 name=DSEEDV5 duration=300s fade=5s cpu=0 lpf=1]
+; The line above defines extra options, works only on msxplay.com
+; name    : Name of mml, use as the base download filename.
+; gain    : Volume gain. (default: 1.0)
+; duration: Length of the song. (default: 300s)
+; fade    : Time of fading out. (default: 5s)
+; cpu     : CPU speed ratio. 0:auto, 1:3.58MHz (default: 0)
+; lpf     : Low-pass filter. 0:off, 1:on (default: 0)
+#opll_mode 1
+#tempo 154
+#title {"Dangerous Seed (MD) Jupiter (Stage 6&10) | for FM-BOIS | uniskie"}
+
+@v15 = { ; Brass
+;       TL FB
+         5, 4,
+; AR DR SL RR KL MT AM VB EG KR DT
+  10, 9, 0, 1, 0, 1, 0, 0, 0, 0, 0,
+  13, 7, 0, 7, 0, 7, 0, 0, 1, 0, 1 }
+
+;@v15 = { ; Brass
+;;       TL FB
+;         1, 4,
+;; AR DR SL RR KL MT AM VB EG KR DT
+;  10, 9, 2, 1, 0, 1, 0, 0, 0, 0, 0,
+;  13, 7, 0, 7, 0, 6, 0, 0, 1, 0, 1 }
+
+9 @15 o5 
+9 v13
+9 [ l8 
+9 d+2&d+eg+b >d+4<b4g+4e4 
+9 >c+2.<af+& f+2.f+g 
+9 g+2&g+g+f+g+ e4g+4b4>d+4 
+9 e2.e16d+16d16c+16& c+2.<b>c+ 
+9 d+2&d+<b4>c+ d+1& 
+9 d+4c+d+e4f+4 c+4.g+4.f+e 
+9 d+4.<b&b2& b2>c+d+ef+ 
+9 d+4.g+&g+2& g+2.<c+d 
+9 ]0 
+
+A @15 q1 v14 o2
+A l16 [ 
+A [[c+c+c+>>c+8c+<<c+c+]3 
+A   c+c+c+>>c+<c+c+c+c+< 
+A  [ddd>>d8d<<dd]3 
+A   ddd>>d8d<dd< 
+A ]2 
+A [>c+c+>c+<c+<]4 
+A [bb>b<b]3 bb>bb< 
+A [a+a+>a+<a+]4 
+A [aa>a<a]3 aa>aa< 
+A [g+g+>g+<g+]4 
+A [aa>a<a]3 aa>aa< 
+A [bb>b<b]4 
+A [>cc>c<c<]3 >cc>cc<< 
+A ]0 
+
+BC @10 v12
+BC l8 o5 [
+BC [ l16
+B   [q6b 8b 8q1b b b q6b 8q1b q6b 8q1b b b b ]2 
+C   [q6g+8g+8q1g+g+g+q6g+8q1g+q6g+8q1g+g+g+g+]2 
+B   [q6a 8a 8q1a a a q6a 8q1a q6a 8q1a a a a ]2 
+C   [q6f+8f+8q1f+f+f+q6f+8q1f+q6f+8q1f+f+f+f+]2 
+BC ]2 l8
+B   q6g+g+g+q1g+16q6g+g+q1g+16q6g+g+ f+f+f+q1f+16q6f+f+q1f+16q6f+f+ 
+C  [q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+]2 
+B   q6f f f q1f 16q6f f q1f 16q6f f  e e e q1e 16q6e e q1e 16q6e e 
+C  [q6c+c+c+q1c+16q6c+c+q1c+16q6c+c+]2 
+B   q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+ e e e q1e 16q6e e q1e 16q6e e 
+C  <q6b b b q1b 16q6b b q1b 16q6b b >c+c+c+q1c+16q6c+c+q1c+16q6c+c+ 
+B   q6f+f+f+q1f+16q6f+f+q1f+16q6f+f+ g g g q1g 16q6g g q1g 16q6g g 
+C  [q6d+d+d+q1d+16q6d+d+q1d+16q6d+d+]2 
+BC ]0
+
+DE @0 v12
+DE l1 o5 [
+D [g+& g+ a& a]2  d+ 
+E [d+& d+ e& e]2 <g+> 
+D  d+ c+ c+ <b> c+ d+ d+ 
+E <f+ g+ g+  f+ g+ f+ g+> 
+DE ]0
+
+F v14 vs13 vm12 vh9 
+F [ 
+F [[hb4b4hb4|b4]2 b8b16b16]4 
+F [[hb4sm8.b16|hb4sm4]4 
+F              hb16b16b8sm16sm16|sm8]2 
+F                                sm16sm16 
+F ]0 
