@@ -12,20 +12,20 @@
 
 @v15 = { ; E-Guiter
 ;       TL FB
-         3, 3,
+         6, 3,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
-  15, 7, 0, 7, 0, 8, 0, 0, 1, 0, 1 }
+  15, 7, 0, 9, 0, 7, 0, 0, 1, 0, 1 }
 
 @v16 = { ; Brass
 ;       TL FB
-         3, 2,
+         4, 2,
 ; AR DR SL RR KL MT AM VB EG KR DT
   15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
   15, 8, 1, 7, 0, 2, 0, 0, 1, 0, 1 }
 
 9A @15 o4
-9 v13    
+9 v12    
 A v11 r8 
 9A [
 9A  [
@@ -46,11 +46,11 @@ A                    g+2<
 A   r8
 9A ]0
 
-B v13 @13 q2 o2
+B v13 @13 q6 o2
 B [ l16
 B  [[aaaa]8 [g+g+g+g+]8 [f+f+f+f+]8 [dddd]3
 B   >d<ddd [eeee]2 eeee a>cde<
-B  ]2
+B  ]2 q8
 B  [[frff>fr<ff]4 [g+rg+g+>g+r<g+g+]4
 B   [eree>er<ee]4 | [araa>a<|raa]3
 B                            aaa  aa>e<aa>e<aa
@@ -58,21 +58,21 @@ B  ]2
 B   a+ra+ra+ra+r brbrbrbr >crcrcrcr c+rc+rc+c+c+c+<
 B ]0
 
-C v11 o4
+C v10 o4
 C [ l16
-C @11 q2so
-C [<aa>eeaaeeaa>eeaa>ee aaee<aaee<aaeeaaee
-C  <gg>ddggddgg>ddgg>dd ggdd<ggdd<ggddggdd
-C  <ff>ccffccff>ccff>cc ffcc<ffcc<ffccffcc
-C  ((
-C   g+g+g+g+d+d+d+d+g+g+g+g+d+d+a+a+
-C   bbbb)eeee)eebb>ee>cc<<
-C ]2 > 
-C [[g>c<cf]8 [g>c<cd+]8 [a>d<df+]8 | [a>c+<c+e]8 
-C ]2 <
-C @16 )) q8sf
-C >a+4.b2&b8 >c4.c+2&c+8<<
-C (( 
+C  @11 q2so
+C  [<aa>eeaaeeaa>eeaa>ee aaee<aaee<aaeeaaee
+C   <gg>ddggddgg>ddgg>dd ggdd<ggdd<ggddggdd
+C   <ff>ccffccff>ccff>cc ffcc<ffcc<ffccffcc
+C   ((
+C    g+g+g+g+d+d+d+d+g+g+g+g+d+d+a+a+
+C    bbbb)eeee)eebb>ee>cc<<
+C  ]2 > 
+C  [[g>c<cf]8 [g>c<cd+]8 [a>d<df+]8 | [a>c+<c+e]8 
+C  ]2 <
+C  @16 )) q8sf
+C  >a+4.b2&b8 >c4.c+2&c+8<<
+C  (( 
 C ]0
 
 D v11 @10 o4
@@ -106,9 +106,9 @@ E  [ l8
 E   e8e4e4.e8e8& e8e4.e4e4 
 E   c8c4c4.c8c8& c8c4.c4c4 
 E   e8e4e4.e8e8& e8e4.e4e4| 
-E   @11  
+E   @11 @1so 
 E   l16 >aa8a<a8>aa8aa8< 
-E   @1 (
+E   @1 q8sf (
 E                      <aa>ee 
 E   a<a>ee aa>ee <aa>ee aa>ee<< 
 E   @10 )

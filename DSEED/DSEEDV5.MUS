@@ -12,10 +12,10 @@
 
 @v15 = { ; Brass
 ;       TL FB
-         5, 4,
+         4, 4,
 ; AR DR SL RR KL MT AM VB EG KR DT
-  10, 9, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-  13, 7, 0, 7, 0, 7, 0, 0, 1, 0, 1 }
+  10, 9, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  13, 7, 0, 7, 0, 5, 0, 0, 1, 0, 1 }
 
 ;@v15 = { ; Brass
 ;;       TL FB
@@ -80,7 +80,7 @@ D  d+ c+ c+ <b> c+ d+ d+
 E <f+ g+ g+  f+ g+ f+ g+> 
 DE ]0
 
-F v14 vs13 vm12 vh9 
+F v14 vs13 vm10 vh9 
 F [ 
 F [[hb4b4hb4|b4]2 b8b16b16]4 
 F [[hb4sm8.b16|hb4sm4]4 
