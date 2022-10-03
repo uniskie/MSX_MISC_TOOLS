@@ -7,15 +7,15 @@
 ; cpu     : CPU speed ratio. 0:auto, 1:3.58MHz (default: 0)
 ; lpf     : Low-pass filter. 0:off, 1:on (default: 0)
 #opll_mode 1
-#tempo 162
+#tempo 156
 #title {"Dangerous Seed (MD) Tube (Stage 1&8) | for FM-BIOS | uniskie"}
 
 @v15 = { ; E-Guiter
 ;       TL FB
-         6, 3,
+         7, 3,
 ; AR DR SL RR KL MT AM VB EG KR DT
-  15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
-  15, 7, 0, 9, 0, 7, 0, 0, 1, 0, 1 }
+  15, 1, 1, 3, 0, 1, 0, 0, 0, 0, 0,
+  15, 1, 0, 3, 0, 8, 1, 0, 1, 0, 1 }
 
 @v16 = { ; Brass
 ;       TL FB
@@ -24,26 +24,20 @@
   15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
   15, 8, 1, 7, 0, 2, 0, 0, 1, 0, 1 }
 
-9A @15 o4
-9 v12    
-A v11 r8 
+9A o4 v12
+A v12 >
 9A [
+9A  @15
 9A  [
 9A   e1 &e4b32>&c8..c32c+32d8.e8<g8 &g1&
 9A   g16.>f32g8f8d+8c8d8d+8f16.b32> c1& c8<a+8>c8<a+8f8c8c+8d+8
-9A   f8d+8f16.a32a+8f8d+8a8e8 f+8e8f+8>c8d8<b8a8|g8<
+9A   f8d+8f16.a32a+8f8d+8a8e8 f+8e8f+8>c8d8<b8a8g8<
 9A  ]2
-9                                                g8 
-9A  @16
-A                                                r8 
+9A  @16 >
 9A  [e1& e2a4e4 g1& g2>c4<g4 >d1& d2d4e4 |
 9A   c+1& c+1<]2
-9A   f4.f+2&f+8g4& g8
-9                    g+2&g+8< 
-A                    g+2< 
+9A   f4.f+2&f+8g4& g8g+2&g+8< 
 9A  <
-9A  @15
-A   r8
 9A ]0
 
 B v13 @13 q6 o2
