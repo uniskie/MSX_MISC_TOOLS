@@ -1,0 +1,26 @@
+@echo off
+echo Pythonのスクリプトファイルの拡張子(.py, .pyc, .pyw)を関連付ける
+echo 管理者権限で動かす事
+esho 各自の環境に合わせてppathのパスを変更して使ってください。
+echo.
+
+rem set ppath=C:\Python\Python27
+rem set ppath=C:\Python\Python34
+set ppath=C:\Python\Python36-32
+
+assoc .py=Python.File
+assoc .pyo=Python.CompiledFile
+assoc .pyw=Python.NoConFile
+ftype Python.File="%ppath%\python.exe" "%1" %*
+ftype Python.CompiledFile="%ppath%\python.exe" "%1" %*
+ftype Python.NoConFile="%ppath%\pythonw.exe" "%1" %*
+
+echo.
+echo Windowsの関連付け設定が残っていたら動かないので、
+echo レジストリエディタを開いて以下のキーを削除。
+echo.
+echo HKEY_CURRENT_USER\Software\Classes\.[拡張子]
+echo HKEY_CURRENT_USER\Software\Classes\[拡張子]_auto_file
+echo HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.[拡張子]
+
+pause
