@@ -60,7 +60,7 @@ fmpac_slot:		db		1
 
 fmpac_bank_reg1:	equ	7FF7H
 
-fmpac_bgm_bank:		equ	1
+fmpac_bgm_bank:		equ	2
 ;BGMƒf[ƒ^‚Ì”ÍˆÍ‚Í $9073- $BF5D
 fmpac_bgm_start:	equ	$408A
 fmpac_bgm_size:		equ	$6B93 + 1 - fmpac_bgm_start
