@@ -36,6 +36,8 @@ FMPAC0.BIN ～ FMPAC4.BIN の 5個が出力されます。
 
 RTYPE0.BIN ～ RTYPEF.BIN の 16個が出力されます。
 
+- - - -
+
 ## OPLDRV_tool.exe
 
 （ [OPLDRV_tool](OPLDRV_tool)にソースコードがあります。）
