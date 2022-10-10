@@ -6,8 +6,11 @@ ROMからOPLDRV用BGMデータをファイルに書き出すプログラム。
 MSX実機でカートリッジを後挿しして実行すると、
 OPLDRV用のBGMデータをファイルに保存します。
 
-[EXTEACT_FROM_MSX_CARTRIDGE](EXTEACT_FROM_MSX_CARTRIDGE)
-においてアリアン素。
+MSX実機用のツールです。
+
+ファイルは  
+[EXTEACT_FROM_MSX_CARTRIDGE](EXTEACT_FROM_MSX_CARTRIDGE)  
+に置いてあります。
 
 - R-TYPE用：```RDRTYPE.BAS```
 - FM PAC用：```RDFMPAC.BAS```
