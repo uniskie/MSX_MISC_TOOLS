@@ -170,6 +170,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\opldrv_data.h" />
+    <ClInclude Include="..\opldrv_inst_data.h" />
+    <ClInclude Include="..\opldrv_inst_data2.h" />
     <ClInclude Include="..\uni_common.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

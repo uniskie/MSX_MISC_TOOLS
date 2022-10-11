@@ -12,16 +12,32 @@ string align_left(string s, u64 i)
     ss << std::left << std::setw(i) << s;
     return ss.str();
 }
-string decimal(u64 i)
+string decimal(u64 i, int align, string space)
 {
     std::stringstream ss;
-    ss << std::dec << i;
+    if (0 == align)
+    {
+        ss << std::dec << i;
+    }
+    else
+    {
+        ss << std::right << std::setw(align) << std::setfill(space.at(0))
+            << std::dec << i;
+    }
     return ss.str();
 }
-string hex(u64 i)
+string hex(u64 i, int align, string space)
 {
     std::stringstream ss;
-    ss << std::hex << i;
+    if (0 == align)
+    {
+        ss << std::hex << i;
+    }
+    else
+    {
+        ss << std::right << std::setw(align) << std::setfill(space.at(0))
+            << std::hex << i;
+    }
     return ss.str();
 }
 

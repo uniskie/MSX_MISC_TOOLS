@@ -5,6 +5,9 @@
 
 using namespace OPLDRV;
 
+#include"opldrv_inst_data.h"	// FMPAC版 拡張音色
+#include"opldrv_inst_data2.h"	// A1GT版 拡張音色
+
 //==================================================
 //
 // class OplDrvData::Header
@@ -361,7 +364,7 @@ const u8* OplDrvData::Command::read_melody(const u8* data_ptr, const u8* end_ptr
 		}
 		else
 		{
-			print_error(string("[ERROR] unknown melody command. 0x") + hex(c));
+			print_error(string("[ERROR] unknown melody command. 0x") + hex(c,2));
 			ASSERT(0);
 			break;
 		}
@@ -422,7 +425,7 @@ const u8* OplDrvData::Command::read_rhythm(const u8* data_ptr, const u8* end_ptr
 		}
 		else
 		{
-			print_error(string("[ERROR] unknown rhythm command. 0x") + hex(c));
+			print_error(string("[ERROR] unknown rhythm command. 0x") + hex(c,2));
 			ASSERT(0);
 		}
 		break;
@@ -519,7 +522,7 @@ u8* OplDrvData::Command::write_melody(u8* data_ptr, const u8* end_ptr) const
 				break;
 			}
 			*p++ = u8(m_param & 0xff);
-			*p++ += u8(m_param >> 8);
+			*p++ = u8(m_param >> 8);
 			break;
 		}
 		case CMD_LEGATO:
@@ -547,7 +550,7 @@ u8* OplDrvData::Command::write_melody(u8* data_ptr, const u8* end_ptr) const
 		}
 		default:
 		{
-			print_error(string("[ERROR] unknown melody command. 0x") + hex(m_cmd));
+			print_error(string("[ERROR] unknown melody command. 0x") + hex(m_cmd,2));
 			ASSERT(0);
 			p = 0;	// error
 			break;
@@ -603,7 +606,7 @@ u8* OplDrvData::Command::write_rhythm(u8* data_ptr, const u8* end_ptr) const
 		}
 		default:
 		{
-			print_error(string("[ERROR] unknown rhythm command. 0x") + hex(m_cmd));
+			print_error(string("[ERROR] unknown rhythm command. 0x") + hex(m_cmd,2));
 			ASSERT(0);
 			p = 0;	// error
 			break;
@@ -665,7 +668,7 @@ string OplDrvData::Command::getCmdInfo() const
 		}
 		case CMD_USER_VOICE:
 		{
-			s += " 0x" + hex(m_param);
+			s += " 0x" + hex(m_param,4);
 			break;
 		}
 		case CMD_LEGATO:
@@ -860,7 +863,7 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 			if (cmd.m_cmd == OplDrvData::Command::CMD_USER_VOICE)
 			{
 				// user voice data
-				if (intptr_t(end_ptr - p)  < VoiceData::data_size)
+				if (intptr_t(end_ptr - p)  < VoiceRaw::data_size)
 				{
 					print_error("[ERROR] VOICE DATA is not contained in buffer.");
 					ASSERT(0);
@@ -872,7 +875,7 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 
 					auto& voice = m_voice[voice_idx];
 					const u8* voice_ptr = data_ptr + voice_offset;
-					std::copy(voice_ptr, voice_ptr + VoiceData::data_size, voice.m_data);
+					std::copy(voice_ptr, voice_ptr + VoiceRaw::data_size, voice.m_data.data);
 				}
 			}
 
@@ -902,12 +905,76 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 		for (; i != e; ++i)
 		{
 			auto& voice = i->second;
-			string s = "VOICE: 0x" + hex(i->first) + " :";
-			for (int i = 0; i < voice.data_size; ++i)
+			string s = "VOICE: 0x" + hex(i->first,4) + " :";
+			for (int i = 0; i < voice.m_data.data_size; ++i)
 			{
-				s += " " + hex(voice.m_data[i]);
+				s += " " + hex(voice.m_data.data[i], 2);
 			}
 			print_log(s);
+		}
+	}
+
+	return true;
+}
+
+//--------------------------------------------------
+//! OplDrvData::Header
+//! ROM内蔵拡張音色コマンドをユーザー音色に変換する
+//--------------------------------------------------
+bool OplDrvData::convert_voice_rom_to_user(int romtype)
+{
+	const OplDrvData::ExtraVoiceSet* voice_table = nullptr;
+	switch ( romtype)
+	{
+	case 1:	voice_table = &fmpac_extention_voice; break;
+	case 2:	voice_table = &msxmusic_extention_voice;break;
+	}
+	
+	if (!voice_table)
+	{
+		print_error("[ERROR] unknown voice romtype. " + decimal(romtype));
+		ASSERT(0);
+		return false;
+	}
+
+
+	// メロディチャンネル
+	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
+	{
+		auto& melody_ch = m_melody_ch[ch];
+
+		for (auto i = melody_ch.begin(); i != melody_ch.end(); ++i)
+		{
+			if (i->m_cmd == OplDrvData::Command::CMD_ROM_VOICE)
+			{
+				// ROM内蔵拡張音色コマンドをユーザー音色に変換する
+
+				// 内蔵音色データをユーザー音色リストへ登録
+				u16 n = u16(i->m_param);
+				ASSERT((0 <= n) && (n <= 63));
+				if (!((0 <= n) && (n <= 63)))
+				{
+					print_error("[ERROR] out of range ROM_VOICE No. " + decimal(n));
+					ASSERT(0);
+					return false;
+				}
+				u16 idx = 0xff80 + n;
+				VoiceData& voice = m_voice[idx];	// 0xff80 to 0xffff
+				auto src = voice_table->list[n];
+				std::copy( src.data, src.data + countof(src.data), voice.m_data.data );
+
+				// USER_VOICE コマンド へ 変更
+				i->m_cmd = OplDrvData::Command::CMD_USER_VOICE;
+				i->m_param = idx; // new voice index
+
+				print("[INFO] melody ch.#" + decimal(ch) + " : change ROM Voice " + decimal(n) + " to USER VOICE.");
+			}
+
+			if (i->m_cmd == OplDrvData::Command::CMD_END)
+			{
+				// end
+				break;
+			}
 		}
 	}
 
@@ -1024,7 +1091,7 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 				if (i->m_cmd == OplDrvData::Command::CMD_USER_VOICE)
 				{
 					// ユーザー定義音色のアドレスを後から書き換える
-					voice_adr_list.push_back( u16(outbuffer.size() - 2) );
+					voice_adr_list.push_back( u16(outbuffer.size() - 2) ); // アドレスがあるオフセットの登録
 					ASSERT(outbuffer.size() > 2 + size_t(m_header.offset[0]));	// 一応検査
 				}
 
@@ -1041,23 +1108,21 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 	if (m_voice.size())
 	{
 		// 出力バイナリへ追加
-		for (auto i = m_voice.begin(); i != m_voice.end(); ++i)
+		for (auto v = m_voice.begin(); v != m_voice.end(); ++v)
 		{
-			auto& voice = i->second;
+			auto& voice = v->second;
 			auto offset = outbuffer.size();
-			for (int i = 0; i < voice.data_size; ++i)
+			for (int i = 0; i < voice.m_data.data_size; ++i)
 			{
-				outbuffer.push_back(voice.m_data[i]);
+				outbuffer.push_back(voice.m_data.data[i]);
 			}
 			ASSERT(offset < 0x10000);
 			voice.offset = u16(offset);
 		}
 		// 使用箇所の音色データアドレス値を変更
-		for (auto i = voice_adr_list.begin(); i != voice_adr_list.end();)
+		for (auto i = voice_adr_list.begin(); i != voice_adr_list.end(); ++i)
 		{
 			size_t pos = *i;
-			i++;
-			i++;
 			u16 idx = u16(outbuffer[pos + 0]) + u16(outbuffer[pos + 1]) * 0x100;
 
 			// 音色データ情報取得
@@ -1065,9 +1130,9 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 			ASSERT(voice.offset);
 
 			// 新しい値を書き込む
-			auto new_offset = base_address + size_t(voice.offset);
-			outbuffer[pos + 0] = u8(new_offset & 0xff);
-			outbuffer[pos + 1] = u8(new_offset >> 8);
+			auto new_addr = base_address + size_t(voice.offset);
+			outbuffer[pos + 0] = u8(new_addr & 0xff);
+			outbuffer[pos + 1] = u8(new_addr >> 8);
 		}
 	}
 

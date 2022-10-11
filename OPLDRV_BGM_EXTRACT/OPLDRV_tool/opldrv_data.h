@@ -91,8 +91,8 @@ public:
 	|  60H～ 6FH | 音量         | この値から60Hを引いた値が、音量として使用される。
 	|  70H～ 7FH | 音色         | この値から70Hを引いた値が、音色番号として使用される。
 	|  80H, 81H  | サスティン   | 80HでサスティンOFF。81HでサスティンON。
-	|  82H       | 拡張音色     | 続く1バイトの値(0～63)がROMの内蔵音色番号。
-	|  83H       | ユーザー音色 | 続く2バイトの値が音色データ先頭アドレス。
+	|  82H       | 拡張音色     | 続く1バイトの値(0～63)がROMの内蔵音色番号。(音色データは4C00H)
+	|  83H       | ユーザー音色 | 続く2バイトの値が音色データ先頭アドレス。（絶対アドレス）
 	|  84H       | レガートオフ | 音を音符毎に切る。
 	|  85H       | レガートオン | 音を切らずにつなぐ。
 	|  86H       | Q指定        | 続く1バイト(1～8)で指定。（レガートオン時は、Q指定を無視）
@@ -244,20 +244,31 @@ public:
 	```
 	*/
 public:
-	class VoiceData
+	struct VoiceRaw
 	{
-	public:
 		enum {
 			data_size = 8,
 		};
+		u8 data[data_size];
+	};
+	struct ExtraVoiceSet
+	{
+		enum {
+			voice_count = 64,
+		};
+		VoiceRaw list[voice_count];
+	};
+
+	class VoiceData
+	{
 	public:
 		VoiceData()
 			: offset(0)
 		{
-			std::fill(m_data, m_data + data_size, 0);
+			std::fill(m_data.data, m_data.data + countof(m_data.data), 0);
 		}
 	public:
-		u8 m_data[data_size];
+		VoiceRaw m_data;
 		u16 offset;
 	};
 
@@ -269,6 +280,8 @@ public:
 
 	void clear();
 	bool from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address);
+
+	bool convert_voice_rom_to_user(int romtype);
 
 	bool make_binary(std::vector<u8>& outb, u16 base_address);
 

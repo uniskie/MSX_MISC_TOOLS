@@ -32,8 +32,14 @@ void showHelp()
 		"/b           add BSAVE header to output.\n"
 		"/-b          RAW output. (remove BSAVE header)\n"
 		"\n\n"
-		"*1 [address] is hexadecimal\n"
-		"             (e.g. 0000, a000, C000) \n"
+		"/cv:fmpac    convert ex-voice to user-voice. (use FMPAC ver.)\n"
+		"/cv:music    convert ex-voice to user-voice. (use A1GT ver.)\n"
+		"             (same as /cv:a1gt)\n"
+		"\n\n"
+		"*1 [address] is hexadecimal.\n"
+		"   (e.g. 0000, a000, C000) \n"
+		"*2 take care address when use \"user-voice\".\n"
+		"   (\"user-voice\" use absolute address) \n"
 		"\n"
 	);
 }
@@ -64,7 +70,10 @@ int main(int argc, char* argv[])
 
 	string logFileName = "";
 
-    //// parse arguments
+	int convert_rom_voice = 0;			//!< 拡張音色をユーザー定義音色コマンドに変更
+										//!< 1=FMPAC拡張音色/2=A1GT拡張音色
+
+    //-- parse arguments
     int argi = 1;
     int  filename_arg_step = 0;
 	bool req_out_base_address = false;
@@ -77,7 +86,7 @@ int main(int argc, char* argv[])
         if (arg.size())
         {
             string l = get_lower(arg);
-			//// arg: log filename
+			//-- arg: output use BSAVE HEADER (BSAVE)
 			if (l == "/b")
 			{
 				print(string("arg: add BSAVE header: ") + arg);
@@ -85,6 +94,7 @@ int main(int argc, char* argv[])
 				remove_bsave_header = false;
 			}
 			else
+			//-- arg: output don't use BSAVE HEADER (RAW)
 			if (l == "/-b")
 			{
 				print(string("arg: remove BSAVE header: ") + arg);
@@ -92,6 +102,7 @@ int main(int argc, char* argv[])
 				remove_bsave_header = true;
 			}
 			else
+			//-- arg: output log file
 			if (l.substr(0, 3) == "/l:")
 			{
 				logFileName = arg.substr(3);
@@ -99,26 +110,53 @@ int main(int argc, char* argv[])
 				OplDrvData::trace_mode = true; // 解析出力を有効化
 			}
 			else
-			//// arg: input base address
+			//-- arg: input base address
 			if (l.substr(0, 3) == "/a:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> in_base_address;
-				print(string("arg: base address : ") + hex(in_base_address));
+				print(string("arg: base address : ") + hex(in_base_address, 4));
 				if (!req_out_base_address)
 				{
 					out_base_address = in_base_address;
 				}
 			}
 			else
-			//// arg: relocate
+			//-- arg: relocate
 			if (l.substr(0, 3) == "/r:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> out_base_address;
-				print(string("arg: relocate to address : ") + hex(out_base_address));
+				print(string("arg: relocate to address : ") + hex(out_base_address, 4));
 				req_out_base_address = true;
 			}
 			else
-			//// arg: inFileName
+			//-- arg: convert extention voice
+			if (l.substr(0, 4) == "/cv:")
+			{
+				string romtype = get_lower(arg.substr(4));
+				print(string("arg: convert ex-voice cmd to user-voice cmd: ") + romtype);
+				if (romtype == "fmpac")
+				{
+					convert_rom_voice = 1;
+				}
+				else
+				if (romtype == "music")
+				{
+					convert_rom_voice = 2;
+				}
+				else
+				if (romtype == "a1gt")
+				{
+					convert_rom_voice = 2;
+				}
+				else
+				{
+					print_error("unknown voice rom type name: " + romtype);
+					ASSERT(0);
+					arg_error = true;
+				}
+			}
+			else
+			//-- arg: inFileName
 			if (filename_arg_step == 0)
 			{
 				inFileName = arg;
@@ -127,7 +165,7 @@ int main(int argc, char* argv[])
 			}
 #if USE_OUT_FILE_NAME_OPTION
 			else
-			//// arg: outFilename
+			//-- arg: outFilename
 			if (l.substr(0, 3) == "/o:")
 			{
 				if (filename_arg_step == 1)
@@ -181,13 +219,13 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
-	//// decide input file path
+	//-- decide input file path
 	print(string("inFileName:") + inFileName);
 	fs::path inPath(inFileName);
 	string ext = inPath.extension().generic_string();
 	
 	//-------------------------------------
-	//// decide output file path
+	//-- decide output file path
 #ifdef _DEBUG
 	fs::path outPath(inFileName);
 	outPath.replace_extension(out_ext);
@@ -289,6 +327,17 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
+	// ROM拡張音色コマンドをユーザー音色コマンドに変換
+	if (convert_rom_voice)
+	{
+		if (!opldata.convert_voice_rom_to_user(convert_rom_voice))
+		{
+			if (!silent_mode)   std::cin.get();
+			return 1;
+		}
+	}
+
+	//-------------------------------------
 	// 出力
 	if (outFileName.size())
 	{
@@ -311,14 +360,14 @@ int main(int argc, char* argv[])
 				auto end_address = out_base_address + output_buffer.size() - 1;
 				bsave_header[3] = u8(end_address & 0xff);
 				bsave_header[4] = u8(end_address >> 8);
-				bsave_header[5] = 0;
-				bsave_header[6] = 0;
+				bsave_header[5] = bsave_header[1];
+				bsave_header[6] = bsave_header[2];
 
 				print("[INFO] output BSAVE file.");
-				print("       start = 0x" + hex(out_base_address));
-				print("       end   = 0x" + hex(end_address));
-				print("       size  = 0x" + hex(output_buffer.size()));
-				print("       total = 0x" + hex(output_buffer.size() + countof(bsave_header)));
+				print("       start = 0x" + hex(out_base_address, 4));
+				print("       end   = 0x" + hex(end_address, 4));
+				print("       size  = 0x" + hex(output_buffer.size(), 4));
+				print("       total = 0x" + hex(output_buffer.size() + countof(bsave_header), 4));
 
 				auto out_size = fwrite(&bsave_header[0], 1, countof(bsave_header), outFile);
 				if (!out_size)
@@ -331,10 +380,10 @@ int main(int argc, char* argv[])
 			else
 			{
 				print("[INFO] output RAW file.");
-				print("       start = 0x" + hex(out_base_address));
-				print("       end   = 0x" + hex(out_base_address + output_buffer.size() - 1));
-				print("       size  = 0x" + hex(output_buffer.size()));
-				print("       total = 0x" + hex(output_buffer.size()));
+				print("       start = 0x" + hex(out_base_address, 4));
+				print("       end   = 0x" + hex(out_base_address + output_buffer.size() - 1, 4));
+				print("       size  = 0x" + hex(output_buffer.size(), 4));
+				print("       total = 0x" + hex(output_buffer.size(), 4));
 
 			}
 			auto out_size = fwrite( &output_buffer[0], 1, output_buffer.size(), outFile);

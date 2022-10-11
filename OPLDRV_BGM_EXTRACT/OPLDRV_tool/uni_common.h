@@ -35,8 +35,8 @@ typedef int8_t          s8;
 
 string align_right(string s, u64 i);
 string align_left(string s, u64 i);
-string decimal(u64 i);
-string hex(u64 i);
+string decimal(u64 i, int align = 0, string space = "0");
+string hex(u64 i, int align = 0, string space = "0");
 string get_lower(const string& s);
 string get_upper(const string& s);
 
