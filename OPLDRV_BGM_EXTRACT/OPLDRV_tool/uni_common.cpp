@@ -12,7 +12,7 @@ string align_left(string s, u64 i)
     ss << std::left << std::setw(i) << s;
     return ss.str();
 }
-string decimal(u64 i, int align, string space)
+string decimal(s64 i, int align, string space)
 {
     std::stringstream ss;
     if (0 == align)

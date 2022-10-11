@@ -23,7 +23,7 @@ void showHelp()
 #if USE_OUT_FILE_NAME_OPTION
 		" [/o:OUTPUT FILENAME]"
 #endif
-		"\n\n"
+		"\n"
 		"/l:filename  Log text output to file.\n"
 		"/a:address   set base address for RAW file.\n"
 		"             (Required for data using user voice.)\n"
@@ -31,10 +31,12 @@ void showHelp()
 		"             (Required for data using user voice.)\n"
 		"/b           add BSAVE header to output.\n"
 		"/-b          RAW output. (remove BSAVE header)\n"
-		"\n\n"
+		"\n"
 		"/cv:fmpac    convert ex-voice to user-voice. (use FMPAC ver.)\n"
 		"/cv:music    convert ex-voice to user-voice. (use A1GT ver.)\n"
 		"             (same as /cv:a1gt)\n"
+		"\n"
+		"/v:volume    modify volume (-15 ~ +15)"
 		"\n\n"
 		"*1 [address] is hexadecimal.\n"
 		"   (e.g. 0000, a000, C000) \n"
@@ -72,6 +74,8 @@ int main(int argc, char* argv[])
 
 	int convert_rom_voice = 0;			//!< 拡張音色をユーザー定義音色コマンドに変更
 										//!< 1=FMPAC拡張音色/2=A1GT拡張音色
+
+	int volume_change = 0;				//!< 音量変更 マイナスなら音が大きくなる
 
     //-- parse arguments
     int argi = 1;
@@ -154,6 +158,13 @@ int main(int argc, char* argv[])
 					ASSERT(0);
 					arg_error = true;
 				}
+			}
+			else
+			//-- arg: modify volume
+			if (l.substr(0, 3) == "/v:")
+			{
+				std::istringstream(arg.substr(3)) >> std::dec >> volume_change;
+				print(string("arg: modify volume : ") + decimal(volume_change));
 			}
 			else
 			//-- arg: inFileName
@@ -324,6 +335,51 @@ int main(int argc, char* argv[])
 	{
 		if (!silent_mode)   std::cin.get();
 		return 1;
+	}
+
+	//-------------------------------------
+	// 音量修正
+	if (volume_change)
+	{
+		print_log("[INFO] volume modify " + decimal(volume_change));
+		// リズムチャンネル
+		if (opldata.m_rhythm_ch.size())
+		{
+			for (auto i= opldata.m_rhythm_ch.begin();
+				 i != opldata.m_rhythm_ch.end();
+				++i)
+			{
+				if (i->m_cmd == OplDrvData::Command::CMD_R_VOL)
+				{
+					i->m_param += volume_change;
+					if (i->m_param > 15)
+					{
+						print_log("[CAUTION] volume over flow.");
+						i->m_param = 15;
+					}
+				}
+			}
+		}
+		// メロディーチャンネル
+		for (int ch = 0; ch < countof(opldata.m_melody_ch); ++ch)
+		{
+			if (opldata.m_melody_ch[ch].size())
+			{
+				for (auto i = opldata.m_melody_ch[ch].begin();
+					 i != opldata.m_melody_ch[ch].end();
+					++i)
+				{
+					if (i->m_cmd == OplDrvData::Command::CMD_VOL)
+					{
+						i->m_opt += volume_change;
+						if (i->m_opt > 15)
+						{
+							i->m_opt = 15;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	//-------------------------------------

@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>fmpac4.bin /l:fmpac4.log /-b /r:9000 /cv:fmpac /o:fmpa_4.opl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>rtype1.bin /o:rtype1m.opl /l:rtype1m.log /-b /v:-2</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NXTargetName>Default</NXTargetName>
-    <LocalDebuggerCommandArguments>fmpac4.bin /l:fmpac4.log /-b /r:9000 /cv:fmpac /o:fmpa_4.opl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>rtype1.bin /o:rtype1m.opl /l:rtype1m.log /-b /v:-2</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

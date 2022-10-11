@@ -43,8 +43,9 @@ RTYPE0.BIN ～ RTYPEF.BIN の 16個が出力されます。
 （ [OPLDRV_tool](OPLDRV_tool)にソースコードがあります。）
 
 ```
-OPLDRV_tool [/l:filename][/b:address)][/r:address)] [INPUT FILENAME] [/o:OUTPUT FILENAME]
+OPLDRV TOOL
 
+OPLDRV_tool [/l:filename][/b:address)][/r:address)] [INPUT FILENAME] [/o:OUTPUT FILENAME]
 /l:filename  Log text output to file.
 /a:address   set base address for RAW file.
              (Required for data using user voice.)
@@ -53,11 +54,11 @@ OPLDRV_tool [/l:filename][/b:address)][/r:address)] [INPUT FILENAME] [/o:OUTPUT 
 /b           add BSAVE header to output.
 /-b          RAW output. (remove BSAVE header)
 
-
 /cv:fmpac    convert ex-voice to user-voice. (use FMPAC ver.)
 /cv:music    convert ex-voice to user-voice. (use A1GT ver.)
              (same as /cv:a1gt)
 
+/v:volume    modify volume (-15 ~ +15)
 
 *1 [address] is hexadecimal.
    (e.g. 0000, a000, C000)
@@ -84,6 +85,7 @@ OPLDRVデータのユーティリティーです。
 | ```/r:アドレス```    | 出力ファイルの配置アドレスを変更（再配置）（16進数4桁）
 | ```/cv:fmpac```      | 拡張音色(ROM内蔵音色)の違いを吸収するため、FMPAC ROM音色と同等のデータを使用してユーザー音色コマンドに変更する
 | ```/cv:music```      | 拡張音色(ROM内蔵音色)の違いを吸収するため、A1GT ROM音色と同等のデータを使用してユーザー音色コマンドに変更する
+| ```/v:音量補正値```  | ボリュームを補正する (値は-15～15)(マイナス値は音が大きくなる)
 
 > **Warning**  
 > ```/cv:???```コマンドを使用する場合は絶対アドレスを使用するので、BINファイルでの入力または```/a:nnnn```での入力データアドレス指定と、```/r:nnnn```での出力アドレス指定をしてください。  
