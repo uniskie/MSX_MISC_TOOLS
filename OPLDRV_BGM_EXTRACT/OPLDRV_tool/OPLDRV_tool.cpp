@@ -351,12 +351,15 @@ int main(int argc, char* argv[])
 			{
 				if (i->m_cmd == OplDrvData::Command::CMD_R_VOL)
 				{
-					i->m_param += volume_change;
-					if (i->m_param > 15)
+					int v = int(i->m_param);
+					v += volume_change;
+					if ((v < 0) || (15 < v))
 					{
-						print_log("[CAUTION] volume over flow.");
-						i->m_param = 15;
+						print_log("[CAUTION] volume over flow. " 
+							+ decimal(i->m_param) + " -> " + decimal(v));
+						v = (v < 0) ? 0 : 15;
 					}
+					i->m_param = v;
 				}
 			}
 		}
@@ -371,11 +374,15 @@ int main(int argc, char* argv[])
 				{
 					if (i->m_cmd == OplDrvData::Command::CMD_VOL)
 					{
-						i->m_opt += volume_change;
-						if (i->m_opt > 15)
+						int v = i->m_opt;
+						v += volume_change;
+						if ((v < 0) || (15 < v))
 						{
-							i->m_opt = 15;
+							print_log("[CAUTION] volume over flow. "
+								+ decimal(i->m_opt) + " -> " + decimal(v));
+							v = (v < 0) ? 0 : 15;
 						}
+						i->m_opt = v;
 					}
 				}
 			}
