@@ -37,6 +37,7 @@ typedef int8_t          s8;
 namespace uni_common {
 string align_right(string s, u64 i);
 string align_left(string s, u64 i);
+string double_str(double i, int align = 0, int precision = 0, string space = " ");
 string float_str(float i, int align = 0, int precision = 0, string space = " ");
 string dec(s64 i, int align = 0, string space = " ");
 string hex(u64 i, int align = 0, string space = "0");

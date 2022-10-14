@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>fmpac4.bin /l:fmpac4.mml.log  /mml:fmpac4.mml  /ts:8 /@t:28 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>fmpac3.bin /l:fmpac3.mml.log  /mml:fmpac3.mml  /ts:8 /@t:28 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NXTargetName>Default</NXTargetName>
-    <LocalDebuggerCommandArguments>fmpac4.bin /l:fmpac4.mml.log  /mml:fmpac4.mml  /ts:8 /@t:28 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>fmpac3.bin /l:fmpac3.mml.log  /mml:fmpac3.mml  /ts:8 /@t:28 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

@@ -14,6 +14,22 @@ string align_left(string s, u64 i)
     ss << std::left << std::setw(i) << s;
     return ss.str();
 }
+string double_str(double i, int align, int precision, string space)
+{
+    std::stringstream ss;
+    if (0 == align)
+    {
+        ss << i;
+    }
+    else
+    {
+        ss << std::right << std::setw(align)
+            << std::setfill(space.at(0))
+            << std::fixed << std::setprecision(precision)
+            << i;
+    }
+    return ss.str();
+}
 string float_str(float i, int align, int precision, string space)
 {
     std::stringstream ss;

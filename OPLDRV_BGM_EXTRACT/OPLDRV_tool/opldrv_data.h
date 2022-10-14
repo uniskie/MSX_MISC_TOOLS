@@ -318,6 +318,8 @@ public:
 		int time_signiture_d8
 	);
 
+	double calc_max_ch_time();
+
 public:
 	Header	m_header;
 	std::vector<Command> m_melody_ch[Header::ch_count_m];

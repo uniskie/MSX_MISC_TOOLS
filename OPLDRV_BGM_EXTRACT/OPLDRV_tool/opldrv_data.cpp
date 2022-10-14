@@ -1343,12 +1343,21 @@ public:
 	};
 	void flush(FlushType flush_type = flush_nomal)
 	{
-		mml << buff.str();
-		buff.str("");
+		size_t s = buff.tellp();
+		if (s)
+		{
+			mml << buff.str();
+			buff.str("");
+		}
 		buff.clear();
 		if (flush_type != flush_nomal)
 		{
-			mml << std::endl;
+			string cr = "\n";
+			const string &ss = mml.str();
+			if (ss.substr(ss.size() - cr.size()) != cr)
+			{
+				mml << std::endl;
+			}
 			measure_count = 0;
 			measure_1st = true;
 			line_size = 0;
@@ -1472,9 +1481,49 @@ public:
 
 //--------------------------------------------------
 //! OplDrvData::Header
+//! 最も長いチャンネルの演奏時間を取得する (tick)
+//--------------------------------------------------
+double OplDrvData::calc_max_ch_time()
+{
+	double max_tick = 0.;
+	if (m_header.isRhythmMode())
+	{
+		double tick = 0.;
+		for (auto i = m_rhythm_ch.begin(); i != m_rhythm_ch.end(); ++i)
+		{
+			if (i->m_cmd == Command::CMD_R_NOTE)
+			{
+				tick += i->m_param;
+			}
+		}
+		max_tick = std::max(max_tick, tick);
+	}
+	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
+	{
+		auto melody_ch = m_melody_ch[ch];
+		double tick = 0.;
+		for (auto i = melody_ch.begin(); i != melody_ch.end(); ++i)
+		{
+			if (i->m_cmd == Command::CMD_NOTE)
+			{
+				tick += i->m_param;
+			}
+		}
+		max_tick = std::max(max_tick,tick);
+	}
+	return max_tick;
+}
+
+//--------------------------------------------------
+//! OplDrvData::Header
 //! MMLを作成する.
-//! @param	outbuffer		このvector<u8>にバイナリデータが出力される.
-//! @param	tempo			テンポ
+//! @param	outbuffer		バイナリデータ出力を受け取る
+//! @param	tempo			テンポを指定
+//! @param	mml_loop		MMLにループ指定
+//! @param	mml_rel_volume	相対音量で出力
+//! @param	def_len			省略時音長 L?
+//! @param	title			タイトル
+//! @param	time_signiture_d8	8分の何拍子か指定
 //--------------------------------------------------
 bool OplDrvData::make_mgs_mml(
 		std::string& outbuffer,
@@ -1579,6 +1628,10 @@ bool OplDrvData::make_mgs_mml(
 		}
 	}
 
+	// 最大演奏時間
+	double max_tick = calc_max_ch_time();
+	print("[INFO] max ch. time : " + double_str(max_tick));
+
 	// ループ
 	if (mml_loop && all_ch.size())
 	{
@@ -1586,10 +1639,12 @@ bool OplDrvData::make_mgs_mml(
 	}
 
 	// リズムチャンネル
-	if (m_rhythm_ch.size())
+	if (m_rhythm_ch.size() && m_header.isRhythmMode())
 	{
 		buffer.mml << ";--- Rhythm ---" << std::endl;
 		buffer.line_head = "F ";
+
+		double total_tick = 0.;
 
 		// default note length L?
 		if (def_len)
@@ -1609,6 +1664,7 @@ bool OplDrvData::make_mgs_mml(
 			case Command::CMD_R_NOTE:
 			{
 				float tick = float(i->m_param);
+				total_tick += tick;
 				int n = get_note_length(tick);
 				if (!n) break;
 				tick -= m_note_length[n];
@@ -1698,6 +1754,20 @@ bool OplDrvData::make_mgs_mml(
 			}
 			}
 		}
+		buffer.flush(buffer.flush_line);
+		print("[INFO] Rhythm ch. time : " + double_str(total_tick));
+		if (total_tick < max_tick)
+		{
+			buffer.mml << "; * time adjustment *" << std::endl;
+			auto diff = max_tick - total_tick;
+			while (0. < diff)
+			{
+				float tick = diff < FLT_MAX ? float(diff) : FLT_MAX;
+				int n = get_note_length(tick);
+				diff -= m_note_length[n];
+				buffer.add_cmd("R" + dec(n));
+			}
+		}
 		buffer.flush(buffer.flush_ch);
 		buffer.mml << std::endl;
 	}
@@ -1719,6 +1789,8 @@ bool OplDrvData::make_mgs_mml(
 			int user_voice = 15;			// 現在のユーザー音色(15は未定義)
 			bool req_user_voice = false;	// ユーザー音色コマンドが必要
 
+			double total_tick = 0.;
+
 			// default note length L?
 			if (def_len)
 			{
@@ -1732,6 +1804,7 @@ bool OplDrvData::make_mgs_mml(
 				case Command::CMD_NOTE:
 				{
 					float tick = float(i->m_param);
+					total_tick += tick;
 					int n = get_note_length(tick);
 					if (!n) break;
 					tick -= m_note_length[n];
@@ -1955,6 +2028,7 @@ bool OplDrvData::make_mgs_mml(
 						// MGSDRVはチャンネルに発音か休符がないとバグる
 						auto n = def_len ? def_len : 16;
 						buffer.add_cmd("R" + dec(n),m_note_length[n]);
+						total_tick += m_note_length[n];
 					}
 					break;
 				}
@@ -1963,6 +2037,27 @@ bool OplDrvData::make_mgs_mml(
 					ASSERT(0);
 					break;
 				}
+				}
+			}
+			buffer.flush(buffer.flush_line);
+			print("[INFO] Melody ch.#" + dec(ch) + " time : " + double_str(total_tick));
+			if (total_tick < max_tick)
+			{
+				buffer.mml << "; * time adjustment *" << std::endl;
+				auto diff = max_tick - total_tick;
+				while (0. < diff)
+				{
+					float tick = diff < FLT_MAX ? float(diff) : FLT_MAX;
+					int n = get_note_length(tick);
+					diff -= m_note_length[n];
+					if (def_len == n)
+					{
+						buffer.add_cmd("r");
+					}
+					else
+					{
+						buffer.add_cmd("r" + dec(n));
+					}
 				}
 			}
 			buffer.flush(buffer.flush_ch);
