@@ -1,5 +1,7 @@
 ﻿#include "uni_common.h"
 
+namespace uni_common {
+
 string align_right(string s, u64 i)
 {
     std::stringstream ss;
@@ -12,7 +14,23 @@ string align_left(string s, u64 i)
     ss << std::left << std::setw(i) << s;
     return ss.str();
 }
-string decimal(s64 i, int align, string space)
+string float_str(float i, int align, int precision, string space)
+{
+    std::stringstream ss;
+    if (0 == align)
+    {
+        ss << i;
+    }
+    else
+    {
+        ss << std::right << std::setw(align)
+            << std::setfill(space.at(0))
+            << std::fixed << std::setprecision(precision)
+            << i;
+    }
+    return ss.str();
+}
+string dec(s64 i, int align, string space)
 {
     std::stringstream ss;
     if (0 == align)
@@ -58,37 +76,72 @@ string get_upper(const string& s)
 }
 
 FILE* log_file = nullptr;
+std::stringstream log_stream;
 
-int print(string s)
-{
-    if (log_file)
-    {
-        fprintf(log_file, (s + "\n").c_str());
-    }
-    return printf((s + "\n").c_str());
-}
 FILE* set_log_file(FILE* f)
 {
     auto old = log_file;
     log_file = f;
+    if (f)
+    {
+        size_t size = log_stream.tellp();
+        if (0 < size)
+        {
+            fprintf(log_file, log_stream.str().c_str());
+            log_stream.clear();
+        }
+    }
     return old;
 }
-
-int print_log(string s)
+int close_log_file()
 {
     if (log_file)
     {
-        return fprintf(log_file, (s + "\n").c_str());
+        return fclose(log_file);
     }
-    return printf((s + "\n").c_str());
+    return 0;
 }
 
-int print_error(string s)
+int print(string s, bool add_cr)
 {
+    if (add_cr) s += "\n";
     if (log_file)
     {
-        fprintf(log_file, (s + "\n").c_str());
+        fprintf(log_file, s.c_str());
     }
-    return fprintf(stderr, (s + "\n").c_str());
+    else
+    {
+        log_stream << s;
+    }
+    return printf(s.c_str());
 }
 
+int print_log(string s, bool add_cr)
+{
+    if (add_cr) s += "\n";
+    if (log_file)
+    {
+        return fprintf(log_file, s.c_str());
+    }
+    else
+    {
+        log_stream << s;
+    }
+    return printf(s.c_str());
+}
+
+int print_error(string s, bool add_cr)
+{
+    if (add_cr) s += "\n";
+    if (log_file)
+    {
+        fprintf(log_file, s.c_str());
+    }
+    else
+    {
+        log_stream << s;
+    }
+    return fprintf(stderr, s.c_str());
+}
+
+} //namespace uni_common 

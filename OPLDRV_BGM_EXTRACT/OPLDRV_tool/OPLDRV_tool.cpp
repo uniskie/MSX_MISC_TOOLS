@@ -11,6 +11,8 @@
 
 #define USE_OUT_FILE_NAME_OPTION	1
 
+using namespace uni_common;
+
 //===============================================
 // show help
 //===============================================
@@ -24,24 +26,27 @@ void showHelp()
 		" [/o:OUTPUT FILENAME]"
 #endif
 		"\n"
-		"/l:filename  Log text output to file.\n"
-		"/a:address   set base address for RAW file.\n"
-		"             (Required for data using user voice.)\n"
-		"/r:address   relocate to address.\n"
-		"             (Required for data using user voice.)\n"
-		"/b           add BSAVE header to output.\n"
-		"/-b          RAW output. (remove BSAVE header)\n"
+		"/l:[filename]  Log text output to file.\n"
+		"/a:[address]   base address. (for RAW file) (need for user voice.)\n"
+		"/r:[address]   relocate to address. (need for user voice.)\n"
+		"/b             add BSAVE header to output.\n"
+		"/-b            RAW output. (remove BSAVE header)\n"
 		"\n"
-		"/cv:fmpac    convert ex-voice to user-voice. (use FMPAC ver.)\n"
-		"/cv:music    convert ex-voice to user-voice. (use A1GT ver.)\n"
-		"             (same as /cv:a1gt)\n"
+		"/cv:fmpac      convert EX-Voice to User-Voice. (FMPAC ver.)\n"
+		"/cv:music      convert EX-Voice to User-Voice. (A1GT ver.)\n"
+		"/v:[volume]    modify volume (-15 ~ +15)\n"
 		"\n"
-		"/v:volume    modify volume (-15 ~ +15)"
-		"\n\n"
-		"*1 [address] is hexadecimal.\n"
-		"   (e.g. 0000, a000, C000) \n"
-		"*2 take care address when use \"user-voice\".\n"
-		"   (\"user-voice\" use absolute address) \n"
+		"/mml:[filename] output MML.\n"
+		"/t:[tempo]      MML:set tempo.\n"
+		"/@t:[tick]      MML:set quarter note tick.\n"
+		"/dl:[num]       MML:set default note length = L?\n"
+		"/ts:[num]       MML:time signiture = ?/4\n"
+		"/loop           MML:set loop\n"
+		"/v+-            MML:use relative volume\n"
+		"\n"
+		"*1 [address] is hexadecimal. (e.g. 0000, a000, C000) \n"
+		"*2 take care Data Address when use \"User-Voice\".\n"
+		"   (\"User-Voice\" use Absolute Address) \n"
 		"\n"
 	);
 }
@@ -77,6 +82,13 @@ int main(int argc, char* argv[])
 
 	int volume_change = 0;				//!< 音量変更 マイナスなら音が大きくなる
 
+	string mmlFileName = "";			//!< MML出力ファイル名
+	float tempo = 120.f;				//!< MML変換時のテンポ
+	int default_note_length = 16;		//!< MMLデフォルト音長
+	int time_signiture_d8 = 8;			//!< MML拍子(?/8)
+	bool mml_loop = false;				//!< MMLループ
+	bool mml_rel_volume = false;		//!< MML相対音量モード
+
     //-- parse arguments
     int argi = 1;
     int  filename_arg_step = 0;
@@ -90,7 +102,7 @@ int main(int argc, char* argv[])
         if (arg.size())
         {
             string l = get_lower(arg);
-			//-- arg: output use BSAVE HEADER (BSAVE)
+			//-- arg: BSAVE形式出力（*.bin）
 			if (l == "/b")
 			{
 				print(string("arg: add BSAVE header: ") + arg);
@@ -98,7 +110,7 @@ int main(int argc, char* argv[])
 				remove_bsave_header = false;
 			}
 			else
-			//-- arg: output don't use BSAVE HEADER (RAW)
+			//-- arg: RAW形式出力（*.opl）
 			if (l == "/-b")
 			{
 				print(string("arg: remove BSAVE header: ") + arg);
@@ -106,7 +118,7 @@ int main(int argc, char* argv[])
 				remove_bsave_header = true;
 			}
 			else
-			//-- arg: output log file
+			//-- arg: ログファイル出力
 			if (l.substr(0, 3) == "/l:")
 			{
 				logFileName = arg.substr(3);
@@ -114,26 +126,26 @@ int main(int argc, char* argv[])
 				OplDrvData::trace_mode = true; // 解析出力を有効化
 			}
 			else
-			//-- arg: input base address
+			//-- arg: データのベースアドレス指定（RAW+ユーザー定義音色用）
 			if (l.substr(0, 3) == "/a:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> in_base_address;
-				print(string("arg: base address : ") + hex(in_base_address, 4));
+				print(string("arg: base address : ") + hex(in_base_address, 4, "0"));
 				if (!req_out_base_address)
 				{
 					out_base_address = in_base_address;
 				}
 			}
 			else
-			//-- arg: relocate
+			//-- arg: メモリ再配置
 			if (l.substr(0, 3) == "/r:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> out_base_address;
-				print(string("arg: relocate to address : ") + hex(out_base_address, 4));
+				print(string("arg: relocate to address : ") + hex(out_base_address, 4, "0"));
 				req_out_base_address = true;
 			}
 			else
-			//-- arg: convert extention voice
+			//-- arg: ROM拡張音色をユーザー定義音色に変換（ROM拡張音色がFMPACや内蔵機種で違う問題を回避）
 			if (l.substr(0, 4) == "/cv:")
 			{
 				string romtype = get_lower(arg.substr(4));
@@ -160,14 +172,101 @@ int main(int argc, char* argv[])
 				}
 			}
 			else
-			//-- arg: modify volume
+			//-- arg: 音量補正
 			if (l.substr(0, 3) == "/v:")
 			{
 				std::istringstream(arg.substr(3)) >> std::dec >> volume_change;
-				print(string("arg: modify volume : ") + decimal(volume_change));
+				print("arg: modify volume : " + dec(volume_change));
 			}
 			else
-			//-- arg: inFileName
+			//-- arg: MML: MML出力ファイル名
+			if (l.substr(0, 5) == "/mml:")
+			{
+				mmlFileName = arg.substr(5);
+				print(string("arg: mmlFileName: ") + arg);
+			}
+			else
+			//-- arg: MML: テンポ指定
+			if (l.substr(0, 3) == "/t:")
+			{
+				std::istringstream(arg.substr(3)) >> std::dec >> tempo;
+				print("arg:MML tempo : " + float_str(tempo));
+				
+				for (int i=0,n=1; i<7; ++i,n*=2)
+				{
+					print("    L" + dec(n) +": tick = "
+						+ float_str(OplDrvData::tempo2tick(tempo, n))
+					);
+				}
+			}
+			else
+			//-- arg: MML: 4分音符のtick数でテンポ指定
+			if (l.substr(0, 4) == "/@t:")
+			{
+				int qt;
+				std::istringstream(arg.substr(4)) >> std::dec >> qt;
+				print("arg:MML quarter note tick : " + dec(qt));
+				tempo = OplDrvData::l4tick2tempo(float(qt));
+				print("    tempo = " + float_str(tempo));
+				float notetick = qt * 4.f;
+				for (int i=0,n=1; i<7; ++i,n*=2)
+				{
+					print("    L" + dec(n) +": tick = " + float_str(notetick / n));
+				}
+			#if 0
+				// list /@t:1 to @t:120
+				print("|     | tempo   | L1     | L2     | L4     | L8     | L16    | L32    | L64    |   OK   |");
+				print("|-----|---------|--------|--------|--------|--------|--------|--------|--------|--------|");
+				for (int t = 1; t<=128; ++t)
+				{
+					tempo = OplDrvData::l4tick2tempo(t);
+					std::stringstream ss;
+					ss << "|" << align_left(" " + dec(t) + " ", 5);
+					ss << "|" << align_left(" " + float_str(tempo) + " ", 9) << "|";
+					float notetick = t * 4.f;
+					int ok = 4;
+					for (int i = 0, n = 1; i < 7; ++i, n *= 2)
+					{
+						float ti = (notetick / n);
+						if (floor(ti) == ti) ok = n;
+						ss << align_left(" " + float_str(notetick / n) + " ", 8) << "|";
+					}
+					
+					ss << align_left( " L" + dec(ok) + (ok==64 ? " *" : " "), 8) << "|";
+					print( ss.str() );
+				}
+			#endif
+			}
+			else
+			//-- arg: MML: 省略時音長 (L?)
+			if (l.substr(0, 4) == "/dl:")
+			{
+				std::istringstream(arg.substr(4)) >> std::dec >> default_note_length;
+				print("arg:MML default note length : L" + dec(default_note_length));
+			}
+			else
+			//-- arg: MML: 8分のn拍子指定
+			if (l.substr(0, 4) == "/ts:")
+			{
+				std::istringstream(arg.substr(4)) >> std::dec >> time_signiture_d8;
+				print("arg:MML time signiture : " + dec(time_signiture_d8) + "/8");
+			}
+			else
+			//-- arg: MML: ループ有効
+			if (l.substr(0, 5) == "/loop")
+			{
+				mml_loop = true;
+				print("arg:MML set loop");
+			}
+			else
+			//-- arg: MML: 相対音量有効
+			if (l.substr(0, 4) == "/v+-")
+			{
+				mml_rel_volume = true;
+				print("arg:MML set relative volume mode");
+			}
+			else
+			//-- arg: 入力ファイル名
 			if (filename_arg_step == 0)
 			{
 				inFileName = arg;
@@ -176,7 +275,7 @@ int main(int argc, char* argv[])
 			}
 #if USE_OUT_FILE_NAME_OPTION
 			else
-			//-- arg: outFilename
+			//-- arg: 出力ファイル名
 			if (l.substr(0, 3) == "/o:")
 			{
 				if (filename_arg_step == 1)
@@ -341,52 +440,7 @@ int main(int argc, char* argv[])
 	// 音量修正
 	if (volume_change)
 	{
-		print_log("[INFO] volume modify " + decimal(volume_change));
-		// リズムチャンネル
-		if (opldata.m_rhythm_ch.size())
-		{
-			for (auto i= opldata.m_rhythm_ch.begin();
-				 i != opldata.m_rhythm_ch.end();
-				++i)
-			{
-				if (i->m_cmd == OplDrvData::Command::CMD_R_VOL)
-				{
-					int v = int(i->m_param);
-					v += volume_change;
-					if ((v < 0) || (15 < v))
-					{
-						print_log("[CAUTION] volume over flow. " 
-							+ decimal(i->m_param) + " -> " + decimal(v));
-						v = (v < 0) ? 0 : 15;
-					}
-					i->m_param = v;
-				}
-			}
-		}
-		// メロディーチャンネル
-		for (int ch = 0; ch < countof(opldata.m_melody_ch); ++ch)
-		{
-			if (opldata.m_melody_ch[ch].size())
-			{
-				for (auto i = opldata.m_melody_ch[ch].begin();
-					 i != opldata.m_melody_ch[ch].end();
-					++i)
-				{
-					if (i->m_cmd == OplDrvData::Command::CMD_VOL)
-					{
-						int v = i->m_opt;
-						v += volume_change;
-						if ((v < 0) || (15 < v))
-						{
-							print_log("[CAUTION] volume over flow. "
-								+ decimal(i->m_opt) + " -> " + decimal(v));
-							v = (v < 0) ? 0 : 15;
-						}
-						i->m_opt = v;
-					}
-				}
-			}
-		}
+		opldata.modify_volume( volume_change );
 	}
 
 	//-------------------------------------
@@ -411,7 +465,7 @@ int main(int argc, char* argv[])
 			errno_t err_no = fopen_s(&outFile, outFileName.c_str(), "wb");
 			if (err_no != 0)
 			{
-				print_error(string("[ERROR] can not open file. \"") + inFileName + "\"");
+				print_error(string("[ERROR] can not open file. \"") + outFileName + "\"");
 				if (!silent_mode)   std::cin.get();
 				return 1; // error end
 			}
@@ -427,15 +481,15 @@ int main(int argc, char* argv[])
 				bsave_header[6] = bsave_header[2];
 
 				print("[INFO] output BSAVE file.");
-				print("       start = 0x" + hex(out_base_address, 4));
-				print("       end   = 0x" + hex(end_address, 4));
-				print("       size  = 0x" + hex(output_buffer.size(), 4));
-				print("       total = 0x" + hex(output_buffer.size() + countof(bsave_header), 4));
+				print("       start = 0x" + hex(out_base_address, 4, "0"));
+				print("       end   = 0x" + hex(end_address, 4, "0"));
+				print("       size  = 0x" + hex(output_buffer.size(), 4, "0"));
+				print("       total = 0x" + hex(output_buffer.size() + countof(bsave_header), 4, "0"));
 
 				auto out_size = fwrite(&bsave_header[0], 1, countof(bsave_header), outFile);
 				if (!out_size)
 				{
-					print_error(string("[ERROR] can not write file. \"") + inFileName + "\"");
+					print_error(string("[ERROR] can not write file. \"") + outFileName + "\"");
 					if (!silent_mode)   std::cin.get();
 					return 1; // error end
 				}
@@ -443,21 +497,60 @@ int main(int argc, char* argv[])
 			else
 			{
 				print("[INFO] output RAW file.");
-				print("       start = 0x" + hex(out_base_address, 4));
-				print("       end   = 0x" + hex(out_base_address + output_buffer.size() - 1, 4));
-				print("       size  = 0x" + hex(output_buffer.size(), 4));
-				print("       total = 0x" + hex(output_buffer.size(), 4));
+				print("       start = 0x" + hex(out_base_address, 4, "0"));
+				print("       end   = 0x" + hex(out_base_address + output_buffer.size() - 1, 4, "0"));
+				print("       size  = 0x" + hex(output_buffer.size(), 4, "0"));
+				print("       total = 0x" + hex(output_buffer.size(), 4, "0"));
 
 			}
 			auto out_size = fwrite( &output_buffer[0], 1, output_buffer.size(), outFile);
 			if (!out_size)
 			{
-				print_error(string("[ERROR] can not write file. \"") + inFileName + "\"");
+				print_error(string("[ERROR] can not write file. \"") + outFileName + "\"");
 				if (!silent_mode)   std::cin.get();
 				return 1; // error end
 			}
 		}
 	}
 
+	//-------------------------------------
+	// mml 出力
+	if (mmlFileName.size())
+	{
+		print("[INFO] output mml file: " + mmlFileName);
+
+		fs::path mmlPath(mmlFileName);
+		mmlPath.replace_extension("");
+		string title = mmlPath.generic_string();
+
+
+		std::string mml;
+		if (!opldata.make_mgs_mml(
+			mml, tempo, mml_loop, mml_rel_volume, default_note_length, title, time_signiture_d8))
+		{
+			if (!silent_mode)   std::cin.get();
+			return 1; // error end
+		}
+		print(mml);
+
+		FILE* outFile;
+		errno_t err_no = fopen_s(&outFile, mmlFileName.c_str(), "w");
+		if (err_no != 0)
+		{
+			print_error(string("[ERROR] can not open file. \"") + mmlFileName + "\"");
+			if (!silent_mode)   std::cin.get();
+			return 1; // error end
+		}
+		auto res = fprintf(outFile, mml.c_str());
+		if (!res)
+		{
+			print_error(string("[ERROR] can not write file. \"") + mmlFileName + "\"");
+			if (!silent_mode)   std::cin.get();
+			return 1; // error end
+		}
+		fclose( outFile );
+	}
+
+	close_log_file();
 	return 0;
 }

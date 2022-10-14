@@ -181,6 +181,9 @@ public:
 			BIT_CYMBAL		= 0x02,
 			BIT_HI_HUT		= 0x01,
 		};
+		enum {
+			RHYTHM_INST_NUM = 5,
+		};
 
 	public:
 		int		m_mode;
@@ -211,10 +214,13 @@ public:
 
 		string getCmdInfo() const;
 
+		static int getOctave(int param);
 		static string getCmdName(int cmd);
 		static string getOctaveName(int param);
 		static string getNoteName(int param);
 		static string getRhythmName(int param, bool use_space = false);
+
+
 	};
 
 
@@ -249,7 +255,7 @@ public:
 		enum {
 			data_size = 8,
 		};
-		u8 data[data_size];
+		u8 reg[data_size];
 	};
 	struct ExtraVoiceSet
 	{
@@ -264,12 +270,28 @@ public:
 	public:
 		VoiceData()
 			: offset(0)
+			, voice_no(0)
 		{
-			std::fill(m_data.data, m_data.data + countof(m_data.data), 0);
+			std::fill(m_data.reg, m_data.reg + countof(m_data.reg), 0);
 		}
 	public:
 		VoiceRaw m_data;
 		u16 offset;
+		u8 voice_no;
+	public:
+		u8 get_TL() const { return m_data.reg[2] & 63; }
+		u8 get_FB() const { return m_data.reg[3] & 7; }
+		u8 get_AR(int o) const { return m_data.reg[4 + o] >> 4; }
+		u8 get_DR(int o) const { return m_data.reg[4 + o] & 15; }
+		u8 get_SL(int o) const { return m_data.reg[6 + o] >> 4; }
+		u8 get_RR(int o) const { return m_data.reg[6 + o] & 15; }
+		u8 get_KL(int o) const { return m_data.reg[2 + o] >> 6; }
+		u8 get_MT(int o) const { return m_data.reg[0 + o] & 15; }
+		u8 get_AM(int o) const { return m_data.reg[0 + o] >> 7; }
+		u8 get_VB(int o) const { return (m_data.reg[0 + o] >> 6) & 1; }
+		u8 get_EG(int o) const { return (m_data.reg[0 + o] >> 5) & 1; }
+		u8 get_KR(int o) const { return (m_data.reg[0 + o] >> 4) & 1; }
+		u8 get_DT(int o) const { return (m_data.reg[3] >> (3 + o)) & 1; }
 	};
 
 public:
@@ -282,8 +304,19 @@ public:
 	bool from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address);
 
 	bool convert_voice_rom_to_user(int romtype);
+	int modify_volume(int volume_change);
 
-	bool make_binary(std::vector<u8>& outb, u16 base_address);
+	bool make_binary(std::vector<u8>& outbuffer, u16 base_address);
+
+	bool make_mgs_mml(
+		std::string& outbuffer, 
+		float tempo, 
+		bool mml_loop, 
+		bool mml_rel_volume, 
+		int def_len, 
+		string title, 
+		int time_signiture_d8
+	);
 
 public:
 	Header	m_header;
@@ -296,6 +329,28 @@ public:
 
 public:
 	static bool trace_mode;
+
+
+	enum {
+		FPS = 60,
+	};
+	/// TEMPOからn分音符のtickを計算
+	static float tempo2tick(float tempo, int n)
+	{
+		return float(FPS) * 60.f * 4.f / tempo / n;
+	}
+	/// 4分音符のtickからTEMPOを計算
+	static float l4tick2tempo(float quarter_note_tick)
+	{
+		return float(FPS) * 60.f / quarter_note_tick;
+	}
+
+public:
+	float m_tempo;
+	std::map<u8, float> m_note_length;
+	void set_tempo(float tempo);
+	void add_note_length(int n, float tempo);
+	int get_note_length(float tick);
 };
 
 } //namespace OPLDRV
