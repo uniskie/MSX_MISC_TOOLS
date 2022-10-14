@@ -57,6 +57,23 @@ call :convert rtyped.bin /@t:24 /dl:16
 call :convert rtypee.bin /@t:32 /dl:4
 call :convert rtypef.bin /@t:32 /dl:16
 
+call :convert rtype0m.opl /@t:32 /dl:16
+call :convert rtype1m.opl /@t:24 /dl:16
+call :convert rtype2m.opl /@t:32 /dl:16
+call :convert rtype3m.opl /@t:32 /dl:16
+call :convert rtype4m.opl /@t:24 /dl:16
+call :convert rtype5m.opl /@t:30 /dl:12
+call :convert rtype6m.opl /@t:24 /dl:8
+call :convert rtype7m.opl /@t:40 /dl:8
+call :convert rtype8m.opl /@t:32 /dl:16
+call :convert rtype9m.opl /@t:32 /dl:16
+call :convert rtypeam.opl /@t:32 /dl:16
+call :convert rtypebm.opl /@t:32 /dl:8
+call :convert rtypecm.opl /@t:24 /dl:16
+call :convert rtypedm.opl /@t:24 /dl:16
+call :convert rtypeem.opl /@t:32 /dl:4
+call :convert rtypefm.opl /@t:32 /dl:16
+
 exit /b
 
 REM =========================================
