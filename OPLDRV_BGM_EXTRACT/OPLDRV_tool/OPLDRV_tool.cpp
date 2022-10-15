@@ -208,11 +208,13 @@ int main(int argc, char* argv[])
 				print("arg:MML quarter note tick : " + dec(qt));
 				tempo = OplDrvData::l4tick2tempo(float(qt));
 				print("    tempo = " + float_str(tempo));
+			#if 0
 				float notetick = qt * 4.f;
 				for (int i=0,n=1; i<7; ++i,n*=2)
 				{
 					print("    L" + dec(n) +": tick = " + float_str(notetick / n));
 				}
+			#endif
 			#if 0
 				// list /@t:1 to @t:120
 				print("|     | tempo   | L1     | L2     | L4     | L8     | L16    | L32    | L64    |   OK   |");

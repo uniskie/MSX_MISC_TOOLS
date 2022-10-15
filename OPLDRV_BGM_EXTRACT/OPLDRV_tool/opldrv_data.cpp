@@ -1254,7 +1254,13 @@ void OplDrvData::set_tempo(float tempo)
 	add_note_length(32, tempo);
 	add_note_length(48, tempo);
 	add_note_length(64, tempo);
-//	add_note_length(96, tempo);
+	add_note_length(96, tempo);
+
+	print("[Note Length] tempo = " + dec(int(tempo)));
+	for (auto i = m_note_length.begin(); i != m_note_length.end(); ++i)
+	{
+		print("[Note Length] L" + dec(i->first) + " = " + float_str(i->second));
+	}
 }
 
 //--------------------------------------------------
@@ -1268,30 +1274,77 @@ void OplDrvData::add_note_length(int n, float tempo)
 
 //--------------------------------------------------
 //! OplDrvData::Header
+//! MML出力用：音長比較
+//! @return 0=一致 -1=tickが小さい +1=tickが大きい
+//--------------------------------------------------
+int OplDrvData::compare_note_length(float tick, int n)
+{
+	auto diff = tick - m_note_length[n];
+	if (abs(diff) <= FLT_EPSILON)
+	{
+		return 0;	// equal
+	}
+
+	// データ側が整数なので切り捨てと切り上げも検査
+	auto ft = floor(tick);
+	auto fn = floor(m_note_length[n]); // 切り捨て
+	auto cn = ceil(m_note_length[n]); // 切り上げ
+	if ((ft==fn) || (ft==cn))
+	{
+		return 0;	// equal
+	}
+
+	if (diff < 0.f)
+	{
+		return -1;	// tick < note_length[n]
+	}
+	return 1;	// tick > note_length[n]
+}
+
+//--------------------------------------------------
+//! OplDrvData::Header
 //! MML出力用：音長リスト追加
 //--------------------------------------------------
-int OplDrvData::get_note_length(float tick)
+int OplDrvData::get_note_length(float tick, float& note_tick)
 {
+	note_tick = tick;
+
+	// 一致を優先
+	for (auto i = m_note_length.begin(); i != m_note_length.end(); ++i)
+	{
+		if (0 == compare_note_length(tick, i->first))
+		{
+			return i->first;
+		}
+	}
+	// 端数のある場合
 	for (auto i = m_note_length.begin(); i != m_note_length.end(); ++i)
 	{
 		if (i->second <= tick)
 		{
-			if ((i->first % 3) == 0)
+			if (i->first == 2) // L2の時
 			{
-				// 3連符は厳密一致のみ
-				if (fabsf(i->second - tick) < FLT_EPSILON)
+				if (0 == compare_note_length(tick - m_note_length[3], 3))
 				{
-					return i->first;
-				}
-				else
-				{
-					continue;
+					note_tick = m_note_length[3];
+					return 3; // 3+3なら3をまず返す
 				}
 			}
+			if (0 == (i->first % 3)) // L3の倍数の時
+			{
+				auto n = i->first * 2;
+				if (0 == compare_note_length(tick - m_note_length[n], i->first))
+				{
+					note_tick = i->second;
+					return i->first;
+				}
+				continue; // 3の倍数の組み合わせでなければスキップ
+			}
+			note_tick = i->second;
 			return i->first;
 		}
 	}
-	return 0;//m_note_length.rbegin()->first;
+	return 0;
 }
 
 
@@ -1665,30 +1718,32 @@ bool OplDrvData::make_mgs_mml(
 			{
 				float tick = float(i->m_param);
 				total_tick += tick;
-				int n = get_note_length(tick);
+				float note_tick = tick;
+				int n = get_note_length(tick, note_tick);
 				if (!n) break;
-				tick -= m_note_length[n];
+				tick -= note_tick;
 
 				if (def_len && (n== def_len))
 				{
 					// 音長省略
-					buffer.add_cmd(Command::getRhythmName(i->m_opt) + ":", m_note_length[n]);
+					buffer.add_cmd(Command::getRhythmName(i->m_opt) + ":", note_tick);
 				}
 				else
 				{
-					buffer.add_cmd(	Command::getRhythmName(i->m_opt) + dec(n), m_note_length[n]);
+					buffer.add_cmd(	Command::getRhythmName(i->m_opt) + dec(n), note_tick);
 				}
 
 				while (0.f < tick)
 				{
 					auto old_n = n;
-					n = get_note_length(tick);
+					note_tick = tick;
+					n = get_note_length(tick, note_tick);
 					if (!n) break;
-					tick -= m_note_length[n];
+					tick -= note_tick;
 
 					if (!buffer.measure_1st && (old_n > 1) && (n == old_n * 2))
 					{
-						buffer.add_cmd(".", m_note_length[n], true);
+						buffer.add_cmd(".", note_tick, true);
 					}
 					else
 					{
@@ -1696,11 +1751,11 @@ bool OplDrvData::make_mgs_mml(
 						if (def_len && (n == def_len))
 						{
 							// 音長省略
-							buffer.add_cmd("R:", m_note_length[n]);
+							buffer.add_cmd("R:", note_tick);
 						}
 						else
 						{
-							buffer.add_cmd("R" + dec(n), m_note_length[n]);
+							buffer.add_cmd("R" + dec(n), note_tick);
 						}
 					}
 				}
@@ -1763,8 +1818,9 @@ bool OplDrvData::make_mgs_mml(
 			while (0. < diff)
 			{
 				float tick = diff < FLT_MAX ? float(diff) : FLT_MAX;
-				int n = get_note_length(tick);
-				diff -= m_note_length[n];
+				float note_tick = tick;
+				int n = get_note_length(tick, note_tick);
+				diff -= note_tick;
 				buffer.add_cmd("R" + dec(n));
 			}
 		}
@@ -1805,9 +1861,10 @@ bool OplDrvData::make_mgs_mml(
 				{
 					float tick = float(i->m_param);
 					total_tick += tick;
-					int n = get_note_length(tick);
+					float note_tick = tick;
+					int n = get_note_length(tick, note_tick);
 					if (!n) break;
-					tick -= m_note_length[n];
+					tick -= note_tick;
 
 					// ボリューム未設定
 					if (volume < 0)
@@ -1847,7 +1904,7 @@ bool OplDrvData::make_mgs_mml(
 						}
 					}
 
-					float note_total = m_note_length[n];
+					float note_total = note_tick;
 
 					if (legato && i->m_opt) // 休符はの時はスラー不要
 					{
@@ -1859,40 +1916,41 @@ bool OplDrvData::make_mgs_mml(
 						// 音長省略
 						buffer.add_cmd(
 							get_lower(Command::getNoteName(i->m_opt))
-							, m_note_length[n]);
+							, note_tick);
 					}
 					else
 					{
 						buffer.add_cmd(
 							get_lower(Command::getNoteName(i->m_opt))
-							+ dec(n), m_note_length[n]);
+							+ dec(n), note_tick);
 					}
 
 					while (0.f < tick)
 					{
 						int old_n = n;
-						n = get_note_length(tick);
+						note_tick = tick;
+						n = get_note_length(tick, note_tick);
 						if (!n) break;
-						tick -= m_note_length[n];
-						note_total += m_note_length[n];
+						tick -= note_tick;
+						note_total += note_tick;
 
 						if (!buffer.measure_1st && (old_n > 1) && (n == old_n * 2))
 						{
 							// 半分なら.
-							buffer.add_cmd(".", m_note_length[n], true);
+							buffer.add_cmd(".", note_tick, true);
 						}
 						else
 						{
 							if (!buffer.measure_1st && (note_total <= m_note_length[1]))
 							{
 								// 全音符以内なら^で音長だけ繋げる
-								buffer.add_cmd("^" + dec(n), m_note_length[n], true);
+								buffer.add_cmd("^" + dec(n), note_tick, true);
 								ASSERT(n > 1);
 							}
 							else
 							{
 								// スラーで繋げる
-								note_total = m_note_length[n];
+								note_total = note_tick;
 								if (i->m_opt) // 休符はの時はスラー不要
 								{
 									buffer.add_cmd("&");
@@ -1902,13 +1960,13 @@ bool OplDrvData::make_mgs_mml(
 									// 音長省略
 									buffer.add_cmd(
 										get_lower(Command::getNoteName(i->m_opt))
-										, m_note_length[n]);
+										, note_tick);
 								}
 								else
 								{
 									buffer.add_cmd(
 										get_lower(Command::getNoteName(i->m_opt))
-										+ dec(n), m_note_length[n]);
+										+ dec(n), note_tick);
 								}
 							}
 						}
@@ -2048,8 +2106,9 @@ bool OplDrvData::make_mgs_mml(
 				while (0. < diff)
 				{
 					float tick = diff < FLT_MAX ? float(diff) : FLT_MAX;
-					int n = get_note_length(tick);
-					diff -= m_note_length[n];
+					float note_tick = tick;
+					int n = get_note_length(tick, note_tick);
+					diff -= note_tick;
 					if (def_len == n)
 					{
 						buffer.add_cmd("r");

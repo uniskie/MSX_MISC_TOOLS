@@ -352,7 +352,8 @@ public:
 	std::map<u8, float> m_note_length;
 	void set_tempo(float tempo);
 	void add_note_length(int n, float tempo);
-	int get_note_length(float tick);
+	int get_note_length(float tick, float& note_tick);
+	int compare_note_length(float tick, int n);
 };
 
 } //namespace OPLDRV

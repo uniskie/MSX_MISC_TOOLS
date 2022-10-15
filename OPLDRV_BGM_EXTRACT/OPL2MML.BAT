@@ -45,7 +45,7 @@ call :convert rtype1.bin /@t:24 /dl:16
 call :convert rtype2.bin /@t:32 /dl:16
 call :convert rtype3.bin /@t:32 /dl:16
 call :convert rtype4.bin /@t:24 /dl:16
-call :convert rtype5.bin /@t:30 /dl:12
+call :convert rtype5.bin /@t:40 /dl:16
 call :convert rtype6.bin /@t:24 /dl:8
 call :convert rtype7.bin /@t:40 /dl:8
 call :convert rtype8.bin /@t:32 /dl:16
@@ -62,7 +62,7 @@ call :convert rtype1m.opl /@t:24 /dl:16
 call :convert rtype2m.opl /@t:32 /dl:16
 call :convert rtype3m.opl /@t:32 /dl:16
 call :convert rtype4m.opl /@t:24 /dl:16
-call :convert rtype5m.opl /@t:30 /dl:12
+call :convert rtype5m.opl /@t:40 /dl:16
 call :convert rtype6m.opl /@t:24 /dl:8
 call :convert rtype7m.opl /@t:40 /dl:8
 call :convert rtype8m.opl /@t:32 /dl:16
