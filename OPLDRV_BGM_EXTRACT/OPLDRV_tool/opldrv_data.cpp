@@ -1606,6 +1606,20 @@ bool OplDrvData::make_mgs_mml(
 
 	int def_note_length = 0;			// 省略時音長
 
+	// 使用チャンネルリスト文字列
+	string all_ch = "";
+	if (m_rhythm_ch.size())
+	{
+		all_ch += "F";
+	}
+	for (int i = 0; i < m_header.getMelodyChCount(); ++i)
+	{
+		if (m_melody_ch[i].size())
+		{
+			all_ch += string("9ABCDEFGH").at(i);
+		}
+	}
+
 	// MSXPLAY header
 	buffer.mml
 		<< ";[gain=1.0 name=" << title << " duration=300s fade=5s cpu=0 lpf=1]"	<< std::endl 
@@ -1622,6 +1636,17 @@ bool OplDrvData::make_mgs_mml(
 		<< "#opll_mode " << (m_header.isRhythmMode() ? "1" : "0")	<< std::endl
 		<< "#tempo " << std::dec << int(tempo)						<< std::endl
 		<< "#title { \"" << title << "\" }"							<< std::endl
+		<< "#alloc { ";
+	for (auto i = all_ch.begin(); i != all_ch.end(); ++i)
+	{
+		if (i != all_ch.begin())
+		{
+			buffer.mml << ",";
+		}
+		buffer.mml << *i << "=1400";
+	}
+	buffer.mml
+		<< " }"  << std::endl
 		<< std::endl;
 
 	// ユーザー音色
@@ -1665,20 +1690,6 @@ bool OplDrvData::make_mgs_mml(
 				<< std::endl;
 		}
 		buffer.mml << std::endl;
-	}
-
-	// 全チャンネル
-	string all_ch = "";
-	if (m_rhythm_ch.size())
-	{
-		all_ch += "F";
-	}
-	for (int i = 0; i < m_header.getMelodyChCount(); ++i)
-	{
-		if (m_melody_ch[i].size())
-		{
-			all_ch += string("9ABCDEFGH").at(i);
-		}
 	}
 
 	// 最大演奏時間
