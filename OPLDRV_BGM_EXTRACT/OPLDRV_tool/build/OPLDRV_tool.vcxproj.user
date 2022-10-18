@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>rtype5.bin /l:rtype5.mml.log  /mml:rtype5.mml  /ts:8 /@t:40 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>fmpac0.bin /l:fmpac0.mml.log  /mml:fmpac0.mml  /ts:16 /@t:32 /dl:16 /loop /v+- /cv:fmpac /cl:fmpac /cl:music</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NXTargetName>Default</NXTargetName>
-    <LocalDebuggerCommandArguments>rtype5.bin /l:rtype5.mml.log  /mml:rtype5.mml  /ts:8 /@t:40 /dl:16 /loop /v+- /cv:fmpac</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>fmpac0.bin /l:fmpac0.mml.log  /mml:fmpac0.mml  /ts:16 /@t:32 /dl:16 /loop /v+- /cv:fmpac /cl:fmpac /cl:music</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

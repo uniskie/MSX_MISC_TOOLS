@@ -29,55 +29,55 @@ REM Convert FMPAC BGM to MML (MGSDRV)
 REM =========================================
 REM 4分音符が24tick =T150、デフォルト音長L16
 REM ユーザー音色コンバートあり
-call :convert fmpac0.bin /t:150 /dl:16
-call :convert fmpac1.bin /t:150 /dl:16
+call :convert fmpac0.bin /t:150 /dl:16 /loop
+call :convert fmpac1.bin /t:150 /dl:16 /loop
 REM 4分音符が28tick = T128、デフォルト音長L16
 REM ユーザー音色コンバートあり
-call :convert fmpac2.bin /@t:28 /dl:16
-call :convert fmpac3.bin /@t:28 /dl:16
-call :convert fmpac4.bin /@t:28 /dl:16
+call :convert fmpac2.bin /@t:28 /dl:16 /loop
+call :convert fmpac3.bin /@t:28 /dl:16 /loop
+call :convert fmpac4.bin /@t:28 /dl:16 /loop
 
 REM =========================================
 REM Convert RTYPE BGM to MML (MGSDRV)
 REM =========================================
-call :convert rtype0.bin /@t:32 /dl:16
-call :convert rtype1.bin /@t:24 /dl:16
-call :convert rtype2.bin /@t:32 /dl:16
-call :convert rtype3.bin /@t:32 /dl:16
-call :convert rtype4.bin /@t:24 /dl:16
-call :convert rtype5.bin /@t:40 /dl:16
-call :convert rtype6.bin /@t:24 /dl:8
-call :convert rtype7.bin /@t:40 /dl:8
+call :convert rtype0.bin /@t:32 /dl:16 /loop
+call :convert rtype1.bin /@t:24 /dl:16 /loop
+call :convert rtype2.bin /@t:32 /dl:16 /loop
+call :convert rtype3.bin /@t:32 /dl:16 /loop
+call :convert rtype4.bin /@t:24 /dl:16 /loop
+call :convert rtype5.bin /@t:40 /dl:16 /loop
+call :convert rtype6.bin /@t:24 /dl:8  /loop
+call :convert rtype7.bin /@t:40 /dl:8  /loop
 call :convert rtype8.bin /@t:32 /dl:16
 call :convert rtype9.bin /@t:32 /dl:16
 call :convert rtypea.bin /@t:32 /dl:16
 call :convert rtypeb.bin /@t:32 /dl:8
 call :convert rtypec.bin /@t:24 /dl:16
-call :convert rtyped.bin /@t:24 /dl:16
+call :convert rtyped.bin /@t:24 /dl:16 /loop
 call :convert rtypee.bin /@t:32 /dl:4
-call :convert rtypef.bin /@t:32 /dl:16
+call :convert rtypef.bin /@t:32 /dl:16 /loop
 
-call :convert rtype0m.opl /@t:32 /dl:16
-call :convert rtype1m.opl /@t:24 /dl:16
-call :convert rtype2m.opl /@t:32 /dl:16
-call :convert rtype3m.opl /@t:32 /dl:16
-call :convert rtype4m.opl /@t:24 /dl:16
-call :convert rtype5m.opl /@t:40 /dl:16
-call :convert rtype6m.opl /@t:24 /dl:8
-call :convert rtype7m.opl /@t:40 /dl:8
+call :convert rtype0m.opl /@t:32 /dl:16 /loop
+call :convert rtype1m.opl /@t:24 /dl:16 /loop
+call :convert rtype2m.opl /@t:32 /dl:16 /loop
+call :convert rtype3m.opl /@t:32 /dl:16 /loop
+call :convert rtype4m.opl /@t:24 /dl:16 /loop
+call :convert rtype5m.opl /@t:40 /dl:16 /loop
+call :convert rtype6m.opl /@t:24 /dl:8  /loop
+call :convert rtype7m.opl /@t:40 /dl:8  /loop
 call :convert rtype8m.opl /@t:32 /dl:16
 call :convert rtype9m.opl /@t:32 /dl:16
 call :convert rtypeam.opl /@t:32 /dl:16
 call :convert rtypebm.opl /@t:32 /dl:8
 call :convert rtypecm.opl /@t:24 /dl:16
-call :convert rtypedm.opl /@t:24 /dl:16
+call :convert rtypedm.opl /@t:24 /dl:16 /loop
 call :convert rtypeem.opl /@t:32 /dl:4
-call :convert rtypefm.opl /@t:32 /dl:16
+call :convert rtypefm.opl /@t:32 /dl:16 /loop
 
 exit /b
 
 REM =========================================
 :convert
 REM =========================================
-OPLDRV_tool %1 /mml:%~n1.mml /l:%~n1.mml.log %2 %3 /v+- /loop /cv:fmpac
+OPLDRV_tool %1 /mml:%~n1.mml /l:%~n1.mml.log %2 %3 %4 /v+- /cv:fmpac
 exit /b

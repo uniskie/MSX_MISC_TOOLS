@@ -11,6 +11,51 @@ using namespace uni_common;
 
 //==================================================
 //
+// class OplDrvData::VoiceData
+// 
+//==================================================
+
+//--------------------------------------------------
+//! OplDrvData::VoiceData
+//! 音色定義MMLを返す（MGSDRV）
+//--------------------------------------------------
+string OplDrvData::VoiceData::make_mgs_mml()
+{
+	std::stringstream mml;
+	mml
+		<< "@v" << std::dec << int(voice_no)
+		<< " = {"
+		//<< " ; 0x" << hex(i->first, 4)
+		<< " ; " << m_data.long_name
+		<< std::endl
+		<< ";       TL FB" << std::endl
+		<< "        "
+		<< dec(get_TL(), 2) << ","
+		<< dec(get_FB(), 2) << "," << std::endl
+		<< "; AR DR SL RR KL MT AM VB EG KR DT" << std::endl;
+	for (int o = 0; o < 2; ++o)
+	{
+		mml
+			<< "  "
+			<< dec(get_AR(o), 2) << ","
+			<< dec(get_DR(o), 2) << ","
+			<< dec(get_SL(o), 2) << ","
+			<< dec(get_RR(o), 2) << ","
+			<< dec(get_KL(o), 2) << ","
+			<< dec(get_MT(o), 2) << ","
+			<< dec(get_AM(o), 2) << ","
+			<< dec(get_VB(o), 2) << ","
+			<< dec(get_EG(o), 2) << ","
+			<< dec(get_KR(o), 2) << ","
+			<< dec(get_DT(o), 2) << (o ? " }" : ",")
+			<< std::endl;
+	}
+	mml << std::endl;
+	return mml.str();
+}
+
+//==================================================
+//
 // class OplDrvData::Header
 // 
 //==================================================
@@ -890,10 +935,16 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 				{
 					u16 voice_idx = u16(cmd.m_param);
 					u16 voice_offset = u16(cmd.m_param) - base_address;
-
-					auto& voice = m_voice[voice_idx];
-					const u8* voice_ptr = data_ptr + voice_offset;
-					std::copy(voice_ptr, voice_ptr + VoiceRaw::data_size, voice.m_data.reg);
+					
+					// 未設定ならデータを取り込む
+					if (!m_voice.count(voice_idx))
+					{
+						auto& voice = m_voice[voice_idx];
+						const u8* voice_ptr = data_ptr + voice_offset;
+						std::copy(voice_ptr, voice_ptr + VoiceRaw::data_size, voice.m_data.reg);
+						voice.m_data.name = "0x" + hex(u16(cmd.m_param));
+						voice.m_data.long_name = "(user) 0x" + voice.m_data.name;
+					}
 				}
 			}
 
@@ -926,6 +977,7 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 			{
 				s += " " + hex(voice.m_data.reg[i], 2);
 			}
+			s += " : " + voice.m_data.long_name;
 			print_log(s);
 		}
 	}
@@ -934,25 +986,65 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 }
 
 //--------------------------------------------------
+//! OplDrvData
+//! ROM内蔵拡張音色定義テーブルを取得
+//--------------------------------------------------
+const OplDrvData::ExtraVoiceSet* OplDrvData::getExtraVoiceSet(int rom_type)
+{
+	const OplDrvData::ExtraVoiceSet* voice_table = nullptr;
+	string table_name;
+	switch (rom_type)
+	{
+	case 1:	voice_table = &fmpac_extention_voice;   break;
+	case 2:	voice_table = &msxmusic_extention_voice; break;
+	}
+
+	if (!voice_table)
+	{
+		print_error("[ERROR] unknown voice romtype. " + dec(rom_type));
+		ASSERT(0);
+	}
+	return voice_table;
+}
+
+//--------------------------------------------------
+//! OplDrvData
+//! ROM内蔵拡張音色定義MMLを作成(MGSDRV)
+//--------------------------------------------------
+string OplDrvData::make_ex_voice_mgs_mml(int mgs_voice_no, int rom_voice_no, int rom_type)
+{
+	const OplDrvData::ExtraVoiceSet* voice_table = getExtraVoiceSet(rom_type);
+	if (!voice_table)
+	{
+		return "";
+	}
+
+	ASSERT((0 <= rom_voice_no) && (rom_voice_no < voice_table->voice_count));
+	if ((0 <= rom_voice_no) && (rom_voice_no < voice_table->voice_count))
+	{
+		VoiceData voice;
+		auto& src = voice_table->list[rom_voice_no];
+		voice.m_data = src;
+		voice.m_data.long_name =
+			"(" + voice_table->name + " #" + dec(rom_voice_no) + ") " + voice.m_data.long_name;
+		voice.voice_no = mgs_voice_no; // 固定
+		return voice.make_mgs_mml();
+	}
+
+	return "";
+}
+
+//--------------------------------------------------
 //! OplDrvData::Header
 //! ROM内蔵拡張音色コマンドをユーザー音色に変換する
 //--------------------------------------------------
-bool OplDrvData::convert_voice_rom_to_user(int romtype)
+bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 {
-	const OplDrvData::ExtraVoiceSet* voice_table = nullptr;
-	switch ( romtype)
-	{
-	case 1:	voice_table = &fmpac_extention_voice; break;
-	case 2:	voice_table = &msxmusic_extention_voice;break;
-	}
-	
+	const OplDrvData::ExtraVoiceSet* voice_table = getExtraVoiceSet(rom_type);
 	if (!voice_table)
 	{
-		print_error("[ERROR] unknown voice romtype. " + dec(romtype));
-		ASSERT(0);
 		return false;
 	}
-
 
 	// メロディチャンネル
 	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
@@ -976,8 +1068,10 @@ bool OplDrvData::convert_voice_rom_to_user(int romtype)
 				}
 				u16 idx = 0xff80 + n;
 				VoiceData& voice = m_voice[idx];	// 0xff80 to 0xffff
-				auto src = voice_table->list[n];
-				std::copy( src.reg, src.reg + countof(src.reg), voice.m_data.reg );
+				auto& src = voice_table->list[n];
+				voice.m_data = src;
+				voice.m_data.long_name =
+					"(" + voice_table->name + " #" + dec(n) + ") " + voice.m_data.long_name;
 
 				// USER_VOICE コマンド へ 変更
 				i->m_cmd = OplDrvData::Command::CMD_USER_VOICE;
@@ -1664,31 +1758,7 @@ bool OplDrvData::make_mgs_mml(
 		auto& voice = i->second;
 		voice.voice_no = cur_user_voice++;
 
-		buffer.mml
-			<< "@v" << std::dec << int(voice.voice_no)
-			<<" = { ; 0x" + hex(i->first, 4) << std::endl
-			<< ";       TL FB" << std::endl 
-			<< "        "
-						<< dec(voice.get_TL(), 2) << ","
-						<< dec(voice.get_FB(), 2) << "," << std::endl
-			<< "; AR DR SL RR KL MT AM VB EG KR DT" << std::endl;
-		for (int o = 0; o < 2; ++o)
-		{
-			buffer.mml
-				<< "  "
-				<< dec(voice.get_AR(o), 2) << ","
-				<< dec(voice.get_DR(o), 2) << ","
-				<< dec(voice.get_SL(o), 2) << ","
-				<< dec(voice.get_RR(o), 2) << ","
-				<< dec(voice.get_KL(o), 2) << ","
-				<< dec(voice.get_MT(o), 2) << ","
-				<< dec(voice.get_AM(o), 2) << ","
-				<< dec(voice.get_VB(o), 2) << ","
-				<< dec(voice.get_EG(o), 2) << ","
-				<< dec(voice.get_KR(o), 2) << ","
-				<< dec(voice.get_DT(o), 2) << (o ? " }" : ",")
-				<< std::endl;
-		}
+		buffer.mml << voice.make_mgs_mml();
 		buffer.mml << std::endl;
 	}
 

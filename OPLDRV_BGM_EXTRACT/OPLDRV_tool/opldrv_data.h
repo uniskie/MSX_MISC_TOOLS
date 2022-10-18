@@ -256,12 +256,15 @@ public:
 			data_size = 8,
 		};
 		u8 reg[data_size];
+		string name;
+		string long_name;
 	};
 	struct ExtraVoiceSet
 	{
 		enum {
 			voice_count = 64,
 		};
+		string name;
 		VoiceRaw list[voice_count];
 	};
 
@@ -273,6 +276,8 @@ public:
 			, voice_no(0)
 		{
 			std::fill(m_data.reg, m_data.reg + countof(m_data.reg), 0);
+			m_data.name = "";
+			m_data.long_name = "";
 		}
 	public:
 		VoiceRaw m_data;
@@ -292,6 +297,8 @@ public:
 		u8 get_EG(int o) const { return (m_data.reg[0 + o] >> 5) & 1; }
 		u8 get_KR(int o) const { return (m_data.reg[0 + o] >> 4) & 1; }
 		u8 get_DT(int o) const { return (m_data.reg[3] >> (3 + o)) & 1; }
+
+		string make_mgs_mml();
 	};
 
 public:
@@ -354,6 +361,10 @@ public:
 	void add_note_length(int n, float tempo);
 	int get_note_length(float tick, float& note_tick);
 	int compare_note_length(float tick, int n);
+
+public:
+	static const ExtraVoiceSet* getExtraVoiceSet(int rom_type);
+	static string make_ex_voice_mgs_mml(int mgs_voice_no, int rom_voice_no, int rom_type);
 };
 
 } //namespace OPLDRV

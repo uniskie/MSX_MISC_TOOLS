@@ -172,6 +172,45 @@ int main(int argc, char* argv[])
 				}
 			}
 			else
+		#if 1
+			//-- arg: ROM拡張音色リスト出力
+			if (l.substr(0, 4) == "/cl:")
+			{
+				string romtype = get_lower(arg.substr(4));
+				print(string("arg: list ex-voice : ") + romtype);
+
+				int rom_id = 0;
+				if (romtype == "fmpac")
+				{
+					rom_id = 1;
+				}
+				else
+				if (romtype == "music")
+				{
+					rom_id = 2;
+				}
+				else
+				if (romtype == "a1gt")
+				{
+					rom_id = 2;
+				}
+				else
+				{
+					print_error("unknown voice rom type name: " + romtype);
+					ASSERT(0);
+					arg_error = true;
+				}
+
+				if (rom_id)
+				{
+					for (int i = 0; i < OplDrvData::ExtraVoiceSet::voice_count; ++i)
+					{
+						print( OplDrvData::make_ex_voice_mgs_mml( 16, i, rom_id ) );
+					}
+				}
+			}
+		#endif
+			else
 			//-- arg: 音量補正
 			if (l.substr(0, 3) == "/v:")
 			{
