@@ -21,4 +21,4 @@ sample
    ![my_font_3c.png](my_font_3c.png)
 
 These fonts is free to use.  
-(Free Liscense)
+(Free License)
