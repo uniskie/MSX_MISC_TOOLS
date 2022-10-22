@@ -28,17 +28,26 @@ Data for MSX -> [MSXFNT/](MSXFNT/)
 ## Other data
 
 - [MSXFNT/FNT.SC2](MSXFNT/FNT.SC2)   
-    ... SCREEN2 data converted from ```my_font_set_1c.png```   
-    ![my_font_set_1c.png](my_font_set_1c.png)
+    ... SCREEN2 data converted from ```my_font_set_1c.png```  
+    ![my_font_set_1c.png](my_font_set_1c.png)  
+    ( use [BMP2MSX](https://github.com/hra1129/bmp2msx) )
+
 - [MSXFNT/SPLITFNT.BAS](MSXFNT/SPLITFNT.BAS)   
-    ... SPLIT 3 FONTS from ```FNT.SC2```   
     ```RUN"SPLITFNT.BAS```   
-    -> make   
-     ```FNT0.PAT```, ```FNT0.COL```   
-     ```FNT1.PAT```, ```FNT1.COL```   
-     ```FNT2.PAT```, ```FNT2.COL```
+    1.  BMP2MSXやpiroPAINT_9918ではキャラの背景色が必ずしもカラー0にはならないので、データを修正します。  
+        Modify FontBit and correct character's background color.  
+        (In BMP2MSX and piroPAINT_9918, ```bit = 0``` is not necessarily color 0)
+    2.  SPLIT 3 FONTS from ```FNT.SC2```  
+        -> make   
+         ```FNT0.PAT```, ```FNT0.COL```   
+         ```FNT1.PAT```, ```FNT1.COL```   
+         ```FNT2.PAT```, ```FNT2.COL```
 
 ## LICENCE
 
-These fonts is free to use.  
+These fonts is Free to use, modify and redistribute.
 (Free Licence)
+
+改変再配布ともにご自由にどうぞ。
+
+
