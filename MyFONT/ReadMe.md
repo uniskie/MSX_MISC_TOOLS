@@ -2,7 +2,12 @@
 
 Data for MSX -> [MSXFNT/](MSXFNT/)
 
-sample
+## LOAD asmple
+
+[MSXFNT/LOADFNT.BAS](MSXFNT/LOADFNT.BAS)   
+```RUN"LOADFNT.BAS```
+
+## sample images
 
 - font 1  
    Pattern data ```BLOAD"FNT0.PAT",S```  
@@ -20,5 +25,20 @@ sample
    (additional) Color data ```BLOAD"FNT2.COL",S```  
    ![my_font_3c.png](2x/my_font_3c.png)
 
+## Other data
+
+- [MSXFNT/FNT.SC2](MSXFNT/FNT.SC2)   
+    ... SCREEN2 data converted from ```my_font_set_1c.png```   
+    ![my_font_set_1c.png](my_font_set_1c.png)
+- [MSXFNT/SPLITFNT.BAS](MSXFNT/SPLITFNT.BAS)   
+    ... SPLIT 3 FONTS from ```FNT.SC2```   
+    ```RUN"SPLITFNT.BAS```   
+    -> make   
+     ```FNT0.PAT```, ```FNT0.COL```   
+     ```FNT1.PAT```, ```FNT1.COL```   
+     ```FNT2.PAT```, ```FNT2.COL```
+
+## LICENCE
+
 These fonts is free to use.  
-(Free License)
+(Free Licence)
