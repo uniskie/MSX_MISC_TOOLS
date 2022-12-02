@@ -101,7 +101,7 @@ try {
 	//alert( out_str );
 	
 	// •Ô‚·
-	//document.selection.Text = ';' + org_text + '\n' + out_str; // emeditor
+	//document.selection.Text = ';' + org_text + '\n' + out_str + '\n'; // emeditor
 	Editor.InsText( ';' + org_text + '\n' + out_str + '\n' ); // emeditor
 	
 }
