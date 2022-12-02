@@ -102,7 +102,7 @@ try {
 	
 	// •Ô‚·
 	//document.selection.Text = ';' + org_text + '\n' + out_str; // emeditor
-	Editor.InsText( ';' + org_text + '\n' + out_str ); // emeditor
+	Editor.InsText( ';' + org_text + '\n' + out_str + '\n' ); // emeditor
 	
 }
 catch (e)
