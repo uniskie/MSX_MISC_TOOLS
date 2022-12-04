@@ -29,8 +29,8 @@ MGSDRVの波形宣言
 倍率は256分の1単位なので128だと半分になります。
 
 実行前
-![image/SCC_WAVE_VOLUME_0.png]
+![実行前](image/SCC_WAVE_VOLUME_0.png)
 
 実行後
-![image/SCC_WAVE_VOLUME_1.png]
+![実行後](image/SCC_WAVE_VOLUME_1.png)
 
