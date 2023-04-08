@@ -1,4 +1,5 @@
 ﻿## namco "DANGEROUS SEED for MEGADRIVE" BGM PLAYER
+ ![](/img/DSEED%200002.png)
 
 ```RUN"AUTOEXEC.BAS"```
 ( install DM-SYSTEM2 -> run```DSEED.DS2```)
