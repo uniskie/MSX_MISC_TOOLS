@@ -18,7 +18,7 @@
 |ツール|説明|
 |---|---|
 | [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル|
-| [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示 (グラフサウルス圧縮対応)<BR>![](img/MIKTEA%200002.png]|
+| [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示 (グラフサウルス圧縮対応)<BR>![](img/MIKTEA%200002.png)|
 | [HIMEM.BAS          ](HIMEM.BAS          ) |フリーエリア先頭とスタックポインタのアドレスを表示<BR>![](img/MISCTOOLS%200001.png)|
 | [GETPALAD.BAS       ](GETPALAD.BAS       ) |現在の画面モードでのVRAMパレットテーブルを返す(サンプルコード)<BR>![](img/MISCTOOLS%200004.png)|
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/MISCTOOLS%200010.png)|
