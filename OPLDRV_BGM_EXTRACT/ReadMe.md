@@ -8,10 +8,6 @@ OPLDRV用のBGMデータをファイルに保存します。
 
 MSX実機用のツールです。
 
-ファイルは  
-[EXTEACT_FROM_MSX_CARTRIDGE](EXTEACT_FROM_MSX_CARTRIDGE)  
-に置いてあります。
-
 - R-TYPE用：```RDRTYPE.BAS```
 - FM PAC用：```RDFMPAC.BAS```
 
