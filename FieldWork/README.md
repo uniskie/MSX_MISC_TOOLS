@@ -126,8 +126,8 @@ http://www.tni.nl/products/tniasm.html
 ## 準備
 
 1. 作業フォルダに[tniasm.exe](http://www.tni.nl/products/tniasm.html)を配置
-2. 作業フォルダに [SETPASH.BAT](bat/SETPASH.BAT) を配置
-3. 作業フォルダに [ASM.BAT](bat/ASM.BAT) を配置
+2. 作業フォルダに [SETPATH.BAT](./bat/SETPATH.BAT) を配置
+3. 作業フォルダに [ASM.BAT](bat/./ASM.BAT) を配置
 4. 作業フォルダに ショートカットを作成 （ asm_cmdline と命名)
    リンク先：C:\Windows\System32\cmd.exe /k setpath.bat  
    作業フォルダ： 作業フォルダ
