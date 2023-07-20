@@ -548,13 +548,19 @@ TITLE:	LD		A,1
 		LD		(SPCFLG),A
 		RET
 M_TITLE:
-		DB		'KANJI TEXT EDITOR - ＦIELD ＷORK'	;*DM*
-		DB		'ver.0.81 (C) 1996,2023 UNKO SOFT'	;*DM*
+		DB		'________________________________'	;*DM*
+		DB		'   MSX SHIFT-JIS TEXT EDITOR'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'[ESC]   メニュー表示／キャンセル'	;*DM*
-		DB		'[SELECT]       全角/半角切り替え'	;*DM*
+		DB		'     ＦIELD ＷORK ver.0.81'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'[SHIFT+ESC]       エディタを終了'	;*DM*
+		DB		'    (C) 1996,2023 UNKO SOFT'	;*DM*
+		DB		CR,LF	;*DM*
+		DB		'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'	;*DM*
+		DB		'[ESC]         メニュー表示'	;*DM*
+		DB		CR,LF	;*DM*
+		DB		'[SELECT]      全角/半角切り替え'	;*DM*
+		DB		CR,LF	;*DM*
+		DB		'[SHIFT+ESC]   エディタを終了'	;*DM*
 		DB		0
 
 MMENU:	JP TX_FILE
