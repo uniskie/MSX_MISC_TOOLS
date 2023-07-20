@@ -20,7 +20,7 @@ FCBDIR:		DB		0
 
 ;--- STRING AREA ---
 STRSIZ:		EQU		28-6
-M_INSTR:	DB		12,26,20H
+M_INSTR:	DB		12,26,C_STAT
 			DB		'INPUT:'	;*DM*
 			DB		26,71H,0
 M_STR:		DB		24,7
@@ -45,7 +45,7 @@ DEL_MBI:	DB		'先頭:0000H 終了:0000H 開始:0000Hこれは ＢＳＡＶＥファイルです'	;*D
 			DB		EOF
 M_CRLF:		DB		CR,LF,0
 M_FILEQ:
-			DB		'　　 ∬ ＦIELD ＷORK ∬'	;*DM*
+			DB		'　∬ ＦIELD ＷORK - MENU ∬'	;*DM*
 			DB		CR,LF,CR,LF
 			DB		'　　　 (Ｌ): LOAD FILE'	;*DM*
 			DB		CR,LF
@@ -57,7 +57,7 @@ M_FILEQ:
 			DB		CR,LF
 ;			DB		'　　　 (Ｈ):   HELP'	;*DM*
 			DB		CR,LF,CR,LF
-			DB		'　　 INPUT (L,S,N,D,H)?( )'	;*DM*
+			DB		'　　 INPUT (L,S,N,D) ? ( )'	;*DM*
 			DB		CR,LF,CR,LF
 			DB		'　　EDIT FILE :'	;*DM*
 M_FILEN:	DB		'FILENAME.DAT'	;*DM*
