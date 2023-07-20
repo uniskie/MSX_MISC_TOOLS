@@ -1,0 +1,105 @@
+;====== FILE I/O ======
+BDOS:		EQU		0F37DH
+DISKVE:		EQU		0F323H
+
+_FOPEN:		EQU		0FH
+_SETDMA:	EQU		1AH
+_RDRND:		EQU		27H
+_WRRND:		EQU		26H
+_FCLOSE:	EQU		10H
+_FMAKE:		EQU		16H
+_FKILL:		EQU		13H
+_FFIRST:	EQU		11H
+_FNEXT:		EQU		12H
+
+
+;=== CALL BDOS RUTINE ===
+;OUT: A= 255:FAULT
+;        00:NO ERROR
+
+BDOSC:	CALL	BDOS
+		OR		A
+		RET
+
+
+;=== SET DMA ===
+;SET: DE= DMA ADDRESS
+
+F_DMA:	LD		C,_SETDMA
+		JP		BDOS
+
+;=== MAKE FILE ===
+;USE: ALL
+;SET: DE= not opened FCB ADDRESS
+;OUT: A: RESULT
+
+F_MAKE:	PUSH	DE
+		LD		C,_FMAKE
+		CALL	BDOSC
+		JP		_FSET
+
+;=== CLOSE FILE ===
+;USE: ALL
+;SET: DE= opened FCB ADDRESS
+;OUT: A: RESULT
+
+F_CLOSE:
+		LD		C,_FCLOSE
+		JP		BDOSC
+
+;=== OPEN FILE ===
+;USE: ALL
+;SET: DE= opend FCB ADDRESS
+;OUT: A= RESULT
+
+F_OPEN:	PUSH	DE
+		LD		C,_FOPEN
+		CALL	BDOSC
+
+_FSET:	POP		IX
+
+		LD		(IX+14),1
+		LD		(IX+15),0		;RECORD SIZE= 1 bytes
+
+		LD		(IX+33),0
+		LD		(IX+34),0
+		LD		(IX+35),0
+		LD		(IX+36),0		;RANDOM RECORD No.= 0
+
+		RET
+
+;=== READ FILE ===
+;USE: ALL
+;SET: DE= opend FCB ADRESS
+;     HL= RECORD É ¶½Þ
+;OUT: HL= ¼Þ¯»²Æ ÖÝÀÞ ¶½Þ
+
+F_READ:	LD		C,_RDRND
+		JP		BDOSC
+
+;=== WRITE FILE ===
+;USE: ALL
+;SET: DE= opend FCB ADRESS
+;     HL= RECORD É ¶½Þ
+;     DMA= DATA(s)
+;OUT: A: RESULT
+
+F_WRITE:
+		LD		C,_WRRND
+		JP		BDOSC
+
+;=== SEARCH DIRECTORY ===
+;SET: FCB= FILE NAME
+;OUT: DMA= DIRECTORY DATA
+
+F_DIR:	LD		C,_FFIRST
+		JP		BDOSC
+
+F_DIR2:	LD		C,_FNEXT
+		JP		BDOSC
+;=== DELETE FILE ===
+;SET: FCB= FILE NAME
+
+F_DEL:	LD		C,_FKILL
+		JP		BDOSC
+

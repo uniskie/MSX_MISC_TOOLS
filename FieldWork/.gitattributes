@@ -1,0 +1,6 @@
+*.bas		diff=sjis encoding=sjis eol=CRLF
+*.asm		diff=sjis encoding=sjis eol=CRLF
+*.asf		diff=sjis encoding=sjis eol=CRLF
+*.txt		diff=sjis encoding=sjis eol=CRLF
+;*.c			diff=sjis encoding=sjis eol=CRLF
+;*.h			diff=sjis encoding=sjis eol=CRLF

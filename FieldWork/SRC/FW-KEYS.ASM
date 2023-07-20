@@ -1,0 +1,502 @@
+;-- KANJI EDITOR "FIELD WORK" --
+
+;    SUB RUTINES 3 (FUNCTION 2)
+
+;      _SAVE("FW-KEYS
+
+
+;----- FUNCTIONS -----
+
+;--- INSERT SPACE ---
+; IN | HL:ADDRESS
+;    | A:LENGTH
+;    | PRE-CALL GETLIND
+; OUT|
+; USE| ALL
+
+MIS_LEN:
+		DW		0
+MIS_ADR:
+		DW		0
+MJ_INS:	LD		C,A
+		LD		B,0
+		LD		(MIS_LEN),BC
+		LD		(REP_FLG),A
+		LD		(MIS_ADR),HL
+		LD		HL,(MJD_HED)
+		CALL	LINTES1
+		PUSH	DE
+
+		LD		A,(MIS_LEN)
+		LD		HL,(TD_MSIZ)
+		LD		DE,TA_HEAD		;-1
+		ADD		HL,DE
+		PUSH	HL
+		CALL	ADDHLA
+		EX		DE,HL
+;    - OVER FLOW CHECK -
+		LD		HL,PROHEAD-1
+		OR		A
+		SBC		HL,DE
+		LD		A,1
+		LD		A,2		;??
+		JP		C,MJ_EROR
+
+		POP		HL
+		PUSH	HL
+		LD		BC,(MIS_ADR)
+		OR		A
+		SBC		HL,BC
+		LD		B,H
+		LD		C,L
+		INC		BC
+		POP		HL
+		LDDR
+		LD		HL,(MIS_ADR)
+		LD		D,H
+		LD		E,L
+		INC		DE
+		LD		(HL),' '
+		LD		BC,(MIS_LEN)
+		DEC		BC
+		LD		A,B
+		OR		C
+		JR		Z,MIS_FIL
+		LDIR
+MIS_FIL:
+		LD		HL,(MJD_HED)
+		CALL	LINTES1
+		EX		DE,HL
+		POP		DE
+		OR		A
+		SBC		HL,DE
+		LD		B,H
+		LD		C,L
+		LD		DE,(TD_YMAX)
+		ADD		HL,DE
+		LD		(TD_YMAX),HL
+		LD		H,B
+		LD		L,C
+		LD		DE,(MWR_YMX)
+		ADD		HL,DE
+		LD		(MWR_YMX),HL
+		LD		DE,(MIS_LEN)
+		LD		HL,(TD_MSIZ)
+		ADD		HL,DE
+		LD		(TD_MSIZ),HL
+		RET
+
+;-- OVER FLOW ERROR --
+REP_SET:
+		LD		(MJ_EROR+1),SP
+		LD		HL,(TD_YMAX)
+		LD		(REP_Y+1),HL
+		CALL	GETYLIN
+		EX		DE,HL
+		LD		(MJD_HED),HL
+		LD		(MJD_XMX),A
+		RET
+MJ_EROR:
+		LD		SP,0		;dummy
+		POP		HL
+		JP		ERROR_W
+
+;--- CHECK ZENKAKU HEAD ---
+; USE | AF,E
+ZENHCHK:
+		LD		A,(CUR_AXS)
+		LD		E,A
+		CALL	CURTEST
+		OR		A
+		LD		A,E
+		RET		NZ
+		DEC		A
+		LD		(CUR_AXS),A
+		RET
+
+;--- CHECK BEFORE LINE ---
+;    (IS ZENKAKU BREAK AT 31)
+;
+; USE | AF,BC,DE,HL
+BFLNCHK:
+		LD		A,(CUR_AXS)
+		OR		A
+		RET		NZ
+		CALL	GETYLIN
+		EX		DE,HL
+		CALL	LINREV
+		RET		Z
+		CALL	BKLINE
+		LD		A,31
+		LD		(CUR_AXS),A
+		LD		(REP_FLG),A
+		RET
+
+;--- WRITE MOJI ---
+; IN | (HL):LENGTH
+;    | (HL+1):DATA
+;    | (TD_MODE):0:OVER WRITE/1:INSERT MODE
+; USE| ALL
+
+; NOT USE CONTROL CODE
+
+MWR_LEN:	DW		0
+MWR_DAT:	DW		0
+MWR_ADR:	DW		0
+MWR_YMX:	DW		0
+MWR_CHR:	DB		0
+MJ_WRIT:
+		LD		A,(HL)
+		OR		A
+		RET		Z
+		LD		(MWR_LEN),A
+		INC		HL
+		LD		(MWR_DAT),HL
+		LD		A,(HL)
+		SUB		13
+		LD		(MWR_CHR),A
+		LD		HL,(CUR_AXS)
+		LD		H,0
+		ADD		A,13-1
+		CALL	ADDHLA
+		XOR		A
+		LD		DE,-32
+		ADD		HL,DE
+		ADC		A,0
+		LD		(REP_FLG),A
+		CALL	BFLNCHK
+MJWRIT0:
+		CALL	REP_SET
+		LD		BC,(CUR_AXS)
+		SUB		C
+		JR		NC,MJWR_1
+; -INS X
+		NEG
+		EX		AF,AF'
+		LD		A,(MJD_XMX)
+		CALL	ADDHLA
+		EX		AF,AF'
+		CALL	MJ_INS
+
+MJWR_1:	CALL	ZENHCHK
+		LD		HL,(MJD_HED)
+		CALL	ADDHLA
+		LD		(MWR_ADR),HL
+		LD		A,(TD_MODE)
+		OR		A
+		JP		Z,MJWR_2
+;-INS MODE
+		LD		A,(MWR_LEN)
+		CALL	MJ_INS
+MJWR_2:	LD		HL,(MJD_HED)
+		CALL	LINTES1
+		LD		(MWR_YMX),DE
+		LD		BC,(MWR_LEN)
+		LD		DE,(MWR_DAT)
+		LD		HL,(MWR_ADR)
+		LD		B,C
+L_MJWR:	LD		A,(HL)
+		CP		32
+		JP		C,MWR_INS
+		CALL	KANJI_F
+		JR		NC,_LMJWR
+		INC		HL
+		LD		(HL),' '
+		DEC		HL
+_LMJWR:	LD		A,(DE)
+		LD		(HL),A
+		INC		HL
+		INC		DE
+		DJNZ	L_MJWR
+		LD		HL,(MJD_HED)
+		CALL	LINTES1
+		LD		A,(MWR_CHR)
+		OR		A
+		JR		NZ,MJWR_3
+		CALL	LNTES1_
+		LD		HL,0
+		LD		(REP_Y+1),HL
+MJWR_3:	EX		DE,HL
+		LD		DE,(MWR_YMX)
+		OR		A
+		SBC		HL,DE
+		LD		DE,(TD_YMAX)
+		ADD		HL,DE
+		LD		(TD_YMAX),HL
+
+		CALL	REPRINT
+		LD		HL,(TD_LIN)
+		CALL	MAKLINE
+		LD		A,(MWR_CHR)
+		OR		A
+		RET		Z
+
+		LD		HL,(MWR_ADR)
+		LD		A,(MWR_LEN)
+		LD		C,A
+		CALL	ADDHLA
+		PUSH	HL
+		CALL	ADDCURS
+		CALL	GETYLIN
+		LD		A,(CUR_AXS)
+		CALL	ADDDEA
+		POP		HL
+		OR		A
+		SBC		HL,DE
+		RET		Z
+		LD		C,L
+		JP		ADDCURS
+
+;--- ADD TO CURSOL AXIS
+; IN | C: + SIZE
+; OUT| (CUR_AXS),2: PLUSED AXIS
+
+ADDCURS:
+		LD		HL,(CUR_AXS)
+		LD		A,C
+		ADD		A,L
+		CP		32
+		JR		C,MW_NLF
+		INC		H
+		INC		H
+MW_NLF:
+		AND		31
+		LD		L,A
+		LD		A,C
+		RLCA
+		RLCA
+		RLCA
+		AND		7
+		RLCA
+		ADD		A,H
+		CP		UD_SCR
+		JR		C,MW_NSCR
+		JR		Z,MW_NSCR
+		SUB		UD_SCR
+		LD		H,A
+		SRL		H
+LMW_SCR:
+		PUSH	HL
+		CALL	TX_SCRD
+		POP		HL
+		LD		A,UD_SCR
+MW_NSCR:
+		LD		H,A
+		LD		(CUR_AXS),HL
+		RET
+
+MWR_INS:
+		PUSH	HL
+		PUSH	DE
+		PUSH	BC
+		LD		A,B
+		CALL	MJ_INS
+		POP		BC
+		POP		DE
+		POP		HL
+		JP		L_MJWR
+
+;- RE-PRINT -
+
+REP_FLG:
+		DB		0
+REPRINT:
+		LD		HL,(TD_YMAX)
+REP_Y:	LD		DE,0		;dummy
+		LD		A,(CUR_AXS+1)
+		SRL		A
+		NEG
+		ADD		A,11
+		LD		B,A
+		OR		A
+		SBC		HL,DE
+		JR		NZ,LFMAX
+		LD		A,(REP_FLG)
+		OR		A
+		LD		A,0
+		JR		Z,LFMWR
+		PUSH	BC
+		LD		HL,(MJD_HED)
+		CALL	LINTES1
+		POP		BC
+		LD		A,D
+		OR		A
+		JR		NZ,LFMAX
+		LD		A,E
+		CP		B
+		JP		C,LFMWR
+LFMAX:	LD		A,B
+LFMWR:	INC		A
+		LD		(REP_FLG),A
+		CALL	LFSET
+		LD		HL,(CUR_AXS)
+		LD		L,0
+		LD		(PR_AXS),HL
+		LD		DE,(MJD_HED)
+		CALL	PRINT
+		CALL	LFRSET
+		RET
+
+;--- BACK LINE ---
+; IN/OUT | NOTING
+;  USE   | AF,BC,DE,HL (ALL?)
+BKLINE:	LD		A,(CUR_AXS+1)
+		SUB		2
+		JP		NC,BKLINEE
+		CALL	TX_SCRU
+		XOR		A
+BKLINEE:
+		LD		(CUR_AXS+1),A
+		RET
+
+;--- DELETE ---
+; -BACK SPACE-
+MJ_BKS:	CALL	GETYLIN
+		LD		HL,(CUR_AXS)
+		CP		L
+		JP		C,DELERR
+		EX		DE,HL
+		LD		A,E
+		CALL	ADDHLA
+		DEC		HL
+		LD		A,(HL)
+		CP		HOF
+		RET		Z
+		DEC		E
+		LD		A,E
+		LD		(CUR_AXS),A
+		CP		32
+		JP		C,MBKS_S1
+		CALL	BKLINE
+		CALL	GETYLIN
+		EX		DE,HL
+		LD		(CUR_AXS),A
+		CALL	ADDHLA
+		LD		DE,(CUR_AXS)
+		LD		A,(HL)
+		CP		32
+		JR		C,MBKS_S0
+		CALL	KANJI_F
+		JP		NC,MBKS_S1
+		DEC		HL
+		DEC		E
+		JP		MBKS_S1
+MBKS_S0:
+		INC		A
+		LD		(DEL_FLG+1),A
+MBKS_S1:
+		CALL	CURTEST
+		LD		C,2
+		JR		C,MBKS
+		DEC		C
+		OR		A
+		JR		NZ,MBKS
+		INC		C
+		DEC		E
+		DEC		HL
+MBKS:	LD		(CUR_AXS),DE
+		LD		B,0
+		JP		DELETE
+
+; -- DEL CHECK --
+DEL_CK:	CALL	GETYLIN
+		LD		HL,(CUR_AXS)
+		CP		L
+		JP		C,DELCKE
+		EX		DE,HL
+		LD		A,E
+		CALL	ADDHLA
+		CALL	CURTEST
+		OR		A
+		RET		NZ
+		DEC		HL
+		DEC		E
+		LD		A,E
+		LD		(CUR_AXS),A
+		RET
+DELCKE:	POP		HL
+DELERR:	CALL	GETYLIN
+		LD		(CUR_AXS),A
+		RET
+
+; -(DEL) DELETE-
+MJ_DEL:	CALL	DEL_CK
+		LD		A,(HL)
+		CP		EOF
+		RET		Z
+		CP		13
+		JR		NZ,MDEL_
+		LD		(DEL_FLG+1),A
+MDEL_:	CALL	CURTEST
+		LD		A,1
+		ADC		A,0
+		LD		C,A
+		LD		B,0
+		JP		DELETE
+
+; -LINE DELETE(CTRL+E)-
+MJ_LID:	CALL	DEL_CK
+		LD		A,(HL)
+		CP		32
+		RET		C
+		PUSH	HL
+		LD		BC,-1
+LMLID:	LD		A,(HL)
+		INC		BC
+		INC		HL
+		CP		32
+		JP		NC,LMLID
+		POP		HL
+		JP		DELETE
+
+; -DELETE SUB-
+DELETE:	LD		(MIS_ADR),HL
+		LD		(MIS_LEN),BC
+		LD		A,1
+		LD		(REP_FLG),A
+		CALL	BFLNCHK
+		CALL	REP_SET
+		CALL	LINTES1
+DEL_FLG:
+		LD		A,0		;dummy
+		OR		A
+		JR		Z,DELET_
+		XOR		A
+		LD		(DEL_FLG+1),A
+		CALL	LNTES1_		; 2 LINE
+DELET_:	PUSH	DE
+
+		LD		HL,(TD_MSIZ)
+		LD		BC,TA_HEAD
+		ADD		HL,BC
+		LD		BC,(MIS_ADR)
+		OR		A
+		SBC		HL,BC
+		LD		B,H
+		LD		C,L
+		LD		HL,(MIS_LEN)
+		LD		DE,(MIS_ADR)
+		ADD		HL,DE
+		LDIR
+
+		LD		HL,(TD_MSIZ)
+		LD		DE,(MIS_LEN)
+		OR		A
+		SBC		HL,DE
+		LD		(TD_MSIZ),HL
+
+		LD		HL,(MJD_HED)
+		CALL	LINTES1
+		POP		HL
+		EX		DE,HL
+		SBC		HL,DE
+		LD		DE,(TD_YMAX)
+		ADD		HL,DE
+		LD		(TD_YMAX),HL
+		XOR		A
+		LD		(DEL_FLG+1),A
+
+		LD		HL,(TD_LIN)
+		CALL	MAKLINE
+		JP		REPRINT
+
