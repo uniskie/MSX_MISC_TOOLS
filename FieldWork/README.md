@@ -4,6 +4,8 @@ MSX2 SHIFT-JIS TEXT EDITOR
 
 ![](../img/fieldwork_001.png)
 
+Disk image: [fw.dsk](fw.dsk)
+
 # 取扱説明書 
 
 ## 起動
