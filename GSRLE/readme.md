@@ -1,6 +1,6 @@
 ![スクリーンショット 2023-07-21 121648](https://github.com/uniskie/MSX_MISC_TOOLS/assets/11275674/06467337-a600-4fc7-bf34-55d3356aff42)﻿## GSRLE
 
-![](../image/GSRLE.png)
+![](../img/GSRLE.png)
 
 これはBSAVE画像をグラフサウルス圧縮形式で圧縮するものです。
 
