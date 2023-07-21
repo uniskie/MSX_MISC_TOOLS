@@ -1,7 +1,7 @@
-Bitmap Palette for Bz Editor 
+# Bitmap Palette for Bz Editor 
  
---Bz Editorはバイナリエディタです。 
-https://devil-tamachan.github.io/BZDoc/ 
+**Bz Editor**はバイナリエディタです  
+  https://devil-tamachan.github.io/BZDoc/ 
  
 構造体表示機能や分割画面と比較、
 メモリのビットマップ表示機能があります。 
