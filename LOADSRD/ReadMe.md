@@ -1,8 +1,8 @@
 ﻿# LOADSRD.BAS
 
-![](../img/MIKTEA%200002.png)
+![](../img/MIKTEA0002.png)
 
-![](../img/MIKTEA%200001.png)
+![](../img/MIKTEA0001.png)
 
 BSAVEスクリーンデータとグラフサウルスデータを表示します。
 

@@ -2,7 +2,7 @@ MSX2 SHIFT-JIS TEXT EDITOR
 [ FIELD WORK ] ver. 0.81  
 (C) 1996,2023 UNKOSOFT 
 
-![](../img/fieldwork_001.png)
+![](../img/FieldWork.png)
 
 Disk image: [fw.dsk](fw.dsk)
 
