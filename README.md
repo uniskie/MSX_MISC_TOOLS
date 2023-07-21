@@ -10,12 +10,12 @@
 
 |ツール|説明|
 |---|---|
-| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮) <BR>展開表示(MSX用)は [LOADSRD](LOADSRD)
+| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<BR> ![](img/GSRLE.png) <BR>展開表示(MSX用)は [LOADSRD](LOADSRD)
 
 ## Windows向けMSX用お役立ちデータ
 |ファイル|説明|
 |---|---|
-| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor 用 MSX Bitmap Palette|
+| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor 用 MSX Bitmap Palette<BR>![](img/BZ_MSX_PALETTE.png)|
 
 ## MSXで動作するツール
 
