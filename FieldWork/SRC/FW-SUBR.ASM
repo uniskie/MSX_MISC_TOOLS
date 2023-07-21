@@ -35,12 +35,15 @@ LINOVER:	EQU		255		; 255
 NOLINE:		EQU		255
 
 ;--- WORK AREA ---
-CUR_AXS:	DW		0		;CURSOL(X,Y) BUCK UP
 TD_MODE:	DW		0		;MODE(0:OVER WRITE/1:INSERT)
+
+CUR_AXS:	DW		0		;CURSOL(X,Y) BUCK UP
 TD_YNOW:	DW		0		;Y NOW(SCR. TOP LINE)
+
 TD_YMAX:	DW		0		;Y MAX
 TD_MSIZ:	DW		0		;MEM_SIZE
 TD_EOFS:	DW		0		;EOF OFFSET FROM END OG FILE (FOOTER SIZE)
+
 TD_LIN:		DS		36		;3*12 : Address(2) + WIDTH(1)
 MJD_HED:	DW		0		;ONE LINE BUF
 MJD_XMX:	DB		0		;ONE LINE BUF X MAX
@@ -527,7 +530,8 @@ WLREV_:	INC		HL
 
 ;--- COUNT LINES (MAX) ---
 ; OUT | (TD_YMAX):Y LIMIT
-;     | HL: [EOF] offset from end of file
+;     | (TD_EOFS): [EOF] offset from end of file
+;     | HL       : too.
 ; USE | AF,BC,DE,HL
 
 LINTES0:
@@ -550,7 +554,7 @@ LNTES0W:
 		SBC		HL,DE
 
 		INC		HL
-;		LD		(TD_EOFS),HL
+		LD		(TD_EOFS),HL
 		RET
 
 ;--- COUNT LINE (to CR LF CODE) ---
