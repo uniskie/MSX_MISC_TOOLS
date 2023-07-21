@@ -1,6 +1,6 @@
 ;-- MSX2 KANJI EDITOR --
 ;
-;  "FIELD WORK" ver.0.81
+;  "FIELD WORK" ver.0.83
 ;
 ; use SCREEN2 / KANJI ROM
 ;
