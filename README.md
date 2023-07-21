@@ -24,7 +24,7 @@
 | [FieldWork/          ](FieldWork          ) |高速な漢字テキストエディタ(SCREEN2とスクロール使用)<BR>![](img/fieldwork_001.png)|
 | [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示 (グラフサウルス圧縮対応)<BR>![](img/MIKTEA%200001.png)<BR>圧縮は [GSRLE](GSRLE)|
 | [OPLDRV_BGM_EXTRACT/](OPLDRV_BGM_EXTRACT ) |FMPACとRTYPEのOPLDRV用BGMデータをカートリッジから取り出すプログラム|
-| [SCC_WAVE_MODULATE/ ](SCC_WAVE_MODULATE  ) |SCC波形データのボリューム加工（n/256倍率をかけて出力）|
+| [SCC_WAVE_MODULATE/ ](SCC_WAVE_MODULATE  ) |SCC波形データのボリューム加工（n/256倍率をかけて出力）<BR> ![](SCC_WAVE_MODULATE/image/SCC_WAVE_VOLUME_1.png) |
 | [FILER.BAS          ](FILER.BAS          ) |ファイル一覧＆ファイル操作プログラム。ファイル名のひらがな→カタカナ変換などもできます。<BR>![](img/MISCTOOLS%200011.png)|
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/MISCTOOLS%200010.png)|
 | [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル|
