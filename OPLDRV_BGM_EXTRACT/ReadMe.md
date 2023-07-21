@@ -43,6 +43,8 @@ RTYPE0.BIN ～ RTYPEF.BIN の 16個が出力されます。
 ```
 OPLDRV TOOL
 
+![](img/OPLDRV_tool.png)
+
 OPLDRV_tool [/l:filename][/b:address)][/r:address)] [INPUT FILENAME] [/o:OUTPUT FILENAME]
 /l:filename  Log text output to file.
 /a:address   set base address for RAW file.
