@@ -4,12 +4,59 @@
 
 ;      _SAVE("FW-FUNC
 
+;--- STRING TO NUMBER
+; IN  | HL:ADDRESS
+; OUT | DE:NUMBER
+STOI:	LD		DE,0
+STOI_L:	LD		A,(HL)
+		INC		HL
+		OR		A
+		RET		Z
+		;
+		SUB		A,'0'
+		CP		10
+		JR		NC,STOI_L
+		;
+		EX		DE,HL
+		; HL=HL*10
+		LD		B,H
+		LD		C,L
+		ADD		HL,HL
+		ADD		HL,HL
+		ADD		HL,BC
+		ADD		HL,HL
+		; HL=HL+A
+		CALL	ADDHLA
+		EX		DE,HL
+		JR		STOI_L
 
 ;--- INPUT STR WORK AREA---
 INSTRMD:	DB		0	; 1 = NUMBER ONLY
 
+;--- INPUT LINE NUMBER STR ---
+; OUT | DE:NUMBER
+;     | A : 0 = CANSEL
+;     | Z : ON = CANSEL
+; USE | AF,BC,DE,HL
+INPLINE:
+		LD		A,1
+		LD		(INSTRMD),A
+		LD		HL,M_INLIN
+		CALL	INPSTR_
+		
+		LD		DE,-1
+		LD		A,(HL)
+		SUB		EOF
+		RET		Z
+		CALL	STOI
+		OR		0FFH
+		RET
+
 ;--- INPUT STR ---
-INPSTR:	LD		HL,M_INSTR
+INPSTR:	XOR		A
+		LD		(INSTRMD),A
+		LD		HL,M_INSTR
+INPSTR_:
 		CALL	STBSET
 		LD		HL,STR
 		LD		DE,STR+1
@@ -45,7 +92,7 @@ L_INSTR:
 		
 		CP		'0'
 		JR		C,L_INSTR
-		CP		'9'
+		CP		'9'+1
 		JR		NC,L_INSTR
 		
 N_INSTR:
@@ -329,37 +376,64 @@ L_TXSKD:
 
 TX_LINE:
 		LD		HL,(TD_YMAX)
-		LD		BC,11
 		OR		A
-		SBC		HL,BC
-		EX		AF,AF'
-		ADD		HL,BC
-		EX		AF,AF'
-		JP		NC,TXLIN_
-		LD		B,E
-		SLA		B
-		LD		C,0
-		LD		DE,0
-		JP		TXLINE
-TXLIN_:	SBC		HL,DE
+		SBC		HL,DE	; YMAX-Y
 		LD		A,0
 		JP		C,ERROR_W
+
+		PUSH	HL		; YMAX-Y
+		ADD		HL,DE	; YMAX
+		OR		A
+		LD		BC,12
+		SBC		HL,BC
+		POP		HL		; YMAX-Y
+		JR		NC,TXLINE0 ;YMAX >= 12
+
+		; YMAX < 12
+		LD		A,E	;CURSOR_Y = Y*2
+		ADD		A,A
+		LD		B,A
+		LD		C,0
+		LD		DE,0
+		JR		TXLINE2
+
+TXLINE0:
+		; YMAX >= 12
+		
 		LD		A,H
 		OR		A
-		JR		NZ,TXLINE
+		JR		NZ,TXLINE1 ; (YMAX - Y) >= 16
 		LD		A,L
-		CP		11-1
-		JR		NC,TXLINE
-		NEG
-		ADD		A,11
-		LD		C,0		;CURSOL X
-		RLA
+		CP		11
+		JR		NC,TXLINE1 ; (YMAX - Y) >= 11
+
+		; (YMAX - Y) < 11
+		
+		; CORSOL_Y = (Y - (YMAX - 11)) * 2
+		NEG				; Y - YMAX
+		ADD		A,11	; Y - (YMAX - 11)
+		ADD		A,A
 		LD		B,A		;CURSOL Y
+		LD		C,0		;CURSOL X
+
 		LD		HL,(TD_YMAX)
 		LD		DE,-11
-		ADD		HL,DE
+		ADD		HL,DE	;Y = YMAX - 11
 		EX		DE,HL
-TXLINE:	LD		HL,TA_HEAD
+		JR		TXLINE2
+
+TXLINE1:
+		LD		BC,0
+		LD		A,D
+		OR		E
+		JR		Z,TXLINE2
+		
+		; CURSOR_Y = 2, Y = DE-1
+		DEC		DE
+		LD		BC,0200H;
+
+TXLINE2:
+		LD		HL,TA_HEAD
 		LD		(TD_YNOW),DE
 		PUSH	BC
 L_TXLIN:
@@ -378,6 +452,7 @@ E_TXLIN:
 		CALL	PRINT
 		CALL	LFRSET
 		POP		HL
+		LD		L,0
 		LD		(CUR_AXS),HL
 		RET
 
@@ -456,7 +531,7 @@ E_TXLIN:
 ;		DB		'[CTRL+下]       次のページを表示'	;*DM*
 ;		DB		'[CTRL+左]             行頭へ移動'	;*DM*
 ;		DB		'[CTRL+右]             行末へ移動'	;*DM*
-;		DB		CR,LF	;*DM*
+;		DB		'[CTRL+G]            指定行へ移動'	;*DM*
 ;		DB		'[SHIFT+ESC]       エディタを終了'	;*DM*
 ;		DB		CR,LF	;*DM*
 ;		DB		'- PUSH SPACE -'	;*DM*

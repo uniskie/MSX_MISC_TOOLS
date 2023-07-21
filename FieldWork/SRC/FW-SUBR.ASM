@@ -35,12 +35,12 @@ LINOVER:	EQU		255		; 255
 NOLINE:		EQU		255
 
 ;--- WORK AREA ---
-CUR_AXS:	DW		0		;CURSOL BUCK UP
+CUR_AXS:	DW		0		;CURSOL(X,Y) BUCK UP
 TD_MODE:	DW		0		;MODE(0:OVER WRITE/1:INSERT)
 TD_YNOW:	DW		0		;Y NOW(SCR. TOP LINE)
 TD_YMAX:	DW		0		;Y MAX
 TD_MSIZ:	DW		0		;MEM_SIZE
-TD_EOFS:	DW		0		;EOF OFFSET FROM END (FOOTER SIZE)
+TD_EOFS:	DW		0		;EOF OFFSET FROM END OG FILE (FOOTER SIZE)
 TD_LIN:		DS		36		;3*12 : Address(2) + WIDTH(1)
 MJD_HED:	DW		0		;ONE LINE BUF
 MJD_XMX:	DB		0		;ONE LINE BUF X MAX
@@ -150,14 +150,16 @@ PUT_INF:
 		EX		DE,HL
 		LD		HL,(CUR_AXS)
 		LD		H,0
-		CALL	PUT_D2
+		CALL	PUT_D2	;X
 		LD		A,'/'
 		OUT		(98H),A
 		PUSH	DE
 		CALL	GETYLIN
+		LD		(PTINF0+1),DE	;ADR.
+		LD		(PTINF1+1),A	;X-MAX
 		LD		L,A
 		LD		H,0
-		CALL	PUT_D2
+		CALL	PUT_D2	;MAX X
 		POP		DE
 		CALL	INFOMES
 		CALL	GETYNOW
@@ -174,10 +176,13 @@ PUT_INF:
 
 		LD		DE,1C40H
 		CALL	VSETW
-		CALL	GETYLIN
-		EX		DE,HL
+PTINF0:	LD		HL,0	;ADR. dummy
+PTINF1:	LD		D,0		;X-MAX dummy
 		LD		A,(CUR_AXS)
-		CALL	ADDHLA
+		CP		D
+		JR		Z,PTINF_
+		JR		NC,PTINFX
+PTINF_:	CALL	ADDHLA
 		LD		A,(HL)
 		CALL	PUT_NB
 		LD		DE,1C40H+30
@@ -185,6 +190,18 @@ PUT_INF:
 		INC		HL
 		LD		A,(HL)
 		CALL	PUT_NB
+		JP		PAGE0
+PTINFX:	; NO DATA
+		LD		A,'-'
+		OUT		(98H),A
+		NOP
+		OUT		(98H),A
+		LD		DE,1C40H+30
+		CALL	VSETW
+		LD		A,'-'
+		OUT		(98H),A
+		NOP
+		OUT		(98H),A
 		JP		PAGE0
 
 INFOMES:
@@ -243,29 +260,29 @@ BINARYD:
 ERROR_M:	; (ｴﾗｰ ﾒｯｾｰｼﾞ28ﾓｼﾞ ﾏﾃﾞ)
 		DB		'$'	;*DM*
 		DB		'指定された行がありません$'	;*DM*
-		DB		'テキスト領域が満杯です$'	;*DM*
+		DB		'ﾃｷｽﾄ領域が満杯です$'	;*DM*
 		DB		'中止されました$'	;*DM*
 		DB		'1$'	;*DM*
 		DB		'2$'	;*DM*
 		DB		'3$'	;*DM*
 		DB		'4$'	;*DM*
 		DB		'5$'	;*DM*
-		DB		'指定ファイルが存在しません$'	;*DM*
-		DB		'ファイルサイズが異常です$'	;*DM*
-		DB		'ディスク容量が満杯です$'	;*DM*
+		DB		'指定ﾌｧｲﾙが存在しません$'	;*DM*
+		DB		'ﾌｧｲﾙｻｲｽﾞが異常です$'	;*DM*
+		DB		'ﾃﾞｨｽｸ容量が満杯です$'	;*DM*
 		DB		'これはBSAVEﾌｧｲﾙです$'	;*DM*
 		DB		'これはBASICﾌﾟﾛｸﾞﾗﾑです$'	;*DM*
-		DB		'指定ファイルが大き過ぎます$'	;*DM*
+		DB		'指定ﾌｧｲﾙが大き過ぎます$'	;*DM*
 		DB		'FATが破壊されています$'	;*DM*
 		DB		'ﾌﾟﾛﾃｸﾄﾉｯﾁを開けて下さい$'	;*DM*
-		DB		'ディスクが入っていません$'	;*DM*
-		DB		'データ が 異常です:CRCｴﾗｰ$'	;*DM*
+		DB		'ﾃﾞｨｽｸが入っていません$'	;*DM*
+		DB		'ﾃﾞｰﾀ が 異常です:CRCｴﾗｰ$'	;*DM*
 		DB		'記憶装置が不調です:SEEKｴﾗｰ$'	;*DM*
-		DB		'レコードが存在しません$'	;*DM*
-		DB		'フォーマット形式 が 違います$'	;*DM*
+		DB		'ﾚｺｰﾄﾞが存在しません$'	;*DM*
+		DB		'ﾌｫｰﾏｯﾄ形式 が 違います$'	;*DM*
 		DB		'書き込みが正常に出来ません$'	;*DM*
-		DB		'原因不明のエラーです$'	;*DM*
-		DB		'ファイル名が不正です$'	;*DM*
+		DB		'原因不明のｴﾗｰです$'	;*DM*
+		DB		'ﾌｧｲﾙ名が不正です$'	;*DM*
 
 ;----- DATA CONTROL -----
 
@@ -590,12 +607,14 @@ LEMAKLN:
 ;--- OUTPUT NUMBER RUTINES ---
 ;--- HEX.NUM. (2byte) ---
 ; IN  | HL: HEX.NUMBER
+;     | DE: dest adr.(RAM mode)
 PUT_N:	LD		A,H
 		CALL	PUT_NB
 		LD		A,L
 
 ;--- HEX.NUM. (1byte) ---
 ; IN  | A: HEX.NUMBER
+;     | DE: dest adr.(RAM mode)
 PUT_NB:	LD		B,A
 		RRCA
 		RRCA
@@ -609,8 +628,10 @@ PUT_NH:	AND		15
 		ADD		A,7
 
 ;--- PUT NUM. (1byte CODE) ---
+; IN  | A : decimal number
+;     | DE: dest adr.(RAM mode)
 PUTN:	ADD		A,'0'
-PUT_MD:	JP		PUT_NV
+PUT_MD:	JP		PUT_NV	;ow: PUT_NV/PUT_NM
 PUT_NV:	OUT		(98H),A
 		RET
 PUT_NM:	LD		(DE),A
@@ -618,15 +639,18 @@ PUT_NM:	LD		(DE),A
 		RET
 
 ;--- OUTPUT MODE CHANGE ---
+; PUT NUM to VRAM
 PUTM_V:	LD		HL,PUT_NV
 		LD		(PUT_MD+1),HL
 		RET
+; PUT NUM to RAM(DE)
 PUTM_M:	LD		HL,PUT_NM
 		LD		(PUT_MD+1),HL
 		RET
 
 ;--- PUT NUMBER (DECIMAL)
 ;  IN  | HL:HEX.NUMBER
+;      | DE:dest adr.(RAM mode)
 ;  OUT | (OUT):BCD DATA
 ;  USE | AF,BC,HL
 

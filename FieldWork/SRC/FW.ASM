@@ -6,10 +6,15 @@
 ;
 ;  1996,2023 (C) UNISKIE
 
-;プログラムサイズ 上限$DB00
+;プログラムサイズ 上限 $DC00
 ;
+; $E47D : A1WSX 2DRIVE
+; $DE67 : A1WSX 2DRIVE
 ; $E48D : CF-3300 1 DRIVE(ctrl起動)
 ; $DE77 : CF-3300 2 DRIVE
+
+; 参考
+; $DAFE : A1WSX 2DRIVE + _KANJI(+$369)
 ;
 ; MSX-JE : 4 bytes + etc.?
 
@@ -184,7 +189,7 @@ JPTABLE:
 		DW		8  , MJ_BKS 	; CTRL+H = BS
 		DW		5  , MJ_LID 	; CTRL+E
 		DW		24 , JECHG 		; CTRL+X = SELECT
-		DW		6  , TESLIN		; CTRL+F
+		DW		7  , TESLIN		; CTRL+G
 		DW		27 , ESCRET 	; CTRL+[ = ESC
 		DW		255, E_TEST 	; ---- end ---
 ;-------------------
@@ -330,7 +335,9 @@ CR__DW:	CALL	GETYNOW
 		LD		A,UD_SCR
 		LD		(CUR_AXS+1),A
 		JP		TX_SCRD
-TESLIN:	LD		DE,(TD_YMAX)
+TESLIN:	CALL	INPLINE
+		RET		Z
+		;LD		DE,(TD_YMAX)
 		JP		TX_LINE
 
 ; CHECK CTRL
@@ -342,10 +349,11 @@ K_CT_SH:
 
 ;-SUB RUTINE-
 
+;- WRITE CURSOL
 ;	D:COLOR
-;	HL:VRAM ADDRESS
 ;   E:LENGTH 8/16
-CUR_WR:	LD		HL,(CUR_AXS)
+CUR_WR:	;	HL:VRAM ADDRESS
+		LD		HL,(CUR_AXS)
 		LD		A,L
 		RLCA
 		RLCA
@@ -360,6 +368,7 @@ CUR_WR:	LD		HL,(CUR_AXS)
 		JP		NZ,FONT_CU
 		JP		FONT_C
 		
+;- CURSOL DISPLAY ON
 CUR_ON:	CALL	GETYLIN	;DE:ADDRESS, A:X MAX
 		PUSH	DE			;<---ADDRESS
 		; LINE OVER?
@@ -385,7 +394,7 @@ CUR_ON:	CALL	GETYLIN	;DE:ADDRESS, A:X MAX
 		LD		E,8
 		JR		C,CUR_SV
 ;--->
-CUR__:	; NORMAL CHR
+		; NORMAL CHR
 		LD		DE,(CUR_AXS)
 		CALL	CURTEST
 		LD		B,C_MJON
@@ -396,6 +405,7 @@ CUR__:	; NORMAL CHR
 CUR_SV:	LD		(CUR_OF+1),DE
 		LD		D,B
 		JP		CUR_WR
+; HIDE CURSOL
 CUR_OF:	LD		DE,0		;dummy
 		JP		CUR_WR
 
@@ -547,20 +557,20 @@ TITLE:	LD		A,1
 		XOR		A
 		LD		(SPCFLG),A
 		RET
-M_TITLE:
-		DB		'________________________________'	;*DM*
-		DB		'   MSX SHIFT-JIS TEXT EDITOR'	;*DM*
+M_TITLE:	;	'   '   '   '   '   '   '   '   ''
+		DB		'     MSX2 KANJI TEXT EDITOR'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'     ＦIELD ＷORK ver.0.81'	;*DM*
+		DB		'      ＦIELD ＷORK ver 0.82'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'    (C) 1996,2023 UNKO SOFT'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'	;*DM*
-		DB		'[ESC]         メニュー表示'	;*DM*
+		DB		'      [ESC] メニュー表示'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'[SELECT]      全角/半角切り替え'	;*DM*
+		DB		'   [SELECT] 全角/半角切り替え'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'[SHIFT+ESC]   エディタを終了'	;*DM*
+		DB		'   [SHIFT+ESC] エディタを終了'	;*DM*
+		DB		CR,LF	;*DM*
+		DB		CR,LF	;*DM*
+		DB		'    (C) 1996,2023  UNKO SOFT'	;*DM*
 		DB		0
 
 MMENU:	JP TX_FILE

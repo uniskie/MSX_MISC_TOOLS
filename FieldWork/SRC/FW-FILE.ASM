@@ -20,6 +20,9 @@ FCBDIR:		DB		0
 
 ;--- STRING AREA ---
 STRSIZ:		EQU		28-6
+M_INLIN:	DB		12,26,C_STAT
+			DB		' GOTO:'	;*DM*
+			DB		26,71H,0
 M_INSTR:	DB		12,26,C_STAT
 			DB		'INPUT:'	;*DM*
 			DB		26,71H,0
@@ -31,17 +34,17 @@ M_SAVEQ:	DB		'上書き READY'	;*DM*
 M_KILLQ:	DB		'削除しますか'	;*DM*
 			DB		0
 M_QUES:		DB		12,26,C_EROR,0
-M_QUES_:	DB		'？(←YES / NO→)'		;8 MOJI	;*DM*
+M_QUES_:	DB		'？(← YES/NO →)'		;8 MOJI	;*DM*
 			DB		0
 M_KILLC:	DB		'削除しません'	;*DM*
 			DB		EOF
-M_KILLM:	DB		'ファイル名:'	;*DM*
+M_KILLM:	DB		'ﾌｧｲﾙ名:'	;*DM*
 M_KILLN:	DS		20
 			DB		' (EDITｻｲｽﾞ:65535 FILEｻｲｽﾞ:65535 )'	;*DM*
 			DB		0
-DEL_MTA:	DB		'これは ＢＡＳＩＣプログラムです'	;*DM*
+DEL_MTA:	DB		'これはBASICﾌﾟﾛｸﾞﾗﾑです'	;*DM*
 			DB		EOF
-DEL_MBI:	DB		'先頭:0000H 終了:0000H 開始:0000Hこれは ＢＳＡＶＥファイルです'	;*DM*
+DEL_MBI:	DB		'先頭:0000H 終了:0000H 開始:0000HこれはBSAVEﾌｧｲﾙです'	;*DM*
 			DB		EOF
 M_CRLF:		DB		CR,LF,0
 M_FILEQ:

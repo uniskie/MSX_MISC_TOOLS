@@ -119,9 +119,9 @@ CRESTMP:
 		LD		(FONTCOL),A
 		RET
 
-; - LF TRIGGER -
-; Stop displaying 
-; when specified number of LF appear
+; - LF FORCE INTERRUPTION
+; Stop displaying when
+; specified number of LF appear
 LFSET:	LD		(LFTCNT),A
 		LD		(CONRET+1),SP
 		LD		A,(FONTCOL)
@@ -381,7 +381,6 @@ D_SC2K:	DB		16H,R_NAM		;PAT_NAME:5800H
 		DB		128,9+80H		;Y:212
 		DB		BACKGC,7+80H	;BACK COLOR
 
-
 ;=== WINDOW ===
 SETWIN:	LD		A,(0F3DFH)
 		LD		(HSYNCOF),A
@@ -629,7 +628,9 @@ VSETW:	LD		A,E
 		EI
 		RET
 
-;--- STATUS BAR WORK AREA ---
+
+;--- STB WORK AREA ---
+; what's STB ? ->  see STB.TXT
 
 CL_BACK:	DW		0	; COLOR BACKUP
 WINY:		EQU		4

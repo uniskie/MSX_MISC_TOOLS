@@ -1,6 +1,6 @@
-MSX2 SHIFT-JIS TEXT EDITOR
-[ FIELD WORK ] ver. 0.81  
-(C) 1996,2023 UNKOSOFT 
+MSX2 SHIFT-JIS TEXT EDITOR  
+[ FIELD WORK ] ver. 0.82  
+(C) 1996,2023 UNKOSOFT
 
 ![](../img/FieldWork.png)
 
@@ -58,6 +58,7 @@ BASICに戻ったら[F1]キーで
 | [CTRL+下]    |        | 次のページを表示         |
 | [CTRL+左]    |        | 行頭へ移動               |
 | [CTRL+右]    |        | 行末へ移動               |
+| [CTRL+G]     |        | 指定行へ移動             |
 
 ## メニュー
 
