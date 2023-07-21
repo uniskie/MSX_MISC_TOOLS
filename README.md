@@ -10,7 +10,8 @@
 
 |ツール|説明|
 |---|---|
-| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<BR> ![](img/GSRLE.png) <BR>展開表示(MSX用)は [LOADSRD](LOADSRD)
+| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<BR> ![](img/GSRLE.png) <BR>展開表示(MSX用)は [LOADSRD](LOADSRD)|
+| [OPLDRV_BGM_EXTRACT/](OPLDRV_BGM_EXTRACT ) |1. FMPACとRTYPEのOPLDRV用BGMデータをカートリッジから取り出すプログラム<br>2. opldrvデータを解析するプログラム <br> ![](OPLDRV_BGM_EXTRACT/img/OPLDRV_tool.png)|
 
 ## Windows向けMSX用お役立ちデータ
 |ファイル|説明|
@@ -23,7 +24,6 @@
 |---|---|
 | [FieldWork/          ](FieldWork          ) |高速な漢字テキストエディタ(SCREEN2とスクロール使用)<BR>![](img/fieldwork_001.png)|
 | [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示 (グラフサウルス圧縮対応)<BR>![](img/MIKTEA%200002.png)<BR>圧縮は [GSRLE](GSRLE)|
-| [OPLDRV_BGM_EXTRACT/](OPLDRV_BGM_EXTRACT ) |FMPACとRTYPEのOPLDRV用BGMデータをカートリッジから取り出すプログラム <br> ![](OPLDRV_BGM_EXTRACT/img/EXTEACT_FROM_MSX_CARTRIDGE.png)|
 | [SCC_WAVE_MODULATE/ ](SCC_WAVE_MODULATE  ) |SCC波形データのボリューム加工（n/256倍率をかけて出力）<BR> ![](SCC_WAVE_MODULATE/image/SCC_WAVE_VOLUME_1.png) |
 | [FILER.BAS          ](FILER.BAS          ) |ファイル一覧＆ファイル操作プログラム。ファイル名のひらがな→カタカナ変換などもできます。<BR>![](img/MISCTOOLS%200011.png)|
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/MISCTOOLS%200010.png)|
