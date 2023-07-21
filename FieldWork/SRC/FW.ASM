@@ -560,7 +560,7 @@ TITLE:	LD		A,1
 M_TITLE:	;	'   '   '   '   '   '   '   '   ''
 		DB		'     MSX2 KANJI TEXT EDITOR'	;*DM*
 		DB		CR,LF	;*DM*
-		DB		'      ÇeIELD ÇvORK ver 0.82'	;*DM*
+		DB		'      ÇeIELD ÇvORK ver 0.83'	;*DM*
 		DB		CR,LF	;*DM*
 		DB		CR,LF	;*DM*
 		DB		'      [ESC] ÉÅÉjÉÖÅ[ï\é¶'	;*DM*
