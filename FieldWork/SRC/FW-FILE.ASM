@@ -385,6 +385,7 @@ TX_LOAD:
 		JP		NZ,FIL_ERR
 		LD		DE,(FCB+16)
 		LD		HL,TA_SIZE
+		OR		A
 		SBC		HL,DE
 		LD		A,13
 		JP		C,FIL_ERR
@@ -415,6 +416,7 @@ TXLOAD_:
 		INC		HL
 		LD		(HL),EOF
 		CALL	LINTES0
+		LD		(TD_EOFS),HL
 		JP		TX_HEAD
 
 ;--- DISK ERROR ---
