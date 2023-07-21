@@ -13,6 +13,8 @@ MSX実機用のツールです。
 
 一度VRAMに書き出してからBSAVEします。
 
+![](img/EXTEACT_FROM_MSX_CARTRIDGE.png)
+
 ### 手順
 
 1. BASICが起動
