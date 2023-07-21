@@ -40,10 +40,10 @@ RTYPE0.BIN ～ RTYPEF.BIN の 16個が出力されます。
 
 （ [OPLDRV_tool](OPLDRV_tool)にソースコードがあります。）
 
+![](img/OPLDRV_tool.png)
+
 ```
 OPLDRV TOOL
-
-![](img/OPLDRV_tool.png)
 
 OPLDRV_tool [/l:filename][/b:address)][/r:address)] [INPUT FILENAME] [/o:OUTPUT FILENAME]
 /l:filename  Log text output to file.
