@@ -10,7 +10,7 @@
 
 |ツール|説明|
 |---|---|
-| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮) <BR>展開表示(MSX用)は [LOADSRD](LOADSRD)
+| [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<BR>![](../image/GSRLE.png)<BR>展開表示(MSX用)は [LOADSRD](LOADSRD)
 
 ## Windows向けMSX用お役立ちデータ
 |ファイル|説明|
