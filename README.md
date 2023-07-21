@@ -15,7 +15,7 @@
 ## Windows向けMSX用お役立ちデータ
 |ファイル|説明|
 |---|---|
-| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor 用 MSX Bitmap Palette|
+| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor 用 MSX Bitmap Palette<BR>![](img/BZ_MSX_PALETTE.png)|
 
 ## MSXで動作するツール
 
