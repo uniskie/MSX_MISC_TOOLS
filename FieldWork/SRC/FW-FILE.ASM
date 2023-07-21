@@ -357,7 +357,7 @@ INSVNA_:
 		JP		TX_REP
 
 
-;--- FILE LOAD
+;--- LOAD FILE
 ; IN | HL:FILENAME ADDRESS
 ; OUT| MEMORY:FILE
 
@@ -391,7 +391,13 @@ TX_LOAD:
 
 		LD		DE,FCB
 		LD		HL,(FCB+16)
-		LD		(TD_MSIZ),HL
+		
+		LD		A,H
+		OR		L
+		JR		Z,TXLOAD_
+	; Skip because an error occurs
+	; in RDRND when the file size is 0
+
 		CALL	F_READ
 		JP		NZ,FIL_ERR
 		LD		A,(TA_HEAD)
@@ -399,8 +405,10 @@ TX_LOAD:
 		JP		Z,FILERRB
 		LD		A,12
 		JP		NC,FIL_ERR
+TXLOAD_:
 		CALL	HS_CONT
-		LD		HL,(TD_MSIZ)
+		LD		HL,(FCB+16)
+		LD		(TD_MSIZ),HL
 		LD		DE,TA_HEAD
 		ADD		HL,DE
 		LD		(HL),EOF
@@ -424,7 +432,7 @@ FILERRB:
 		CALL	PUTM_V
 		LD		A,11
 FIL_ERR:
-		LD		SP,0
+		LD		SP,0	;dummy
 		PUSH	AF
 		CALL	HS_CONT
 		LD		A,1
@@ -467,7 +475,7 @@ DSKER0:	LD		A,-1
 DSKER1:	ADD		A,15
 DSKER_:	JP		FIL_ERR
 
-;--- FILE SAVE
+;--- SAVE FILE
 ; IN | --
 ; OUT| MEMORY:FILE
 
