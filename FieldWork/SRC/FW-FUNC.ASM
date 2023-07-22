@@ -378,7 +378,7 @@ TX_LINE:
 		LD		HL,(TD_YMAX)
 		OR		A
 		SBC		HL,DE	; YMAX-Y
-		LD		A,0
+		LD		A,E_NOLINE
 		JP		C,ERROR_W
 
 		PUSH	HL		; YMAX-Y

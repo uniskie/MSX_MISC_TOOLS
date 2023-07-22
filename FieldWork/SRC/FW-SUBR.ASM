@@ -1,31 +1,11 @@
 ;-- KANJI EDITOR "FIELD WORK" --
 
-;    SUB RUTINES 1 (CONTROL)
+;    SUB RUTINES
 
 ;      _SAVE("FW-SUBR
 
 TA_HEAD:	EQU		08000H+1		;add HOF
 TA_SIZE:	EQU		PROHEAD-TA_HEAD-2		;add EOF*2
-
-;--- ASCII CONTROL CODE ---
-;CTRL_E		EQU		5	; ^E
-BS:			EQU		8	; ^H [BS]
-TAB:		EQU		9	; ^I [TAB]
-LF:			EQU		10	; ^J [LF]
-HOME:		EQU		11	; ^K [HOME]
-CLS:		EQU		12	; ^L [CLS]
-CR:			EQU		13	; ^M [CR]
-INS:		EQU		18	; ^R [INS]
-SELECT:		EQU		24	; ^X [SELECT]
-EOF:		EQU		1AH	; ^Z [EOF] (26)
-ESC:		EQU		27	; ^[ [ESC]
-RIGHT:		EQU		28	; ^\ [RIGHT]
-LEFT:		EQU		29	; ^] [LEFT]
-UP:			EQU		30	; ^^ [UP]
-DOWN:		EQU		31	; ^_ [DOWN]
-DEL:		EQU		127	; [DEL]
-
-HOF:		EQU		0FFH	; HEAD of FILE
 
 ;--- BIOS ---
 BEEP:		EQU		00C0H
@@ -37,16 +17,33 @@ NOLINE:		EQU		255
 ;--- WORK AREA ---
 TD_MODE:	DW		0		;MODE(0:OVER WRITE/1:INSERT)
 
-CUR_AXS:	DW		0		;CURSOL(X,Y) BUCK UP
+TXTWORK:
 TD_YNOW:	DW		0		;Y NOW(SCR. TOP LINE)
-
 TD_YMAX:	DW		0		;Y MAX
 TD_MSIZ:	DW		0		;MEM_SIZE
 TD_EOFS:	DW		0		;EOF OFFSET FROM END OG FILE (FOOTER SIZE)
+TXTWK_E:
+
+CUR_AXS:	DW		0		;CURSOL(X,Y) BUCK UP
 
 TD_LIN:		DS		36		;3*12 : Address(2) + WIDTH(1)
 MJD_HED:	DW		0		;ONE LINE BUF
 MJD_XMX:	DB		0		;ONE LINE BUF X MAX
+
+;--- WORK BACKUP ---
+
+TXTWKBK:
+BK_YNOW:	DW		0	;TD_YNOW
+BK_YMAX:	DW		0	;TD_YMAX
+BK_MSIZ:	DW		0	;TD_MSIZ
+BK_EOFS:	DW		0	;TD_EOFS
+TXTWKBE:
+
+BK_CAXS:	DW		0	;CUR_AXS
+
+BK_LIND:	DW		0	;TD_LIN FIRST ADDRESS
+
+BK_COLF:	DB		0	;FONTCOL
 
 ;-- KEY BUF CLEAR --
 KEYCLR:	LD		HL,(0F3F8H)
@@ -262,30 +259,49 @@ BINARYD:
 		DB		'先頭0000:終了0000:開始0000$'	;*DM*
 ERROR_M:	; (ｴﾗｰ ﾒｯｾｰｼﾞ28ﾓｼﾞ ﾏﾃﾞ)
 		DB		'$'	;*DM*
-		DB		'指定された行がありません$'		; 0 ;*DM*
-		DB		'ﾃｷｽﾄ領域が満杯です$'			; 1 ;*DM*
-		DB		'中止されました$'				; 2 ;*DM*
+E_NOLINE:	EQU		0
+		DB		'指定された行がありません$'		;*DM*
+E_FULTXT:	EQU		1
+		DB		'ﾃｷｽﾄ領域が満杯です$'			;*DM*
+E_IGNORE:	EQU		2
+		DB		'中止されました$'				;*DM*
 		DB		'3$'	;*DM*
 		DB		'4$'	;*DM*
 		DB		'5$'	;*DM*
 		DB		'6$'	;*DM*
 		DB		'7$'	;*DM*
-		DB		'指定ﾌｧｲﾙが存在しません$'		; 8 ;*DM*
-		DB		'ﾌｧｲﾙｻｲｽﾞが異常です$'			; 9 ;*DM*
-		DB		'ﾃﾞｨｽｸ容量が満杯です$'			; 10 ;*DM*
-		DB		'これはBSAVEﾌｧｲﾙです$'			; 11 ;*DM*
-		DB		'これはBASICﾌﾟﾛｸﾞﾗﾑです$'		; 12 ;*DM*
-		DB		'指定ﾌｧｲﾙが大き過ぎます$'		; 13 ;*DM*
-		DB		'FATが破壊されています$'		; 14 ;*DM*
-		DB		'ﾌﾟﾛﾃｸﾄﾉｯﾁを開けて下さい$'		; 15 ;*DM*
-		DB		'ﾃﾞｨｽｸが入っていません$'		; 16 ;*DM*
-		DB		'ﾃﾞｰﾀ が 異常です:CRCｴﾗｰ$'		; 17 ;*DM*
-		DB		'記憶装置が不調です:SEEKｴﾗｰ$'	; 18 ;*DM*
-		DB		'ﾚｺｰﾄﾞが存在しません$'			; 19 ;*DM*
-		DB		'ﾌｫｰﾏｯﾄ形式 が 違います$'		; 20 ;*DM*
-		DB		'書き込みが正常に出来ません$'	; 21 ;*DM*
-		DB		'原因不明のｴﾗｰです$'			; 22 ;*DM*
-		DB		'ﾌｧｲﾙ名が不正です$'				; 23 ;*DM*
+E_FILENF:	EQU		8
+		DB		'指定ﾌｧｲﾙが存在しません$'		;*DM*
+E_BADSIZ:	EQU		9
+		DB		'ﾌｧｲﾙｻｲｽﾞが異常です$'			;*DM*
+E_DSKFUL:	EQU		10
+		DB		'ﾃﾞｨｽｸ容量が満杯です$'			;*DM*
+E_BSAVE:	EQU		11
+		DB		'これはBSAVEﾌｧｲﾙです$'			;*DM*
+E_BASIC:	EQU		12
+		DB		'これはBASICﾌﾟﾛｸﾞﾗﾑです$'		;*DM*
+E_BIGSIZ:	EQU		13
+		DB		'指定ﾌｧｲﾙが大き過ぎます$'		;*DM*
+E_BADFAT:	EQU		14
+		DB		'FATが破壊されています$'		;*DM*
+E_PROTEC:	EQU		15
+		DB		'ﾌﾟﾛﾃｸﾄﾉｯﾁを開けて下さい$'		;*DM*
+E_NODSK:	EQU		16
+		DB		'ﾃﾞｨｽｸが入っていません$'		;*DM*
+E_BADDAT:	EQU		17
+		DB		'ﾃﾞｰﾀ が 異常です:CRCｴﾗｰ$'		;*DM*
+E_BADDRV:	EQU		18
+		DB		'記憶装置が不調です:SEEKｴﾗｰ$'	;*DM*
+E_RECNOF:	EQU		19
+		DB		'ﾚｺｰﾄﾞが存在しません$'			;*DM*
+E_BADFMT:	EQU		20
+		DB		'ﾌｫｰﾏｯﾄ形式 が 違います$'		;*DM*
+E_WRFAIL:	EQU		21
+		DB		'書き込みが正常に出来ません$'	;*DM*
+E_UNKNOW:	EQU		22
+		DB		'原因不明のｴﾗｰです$'			;*DM*
+E_BADFNM:	EQU		23
+		DB		'ﾌｧｲﾙ名が不正です$'				;*DM*
 
 ;----- DATA CONTROL -----
 

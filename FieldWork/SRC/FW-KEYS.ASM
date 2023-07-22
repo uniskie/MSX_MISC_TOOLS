@@ -4,6 +4,25 @@
 
 ;      _SAVE("FW-KEYS
 
+;--- ASCII CONTROL CODE ---
+;CTRL_E		EQU		5	; ^E
+BS:			EQU		8	; ^H [BS]
+TAB:		EQU		9	; ^I [TAB]
+LF:			EQU		10	; ^J [LF]
+HOME:		EQU		11	; ^K [HOME]
+CLS:		EQU		12	; ^L [CLS]
+CR:			EQU		13	; ^M [CR]
+INS:		EQU		18	; ^R [INS]
+SELECT:		EQU		24	; ^X [SELECT]
+EOF:		EQU		1AH	; ^Z [EOF] (26)
+ESC:		EQU		27	; ^[ [ESC]
+RIGHT:		EQU		28	; ^\ [RIGHT]
+LEFT:		EQU		29	; ^] [LEFT]
+UP:			EQU		30	; ^^ [UP]
+DOWN:		EQU		31	; ^_ [DOWN]
+DEL:		EQU		127	; [DEL]
+
+HOF:		EQU		0FFH	; HEAD of FILE
 
 ;----- FUNCTIONS -----
 
@@ -38,8 +57,7 @@ MJ_INS:	LD		C,A
 		LD		HL,PROHEAD-1
 		OR		A
 		SBC		HL,DE
-		LD		A,1
-		LD		A,2		;??
+		LD		A,E_FULTXT
 		JP		C,MJ_EROR
 
 		POP		HL
