@@ -6,6 +6,11 @@
 |---|---|
 | [EXTRACT_MSX_CAS/  ](https://github.com/uniskie/EXTRACT_MSX_CAS/ ) |MSXテープイメージからファイルを取り出す(Python3)
 
+## ブラウザで動作するMSX用ツール
+HTML5+javascript ES6 で動作
+
+https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/html/gsrle.html
+
 ## Windowsで動作するMSX用ツール
 
 |ツール|説明|
