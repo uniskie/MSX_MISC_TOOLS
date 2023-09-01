@@ -157,7 +157,9 @@
 }
 #spec_details {
     min-height: 1.5em;
+    background-color: #888;
     color: #dadade;
+    font-size: smaller;
 }
 
 button.save_button {
@@ -170,13 +172,15 @@ button.save_button {
     margin: 0 2px;
 
     box-sizing: content-box;
+
+    border: 2px outset gray;
 }
 button.save_button:hover {
     background-color: #caa;
 }
 
 button.save_button:active {
-    border: inset red;
+    border: 2px inset red;
 }
 /* ==================================== */
 /*	クリックアイテムのカーソル変更 */

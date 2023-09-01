@@ -90,6 +90,8 @@ function displayCurrentFilename() {
 
     var s = '[SCREEN ' + vdp.screen_no + "] ";
     s = s + '[' + vdp.mode_info.name + '] ';
+    s = s + '[WIDTH ' + vdp.width + '] ';
+    s = s + '[HEIGHT ' + vdp.height + '] ';
     if (vdp.interlace_mode) s = s + '[Interlace ON] ';
     spec_details.innerText = s;
 }
@@ -97,12 +99,17 @@ function displayCurrentFilename() {
 //================================================
 // 拡張子情報
 //================================================
-// パレット拡張子
-const ext_pal = [ 'PL5', 'PL7', 'PLT', 'PAL' ];
 function getExt( filename )
 {
     return filename.split('.').pop().toUpperCase();
 }
+function getBasename( filename )
+{
+    return filename.split('.').shift();
+}
+
+// パレット拡張子
+const ext_pal = [ 'PL5', 'PL7', 'PLT', 'PAL' ];
 function isPaletteFile( ext )
 {
     return (-1 < ext_pal.indexOf(ext));
@@ -180,13 +187,31 @@ class BinHeader {
         this.id    = d[0];
         this.start = d[1] + d[2] * 256;
         this.end   = d[3] + d[4] * 256;
-        this.start = d[5] + d[6] * 256;
+        this.run   = d[5] + d[6] * 256;
     }
     get isBinary() {
         return (this.id == BinHeader.HEAD_ID_LINEAR);
     }
     get isCompress() {
         return (this.id == BinHeader.HEAD_ID_COMPRESS);
+    }
+    toBin() {
+        return Uint8Array.from([
+            this.id, 
+            this.start & 255,
+            (this.start >> 8) & 255,
+            this.end & 255,
+            (this.end >> 8) & 255,
+            this.run & 255,
+            (this.run >> 8) & 255,
+        ]);
+    }
+    get size() {
+        if (this.id == BinHeader.HEAD_ID_COMPRESS) {
+            return this.end;
+        } else {
+            return this.end - this.start + 1;
+        }
     }
 }
 
@@ -242,7 +267,7 @@ class Palette {
     get a() {
         return [ this.r * 16 + this.b, this.g ];
     }
-    get w() {
+    get rgb777() {
         return this.r * 16 + this.g * 256 + this.b;
     }
     get rgba() {
@@ -297,53 +322,85 @@ class VDP {
     ]; }
 
     //------------------------------------------------
+    // 画面モード別 スペック
+    static get screen_mode_spec1() { return [
+        { no: 0, txw:240, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 0, txw:480, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 1, txw:256, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 2, txw:256, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 3, txw:256, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 4, txw:256, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 5, txw:256, name:'GRAPHIC4',   width:256, height:212, bpp:4, page_size:0x08000, }, 
+        { no: 6, txw:512, name:'GRAPHIC5',   width:512, height:212, bpp:4, page_size:0x08000, }, 
+        { no: 7, txw:512, name:'GRAPHIC6',   width:512, height:212, bpp:4, page_size:0x10000, }, 
+        { no: 8, txw:256, name:'GRAPHIC7',   width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no: 9, txw:512, name:'GRAPHIC8',   width:512, height:212, bpp:4, page_size:0x08000, }, 
+        { no:10, txw:256, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no:11, txw:256, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no:12, txw:256, name:'YJK',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+    ]; }
     // 画面モード別キャラジェネ設定
-    static get screen_mode_setting() { return [
-        { no: 0, t: 40, name:'TEXT1',      width:240, height:192, namsiz:0x00400, patnam:0x0000, patgen:0x0800, patcol:-1    , paltbl:0x0400, s192:0x0FFF, s212:0x0FFF, sFul:0x0FFF, }, 
-        { no: 0, t: 80, name:'TEXT2',      width:480, height:192, namsiz:0x00800, patnam:0x0000, patgen:0x1000, patcol:0x0800, paltbl:0x0F00, s192:0x17FF, s212:0x17FF, sFul:0x17FF, }, 
-        { no: 1, t:256, name:'GRAPHIC1',   width:256, height:192, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x2020, s192:0x37FF, s212:0x37FF, sFul:0x3FFF, }, 
-        { no: 2, t:256, name:'GRAPHIC2',   width:256, height:192, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, sFul:0x3FFF, }, 
-        { no: 3, t:256, name:'MULTICOLOR', width:256, height:192, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, sFul:0x3FFF, }, 
-        { no: 4, t:256, name:'GRAPHIC3',   width:256, height:192, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, sFul:0x3FFF, }, 
-        { no: 5, t:256, name:'GRAPHIC4',   width:256, height:212, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, sFul:0x7FFF, }, 
-        { no: 6, t:512, name:'GRAPHIC5',   width:512, height:212, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, sFul:0x7FFF, }, 
-        { no: 7, t:512, name:'GRAPHIC6',   width:512, height:212, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, sFul:0xFFFF, }, 
-        { no: 8, t:256, name:'GRAPHIC7',   width:256, height:212, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, sFul:0xFFFF, }, 
-        { no: 9, t:512, name:'GRAPHIC8',   width:512, height:212, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, sFul:0x7FFF, }, 
-        { no:10, t:256, name:'YAE',        width:256, height:212, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, sFul:0xFFFF, }, 
-        { no:11, t:256, name:'YAE',        width:256, height:212, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, sFul:0xFFFF, }, 
-        { no:12, t:256, name:'YJK',        width:256, height:212, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, sFul:0xFFFF, }, 
+    static get screen_mode_spec2() { return [
+        { no: 0, txw:240, namsiz:0x00400, patnam:0x0000, patgen:0x0800, patcol:-1    , paltbl:0x0400, s192:0x0FFF, s212:0x0FFF, }, 
+        { no: 0, txw:480, namsiz:0x00800, patnam:0x0000, patgen:0x1000, patcol:0x0800, paltbl:0x0F00, s192:0x17FF, s212:0x17FF, }, 
+        { no: 1, txw:256, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
+        { no: 2, txw:256, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
+        { no: 3, txw:256, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
+        { no: 4, txw:256, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
+        { no: 5, txw:256, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no: 6, txw:512, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no: 7, txw:512, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no: 8, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no: 9, txw:512, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no:10, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no:11, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no:12, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
     ]; }
     // 画面モード別スプライト設定
-    static get screen_sprite_setting() { return [
+    static get screen_mode_spec3() { return [
     	//                                                               
-        { no: 0, t: 40, name:'TEXT1',      spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
-        { no: 0, t: 80, name:'TEXT2',      spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
-        { no: 1, t:256, name:'GRAPHIC1',   spratr:0x1B00, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 2, t:256, name:'GRAPHIC2',   spratr:0x2000, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 3, t:256, name:'MULTICOLOR', spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 4, t:256, name:'GRAPHIC3',   spratr:0x2000, sprgen:0x3800, sprcol:0x3800, }, 
-        { no: 5, t:256, name:'GRAPHIC4',   spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no: 6, t:512, name:'GRAPHIC5',   spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no: 7, t:512, name:'GRAPHIC6',   spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no: 8, t:256, name:'GRAPHIC7',   spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no: 9, t:512, name:'GRAPHIC8',   spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no:10, t:256, name:'YJK/RGB',    spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no:11, t:256, name:'YJK/RGB',    spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no:12, t:256, name:'YJK',        spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 0, txw:240, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
+        { no: 0, txw:480, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
+        { no: 1, txw:256, spratr:0x1B00, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 2, txw:256, spratr:0x2000, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 3, txw:256, spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 4, txw:256, spratr:0x2000, sprgen:0x3800, sprcol:0x3800, }, 
+        { no: 5, txw:256, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no: 6, txw:512, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no: 7, txw:512, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 8, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 9, txw:512, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no:10, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no:11, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no:12, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
     ]; }
     static getScreenModeSetting( no, width ) {
     	if (0 < no) {
+            // SCREEN 1 以上
     		no += 1;
-    	}
-    	else
-    	if (arguments.length > 1) {
-    		if (width > 40) {
-    			no += 1;
-    		}
-    	}
+    	} else {
+            // SCREEN 0
+            // width 40 か 80 か
+            if (arguments.length > 1) {
+                if (width > 40) {
+                    no += 1;
+                }
+            }
+        }
+
+        if ((no < 0) || (VDP.screen_mode_spec1.length <= no))
+        {
+            return null;
+        }
+
     	// 結合して返す
-    	return { ...VDP.screen_sprite_setting[no], ...VDP.screen_mode_setting[no] };
+    	let info = { ...VDP.screen_mode_spec1[no], ...VDP.screen_mode_spec2[no], ...VDP.screen_mode_spec3[no] };
+
+        // VRAMパレットエントリエンド
+        info.palend = info.paltbl + 32 -1;
+
+        info.sPal = Math.max(info.s212, info.palend);
+        return info;
     }
 
     //------------------------
@@ -441,18 +498,32 @@ class VDP {
         }
     }
 
+    getPalTbl() {
+        const p = this;
+        let d = new Uint8Array( VDP.palette_count * 2 );
+        let idx = 0;
+        for (var i = 0; i < VDP.palette_count; ++i, idx+=2) {
+            d[idx + 0] = p.pal[i].rgb777 & 255;
+            d[idx + 1] = (p.pal[i].rgb777 >> 8) & 255;
+        }
+        return d;
+    }
+
     //------------------------
     // 画面モード変更
     //------------------------
-    changeScreen( screen_no, interlace_mode ) {
+    changeScreen( screen_no, interlace_mode, force_height ) {
         const p = this;
 
         p.screen_no = screen_no;
         p.mode_info = VDP.getScreenModeSetting( screen_no );
         p.width  = p.mode_info.width;
         p.height = p.mode_info.height;
-        if (p.force_height) {
-            p.height = p.force_height;
+        if (force_height === undefined) {
+            force_height = p.force_height;
+        }
+        if (force_height) {
+            p.height = force_height;
         }
         if (arguments.length >= 2 ) {
             p.interlace_mode = interlace_mode;
@@ -841,6 +912,23 @@ function formatHex0( n, d ) {
 }
 
 // ========================================================
+// バイナリをダウンロードさせる
+// ========================================================
+function startDownload( dat, filename )
+{
+    const blob = new Blob( [dat], { "type" : "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement( 'a' );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1E4);
+}
+
+// ========================================================
 // ラジオスイッチ：チェックされた値を返す
 //  in: name - タグのid
 // ========================================================
@@ -945,9 +1033,14 @@ function gs_rle_decode( dat, vram_size )
 // ========================================================
 // GRAPH SAURUS RLE 圧縮
 // ========================================================
-function gs_rle_encode( dat, buff_size )
+function gs_rle_encode( dat, max_size )
 {
-    function flash( l, v, buff, o, limit) {
+    // l = count
+    // v = value
+    // buff = output buffer
+    // o = output buffer pointer
+    function flash( l, v, buff, o)
+    {
         // 値が変化したので書き出し
         if ((1 == l) && (16 <= v)) {
             // 長さ1で値が16以上なら直接値
@@ -955,14 +1048,14 @@ function gs_rle_encode( dat, buff_size )
         } else
         if (l < 16 ) {
             // 長さが16未満なら長さ+値
-            if (limit <= (o + 2)) {
+            if (buff.length <= (o + 2)) {
                 return -1;
             }
             buf[o++] = l;
             buf[o++] = v;
         } else {
             // それ以外なら0+長さ+値
-            if (limit <= (o + 3)) {
+            if (buf.length <= (o + 3)) {
                 return -1;
             }
             buf[o++] = 0;
@@ -972,10 +1065,10 @@ function gs_rle_encode( dat, buff_size )
         return o;
     }
 
-    if (buff_size === undefined) {
-        buff_size = VDP.vram_size;
+    if (max_size === undefined) {
+        max_size = VDP.vram_size;
     }
-    let buf = new Uint8Array( buff_size );
+    let buf = new Uint8Array( max_size );
 
     let i = 0;
     let o = 0;
@@ -987,14 +1080,14 @@ function gs_rle_encode( dat, buff_size )
 
     let need_push = false;
 
-    while ((o < buff_size) && (i < dat.length))
+    while ((o < buf.length) && (i < dat.length))
     {
         b = dat[i++];
         if (searching) {
             if ((v != b) || (l == 255)) {
-                flash( l, v, buf, o, buff_size );
+                o = flash( l, v, buf, o );
+                searching = false;
             }
-            searching = false;
         } 
         if (!searching) {
             // 検索開始
@@ -1006,9 +1099,75 @@ function gs_rle_encode( dat, buff_size )
         }
     }
     if (searching) {
-        flash( l, v, buf, o, buff_size );
+        o = flash( l, v, buf, o );
     } 
     return buf.slice(0, o);
+}
+
+// ========================================================
+// 画像保存バイナリ作成
+// ========================================================
+function createBsaveImage( start, size, page, isCompress )
+{
+    let dat = new Uint8Array( size + BinHeader.HEADER_SIZE );
+
+    let header = new BinHeader();
+    if (isCompress === undefined) isCompress = 0;
+    if ( !isCompress ) {
+        header.id = BinHeader.HEAD_ID_LINEAR;
+        header.start = start;
+        header.end = start + size - 1;
+        header.run = 0;
+    } else {
+        header.id = BinHeader.HEAD_ID_COMPRESS;
+        header.start = start;
+        header.end = size;
+        header.run = 0;
+    }
+
+    //const offset = page * vdp.mode_info.page_size;
+    const offset = page * vdp.height;
+    let body = vdp.vram.subarray( start + offset, start + size );
+    if (header.id == BinHeader.HEAD_ID_COMPRESS) {
+        let cbody = gs_rle_encode( body );
+        body = cbody;
+        header.end = cbody.length;
+    }
+
+    let header_bin = header.toBin();
+    dat.set( header_bin, 0 );
+    dat.set( body, header_bin.length );
+    
+    return dat.subarray(0, body.length + header_bin.length );
+}
+
+// ========================================================
+// 画像保存
+// ========================================================
+function saveImage(file, page, commpress, with_pal)
+{
+    f = file;
+    if (f.size) {
+        const ext_info = getExtInfo( getExt( f.name ) );
+        if (!ext_info) return;
+
+        let sav_ext;
+        if (commpress) {
+            sav_ext = ext_info.gs;
+        } else {
+            sav_ext = ext_info.bsave;
+        }
+        let fname = getBasename( f.name ) + sav_ext;
+
+        let start = 0;
+        let size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
+        if (with_pal) {
+            size = Math.max( vdp.mode_info.palend + 1,  size );
+        }
+
+        let out = createBsaveImage( start, size, page, commpress);
+        startDownload( out, fname );
+    }
 }
 
 // ========================================================
@@ -1016,23 +1175,13 @@ function gs_rle_encode( dat, buff_size )
 // in:  d - Uint8Array
 //      config - loadVcdConfig（設定オブジェクト）
 // ========================================================
-function LoadImage(d, ext_info)
+function loadImage(d, ext_info)
 {
     // ========================================================
     // バイナリ解析開始
     // ========================================================
     let header = new BinHeader( d );
     let dat = d.subarray( BinHeader.HEADER_SIZE );
-
-    if (ext_info.page && ext_info.interlace &&
-         (ext_info.screen_no == vdp.screen_no) &&
-         (ext_info.interlace == vdp.interlace_mode) ) {
-    } else {
-        vdp.changeScreen( ext_info.screen_no, ext_info.interlace );
-    }
-    if (!ext_info || !ext_info.page) vdp.cls();
-
-
     if (header.isCompress)
     {
         // 圧縮の場合 end = 展開後のピクセルサイズ
@@ -1042,11 +1191,36 @@ function LoadImage(d, ext_info)
         dat = gs_rle_decode( dat );
     }
 
-    vdp.loadBinary(dat, 
-        ext_info.page * vdp.mode_info.namsiz);
+    let mode_info = VDP.getScreenModeSetting( ext_info.screen_no );
+    let force_height = vdp.force_height;
+    if (0 == force_height) {
+        // 自動なら画像ピクセルサイズから表示サイズを判断
+        if (header.isCompress && ((mode_info.s212 + 1) < dat.length)) {
+            // 圧縮形式はパレットを含まないのでline212と比較
+            force_height = 256;
+        } else
+        if ((mode_info.palend + 1) < dat.length) {
+            // リニア形式はパレットテーブルを越えているかで判断
+            force_height = 256;
+        } else {
+            force_height = mode_info.height;
+        }
+    }
+
+    if (ext_info.page && ext_info.interlace &&
+         (ext_info.screen_no == vdp.screen_no) &&
+         (ext_info.interlace == vdp.interlace_mode) &&
+         (force_height == vdp.height)
+       ) {
+    } else {
+        vdp.changeScreen( ext_info.screen_no, ext_info.interlace, force_height );
+    }
+    if (!ext_info || !ext_info.page) vdp.cls();
+
+    vdp.loadBinary(dat, ext_info.page * vdp.mode_info.page_size);
 
     if (header.isBinary && !header.isCompress) {
-        if (!ext_info.page && (header.end > vdp.mode_info.s212)) {
+        if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
             vdp.restorePalette(); 
         }
     }
@@ -1129,7 +1303,7 @@ function openGsFile( target_file )
                 vdp.update();
                 vdp.draw();
             } else {
-                let h = LoadImage(u8array, ext_info);
+                let h = loadImage(u8array, ext_info);
                 if (ext_info.interlace && ext_info.page) {
                     sub_file.header = h;
                 } else {
@@ -1248,34 +1422,37 @@ function() {
     //const drop_area = canvas_area;
     const drop_area = document.body;
 
+    // 読み込みファイル一覧（１）
     const filename_area = document.getElementById('filename_area');
     const filename_area2 = document.getElementById('filename_area2');
     const filename_area3 = document.getElementById('filename_area3');
+
+    // ログメッセージ
     const log_text = this.document.getElementById('log_text');
 
+    // ファイル情報詳細
     const spec_details = document.getElementById('spec_details');
-
-    const detail_page0 = document.getElementById('detail_page0');
-    const detail_page1 = document.getElementById('detail_page1');
-    const detail_pal = document.getElementById('detail_pal');
-
-    const detail_page0_spec = document.getElementById('detail_page0_spec');
-    const detail_page1_spec = document.getElementById('detail_page1_spec');
 
     const detail_pal_file    = document.getElementById('detail_pal_file');
     const detail_page0_file = document.getElementById('detail_page0_file');
     const detail_page1_file = document.getElementById('detail_page1_file');
 
+    const detail_page0_spec = document.getElementById('detail_page0_spec');
+    const detail_page1_spec = document.getElementById('detail_page1_spec');
+
+    // ボタン
     const pal_save            = document.getElementById('pal_save');
     const page0_save_bsave    = document.getElementById('page0_save_bsave');
     const page0_save_bsave_np = document.getElementById('page0_save_bsave_np');
     const page0_save_gsrle    = document.getElementById('page0_save_gsrle');
-    const page1_save_bsave    = document.getElementById('page0_save_bsave');
-    const page1_save_bsave_np = document.getElementById('page0_save_bsave_np');
-    const page1_save_gsrle    = document.getElementById('page0_save_gsrle');
+    const page1_save_bsave    = document.getElementById('page1_save_bsave');
+    const page1_save_bsave_np = document.getElementById('page1_save_bsave_np');
+    const page1_save_gsrle    = document.getElementById('page1_save_gsrle');
 
+    // 情報表示
     const help_guide = document.getElementById('help_guide');
 
+    // アコーディオンタブ
     const tab_title = document.getElementById('tab_title'); // help detail tag
     const tab_helps = document.getElementById('tab_helps'); // help detail tag
     const tab_settings = document.getElementById('tab_settings'); // settings detail tag
@@ -1428,5 +1605,45 @@ function() {
         }
         }
     });
+
+    // ========================================================
+    // イベント：ファイルを保存するボタン
+    // ========================================================
+    // パレットファイル
+    pal_save.addEventListener("click",
+    function(e) {
+        let f = null;
+        if (pal_file.size) {
+            f = pal_file;
+        } else 
+        if (main_file.size) {
+            f = main_file;
+        } else 
+        if (sub_file.size) {
+            f = sub_file;
+        }
+        if (f && f.name.length) {
+            const fname = getBasename( f.name ) + ".PL" + vdp.screen_no.toString(16);
+            pald = vdp.getPalTbl();
+            startDownload( pald, fname );
+        }
+    });
+
+    // page 0 bsave
+    page0_save_bsave.addEventListener("click",
+    function(e) { saveImage( main_file, 0, 0, 1 ); });
+    page0_save_bsave_np.addEventListener("click",
+    function(e) { saveImage( main_file, 0, 0, 0 ); });
+    page0_save_gsrle.addEventListener("click",
+    function(e) { saveImage( main_file, 0, 1, 0 ); });
+
+    // page 1 bsave
+    page1_save_bsave.addEventListener("click",
+    function(e) { saveImage( sub_file, 1, 0, 1 ); });
+    page1_save_bsave_np.addEventListener("click",
+    function(e) { saveImage( sub_file, 1, 0, 0 ); });
+    page1_save_gsrle.addEventListener("click",
+    function(e) { saveImage( sub_file, 1, 1, 0 ); });
+
 });
 
