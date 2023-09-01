@@ -1,0 +1,100 @@
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>MSX画像ビューア</title>
+<style>
+    @import url(base.css);
+</style>
+</head>
+<body id="main">
+    <details open id="tab_title">
+        <summary id="title">
+            MSX GRAPHIC Viewer
+        </summary>
+        <div class="guide">
+            <label>使い方：画像ファイルをドロップ（複数可）</label>
+        </div>
+    </details>
+    <div id="info">
+        <label for="file_open" id="file_open_label" class="button" tabIndex="0">
+            <span> ファイル </span>
+            <input type="file" id="file_open" accept=".*" multiple>
+        </label>
+        <span id="filename_area"></span>
+        <span id="filename_area2"></span>
+        <span id="filename_area3"></span>
+    </div>
+    <div class="canvas_container">
+        <span>
+            <canvas id="canvas_area" class="canvas_area"></canvas>
+            <div id="log_text"></div>
+        </span>
+        <span>
+            <details open id="tab_details" class="details">
+            <summary class="tab_label">詳細</summary>
+            <div id="spec_details"></div>
+            <div>
+                <label id="detail_pal">
+                    <div>カラーパレット<span id="detail_pal_file"></span></div>
+                    <canvas id="palette_area"></canvas>
+                    <button class="hide" type="button">デフォルト反応抑制ダミー</button>
+                    <button class="save_button" id="pal_save">PLT保存</button>
+                </label>
+            </div>
+            <div>
+                <label id="detail_page0">
+                    <div>Page 0
+                        <span id="detail_page0_file"></span>
+                        <span id="detail_page0_spec"></span>
+                    </div>
+                    <canvas id="canvas_page0" class="canvas_area"></canvas>
+                    <div>
+                        <button class="hide" type="button">デフォルト反応抑制ダミー</button>
+                        <button type="button" class="save_button" id="page0_save_bsave">BSAVE保存(FULL)</button>
+                        <button type="button" class="save_button" id="page0_save_bsave_np">BSAVE保存(画素のみ)</button>
+                        <button type="button" class="save_button" id="page0_save_gsrle">GS圧縮保存(画素のみ)</button>
+                    </div>
+                </label>
+                <label id="detail_page1">
+                    <div>Page 1
+                        <span id="detail_page1_file"></span>
+                        <span id="detail_page1_spec"></span>
+                    </div>
+                    <canvas id="canvas_page1" class="canvas_area"></canvas>
+                    <div>
+                        <button class="hide" type="button">デフォルト反応抑制ダミー</button>
+                        <button type="button" class="save_button" id="page1_save_bsave">BSAVE保存(FULL)</button>
+                        <button type="button" class="save_button" id="page1_save_bsave_np">BSAVE保存(画素のみ)</button>
+                        <button type="button" class="save_button" id="page1_save_gsrle">GS圧縮保存(画素のみ)</button>
+                    </div>
+                </label>
+            </div>
+        </details></span>
+    </div>
+    <div>
+        <details open id="tab_helps">
+            <summary class="tab_label">ヘルプ</summary>
+            <div id="help_guide"></div>
+            </div>
+        </details>
+        <details open id="tab_settings">
+            <summary class="tab_label">設定</summary>
+            <span class="selector">
+                <label class="label">画面縦サイズ</label>
+                <label class="click"><input type="radio" name="height_mode" value="0"    checked>自動</label>
+                <label class="click"><input type="radio" name="height_mode" value="192"         >192固定</label>
+                <label class="click"><input type="radio" name="height_mode" value="212"         >212固定</label>
+                <label class="click"><input type="radio" name="height_mode" value="256"         >256固定</label>
+            </span>
+            <span class="selector">
+                <label class="label">DotAspect比 (ピクセル縦横比)</label>
+                <label class="click"><input type="radio" name="stretch_screen" value="1.177" checked>1.177:1</label>
+                <label class="click"><input type="radio" name="stretch_screen" value="1.166"        >1.166:1</label>
+                <label class="click"><input type="radio" name="stretch_screen" value="1.133"        >1.133:1</label>
+                <label class="click"><input type="radio" name="stretch_screen" value="1"            >1:1</label>
+            </span>
+        </details>
+    </div>
+	<script type="text/javascript" src="gsrle.js" defer></script>
+</body>
+</html>
