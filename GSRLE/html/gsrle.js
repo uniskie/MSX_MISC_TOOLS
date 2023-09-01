@@ -327,12 +327,12 @@ class VDP {
     //------------------------------------------------
     // 画面モード別 スペック
     static get screen_mode_spec1() { return [
-        { no: 0, txw:240, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 0, txw:480, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 1, txw:256, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 2, txw:256, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 3, txw:256, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 4, txw:256, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 0, txw: 40, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 0, txw: 80, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 1, txw: 32, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 2, txw: 32, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 3, txw: 64, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 4, txw: 32, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
         { no: 5, txw:256, name:'GRAPHIC4',   width:256, height:212, bpp:4, page_size:0x08000, }, 
         { no: 6, txw:512, name:'GRAPHIC5',   width:512, height:212, bpp:4, page_size:0x08000, }, 
         { no: 7, txw:512, name:'GRAPHIC6',   width:512, height:212, bpp:4, page_size:0x10000, }, 
@@ -576,6 +576,29 @@ class VDP {
     cls() {
         this.vram.fill( 0 );
         this.setPalReg16();
+    }
+
+    //------------------------
+    // 指定したYに対応するアドレスを返す
+    //------------------------
+    lineAddress( y ) {
+        let adr = 0;
+        if (this.screen_no >= 5) {
+            adr = y * this.mode_info.bpp * this.width / 8;
+        } else
+        if (this.screen_no == 3) {
+            // 64x48ブロック
+            // ブロック=4x4ドット
+            // 2バイトが2x2ブロック = 8x8ドット
+            // 64x2バイトが64x2ブロック
+            // int(y/8) * 128 + (y & 1);
+            adr = (y >> 3) * 128 + (y & 1);
+        } else {
+            // 1バイトが 6x8 または 8x8
+            // 画面横文字数 バイト が 8 ライン
+            adr = (y >> 3) * this.mode_info.txw;
+        }
+        return this.mode_info.patnam + adr;
     }
 
     //------------------------
@@ -1129,8 +1152,8 @@ function createBsaveImage( start, size, page, isCompress )
     }
 
     //const offset = page * vdp.mode_info.page_size;
-    const offset = page * vdp.height;
-    let body = vdp.vram.subarray( start + offset, start + size );
+    const offset = page * vdp.lineAddress( vdp.height );
+    let body = vdp.vram.subarray( start + offset, start + offset + size );
     if (header.id == BinHeader.HEAD_ID_COMPRESS) {
         let cbody = gs_rle_encode( body );
         body = cbody;
