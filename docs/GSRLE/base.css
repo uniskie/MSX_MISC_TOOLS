@@ -1,0 +1,293 @@
+@charset "utf-8";
+
+/* ==================================== */
+/*	メインブロック */
+/* ==================================== */
+#main{
+    margin: 0%;
+    padding: 0.5em;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: 
+        fit-content(100%)
+        fit-content(100%)
+        1fr
+        fit-content(100%);
+    width: 100%;
+    height: 100%;
+
+    background-color: #f8f8ff;
+    /*background-color: #24f;*/
+}
+
+/* ==================================== */
+/*	タイトルブロック */
+/* ==================================== */
+#title{
+    padding: 0.2em 0.5em;
+    background: #111;
+    color: white;
+    font-weight: bold;
+    font-size: larger;
+}
+.guide {
+    font-size: small;
+    margin: 0;
+    padding: 0.2em;
+    padding-left: 1em;
+    background: #666;
+    color: #eee;
+}
+/* ==================================== */
+/*	情報ブロック */
+/* ==================================== */
+#info {
+    padding: 0.2em;
+    box-sizing: border-box;
+    background:gray;
+    color: white;
+    font-size: small;
+    /*
+    white-space: nowrap;
+    */
+}
+#info label {
+    font-size:smaller;
+    padding: 0 0.5em;
+    position: relative;
+}
+
+/* ==================================== */
+/*	テキスト表示ブロック */
+/* ==================================== */
+#text_area {
+    padding: 0.5em;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+
+    overflow:auto;
+    white-space:pre-line;
+    word-wrap:break-word;
+
+    background:#f0f0f0;
+    color: black;
+    border:2px inset #888;
+}
+/** ドラッグオーバー **/
+#text_area.dropEffect {
+    border-color:#f88;
+}
+
+/* ==================================== */
+/*	非表示にしたい要素 */
+/* ==================================== */
+.hide {
+    display: none;
+}
+
+/* ==================================== */
+/*	キャンバス表示ブロック */
+/* ==================================== */
+.canvas_area {
+     /* 644 = 512*1.1333 */
+     /*
+    width: 644;
+    height: 484;
+    */
+    background:black;
+    color: white;
+    /*
+    border:2px inset #888;
+    */
+    border:2px solid #888;
+}
+/** ドラッグオーバー **/
+#canvas_area.dropEffect {
+    border-color:#f88;
+}
+/** コンテナ **/
+.canvas_container {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+.canvas_container span {
+    vertical-align: top;
+}
+#color_palette_area {
+    /*width : 256px;*/
+    /*height : 32px;*/
+    background-color: black;
+}
+/* ==================================== */
+/* ログメッセージ */
+/* ==================================== */
+#log_text {
+    font-size:smaller;
+    /*
+    min-height: 2em;
+    box-sizing: border-box;
+    */
+    padding: 2px;
+}
+/* ==================================== */
+/* 追加情報表示 */
+/* ==================================== */
+.details {
+    font-size:smaller;
+    background-color: #888;
+    padding: 0.5em;
+}
+
+.details .canvas_area {
+    border: none;
+}
+
+.details .tab_label {
+    min-width: 512px;
+}
+.details label {
+    text-align: center;
+    line-height: 1em;
+    background-color: #844;
+    color: white;
+    padding: 2px;
+    margin: 1px;
+}
+#spec_details {
+    min-height: 1.5em;
+    color: #dadade;
+}
+
+button.save_button {
+    color: #622;
+    background-color: #dbb;
+    vertical-align:top;
+    border-radius: 0.8em;
+    transition: .25s;
+    padding: 0 10px;
+    margin: 0 2px;
+
+    box-sizing: content-box;
+}
+button.save_button:hover {
+    background-color: #caa;
+}
+
+button.save_button:active {
+    border: inset red;
+}
+/* ==================================== */
+/*	クリックアイテムのカーソル変更 */
+/* ==================================== */
+.click {
+    cursor: pointer;
+}
+summary {
+    cursor: pointer;
+}
+input {
+    cursor: pointer;
+}
+span {
+    display: inline-block;
+}
+button {
+    cursor: pointer;
+}
+
+/* ==================================== */
+/*	途中改行を抑制したい要素	*/
+/* ==================================== */
+label {
+    display: inline-block;
+}
+
+/* ==================================== */
+/* ヘルプ報表示 */
+/* ==================================== */
+#tab_helps {
+    background-color: #ddd;
+    font-size: smaller;
+}
+
+/* ==================================== */
+/*	設定 */
+/* ==================================== */
+#tab_settings {
+    background-color: #f8f0ff;
+    font-size: smaller;
+}
+.tab_label {
+    padding: 0.1em 0.5em;
+    font-weight: bolder;
+    background: #768;
+    color: white;
+}
+.label {
+    padding: 0.1em 0.5em;
+    font-weight: bolder;
+    background: #a9c;
+    color: white;
+}
+.selector {
+    margin: 0.1em;
+    padding: 0;
+    border: dotted 2px #a9c;
+}
+.selector .label {
+    display: block;
+    padding: 0 0.8em;
+}
+.selector .click {
+    padding:  0 4px 0 2px;
+}
+
+/* ==================================== */
+/* 詳細 */
+/* ==================================== */
+.info {
+    box-sizing: border-box;
+    margin: 0.1em 1em;
+    padding: 0.2em 0.4em;
+    font-size:smaller;
+
+    color: #535;
+    background-color: #ddf;
+    border: 1px solid #9ab;
+}
+
+/* ==================================== */
+/* Label Input ボタンの見た目変更 */
+/* ==================================== */
+label.button {
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 0.2em;
+    border: outset 2px #888;
+    border-radius: 0.8em;
+    background: #f0e8f8;
+    color: black;
+    /*font-size: smaller;*/
+    transition: .25s;
+}
+label.button span {
+    /* label.button で paddingが効かないので */
+    padding: 1px 4px;
+}
+@media (any-hover: hover) {
+    label.button:hover {
+        background: #e0d0e0;
+    }
+}
+/*class="focus:outline"*/
+label.button:focus {
+    outline: auto;
+}
+label.button:active {
+    border: inset red;
+}
+label.button > input[type="file"]  {
+    display: none;
+}
