@@ -67,7 +67,6 @@ function displayCurrentFilename() {
     }
     if (sub_file.name.length) {
         filename_area2.textContent = fileText(sub_file);
-        detail_page1.style.display ="inline-block";
         detail_page1_file.textContent = '　:　' + fileText(sub_file);
         if (sub_file.header) {
             detail_page1_spec.textContent = 
@@ -75,11 +74,12 @@ function displayCurrentFilename() {
         } else {
             detail_page1_spec.textContent = '';
         }
+        //detail_page1.style.display ="inline-block";
     } else {
         filename_area2.textContent = '';
-        detail_page1.style.display ="none";
         detail_page1_file.textContent = '';
         detail_page1_spec.textContent = '';
+        //detail_page1.style.display ="none";
     }
     if (pal_file.name.length) {
         filename_area3.textContent = fileText(pal_file);
@@ -87,6 +87,12 @@ function displayCurrentFilename() {
     } else {
         filename_area3.textContent = '';
         detail_pal_file.textContent =  '';
+    }
+
+    if (vdp.interlace_mode) {
+        detail_page1.style.display ="inline-block";
+    } else {
+        detail_page1.style.display ="none";
     }
 
     //spec_details
@@ -121,7 +127,7 @@ function isPaletteFile( ext )
 // 画像拡張子
 // 拡張子でパレットの有無を判定しない
 const ext_info = [
-	{ext:".SC1", screen_no: 1, interlace:0, page:0, type:0, bsave:".SC1", gs:".SR1"},	// BSAVE
+//	{ext:".SC1", screen_no: 1, interlace:0, page:0, type:0, bsave:".SC1", gs:".SR1"},	// BSAVE
 	{ext:".SC2", screen_no: 2, interlace:0, page:0, type:0, bsave:".SC2", gs:".SR2"},	// BSAVE
 	{ext:".SC3", screen_no: 3, interlace:0, page:0, type:0, bsave:".SC3", gs:".SR4"},	// BSAVE
 	{ext:".SC4", screen_no: 4, interlace:0, page:0, type:0, bsave:".SC4", gs:".SR3"},	// BSAVE
@@ -130,6 +136,8 @@ const ext_info = [
 	{ext:".SC8", screen_no: 8, interlace:0, page:0, type:0, bsave:".SC8", gs:".SR8"},	// BSAVE
 	{ext:".S10", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// BSAVE
 	{ext:".S12", screen_no:12, interlace:0, page:0, type:0, bsave:".S12", gs:".SRC"},	// BSAVE
+	{ext:".SCA", screen_no:10, interlace:0, page:0, type:0, bsave:".SCA", gs:".SRA"},	// BSAVE
+	{ext:".SCC", screen_no:12, interlace:0, page:0, type:0, bsave:".SCC", gs:".SRC"},	// BSAVE
 	{ext:".S50", screen_no: 5, interlace:1, page:0, type:0, bsave:".S50", gs:".R50"},	// BSAVE interlace
     {ext:".S51", screen_no: 5, interlace:1, page:1, type:0, bsave:".S51", gs:".R51"},	// BSAVE interlace
 	{ext:".S70", screen_no: 7, interlace:1, page:0, type:0, bsave:".S70", gs:".R70"},	// BSAVE interlace
@@ -789,7 +797,7 @@ class VDP {
         let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.mode_info.patnam;
+            let idx = p.mode_info.patnam
                     + p.mode_info.namsiz * pg;
             for (var i = 0; i < sz; ++i) {
                 let px = d[idx];
@@ -820,7 +828,7 @@ class VDP {
         let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.mode_info.patnam;
+            let idx = p.mode_info.patnam
                     + p.mode_info.namsiz * pg;
             for (var i = 0; i < sz; i+=4) {
                 y[0] = d[idx] >> 3; k = d[idx] & 7;        ++idx;
@@ -857,7 +865,7 @@ class VDP {
         let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.mode_info.patnam;
+            let idx = p.mode_info.patnam
                     + p.mode_info.namsiz * pg;
             for (var i = 0; i < sz; i+=4) {
                 y[0] = d[idx] >> 3; k = d[idx] & 7;        ++idx;
