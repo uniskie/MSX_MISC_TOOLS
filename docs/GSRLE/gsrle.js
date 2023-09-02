@@ -65,10 +65,22 @@ function displayCurrentFilename() {
         } else {
             detail_page0_spec.textContent = '';
         }
+        page0_save_bsave   .disabled = false;
+        page0_save_bsave_np.disabled = false;
+        page0_save_gsrle   .disabled = false;
+        page0_save_bsave   .style.display ="inline-block";
+        page0_save_bsave_np.style.display ="inline-block";
+        page0_save_gsrle   .style.display ="inline-block";
     } else {
         filename_area.textContent = '';
         detail_page0_file.textContent = '';
         detail_page0_spec.textContent = '';
+        page0_save_bsave   .disabled = true;
+        page0_save_bsave_np.disabled = true;
+        page0_save_gsrle   .disabled = true;
+        page0_save_bsave   .style.display ="none";
+        page0_save_bsave_np.style.display ="none";
+        page0_save_gsrle   .style.display ="none";
     }
 
     if (sub_file.name.length) {
@@ -1696,6 +1708,7 @@ function() {
 
     log_text.innerText = '';
     help_guide.innerText = default_log_msg;
+    
     displayCurrentFilename();
 
     // ========================================================
