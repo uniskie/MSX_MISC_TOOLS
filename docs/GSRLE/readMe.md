@@ -2,11 +2,14 @@
 
 SCREEN2～SCREEN12の画像を表示・変換保存可能なツールです。
 
-- 変換保存時はグラフサウルス圧縮形式とBSAVEベタ形式が選択可能
-- SCREEN5以上はインターレース画像に対応
-- ※ SCREEN1以外に対応。SCREEN9は未テスト
+GSRLEのブラウザ版を作成しようとしたら、いつの間にかこうなっていました。
 
-![プレビュー](img/gsrle_html_default.png)
+- SCREEN 2～SCREEN 12のMSX画像ファイルに対応
+- BSAVE形式、グラフサウルス圧縮形式の読み込み表示
+- BSAVE形式、グラフサウルス圧縮形式での保存
+- インターレース画像対応（SCREEN5以上）
+
+![プレビュー](img/gsrle_html_preview.png)
 
 ソースコード  
 [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)
@@ -26,13 +29,25 @@ github pagesはdocsフォルダに手作業で移動しているので、更新�
 ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。
 
-## 変換・保存機能
+## MSX画像の圧縮・展開 保存機能
 
 読み込み済みファイルがあれば保存・圧縮保存が可能です。
 
 また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。
 
 ![プレビュー](img/gsrle_html_button.png)
+
+## PNGやBMPからの変換
+
+本ツールにはMSX画像形式からの圧縮や展開のみをサポートしています。  
+PNGなどからの変換機能が欲しい場合は他のツールを使用してください。
+
+- BMP to MSX  
+  自分が良く使用しているのは、hra1129さんの変換ツール  BMP to MSX です。  
+  [https://github.com/hra1129/bmp2msx](https://github.com/hra1129/bmp2msx)
+
+- その他ツール紹介ページ  
+  [Gigamax Online Webアプリ多め！ネットで見つけたMSX向け画像編集ツールまとめ](https://gigamix.hatenablog.com/entry/devmsx/graphics-tools#MSX-Screen-Converter%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3-MSX%E5%90%91%E3%81%91%E5%90%84%E7%A8%AE%E7%94%BB%E5%83%8F%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF)
 
 ## 対応拡張子
 
