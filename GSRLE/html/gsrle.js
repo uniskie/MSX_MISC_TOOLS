@@ -1369,8 +1369,7 @@ function createBsaveImage( start, size, page, isCompress )
         header.run = 0;
     }
 
-    //const offset = page * vdp.mode_info.page_size;
-    const offset = page * vdp.lineAddress( vdp.height );
+    const offset = page * vdp.mode_info.page_size;
     let body = vdp.vram.subarray( start + offset, start + offset + size );
     if (header.id == BinHeader.HEAD_ID_COMPRESS) {
         let cbody = gs_rle_encode( body );
