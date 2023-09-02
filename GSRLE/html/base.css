@@ -1,6 +1,17 @@
 @charset "utf-8";
 
 /* ==================================== */
+/*	アコーディオンラベル */
+/* ==================================== */
+.tab_label {
+    padding: 0.1em 0.5em;
+    font-weight: bolder;
+    background: #101;
+    color: white;
+    border: outset 2px #a67;
+}
+
+/* ==================================== */
 /*	メインブロック */
 /* ==================================== */
 #main{
@@ -115,6 +126,15 @@
 .canvas_container span {
     vertical-align: top;
 }
+#spec_details {
+    min-height: 1.5em;
+    background-color: #888;
+    color: #dadade;
+    font-size: smaller;
+    margin: 0;
+    padding: 0px 2px 1px 4px;
+
+}
 #color_palette_area {
     /*width : 256px;*/
     /*height : 32px;*/
@@ -125,11 +145,11 @@
 /* ==================================== */
 #log_text {
     font-size:smaller;
+    min-height: 1.5em;
     /*
-    min-height: 2em;
     box-sizing: border-box;
     */
-    padding: 2px;
+    padding: 1px 6px 1px 2px;
 }
 /* ==================================== */
 /* 追加情報表示 */
@@ -144,7 +164,12 @@
     border: none;
 }
 
-.details .tab_label {
+.detail_tab_label {
+    padding: 0.1em 0.5em;
+    font-weight: bolder;
+    background: #768;
+    color: white;
+
     min-width: 512px;
 }
 .details label {
@@ -155,13 +180,6 @@
     padding: 2px;
     margin: 1px;
 }
-#spec_details {
-    min-height: 1.5em;
-    background-color: #888;
-    color: #dadade;
-    font-size: smaller;
-}
-
 button.save_button {
     color: #622;
     background-color: #dbb;
@@ -212,8 +230,11 @@ label {
 /* ヘルプ報表示 */
 /* ==================================== */
 #tab_helps {
-    background-color: #ddd;
     font-size: smaller;
+}
+#help_guide {
+    background-color: #eed;
+    padding: 0.1em 0.2em 0.1em 0.5em;
 }
 
 /* ==================================== */
@@ -222,12 +243,6 @@ label {
 #tab_settings {
     background-color: #f8f0ff;
     font-size: smaller;
-}
-.tab_label {
-    padding: 0.1em 0.5em;
-    font-weight: bolder;
-    background: #768;
-    color: white;
 }
 .label {
     padding: 0.1em 0.5em;

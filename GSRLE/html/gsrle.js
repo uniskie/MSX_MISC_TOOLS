@@ -1,13 +1,18 @@
 const toString = Object.prototype.toString;
 
 const default_log_msg = 
-`- インターレース表示やパレットが別の場合はまとめて一気にドロップ
-- または、メイン画像を開いた後にパレットやページ1画像をドロップ
+`-使い方-
+1. MSX画像ファイルやパレットファイルをドロップ
+2. ファイルボタンを押して開く
+3. メイン画像を開いた後に、インターレースページ1画像、パレットを追加できる
+4. 画像ファイルやパレットは詳細タブに形式を指定保存するボタンがある
 
-- グラフサウルス圧縮形式で保存可能
-- 保存時は表示画面サイズでの保存になります
-
-- ドットアスペクト比：1.133:1は良く聞く比率。1.177:1はOpenMSXに近い値`;
+- 補足 -
+1. グラフサウルス圧縮形式で保存可能 (※ 保存時は表示画面サイズで保存)
+2. パレットの有無、画面縦サイズ、圧縮などはデータの内容で判定。
+3. SC1はSSCREEN12のインターレース画像として扱う
+4. SCREEN1は非対応。SCREEN2～12の画像に対応 (※SCREEN 9は未テスト)
+5. ドットアスペクト比 1.133:1 は良く聞く比率。1.177:1 はOpenMSXに近い値`;
 
 let isFirst = true;
 
@@ -53,7 +58,7 @@ function displayCurrentFilename() {
 
     if (main_file.name.length) {
         filename_area.textContent = fileText(main_file);
-        detail_page0_file.textContent = '　:　' + fileText(main_file);
+        detail_page0_file.textContent = ':　' + fileText(main_file);
         if (main_file.header) {
             detail_page0_spec.textContent = 
             `[START:0x${main_file.header.start.toString(16)} END:0x${main_file.header.end}]`;
@@ -65,9 +70,10 @@ function displayCurrentFilename() {
         detail_page0_file.textContent = '';
         detail_page0_spec.textContent = '';
     }
+
     if (sub_file.name.length) {
         filename_area2.textContent = fileText(sub_file);
-        detail_page1_file.textContent = '　:　' + fileText(sub_file);
+        detail_page1_file.textContent = ':　' + fileText(sub_file);
         if (sub_file.header) {
             detail_page1_spec.textContent = 
             `[START:0x${sub_file.header.start.toString(16)} END:0x${sub_file.header.end}]`;
@@ -75,21 +81,39 @@ function displayCurrentFilename() {
             detail_page1_spec.textContent = '';
         }
         //detail_page1.style.display ="inline-block";
+        page1_save_bsave   .disabled = false;
+        page1_save_bsave_np.disabled = false;
+        page1_save_gsrle   .disabled = false;
+        page1_save_bsave   .style.display ="inline-block";
+        page1_save_bsave_np.style.display ="inline-block";
+        page1_save_gsrle   .style.display ="inline-block";
     } else {
         filename_area2.textContent = '';
-        detail_page1_file.textContent = '';
-        detail_page1_spec.textContent = '';
+        if (vdp.screen_no < 5) {
+            detail_page1_file.textContent = '';
+            detail_page1_spec.textContent = ':　[CHARACTER PATTERN GENERATOR TABLE]';
+        } else {
+            detail_page1_file.textContent = '';
+            detail_page1_spec.textContent = '';
+        }
         //detail_page1.style.display ="none";
+        page1_save_bsave   .disabled = true;
+        page1_save_bsave_np.disabled = true;
+        page1_save_gsrle   .disabled = true;
+        page1_save_bsave   .style.display ="none";
+        page1_save_bsave_np.style.display ="none";
+        page1_save_gsrle   .style.display ="none";
     }
+
     if (pal_file.name.length) {
         filename_area3.textContent = fileText(pal_file);
-        detail_pal_file.textContent = '　:　' + fileText(pal_file);
+        detail_pal_file.textContent = ':　' + fileText(pal_file);
     } else {
         filename_area3.textContent = '';
         detail_pal_file.textContent =  '';
     }
 
-    if (vdp.interlace_mode) {
+    if (vdp.interlace_mode || (vdp.screen_no < 5)) {
         detail_page1.style.display ="inline-block";
     } else {
         detail_page1.style.display ="none";
@@ -132,6 +156,7 @@ const ext_info = [
 	{ext:".SC3", screen_no: 3, interlace:0, page:0, type:0, bsave:".SC3", gs:".SR4"},	// BSAVE
 	{ext:".SC4", screen_no: 4, interlace:0, page:0, type:0, bsave:".SC4", gs:".SR3"},	// BSAVE
 	{ext:".SC5", screen_no: 5, interlace:0, page:0, type:0, bsave:".SC5", gs:".SR5"},	// BSAVE
+	{ext:".SC6", screen_no: 6, interlace:0, page:0, type:0, bsave:".SC6", gs:".SR6"},	// BSAVE
 	{ext:".SC7", screen_no: 7, interlace:0, page:0, type:0, bsave:".SC7", gs:".SR7"},	// BSAVE
 	{ext:".SC8", screen_no: 8, interlace:0, page:0, type:0, bsave:".SC8", gs:".SR8"},	// BSAVE
 	{ext:".S10", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// BSAVE
@@ -140,6 +165,8 @@ const ext_info = [
 	{ext:".SCC", screen_no:12, interlace:0, page:0, type:0, bsave:".SCC", gs:".SRC"},	// BSAVE
 	{ext:".S50", screen_no: 5, interlace:1, page:0, type:0, bsave:".S50", gs:".R50"},	// BSAVE interlace
     {ext:".S51", screen_no: 5, interlace:1, page:1, type:0, bsave:".S51", gs:".R51"},	// BSAVE interlace
+	{ext:".S60", screen_no: 6, interlace:1, page:0, type:0, bsave:".S60", gs:".R60"},	// BSAVE interlace
+    {ext:".S61", screen_no: 6, interlace:1, page:1, type:0, bsave:".S61", gs:".R61"},	// BSAVE interlace
 	{ext:".S70", screen_no: 7, interlace:1, page:0, type:0, bsave:".S70", gs:".R70"},	// BSAVE interlace
     {ext:".S71", screen_no: 7, interlace:1, page:1, type:0, bsave:".S71", gs:".R71"},	// BSAVE interlace
 	{ext:".S80", screen_no: 8, interlace:1, page:0, type:0, bsave:".S80", gs:".R80"},	// BSAVE interlace
@@ -152,6 +179,7 @@ const ext_info = [
 	{ext:".SR4", screen_no: 3, interlace:0, page:0, type:1, bsave:".SC3", gs:".SR4"},	// GRAPH SAURUS
 	{ext:".SR3", screen_no: 4, interlace:0, page:0, type:1, bsave:".SC4", gs:".SR3"},	// GRAPH SAURUS
 	{ext:".SR5", screen_no: 5, interlace:0, page:0, type:1, bsave:".SC5", gs:".SR5"},	// GRAPH SAURUS
+	{ext:".SR6", screen_no: 6, interlace:0, page:0, type:1, bsave:".SC6", gs:".SR6"},	// GRAPH SAURUS
 	{ext:".SR7", screen_no: 7, interlace:0, page:0, type:1, bsave:".SC7", gs:".SR7"},	// GRAPH SAURUS
 	{ext:".SR8", screen_no: 8, interlace:0, page:0, type:1, bsave:".SC8", gs:".SR8"},	// GRAPH SAURUS
 	{ext:".SRA", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// GRAPH SAURUS
@@ -159,6 +187,8 @@ const ext_info = [
 	{ext:".SRS", screen_no:12, interlace:0, page:0, type:1, bsave:".S12", gs:".SRS"},	// GRAPH SAURUS
 	{ext:".R50", screen_no: 5, interlace:1, page:0, type:1, bsave:".S50", gs:".R50"},	// GRAPH SAURUS interlace
     {ext:".R51", screen_no: 5, interlace:1, page:1, type:1, bsave:".S51", gs:".R51"},	// GRAPH SAURUS interlace
+	{ext:".R60", screen_no: 6, interlace:1, page:0, type:1, bsave:".S60", gs:".R60"},	// GRAPH SAURUS interlace
+    {ext:".R61", screen_no: 6, interlace:1, page:1, type:1, bsave:".S61", gs:".R61"},	// GRAPH SAURUS interlace
 	{ext:".R70", screen_no: 7, interlace:1, page:0, type:1, bsave:".S70", gs:".R70"},	// GRAPH SAURUS interlace
     {ext:".R71", screen_no: 7, interlace:1, page:1, type:1, bsave:".S71", gs:".R71"},	// GRAPH SAURUS interlace
 	{ext:".R80", screen_no: 8, interlace:1, page:0, type:1, bsave:".S80", gs:".R80"},	// GRAPH SAURUS interlace
@@ -335,55 +365,55 @@ class VDP {
     //------------------------------------------------
     // 画面モード別 スペック
     static get screen_mode_spec1() { return [
-        { no: 0, txw: 40, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 0, txw: 80, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 1, txw: 32, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 2, txw: 32, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 3, txw: 64, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 4, txw: 32, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 5, txw:256, name:'GRAPHIC4',   width:256, height:212, bpp:4, page_size:0x08000, }, 
-        { no: 6, txw:512, name:'GRAPHIC5',   width:512, height:212, bpp:4, page_size:0x08000, }, 
-        { no: 7, txw:512, name:'GRAPHIC6',   width:512, height:212, bpp:4, page_size:0x10000, }, 
-        { no: 8, txw:256, name:'GRAPHIC7',   width:256, height:212, bpp:8, page_size:0x10000, }, 
-        { no: 9, txw:512, name:'GRAPHIC8',   width:512, height:212, bpp:4, page_size:0x08000, }, 
-        { no:10, txw:256, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
-        { no:11, txw:256, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
-        { no:12, txw:256, name:'YJK',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no: 0, txw:40, txh:24, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 0, txw:80, txh:24, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 1, txw:32, txh:24, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 2, txw:32, txh:24, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 3, txw:64, txh:48, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 4, txw:32, txh:24, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 5, txw:32, txh:26, name:'GRAPHIC4',   width:256, height:212, bpp:4, page_size:0x08000, }, 
+        { no: 6, txw:64, txh:26, name:'GRAPHIC5',   width:512, height:212, bpp:2, page_size:0x08000, }, 
+        { no: 7, txw:64, txh:26, name:'GRAPHIC6',   width:512, height:212, bpp:4, page_size:0x10000, }, 
+        { no: 8, txw:32, txh:26, name:'GRAPHIC7',   width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no: 9, txw:64, txh:26, name:'GRAPHIC8',   width:512, height:212, bpp:2, page_size:0x08000, }, 
+        { no:10, txw:32, txh:26, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no:11, txw:32, txh:26, name:'YAE',        width:256, height:212, bpp:8, page_size:0x10000, }, 
+        { no:12, txw:32, txh:26, name:'YJK',        width:256, height:212, bpp:8, page_size:0x10000, }, 
     ]; }
     // 画面モード別キャラジェネ設定
     static get screen_mode_spec2() { return [
-        { no: 0, txw:240, namsiz:0x00400, patnam:0x0000, patgen:0x0800, patcol:-1    , paltbl:0x0400, s192:0x0FFF, s212:0x0FFF, }, 
-        { no: 0, txw:480, namsiz:0x00800, patnam:0x0000, patgen:0x1000, patcol:0x0800, paltbl:0x0F00, s192:0x17FF, s212:0x17FF, }, 
-        { no: 1, txw:256, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
-        { no: 2, txw:256, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
-        { no: 3, txw:256, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
-        { no: 4, txw:256, namsiz:0x00200, patnam:0x2000, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
-        { no: 5, txw:256, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
-        { no: 6, txw:512, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
-        { no: 7, txw:512, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
-        { no: 8, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
-        { no: 9, txw:512, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
-        { no:10, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
-        { no:11, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
-        { no:12, txw:256, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no: 0, txw:40, namsiz:0x00400, patnam:0x0000, patgen:0x0800, patcol:-1    , paltbl:0x0400, s192:0x0FFF, s212:0x0FFF, }, 
+        { no: 0, txw:80, namsiz:0x00800, patnam:0x0000, patgen:0x1000, patcol:0x0800, paltbl:0x0F00, s192:0x17FF, s212:0x17FF, }, 
+        { no: 1, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
+        { no: 2, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
+        { no: 3, txw:64, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
+        { no: 4, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
+        { no: 5, txw:32, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no: 6, txw:64, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no: 7, txw:64, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no: 8, txw:32, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no: 9, txw:64, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
+        { no:10, txw:32, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no:11, txw:32, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
+        { no:12, txw:32, namsiz:0x10000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0xFA80, s192:0xBFFF, s212:0xD3FF, }, 
     ]; }
     // 画面モード別スプライト設定
     static get screen_mode_spec3() { return [
     	//                                                               
-        { no: 0, txw:240, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
-        { no: 0, txw:480, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
-        { no: 1, txw:256, spratr:0x1B00, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 2, txw:256, spratr:0x2000, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 3, txw:256, spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 4, txw:256, spratr:0x2000, sprgen:0x3800, sprcol:0x3800, }, 
-        { no: 5, txw:256, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no: 6, txw:512, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no: 7, txw:512, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no: 8, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no: 9, txw:512, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
-        { no:10, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no:11, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
-        { no:12, txw:256, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 0, txw:40, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
+        { no: 0, txw:80, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
+        { no: 1, txw:32, spratr:0x1B00, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 2, txw:32, spratr:0x2000, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 3, txw:64, spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 4, txw:32, spratr:0x2000, sprgen:0x3800, sprcol:0x3800, }, 
+        { no: 5, txw:32, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no: 6, txw:64, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no: 7, txw:64, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 8, txw:32, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no: 9, txw:64, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
+        { no:10, txw:32, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no:11, txw:32, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
+        { no:12, txw:32, spratr:0xFA00, sprgen:0xF000, sprcol:0xF800, }, 
     ]; }
     static getScreenModeSetting( no, width ) {
     	if (0 < no) {
@@ -666,7 +696,9 @@ class VDP {
             // ページ毎表示キャンバス
             //------------------------
             if (p.page_canvas) {
-                var offscreen = p.offscreen[p.interlace_mode];
+                let i = 0;
+                if (p.interlace_mode || (p.screen_no < 5)) ++i;
+                var offscreen = p.offscreen[i];
 
                 for (var pg = 0; pg < p.page_canvas.length; ++pg) {
                     var canvas = p.page_canvas[pg];
@@ -708,7 +740,16 @@ class VDP {
                         canvas.width * i / pal.length, 0,
                         w, canvas.height);
                 }
-            }
+                /*
+                if (p.screen_no == 6) {
+                    ctx.moveTo( canvas.width * 4 / pal.length, canvas.height/2 );
+                    ctx.lineTo( canvas.width, canvas.height/2);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = 'red';
+                    ctx.stroke();
+                }
+                */
+        }
         }
     }
     update() {
@@ -718,11 +759,20 @@ class VDP {
             return;
         }
         switch (p.screen_no) {
+        case 2:
+        case 4:
+            p.update_chrgen_x3();
+            break;
+        case 3:
+            p.update_multi_color();
+            break;
         case 5:
-        case 6:
         case 7:
-        case 9:
             p.update_bitmap16();
+            break;
+        case 6:
+        case 9:
+            p.update_bitmap8();
             break;
         case 8:
             p.update_bitmap256();
@@ -736,7 +786,7 @@ class VDP {
             break;
         }
 
-        if (!p.interlace_mode) {
+        if (!p.interlace_mode && (5 <= p.screen_no)) {
             var ctx = p.offscreen[0].getContext('2d');
             ctx.putImageData( p.imgData, 0, 0 );
         } else {
@@ -745,10 +795,129 @@ class VDP {
             ctx.putImageData( p.imgData, 0, 0 );
 
             ctx = p.offscreen[0].getContext('2d');
-            let y = 0;
-            for (var i = 0; i < p.height;  ++i, y+=2) {
-                ctx.drawImage( work, 0, i           , p.width, 1, 0, y    , p.width, 1 );
-                ctx.drawImage( work, 0, i + p.height, p.width, 1, 0, y + 1, p.width, 1 );
+            if (5 <= p.screen_no) {
+                let y = 0;
+                for (var i = 0; i < p.height;  ++i, y+=2) {
+                    ctx.drawImage( work, 0, i           , p.width, 1, 0, y    , p.width, 1 );
+                    ctx.drawImage( work, 0, i + p.height, p.width, 1, 0, y + 1, p.width, 1 );
+                }
+            } else {
+                ctx.putImageData( p.imgData, 0, 0 );
+            }
+        }
+    }
+    update_chrgen_x3() {
+    	const p = this;
+
+        if (!p.imgData) {
+            console.log('update_chrgen_x3 - this.imgData is null.');
+            return;
+        }
+        let pg_count = 2;//p.interlace_mode + 1;
+        let buf = p.imgData.data;
+        let d = p.vram;
+
+        let patgen = p.mode_info.patgen;
+        let patcol = p.mode_info.patcol;
+        const line_size = 4 * vdp.width;
+
+        let txw = p.mode_info.txw;
+        let txmask = txw - 1;
+        let txshift = 0; while((txw >> txshift) > 1) {txshift ++;}
+        let tx_size = txw * p.mode_info.txh;
+
+        let ndx = p.mode_info.patnam;
+        let odx = 0;
+        for (var pg = 0; pg < pg_count; ++pg) {
+            for (var i = 0; i < tx_size; ++i) {
+                // chr gen view : page 1
+                let chr_d = i;
+                if (pg == 0) {
+                    // main view : page 0
+                    chr_d = (d[ndx++] + (i & 0xff00));
+                }
+                chr_d *= 8;
+                let dy = odx
+                        + (i & txmask)      // i & 31
+                        * 32                // 8px * 4byte
+                        + (i >> txshift)    // i / 32
+                        * (line_size * 8);  // 8 line
+
+                for(var py = 0; py < 8; ++py, ++chr_d) {
+                    let patbit = d[patgen + chr_d];
+                    let colset = d[patcol + chr_d];
+                    let dx = dy; 
+                    for(var px = 0; px < 8; ++px, dx+=4) {
+                        let c_shift = (patbit >> 5) & 4; // 128 >> 5 = 4
+                        let c = p.pal_rgba[ (colset >> c_shift) & 15 ];
+                        buf[ dx + 0 ] = c[0];
+                        buf[ dx + 1 ] = c[1];
+                        buf[ dx + 2 ] = c[2];
+                        buf[ dx + 3 ] = c[3];
+                        patbit <<= 1;
+                    }
+                    dy += line_size;
+                }
+            }
+            odx += p.width * p.height * 4;
+        }
+    }
+    update_multi_color() {
+    	const p = this;
+
+        if (!p.imgData) {
+            console.log('update_multi_color - this.imgData is null.');
+            return;
+        }
+        let pg_count = 2;//p.interlace_mode + 1;
+        let buf = p.imgData.data;
+        let d = p.vram;
+
+        let patnam = p.mode_info.patnam;
+        let patgen = p.mode_info.patgen;
+        
+        let txw = Math.floor(p.mode_info.width  / 8);
+        let txh = Math.floor(p.mode_info.height / 8);
+        let tx_size = txw * txh;
+        const line_size = 4 * vdp.width;
+        const b_line_size = line_size * 4; // 1block 4x4px
+
+        let odx = 0;
+        for (var pg = 0; pg < pg_count; ++pg) {
+            for (var y = 0; y < txh; ++y) {
+                let dx = odx;
+                for (var x = 0; x < txw; ++x) {
+                    let chr;
+                    if (pg) {
+                        chr = x + (y >> 2) * txw;
+                    } else {
+                        chr = d[patnam + x + y * txw];
+                    }
+                    let dy = dx;
+                    for (var iy = 0; iy < 2; ++iy) {
+                        let colval = d[ patgen + (chr * 8) + (y & 3) * 2 + iy ];
+                        // 8x4
+                        let ddy = dy;
+                        for (var diy = 0; diy < 4; ++diy) {
+                            // 8x1
+                            let ddx = ddy;
+                            for(var c_shift = 4; c_shift >= 0; c_shift -= 4) {
+                                var c = p.pal_rgba[ (colval >> c_shift) & 15 ];
+                                // 4x1
+                                for (var dix = 0; dix < 4; ++dix) {
+                                    buf[ ddx++ ] = c[0];
+                                    buf[ ddx++ ] = c[1];
+                                    buf[ ddx++ ] = c[2];
+                                    buf[ ddx++ ] = c[3];
+                                }
+                            }
+                            ddy += line_size;
+                        }
+                        dy += b_line_size;
+                    }
+                    dx += 32; // 8 * 4;
+                }
+                odx += b_line_size + b_line_size;
             }
         }
     }
@@ -756,7 +925,7 @@ class VDP {
     	const p = this;
 
         if (!p.imgData) {
-            console.log('draw_bitmap16 - this.imgData is null.');
+            console.log('update_bitmap16 - this.imgData is null.');
             return;
         }
         let pg_count = 2;//p.interlace_mode + 1;
@@ -784,11 +953,40 @@ class VDP {
             }
         }
     }
+    update_bitmap8() {
+    	const p = this;
+
+        if (!p.imgData) {
+            console.log('update_bitmap16 - this.imgData is null.');
+            return;
+        }
+        let pg_count = 2;//p.interlace_mode + 1;
+        let buf = p.imgData.data;
+        let d = p.vram;
+        let sz = p.width / 4 * p.height;
+        let odx = 0;
+        for (var pg = 0; pg < pg_count; ++pg) {
+            let idx = p.mode_info.patnam
+                    + p.mode_info.namsiz * pg;
+            for (var i = 0; i < sz; ++i) {
+                let px = d[idx];
+                for (var c_shift = 6; c_shift>= 0; c_shift-=2 ) {
+                    let c = p.pal_rgba[(px >> c_shift) & 3];
+                    buf[ odx + 0 ] = c[0];
+                    buf[ odx + 1 ] = c[1];
+                    buf[ odx + 2 ] = c[2];
+                    buf[ odx + 3 ] = c[3];
+                    odx += 4;
+                }
+                idx += 1;
+            }
+        }
+    }
     update_bitmap256() {
     	const p = this;
 
         if (!p.imgData) {
-            console.log('draw_bitmap256 - this.imgData is null.');
+            console.log('update_bitmap256 - this.imgData is null.');
             return;
         }
         let pg_count = 2;//p.interlace_mode + 1;
@@ -815,7 +1013,7 @@ class VDP {
     	const p = this;
 
         if (!p.imgData) {
-            console.log('draw_bitmap256 - this.imgData is null.');
+            console.log('update_bitmap_yjk - this.imgData is null.');
             return;
         }
         let y = [0,0,0,0];  // 0 ~ 31
@@ -852,7 +1050,7 @@ class VDP {
     	const p = this;
 
         if (!p.imgData) {
-            console.log('draw_bitmap256 - this.imgData is null.');
+            console.log('update_bitmap_yae - this.imgData is null.');
             return;
         }
         let y = [0,0,0,0];  // 0 ~ 31 / bit0 == 1 -> index color
@@ -1227,7 +1425,8 @@ function loadImage(d, ext_info)
 
     let mode_info = VDP.getScreenModeSetting( ext_info.screen_no );
     let force_height = vdp.force_height;
-    if (0 == force_height) {
+    if ((0 == force_height) && (5 <= mode_info.no))
+    {
         // 自動なら画像ピクセルサイズから表示サイズを判断
         if (header.isCompress && ((mode_info.s212 + 1) < dat.length)) {
             // 圧縮形式はパレットを含まないのでline212と比較
@@ -1253,7 +1452,9 @@ function loadImage(d, ext_info)
 
     vdp.loadBinary(dat, ext_info.page * vdp.mode_info.page_size);
 
-    if (header.isBinary && !header.isCompress) {
+    // VRAMパレットテーブル読み込み
+    if (header.isBinary && !header.isCompress) 
+    {
         if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
             vdp.restorePalette(); 
         }
