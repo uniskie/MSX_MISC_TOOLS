@@ -9,6 +9,20 @@
     background: #101;
     color: white;
     border: outset 2px #a67;
+
+    transition: height .25s;
+}
+.tab_label a {
+    color:#Fdd;
+    text-decoration:underline;
+
+    transition: .25s;
+}
+.tab_label a:hover {
+    color:#f88;
+}
+.tab_label a:active {
+    color:#af8;
 }
 
 /* ==================================== */
@@ -231,6 +245,7 @@ label {
 /* ==================================== */
 #tab_helps {
     font-size: smaller;
+
 }
 #help_guide {
     background-color: #eed;
@@ -289,6 +304,7 @@ label.button {
     background: #f0e8f8;
     color: black;
     /*font-size: smaller;*/
+
     transition: .25s;
 }
 label.button span {

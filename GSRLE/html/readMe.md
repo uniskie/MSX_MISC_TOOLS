@@ -6,7 +6,7 @@ SCREEN2～SCREEN12の画像を表示・変換保存可能なツールです。
 - SCREEN5以上はインターレース画像に対応
 - ※ SCREEN1以外に対応。SCREEN9は未テスト
 
-![プレビュー](gsrle_html_preview.png)
+![プレビュー](img/gsrle_html_default.png)
 
 ソースコード  
 [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)
@@ -25,6 +25,14 @@ github pagesはdocsフォルダに手作業で移動しているので、更新�
 
 ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。
+
+## 変換・保存機能
+
+読み込み済みファイルがあれば保存・圧縮保存が可能です。
+
+また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。
+
+![プレビュー](img/gsrle_html_button.png)
 
 ## 対応拡張子
 
