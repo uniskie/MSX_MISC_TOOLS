@@ -1,13 +1,27 @@
 # MSX画像ビューア ブラウザ版
 
-作業中の物です。
+SCREEN2～SCREEN12の画像を表示・変換保存可能なツールです。
 
+- 変換保存時はグラフサウルス圧縮形式とBSAVEベタ形式が選択可能
+- SCREEN5以上はインターレース画像に対応
+- ※ SCREEN1以外に対応。SCREEN9は未テスト
 
-## github pagesで直接ブラウズ
+![プレビュー](gsrle_html_preview.png)
 
-https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html
+## github pages の WEBページでブラウザから直接実行
+
+[https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
 
 github pagesはdocsフォルダに手作業で移動しているので、更新は遅れるかもしれません。
+
+## MSX実機でのロード
+
+ローダーのサンプルがあります。
+
+[https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD)
+
+ビューアー・ローダーともに、
+ソースコードの再利用はご自由にどうぞ。
 
 ## 対応拡張子
 
