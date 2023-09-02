@@ -8,6 +8,9 @@ SCREEN2～SCREEN12の画像を表示・変換保存可能なツールです。
 
 ![プレビュー](gsrle_html_preview.png)
 
+ソースコード  
+[https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)
+
 ## github pages の WEBページでブラウザから直接実行
 
 [https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
