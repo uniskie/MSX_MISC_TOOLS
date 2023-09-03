@@ -1745,8 +1745,7 @@ function saveAll()
     if (sub_file.size && sub_file.name.length) {
         saveImage( sub_file, 1, commpress, with_pal );
     }
-    if (!with_pal)
-    {
+    if (!with_pal) {
         savePalette();
     }
 }
@@ -1979,7 +1978,7 @@ function() {
     // パレットファイル
     pal_save.addEventListener("click", 
     function(e) {
-        avePalette();
+        savePalette();
     });
     // ========================================================
     // page 0 bsave

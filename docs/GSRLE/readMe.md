@@ -49,6 +49,18 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 - その他ツール紹介ページ  
   [Gigamax Online Webアプリ多め！ネットで見つけたMSX向け画像編集ツールまとめ](https://gigamix.hatenablog.com/entry/devmsx/graphics-tools#MSX-Screen-Converter%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3-MSX%E5%90%91%E3%81%91%E5%90%84%E7%A8%AE%E7%94%BB%E5%83%8F%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF)
 
+## 設定：読み込み後自動保存
+
+画像の読み込みが終わった後に指定の形式で自動保存するオプション
+
+| 形式 | 内容 | パレットデータ |
+|---|---|---|
+| BSAVE(FULL) | BSAVE形式（VRAMカラーパレットテーブルを含む）画像ファイル | BSAVEファイルに含む ||
+| BSAVE(画素のみ)+PLT | BSAVE形式（VRAMカラーパレットテーブルを含まない）画像ファイルと、PLTファイルのセット | PLTファイル |
+| GS圧縮(画素のみ)+PLT | グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット | PLTファイル |
+
+![プレビュー](img/gsrle_html_autosave.png)
+
 ## 対応拡張子
 
 拡張子で判定して、インターレースモードでの読込先ページを決定します。
