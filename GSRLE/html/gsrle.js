@@ -14,11 +14,10 @@ const default_log_msg =
 4. SCREEN1は非対応。SCREEN2～12の画像に対応 (※SCREEN 9は未テスト)
 5. ドットアスペクト比 1.133:1 は良く聞く比率。1.177:1 はOpenMSXに近い値`;
 
+// ========================================================
+// 初回（自動でアコーディオンタブを閉じる）
 let isFirst = true;
-
-// ========================================================
 // ドラッグアンドドロップ受付状態
-// ========================================================
 let drop_avilable = true;
 
 // ========================================================
@@ -34,6 +33,21 @@ let pal_file = empty_file;
 
 // ファイル読み込み待ちキュー
 var file_load_que = new Array();
+
+// ========================================================
+// 動作ログ表示
+// ========================================================
+let log_string = [];
+const log_height = 3;
+function add_log( s )
+{
+    if (log_string.length >= log_height) {
+        log_string.shift();
+    }
+    log_string.push( s );
+    log_text.innerText = '' + log_string.join('\n');
+}
+
 
 // ========================================================
 // ファイル情報テキスト作成
@@ -542,6 +556,7 @@ class VDP {
             p.pal_rgba[i] = p.pal[i].rgba;
         }
     }
+    resetPalette() { this.setPalReg16(); }
     restorePalette( d ) {
         const p = this;
         if (arguments.length < 1) {
@@ -625,7 +640,9 @@ class VDP {
     //------------------------
     cls() {
         this.vram.fill( 0 );
-        this.setPalReg16();
+        if (!pal_lock.checked) {
+            this.resetPalette();
+        }
     }
 
     //------------------------
@@ -683,7 +700,7 @@ class VDP {
             p.canvas.height = p.height * 2;
 
             var ctx = p.canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
 
             if (!p.interlace_mode) {
                 ctx.drawImage( p.offscreen[0],
@@ -717,8 +734,8 @@ class VDP {
                     if (canvas) {
                         canvas.width  = p.canvas.width;
                         canvas.height = p.canvas.height;
-                                ctx = canvas.getContext('2d');
-                        ctx.imageSmoothingEnabled = false;
+                        ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
                         ctx.drawImage( offscreen, 
                             0, pg * p.height, p.width, p.height,
                             0, 0, canvas.width, canvas.height );
@@ -740,7 +757,7 @@ class VDP {
                 var ctx = canvas.getContext('2d');
 
                 canvas.width = 32 * VDP.palette_count;
-                canvas.height = 32;
+                canvas.height = 24;
 
                 ctx.fillStyle = "black";
                 ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -752,16 +769,7 @@ class VDP {
                         canvas.width * i / pal.length, 0,
                         w, canvas.height);
                 }
-                /*
-                if (p.screen_no == 6) {
-                    ctx.moveTo( canvas.width * 4 / pal.length, canvas.height/2 );
-                    ctx.lineTo( canvas.width, canvas.height/2);
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = 'red';
-                    ctx.stroke();
-                }
-                */
-        }
+            }
         }
     }
     update() {
@@ -1405,10 +1413,19 @@ function saveImage(file, page, commpress, with_pal)
         let start = 0;
         let size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
         if (with_pal) {
-            size = Math.max( vdp.mode_info.palend + 1,  size );
+            let withpal_size = vdp.mode_info.palend + 1;
+            if (size < withpal_size) {
+                vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
+                size = withpal_size;
+            }
         }
 
         let out = createBsaveImage( start, size, page, commpress);
+        if (commpress) {
+            add_log( '"' + fname + '": GS圧縮出力' );
+        } else {
+            add_log( '"' + fname + '": BSAVE出力' );
+        }
         startDownload( out, fname );
     }
 }
@@ -1459,7 +1476,9 @@ function loadImage(d, ext_info)
     } else {
         vdp.changeScreen( ext_info.screen_no, ext_info.interlace, force_height );
     }
-    if (!ext_info || !ext_info.page) vdp.cls();
+    if (!ext_info || !ext_info.page) {
+        vdp.cls();
+    }
 
     vdp.loadBinary(dat, ext_info.page * vdp.mode_info.page_size);
 
@@ -1467,7 +1486,9 @@ function loadImage(d, ext_info)
     if (header.isBinary && !header.isCompress) 
     {
         if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
-            vdp.restorePalette(); 
+            if (!pal_lock.checked) {
+                vdp.restorePalette(); 
+            }
         }
     }
     vdp.update();
@@ -1482,13 +1503,12 @@ function loadImage(d, ext_info)
 function openGsFile( target_file )
 {
     if (target_file == undefined) {
-        log_text.innerText = '';
         return false;
     }
 
     // ファイル名表示
     let file_text = fileText(target_file);
-    log_text.innerText = 'read: ' + file_text;
+    //add_log( 'read: ' + file_text );
 
     // 拡張子検査
     let file_ext = getExt(target_file.name);
@@ -1497,7 +1517,7 @@ function openGsFile( target_file )
     if (!ext_info && !is_pal)
     {
         // 画像ファイルでなければ無視
-        log_text.innerText = '"' + file_text + '": 画像ファイルではありません。';
+        add_log( '"' + file_text + '": 画像ファイルではありません。' );
         return false;
     }
 
@@ -1528,7 +1548,7 @@ function openGsFile( target_file )
     
     // ドロップ可能フラグを一時停止
     drop_avilable = false;
-    log_text.innerText = '"' + file_text + '": 読み込み中';
+    //add_log( '"' + file_text + '": 読み込み中' );
 
     let config = {};
 
@@ -1540,7 +1560,7 @@ function openGsFile( target_file )
         try {
             u8array = new Uint8Array(f.target.result);
         } catch (e) {
-            log_text.innerText = '"' + file_text + '": 読み込みデータに問題があります';
+            add_log( '"' + file_text + '": 読み込みデータに問題があります' );
         }
         if (u8array != null)
         {
@@ -1557,7 +1577,7 @@ function openGsFile( target_file )
                 }
                 
             }
-            log_text.innerText = '';//'"' + file_text + '": 読み込み完了';
+            add_log( '"' + file_text + '": 読み込み完了' );
         }
         drop_avilable = true;
         displayCurrentFilename();
@@ -1577,8 +1597,8 @@ function openGsFile( target_file )
             "ファイルの読み込み権限がありません",
             "ファイルサイズが大き過ぎます"
             );
-            log_text.innerText = '"' + file_text + '": 読み込みエラーです \n\n'
-                                + errmes[reader.error.code];
+            add_log( '"' + file_text + '": 読み込みエラーです \n\n'
+                                + errmes[reader.error.code]  );
         drop_avilable = true;
         displayCurrentFilename();
 
@@ -1624,7 +1644,7 @@ function openFiles( files )
                 main = files[i];
             }
         } else {
-
+            add_log( '"' + files[i].name + '": 読み込み対象ファイルではありません' );
         }
 
     }
@@ -1703,9 +1723,15 @@ function() {
     const tab_helps = document.getElementById('tab_helps'); // help detail tag
     const tab_settings = document.getElementById('tab_settings'); // settings detail tag
 
+    // カラーパレット固定
+    const pal_lock = document.getElementById('pal_lock');
+
+    // キャンバススムージング
+    //const canvas_smoothing = document.getElementById('canvas_smoothing');
+
     vdp.initCanvas( canvas_area, palette_area, canvas_page0, canvas_page1 );
 
-    log_text.innerText = '';
+    //log_text.innerText = '';
     help_guide.innerText = default_log_msg;
     
     displayCurrentFilename();
@@ -1805,7 +1831,7 @@ function() {
 
         if (isFirst) {
             isFirst = false;
-            tab_title.removeAttribute('open');
+            //tab_title.removeAttribute('open');
             tab_helps.removeAttribute('open');
             //tab_settings.removeAttribute('open');
         }
@@ -1830,7 +1856,7 @@ function() {
 
         if (isFirst) {
             isFirst = false;
-            tab_title.removeAttribute('open');
+            //tab_title.removeAttribute('open');
             tab_helps.removeAttribute('open');
             //tab_settings.removeAttribute('open');
         }
@@ -1872,6 +1898,7 @@ function() {
         if (f && f.name.length) {
             const fname = getBasename( f.name ) + ".PL" + vdp.screen_no.toString(16);
             pald = vdp.getPalTbl();
+            add_log( '"' + fname + '": カラーパレット出力' );
             startDownload( pald, fname );
         }
     });
@@ -1892,5 +1919,7 @@ function() {
     page1_save_gsrle.addEventListener("click",
     function(e) { saveImage( sub_file, 1, 1, 0 ); });
 
+    // キャンバススムージング
+    //canvas_smoothing.addEventListener("change", function(e) { vdp.draw(); });
 });
 

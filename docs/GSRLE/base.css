@@ -58,9 +58,9 @@
 .guide {
     font-size: small;
     margin: 0;
-    padding: 0.2em;
-    padding-left: 1em;
-    background: #666;
+    padding: 0;
+    padding-left: 1.25em;
+    background: #aaa;
     color: #eee;
 }
 /* ==================================== */
@@ -69,7 +69,7 @@
 #info {
     padding: 0.2em;
     box-sizing: border-box;
-    background:gray;
+    background:#666;
     color: white;
     font-size: small;
     /*
@@ -137,16 +137,19 @@
     height: 100%;
     overflow: auto;
 }
+.canvas_container .main_area {
+    background-color: #888;
+}
 .canvas_container span {
     vertical-align: top;
 }
 #spec_details {
     min-height: 1.5em;
-    background-color: #888;
+    background-color: #226;
     color: #dadade;
     font-size: smaller;
     margin: 0;
-    padding: 0px 2px 1px 4px;
+    padding: 0px 2px 1px 6px;
 
 }
 #color_palette_area {
@@ -164,6 +167,8 @@
     box-sizing: border-box;
     */
     padding: 1px 6px 1px 2px;
+
+    background: #484848;
 }
 /* ==================================== */
 /* 追加情報表示 */
@@ -171,6 +176,9 @@
 .details {
     font-size:smaller;
     background-color: #888;
+}
+
+details.details {
     padding: 0.5em;
 }
 
@@ -194,7 +202,12 @@
     padding: 2px;
     margin: 1px;
 }
-button.save_button {
+.details .label_title {
+    background-color: #644;
+    padding: 3px;
+    margin: 2px;
+}
+ button.save_button {
     color: #622;
     background-color: #dbb;
     vertical-align:top;
@@ -303,7 +316,6 @@ label.button {
     border-radius: 0.8em;
     background: #f0e8f8;
     color: black;
-    /*font-size: smaller;*/
 
     transition: .25s;
 }

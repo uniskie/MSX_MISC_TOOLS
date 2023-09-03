@@ -12,7 +12,8 @@
             MSX GRAPHIC Viewer
         </summary>
         <div class="guide">
-            <label>使い方：画像ファイルをドロップ（複数可）</label>
+            <div id="log_text">使い方：画像ファイルをドロップ（複数可）</div>
+            <!-- label>使い方：画像ファイルをドロップ（複数可）</label -->
         </div>
     </details>
     <div id="info">
@@ -25,48 +26,48 @@
         <span id="filename_area3"></span>
     </div>
     <div class="canvas_container">
-        <span>
+        <span class="main_area">
             <canvas id="canvas_area" class="canvas_area"></canvas>
             <div id="spec_details"></div>
-            <div id="log_text"></div>
-        </span>
-        <span>
-            <details open id="tab_details" class="details">
-            <summary class="detail_tab_label">詳細</summary>
-            <div>
+            <div class="details">
                 <label id="detail_pal">
-                    <div>カラーパレット<span id="detail_pal_file"></span></div>
+                    <div class="label_title">カラーパレット
+                        <span id="detail_pal_file"></span>
+                    </div>
                     <canvas id="palette_area"></canvas>
                     <button class="hide" type="button">デフォルト反応抑制ダミー</button>
                     <button class="save_button" id="pal_save">PLT保存</button>
                 </label>
             </div>
+        </span>
+        <span><details open id="tab_details" class="details">
+            <summary class="detail_tab_label">詳細</summary>
             <div>
                 <label id="detail_page0">
-                    <div>Page 0
+                    <div class="label_title">Page 0
                         <span id="detail_page0_file"></span>
                         <span id="detail_page0_spec"></span>
                     </div>
-                    <canvas id="canvas_page0" class="canvas_area"></canvas>
                     <div>
                         <button class="hide" type="button">デフォルト反応抑制ダミー</button>
                         <button type="button" class="save_button" id="page0_save_bsave">BSAVE保存(FULL)</button>
                         <button type="button" class="save_button" id="page0_save_bsave_np">BSAVE保存(画素のみ)</button>
                         <button type="button" class="save_button" id="page0_save_gsrle">GS圧縮保存(画素のみ)</button>
                     </div>
+                    <canvas id="canvas_page0" class="canvas_area"></canvas>
                 </label>
                 <label id="detail_page1">
-                    <div>Page 1
+                    <div class="label_title">Page 1
                         <span id="detail_page1_file"></span>
                         <span id="detail_page1_spec"></span>
                     </div>
-                    <canvas id="canvas_page1" class="canvas_area"></canvas>
                     <div>
                         <button class="hide" type="button">デフォルト反応抑制ダミー</button>
                         <button type="button" class="save_button" id="page1_save_bsave">BSAVE保存(FULL)</button>
                         <button type="button" class="save_button" id="page1_save_bsave_np">BSAVE保存(画素のみ)</button>
                         <button type="button" class="save_button" id="page1_save_gsrle">GS圧縮保存(画素のみ)</button>
                     </div>
+                    <canvas id="canvas_page1" class="canvas_area"></canvas>
                 </label>
             </div>
         </details></span>
@@ -96,6 +97,22 @@
                 <label class="click"><input type="radio" name="stretch_screen" value="1.133"        >1.133:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1"            >1:1</label>
             </span>
+            <span class="selector">
+                <label class="label">カラーパレット</label>
+                <label class="click" for="pal_lock">
+                    <input type="checkbox" id="pal_lock" value="pal_lock">
+                    カラーパレット固定(パレットファイル読み込み時のみ変更)
+                </label>
+            </span>
+            <!--
+            <span class="selector">
+                <label class="label">キャンバス</label>
+                <label class="click" for="canvas_smoothing">
+                    <input type="checkbox" id="canvas_smoothing" value="canvas_smoothing">
+                    キャンバススムージング
+                </label>
+            </span>
+            -->
         </details>
     </div>
 	<script type="text/javascript" src="gsrle.js" defer></script>
