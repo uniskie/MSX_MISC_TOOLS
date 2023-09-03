@@ -1404,6 +1404,12 @@ function createBsaveImage( start, size, page, isCompress )
 // ========================================================
 function savePalette()
 {
+    if (vdp.screen_no == 8) {
+        // SCREEN8はパレットなし
+        // スプライトパレットも固定
+        return;
+    }
+
     let f = null;
     if (pal_file.size) {
         f = pal_file;
