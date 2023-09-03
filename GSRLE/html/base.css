@@ -9,14 +9,28 @@
     background: #101;
     color: white;
     border: outset 2px #a67;
-
-    transition: height .25s;
 }
+.tab_label:hover {
+    /* background-color:  #334; */
+    animation: 1s blink linear infinite;
+}
+@keyframes blink {
+    0% {
+      background-color: #101;
+    }
+    50% {
+        background-color: #148;
+    }
+    100% {
+        background-color: #101;
+    }
+  }
+/* アコーディオンラベル内のリンク */
 .tab_label a {
     color:#Fdd;
     text-decoration:underline;
 
-    transition: .25s;
+    transition: .5s;
 }
 .tab_label a:hover {
     color:#f88;
@@ -55,6 +69,11 @@
     font-weight: bold;
     font-size: larger;
 }
+#title:hover {
+    /* background-color:  #334; */
+    animation: 1s blink linear infinite;
+}
+
 .guide {
     font-size: small;
     margin: 0;
@@ -189,12 +208,29 @@ details.details {
 .detail_tab_label {
     padding: 0.1em 0.5em;
     font-weight: bolder;
-    background: #768;
+    /*background: #101;*/
+    background: #767;
     color: white;
 
     min-width: 512px;
 }
-.details label {
+.detail_tab_label:hover {
+    animation: 2s blink2 linear infinite;
+}
+@keyframes blink2 {
+    0% {
+        /*background-color: #101;*/
+        background-color: #767;
+    }
+    50% {
+        background-color: #656;
+    }
+    100% {
+        /*background-color: #101;*/
+        background-color: #767;
+    }
+  }
+.details .detail_group {
     text-align: center;
     line-height: 1em;
     background-color: #844;
@@ -202,10 +238,16 @@ details.details {
     padding: 2px;
     margin: 1px;
 }
-.details .label_title {
+/*.details*/ .label_title {
+    text-align: left;
     background-color: #644;
-    padding: 3px;
-    margin: 2px;
+    padding: 2px 0.5em;
+    margin: 0;
+}
+/*.details*/ .label_text {
+    padding-right: 1em;
+    font-weight: bolder;
+    color: #edd;
 }
  button.save_button {
     color: #622;
@@ -281,7 +323,8 @@ label {
 .selector {
     margin: 0.1em;
     padding: 0;
-    border: dotted 2px #a9c;
+    /*border: dotted 2px #a9c;*/
+    border: solid 1px #a9c;
 }
 .selector .label {
     display: block;

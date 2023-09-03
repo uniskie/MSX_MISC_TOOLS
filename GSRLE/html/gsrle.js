@@ -17,8 +17,14 @@ const default_log_msg =
 // ========================================================
 // 初回（自動でアコーディオンタブを閉じる）
 let isFirst = true;
+
 // ドラッグアンドドロップ受付状態
 let drop_avilable = true;
+
+// 自動保存モード
+let quick_save_mode = 'none';
+const quick_save_mode_value = 
+ ['none', 'bsave_full', 'bsave_mini', 'gsrle_save'];
 
 // ========================================================
 // 読み込み済みファイル管理
@@ -72,7 +78,7 @@ function displayCurrentFilename() {
 
     if (main_file.name.length) {
         filename_area.textContent = fileText(main_file);
-        detail_page0_file.textContent = ':　' + fileText(main_file);
+        detail_page0_file.textContent = fileText(main_file);
         if (main_file.header) {
             detail_page0_spec.textContent = 
             `[START:0x${main_file.header.start.toString(16)} END:0x${main_file.header.end}]`;
@@ -99,7 +105,7 @@ function displayCurrentFilename() {
 
     if (sub_file.name.length) {
         filename_area2.textContent = fileText(sub_file);
-        detail_page1_file.textContent = ':　' + fileText(sub_file);
+        detail_page1_file.textContent = fileText(sub_file);
         if (sub_file.header) {
             detail_page1_spec.textContent = 
             `[START:0x${sub_file.header.start.toString(16)} END:0x${sub_file.header.end}]`;
@@ -117,7 +123,7 @@ function displayCurrentFilename() {
         filename_area2.textContent = '';
         if (vdp.screen_no < 5) {
             detail_page1_file.textContent = '';
-            detail_page1_spec.textContent = ':　[CHARACTER PATTERN GENERATOR TABLE]';
+            detail_page1_spec.textContent = '[ CHARACTER PATTERN GENERATOR TABLE]';
         } else {
             detail_page1_file.textContent = '';
             detail_page1_spec.textContent = '';
@@ -133,7 +139,7 @@ function displayCurrentFilename() {
 
     if (pal_file.name.length) {
         filename_area3.textContent = fileText(pal_file);
-        detail_pal_file.textContent = ':　' + fileText(pal_file);
+        detail_pal_file.textContent = fileText(pal_file);
     } else {
         filename_area3.textContent = '';
         detail_pal_file.textContent =  '';
@@ -529,6 +535,7 @@ class VDP {
         p.width     = p.mode_info.width;
         p.height    = p.mode_info.height;
         p.force_height = 0;
+        p.auto_detect_height = 0;
         p.img_width  = p.width;
         p.img_height = p.height;
         p.interlace_mode = 0;
@@ -1393,6 +1400,30 @@ function createBsaveImage( start, size, page, isCompress )
 }
 
 // ========================================================
+// カラーパレット保存
+// ========================================================
+function savePalette()
+{
+    let f = null;
+    if (pal_file.size) {
+        f = pal_file;
+    } else 
+    if (main_file.size) {
+        f = main_file;
+    } else 
+    if (sub_file.size) {
+        f = sub_file;
+    }
+    if (f && f.name.length) {
+        const fname = getBasename( f.name ) + ".PL" + vdp.screen_no.toString(16);
+        pald = vdp.getPalTbl();
+        add_log( '"' + fname + '": カラーパレット出力' );
+        startDownload( pald, fname );
+    }
+
+}
+
+// ========================================================
 // 画像保存
 // ========================================================
 function saveImage(file, page, commpress, with_pal)
@@ -1431,6 +1462,30 @@ function saveImage(file, page, commpress, with_pal)
 }
 
 // ========================================================
+// 画像 縦サイズ 自動判定
+// ========================================================
+function detectImageHeight( mode_info, header, size )
+{
+    let force_height = 0;
+    let end = header.start + size - 1;
+    if ((0 == force_height) && (5 <= mode_info.no))
+    {
+        // 自動なら画像ピクセルサイズから表示サイズを判断
+        if (header.isCompress && (mode_info.s212 < end)) {
+            // 圧縮形式はパレットを含まないのでline212と比較
+            force_height = 256;
+        } else
+        if (mode_info.palend < end) {
+            // リニア形式はパレットテーブルを越えているかで判断
+            force_height = 256;
+        } else {
+            force_height = mode_info.height;
+        }
+    }
+    return force_height;
+}
+
+// ========================================================
 // 画像バイナリ読み込み
 // in:  d - Uint8Array
 //      config - loadVcdConfig（設定オブジェクト）
@@ -1452,35 +1507,26 @@ function loadImage(d, ext_info)
     }
 
     let mode_info = VDP.getScreenModeSetting( ext_info.screen_no );
-    let force_height = vdp.force_height;
-    if ((0 == force_height) && (5 <= mode_info.no))
-    {
-        // 自動なら画像ピクセルサイズから表示サイズを判断
-        if (header.isCompress && ((mode_info.s212 + 1) < dat.length)) {
-            // 圧縮形式はパレットを含まないのでline212と比較
-            force_height = 256;
-        } else
-        if ((mode_info.palend + 1) < dat.length) {
-            // リニア形式はパレットテーブルを越えているかで判断
-            force_height = 256;
-        } else {
-            force_height = mode_info.height;
-        }
+    vdp.auto_detect_height = detectImageHeight( mode_info, header, dat.length );
+    let disp_height = vdp.force_height;
+    if (!disp_height) {
+        disp_height = vdp.auto_detect_height;
     }
 
     if (ext_info.page && ext_info.interlace &&
          (ext_info.screen_no == vdp.screen_no) &&
          (ext_info.interlace == vdp.interlace_mode) &&
-         (force_height == vdp.height)
+         (disp_height == vdp.height)
        ) {
     } else {
-        vdp.changeScreen( ext_info.screen_no, ext_info.interlace, force_height );
+        vdp.changeScreen( ext_info.screen_no, ext_info.interlace, disp_height );
     }
     if (!ext_info || !ext_info.page) {
         vdp.cls();
     }
 
-    vdp.loadBinary(dat, ext_info.page * vdp.mode_info.page_size);
+    vdp.loadBinary(dat, 
+        header.start + ext_info.page * vdp.mode_info.page_size);
 
     // VRAMパレットテーブル読み込み
     if (header.isBinary && !header.isCompress) 
@@ -1587,6 +1633,12 @@ function openGsFile( target_file )
         {
             openGsFile( file_load_que.shift() );
         }
+        else
+        {
+            // 全て完了した後
+            // 自動保存があれば実行
+            saveAll();
+        }
     };
     reader.onerror = function(e) {
         let errmes = new Array(
@@ -1660,6 +1712,43 @@ function openFiles( files )
         openGsFile( file_load_que.shift() );
     }
     return true;
+}
+
+// ========================================================
+// 全て保存
+// ========================================================
+function saveAll()
+{
+    let commpress = 0;
+    let with_pal = 0;
+    switch (quick_save_mode)
+    {
+        case quick_save_mode_value[1]:
+            commpress = 0;
+            with_pal  = 1;
+            break;
+        case quick_save_mode_value[2]:
+            commpress = 0;
+            with_pal  = 0;
+            break;
+        case quick_save_mode_value[3]:
+            commpress = 1;
+            with_pal  = 0;
+            break;
+        default:
+            return;
+    }
+    let f = null;
+    if (main_file.size && main_file.name.length) {
+        saveImage( main_file, 0, commpress, with_pal );
+    }
+    if (sub_file.size && sub_file.name.length) {
+        saveImage( sub_file, 1, commpress, with_pal );
+    }
+    if (!with_pal)
+    {
+        savePalette();
+    }
 }
 
 // ========================================================
@@ -1737,7 +1826,7 @@ function() {
     displayCurrentFilename();
 
     // ========================================================
-    // イベント：画面引き延ばしモード変更
+    // イベント：画面縦横比(DotAspect比)変更
     // ========================================================
     canvas_area.height = VDP.screen_height;
     const stretch_screen_radio = document.getElementsByName('stretch_screen');
@@ -1766,7 +1855,12 @@ function() {
         const e = event.srcElement;
         if (e.checked) {
             vdp.force_height = Number.parseInt(e.value);
-            vdp.changeScreen( vdp.screen_no, vdp.interlace_mode );
+
+            let disp_height = vdp.force_height;
+            if (!disp_height) {
+                disp_height = vdp.auto_detect_height;
+            }
+            vdp.changeScreen( vdp.screen_no, vdp.interlace_mode, disp_height );
             vdp.update();
             vdp.draw();
         }
@@ -1883,26 +1977,11 @@ function() {
     // イベント：ファイルを保存するボタン
     // ========================================================
     // パレットファイル
-    pal_save.addEventListener("click",
+    pal_save.addEventListener("click", 
     function(e) {
-        let f = null;
-        if (pal_file.size) {
-            f = pal_file;
-        } else 
-        if (main_file.size) {
-            f = main_file;
-        } else 
-        if (sub_file.size) {
-            f = sub_file;
-        }
-        if (f && f.name.length) {
-            const fname = getBasename( f.name ) + ".PL" + vdp.screen_no.toString(16);
-            pald = vdp.getPalTbl();
-            add_log( '"' + fname + '": カラーパレット出力' );
-            startDownload( pald, fname );
-        }
+        avePalette();
     });
-
+    // ========================================================
     // page 0 bsave
     page0_save_bsave.addEventListener("click",
     function(e) { saveImage( main_file, 0, 0, 1 ); });
@@ -1910,7 +1989,7 @@ function() {
     function(e) { saveImage( main_file, 0, 0, 0 ); });
     page0_save_gsrle.addEventListener("click",
     function(e) { saveImage( main_file, 0, 1, 0 ); });
-
+    // ========================================================
     // page 1 bsave
     page1_save_bsave.addEventListener("click",
     function(e) { saveImage( sub_file, 1, 0, 1 ); });
@@ -1919,7 +1998,25 @@ function() {
     page1_save_gsrle.addEventListener("click",
     function(e) { saveImage( sub_file, 1, 1, 0 ); });
 
+    // ========================================================
+    // イベント：自動保存モード変更
+    // ========================================================
+    const quick_save = document.getElementsByName('qick_save');
+    let onChangeQuickSaveMode = function(event) {
+        const e = event.srcElement;
+        if (e.checked) {
+            quick_save_mode = e.value;
+        }
+    }
+    quick_save.forEach(e => {
+        e.addEventListener("change", onChangeQuickSaveMode );
+    });
+
+    // ========================================================
     // キャンバススムージング
+    // ========================================================
     //canvas_smoothing.addEventListener("change", function(e) { vdp.draw(); });
+    // ぼやけすぎて使えない
+
 });
 
