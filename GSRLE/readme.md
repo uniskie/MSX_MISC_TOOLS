@@ -1,4 +1,4 @@
-## GSRLE
+# GSRLE
 
 ![](../img/GSRLE.png)
 
@@ -11,7 +11,29 @@
 - **python版はもうメンテしていません**
 
 ----
-### 使い方
+## HTML版 MSX GRAPHICS Viewer
+
+HTML5+Javascript(ES6)を使用した、WEBブラウザで実行できるツールです。
+
+一括で処理するのであればコマンドライン版がオススメですが、確認しながら変換したい場合はブラウザ版のほうが便利かもしれません。
+
+![HTML ver](html/img/gsrle_html_preview.png)
+
+### WEBページ
+[https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
+
+- BSAVE画像、グラフサウルス圧縮画像の表示
+- BSAVE画像、グラフサウルス圧縮画像の保存
+- パレットファイルの読み込み保存（1スロットのみ）
+- インターレース画像の表示
+- 表示後の自動変換保存（オプション）
+
+※ [ソースは ./html/](./html/)
+
+
+
+----
+## 使い方
 gsrle.exeにドロップしてください。
 同じフォルダに圧縮後のファイルが出来ます。
 
