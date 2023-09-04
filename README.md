@@ -11,7 +11,7 @@ HTML5+javascript ES6 で動作
 
 |ツール|説明|
 |---|---|
-| [HTML5版 MSX画像ビューア](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html) | BSAVE画像やグラフサウルス形式圧縮画像 (派生型ランレングス圧縮)の読み込み・表示・保存が出来るツール<BR> https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html <br> ![](GSRLE/html/img/gsrle_html_default.png) <BR>MSX上での展開表示は [LOADSRD](LOADSRD)|
+| [GSRLE/html/](GSRLE/html/) | 【HTML5版 MSX画像ビューア】<br>BSAVE画像やグラフサウルス形式圧縮画像 (派生型ランレングス圧縮)の読み込み・表示・保存が出来るツール<BR> [ブラウザで実行 → https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html) <br> ![](GSRLE/html/img/gsrle_html_default.png) <BR>MSX上での展開表示は [LOADSRD](LOADSRD)|
 
 
 ## Windowsで動作するMSX用ツール
