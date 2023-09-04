@@ -117,4 +117,15 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 | .RC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | GRAPH SAURUS interlace
 | .RC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | GRAPH SAURUS interlace
 
+## 更新履歴
 
+- 2023/09/05
+  - SCREEN2～4の画像保存が正常動作しないのを修正。
+  - こっそりSCREEN0と1に対応。
+  - こっそりGEN、COL、NAM、PATなどのVRAM部分セーブファイルに対応。
+    - 扱いはSCREEN2画像
+    - 部分ファイルはメインファイル名として記録されないのでメイン画像がないと保存出来ない。  
+      （※TEST.SC2などのSCREEN2全体画像を読み込んだ後に部分データを読み込むとセーブ可能）
+
+- それ以前
+  - 何か色々修正

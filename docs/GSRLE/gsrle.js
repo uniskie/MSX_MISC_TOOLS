@@ -184,68 +184,82 @@ function isPaletteFile( ext )
 // 拡張子でパレットの有無を判定しない
 const ext_info = [
 
-    // 特殊
-    {ext:".BIN", screen_no:-1, interlace:0, page:-1, type:0, bsave:".BIN", gs:".BIN"},	// BSAVE / GS
-    {ext:".SPR", screen_no:-1, interlace:0, page:-1, type:0, bsave:".BIN", gs:".BIN"},	// BSAVE / GS
-    {ext:".NAM", screen_no: 2, interlace:0, page: 0, type:0, bsave:".BIN", gs:".BIN"},	// BSAVE / GS
-    {ext:".PAT", screen_no: 2, interlace:0, page: 0, type:0, bsave:".BIN", gs:".BIN"},	// BSAVE / GS
-    {ext:".GEN", screen_no: 2, interlace:0, page: 0, type:0, bsave:".BIN", gs:".BIN"},	// BSAVE / GS
+    // グラフィック
+    {ext:'.SC2', screen_no: 2, interlace:0, page:0, type:0, bsave:'.SC2', gs:'.SR2'},	// BSAVE
+	{ext:'.SC3', screen_no: 3, interlace:0, page:0, type:0, bsave:'.SC3', gs:'.SR4'},	// BSAVE
+	{ext:'.SC4', screen_no: 4, interlace:0, page:0, type:0, bsave:'.SC4', gs:'.SR3'},	// BSAVE
+	{ext:'.SC5', screen_no: 5, interlace:0, page:0, type:0, bsave:'.SC5', gs:'.SR5'},	// BSAVE
+	{ext:'.SC6', screen_no: 6, interlace:0, page:0, type:0, bsave:'.SC6', gs:'.SR6'},	// BSAVE
+	{ext:'.SC7', screen_no: 7, interlace:0, page:0, type:0, bsave:'.SC7', gs:'.SR7'},	// BSAVE
+	{ext:'.SC8', screen_no: 8, interlace:0, page:0, type:0, bsave:'.SC8', gs:'.SR8'},	// BSAVE
+	{ext:'.S10', screen_no:10, interlace:0, page:0, type:0, bsave:'.S10', gs:'.SRA'},	// BSAVE
+	{ext:'.S12', screen_no:12, interlace:0, page:0, type:0, bsave:'.S12', gs:'.SRC'},	// BSAVE
+	{ext:'.SCA', screen_no:10, interlace:0, page:0, type:0, bsave:'.SCA', gs:'.SRA'},	// BSAVE
+	{ext:'.SCC', screen_no:12, interlace:0, page:0, type:0, bsave:'.SCC', gs:'.SRC'},	// BSAVE
+
+    {ext:'.S50', screen_no: 5, interlace:1, page:0, type:0, bsave:'.S50', gs:'.R50'},	// BSAVE interlace
+    {ext:'.S51', screen_no: 5, interlace:1, page:1, type:0, bsave:'.S51', gs:'.R51'},	// BSAVE interlace
+	{ext:'.S60', screen_no: 6, interlace:1, page:0, type:0, bsave:'.S60', gs:'.R60'},	// BSAVE interlace
+    {ext:'.S61', screen_no: 6, interlace:1, page:1, type:0, bsave:'.S61', gs:'.R61'},	// BSAVE interlace
+	{ext:'.S70', screen_no: 7, interlace:1, page:0, type:0, bsave:'.S70', gs:'.R70'},	// BSAVE interlace
+    {ext:'.S71', screen_no: 7, interlace:1, page:1, type:0, bsave:'.S71', gs:'.R71'},	// BSAVE interlace
+	{ext:'.S80', screen_no: 8, interlace:1, page:0, type:0, bsave:'.S80', gs:'.R80'},	// BSAVE interlace
+    {ext:'.S81', screen_no: 8, interlace:1, page:1, type:0, bsave:'.S81', gs:'.R81'},	// BSAVE interlace
+	{ext:'.SA0', screen_no:10, interlace:1, page:0, type:0, bsave:'.SA0', gs:'.RA0'},	// BSAVE interlace
+    {ext:'.SA1', screen_no:10, interlace:1, page:1, type:0, bsave:'.SA1', gs:'.RA1'},	// BSAVE interlace
+	{ext:'.SC0', screen_no:12, interlace:1, page:0, type:0, bsave:'.SC0', gs:'.RC0'},	// BSAVE interlace
+    {ext:'.SC1', screen_no:12, interlace:1, page:1, type:0, bsave:'.SC1', gs:'.RC1'},	// BSAVE interlace
+
+    {ext:'.SR2', screen_no: 2, interlace:0, page:0, type:1, bsave:'.SC2', gs:'.SR2'},	// GRAPH SAURUS
+	{ext:'.SR4', screen_no: 3, interlace:0, page:0, type:1, bsave:'.SC3', gs:'.SR4'},	// GRAPH SAURUS
+	{ext:'.SR3', screen_no: 4, interlace:0, page:0, type:1, bsave:'.SC4', gs:'.SR3'},	// GRAPH SAURUS
+	{ext:'.SR5', screen_no: 5, interlace:0, page:0, type:1, bsave:'.SC5', gs:'.SR5'},	// GRAPH SAURUS
+	{ext:'.SR6', screen_no: 6, interlace:0, page:0, type:1, bsave:'.SC6', gs:'.SR6'},	// GRAPH SAURUS
+	{ext:'.SR7', screen_no: 7, interlace:0, page:0, type:1, bsave:'.SC7', gs:'.SR7'},	// GRAPH SAURUS
+	{ext:'.SR8', screen_no: 8, interlace:0, page:0, type:1, bsave:'.SC8', gs:'.SR8'},	// GRAPH SAURUS
+	{ext:'.SRA', screen_no:10, interlace:0, page:0, type:0, bsave:'.S10', gs:'.SRA'},	// GRAPH SAURUS
+	{ext:'.SRC', screen_no:12, interlace:0, page:0, type:0, bsave:'.S12', gs:'.SRC'},	// GRAPH SAURUS
+	{ext:'.SRS', screen_no:12, interlace:0, page:0, type:1, bsave:'.S12', gs:'.SRS'},	// GRAPH SAURUS
+
+    {ext:'.R50', screen_no: 5, interlace:1, page:0, type:1, bsave:'.S50', gs:'.R50'},	// GRAPH SAURUS interlace
+    {ext:'.R51', screen_no: 5, interlace:1, page:1, type:1, bsave:'.S51', gs:'.R51'},	// GRAPH SAURUS interlace
+	{ext:'.R60', screen_no: 6, interlace:1, page:0, type:1, bsave:'.S60', gs:'.R60'},	// GRAPH SAURUS interlace
+    {ext:'.R61', screen_no: 6, interlace:1, page:1, type:1, bsave:'.S61', gs:'.R61'},	// GRAPH SAURUS interlace
+	{ext:'.R70', screen_no: 7, interlace:1, page:0, type:1, bsave:'.S70', gs:'.R70'},	// GRAPH SAURUS interlace
+    {ext:'.R71', screen_no: 7, interlace:1, page:1, type:1, bsave:'.S71', gs:'.R71'},	// GRAPH SAURUS interlace
+	{ext:'.R80', screen_no: 8, interlace:1, page:0, type:1, bsave:'.S80', gs:'.R80'},	// GRAPH SAURUS interlace
+    {ext:'.R81', screen_no: 8, interlace:1, page:1, type:1, bsave:'.S81', gs:'.R81'},	// GRAPH SAURUS interlace
+	{ext:'.RA0', screen_no:10, interlace:1, page:0, type:1, bsave:'.SA0', gs:'.RA0'},	// GRAPH SAURUS interlace
+    {ext:'.RA1', screen_no:10, interlace:1, page:1, type:1, bsave:'.SA1', gs:'.RA1'},	// GRAPH SAURUS interlace
+	{ext:'.RC0', screen_no:12, interlace:1, page:0, type:1, bsave:'.SC0', gs:'.RC0'},	// GRAPH SAURUS interlace
+    {ext:'.RC1', screen_no:12, interlace:1, page:1, type:1, bsave:'.SC1', gs:'.RC1'},	// GRAPH SAURUS interlace
+
+    // 特殊 
+    {ext:'.BIN', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.BIN', gs:'.BIN'},	// 汎用
+    {ext:'.SPR', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.SPR', gs:'.SPR'},	// スプライト
+    {ext:'.SPC', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.SPC', gs:'.SPC'},	// スプライトカラー
+    {ext:'.NAM', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.NAM', gs:'.NAM'},	// SC2 パターンネーム
+    {ext:'.COL', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.COL', gs:'.COL'},	// SC2 パターンカラー
+    {ext:'.GEN', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GEN', gs:'.GEN'},	// SC2 パターンジェネレータ
+    {ext:'.PAT', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.PAT', gs:'.PAT'},	// SC2 パターンジェネレータ
+
+    {ext:'.NM' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.NM' , gs:'.NM' },	// SC2 パターンネーム
+    {ext:'.CL' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL' , gs:'.CL' },	// SC2 パターンカラー
+    {ext:'.GN' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN' , gs:'.GN' },	// SC2 パターンジェネレータ
+
+    {ext:'.CL0', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL0', gs:'.CL0'},	// SC2 パターンカラー
+    {ext:'.CL1', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL1', gs:'.CL1'},	// SC2 パターンカラー
+    {ext:'.CL2', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL2', gs:'.CL2'},	// SC2 パターンカラー
+
+    {ext:'.GN0', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN0', gs:'.GN0'},	// SC2 パターンジェネレータ
+    {ext:'.GN1', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN1', gs:'.GN1'},	// SC2 パターンジェネレータ
+    {ext:'.GN2', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN2', gs:'.GN2'},	// SC2 パターンジェネレータ
 
     // 対応未定：スクリーン0、1
-    //	{ext:".SC1", screen_no: 1, interlace:0, page:0, type:0, bsave:".SC1", gs:".SR1"},	// BSAVE
-    {ext:".TX1", screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:".SR0", gs:".SR0"},	// BSAVE / GS
-    {ext:".TX2", screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:".SR0", gs:".SR0"},	// BSAVE / GS
-    {ext:".GR1", screen_no: 1,         interlace:0, page:0, type:0, bsave:".SR1", gs:".SR1"},	// BSAVE / GS
-
-    // グラフィック
-    {ext:".SC2", screen_no: 2, interlace:0, page:0, type:0, bsave:".SC2", gs:".SR2"},	// BSAVE
-	{ext:".SC3", screen_no: 3, interlace:0, page:0, type:0, bsave:".SC3", gs:".SR4"},	// BSAVE
-	{ext:".SC4", screen_no: 4, interlace:0, page:0, type:0, bsave:".SC4", gs:".SR3"},	// BSAVE
-	{ext:".SC5", screen_no: 5, interlace:0, page:0, type:0, bsave:".SC5", gs:".SR5"},	// BSAVE
-	{ext:".SC6", screen_no: 6, interlace:0, page:0, type:0, bsave:".SC6", gs:".SR6"},	// BSAVE
-	{ext:".SC7", screen_no: 7, interlace:0, page:0, type:0, bsave:".SC7", gs:".SR7"},	// BSAVE
-	{ext:".SC8", screen_no: 8, interlace:0, page:0, type:0, bsave:".SC8", gs:".SR8"},	// BSAVE
-	{ext:".S10", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// BSAVE
-	{ext:".S12", screen_no:12, interlace:0, page:0, type:0, bsave:".S12", gs:".SRC"},	// BSAVE
-	{ext:".SCA", screen_no:10, interlace:0, page:0, type:0, bsave:".SCA", gs:".SRA"},	// BSAVE
-	{ext:".SCC", screen_no:12, interlace:0, page:0, type:0, bsave:".SCC", gs:".SRC"},	// BSAVE
-
-    {ext:".S50", screen_no: 5, interlace:1, page:0, type:0, bsave:".S50", gs:".R50"},	// BSAVE interlace
-    {ext:".S51", screen_no: 5, interlace:1, page:1, type:0, bsave:".S51", gs:".R51"},	// BSAVE interlace
-	{ext:".S60", screen_no: 6, interlace:1, page:0, type:0, bsave:".S60", gs:".R60"},	// BSAVE interlace
-    {ext:".S61", screen_no: 6, interlace:1, page:1, type:0, bsave:".S61", gs:".R61"},	// BSAVE interlace
-	{ext:".S70", screen_no: 7, interlace:1, page:0, type:0, bsave:".S70", gs:".R70"},	// BSAVE interlace
-    {ext:".S71", screen_no: 7, interlace:1, page:1, type:0, bsave:".S71", gs:".R71"},	// BSAVE interlace
-	{ext:".S80", screen_no: 8, interlace:1, page:0, type:0, bsave:".S80", gs:".R80"},	// BSAVE interlace
-    {ext:".S81", screen_no: 8, interlace:1, page:1, type:0, bsave:".S81", gs:".R81"},	// BSAVE interlace
-	{ext:".SA0", screen_no:10, interlace:1, page:0, type:0, bsave:".SA0", gs:".RA0"},	// BSAVE interlace
-    {ext:".SA1", screen_no:10, interlace:1, page:1, type:0, bsave:".SA1", gs:".RA1"},	// BSAVE interlace
-	{ext:".SC0", screen_no:12, interlace:1, page:0, type:0, bsave:".SC0", gs:".RC0"},	// BSAVE interlace
-    {ext:".SC1", screen_no:12, interlace:1, page:1, type:0, bsave:".SC1", gs:".RC1"},	// BSAVE interlace
-
-    {ext:".SR2", screen_no: 2, interlace:0, page:0, type:1, bsave:".SC2", gs:".SR2"},	// GRAPH SAURUS
-	{ext:".SR4", screen_no: 3, interlace:0, page:0, type:1, bsave:".SC3", gs:".SR4"},	// GRAPH SAURUS
-	{ext:".SR3", screen_no: 4, interlace:0, page:0, type:1, bsave:".SC4", gs:".SR3"},	// GRAPH SAURUS
-	{ext:".SR5", screen_no: 5, interlace:0, page:0, type:1, bsave:".SC5", gs:".SR5"},	// GRAPH SAURUS
-	{ext:".SR6", screen_no: 6, interlace:0, page:0, type:1, bsave:".SC6", gs:".SR6"},	// GRAPH SAURUS
-	{ext:".SR7", screen_no: 7, interlace:0, page:0, type:1, bsave:".SC7", gs:".SR7"},	// GRAPH SAURUS
-	{ext:".SR8", screen_no: 8, interlace:0, page:0, type:1, bsave:".SC8", gs:".SR8"},	// GRAPH SAURUS
-	{ext:".SRA", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// GRAPH SAURUS
-	{ext:".SRC", screen_no:12, interlace:0, page:0, type:0, bsave:".S12", gs:".SRC"},	// GRAPH SAURUS
-	{ext:".SRS", screen_no:12, interlace:0, page:0, type:1, bsave:".S12", gs:".SRS"},	// GRAPH SAURUS
-
-    {ext:".R50", screen_no: 5, interlace:1, page:0, type:1, bsave:".S50", gs:".R50"},	// GRAPH SAURUS interlace
-    {ext:".R51", screen_no: 5, interlace:1, page:1, type:1, bsave:".S51", gs:".R51"},	// GRAPH SAURUS interlace
-	{ext:".R60", screen_no: 6, interlace:1, page:0, type:1, bsave:".S60", gs:".R60"},	// GRAPH SAURUS interlace
-    {ext:".R61", screen_no: 6, interlace:1, page:1, type:1, bsave:".S61", gs:".R61"},	// GRAPH SAURUS interlace
-	{ext:".R70", screen_no: 7, interlace:1, page:0, type:1, bsave:".S70", gs:".R70"},	// GRAPH SAURUS interlace
-    {ext:".R71", screen_no: 7, interlace:1, page:1, type:1, bsave:".S71", gs:".R71"},	// GRAPH SAURUS interlace
-	{ext:".R80", screen_no: 8, interlace:1, page:0, type:1, bsave:".S80", gs:".R80"},	// GRAPH SAURUS interlace
-    {ext:".R81", screen_no: 8, interlace:1, page:1, type:1, bsave:".S81", gs:".R81"},	// GRAPH SAURUS interlace
-	{ext:".RA0", screen_no:10, interlace:1, page:0, type:1, bsave:".SA0", gs:".RA0"},	// GRAPH SAURUS interlace
-    {ext:".RA1", screen_no:10, interlace:1, page:1, type:1, bsave:".SA1", gs:".RA1"},	// GRAPH SAURUS interlace
-	{ext:".RC0", screen_no:12, interlace:1, page:0, type:1, bsave:".SC0", gs:".RC0"},	// GRAPH SAURUS interlace
-    {ext:".RC1", screen_no:12, interlace:1, page:1, type:1, bsave:".SC1", gs:".RC1"},	// GRAPH SAURUS interlace
+    //	{ext:'.SC1', screen_no: 1, interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
+    {ext:'.TX1', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
+    {ext:'.TX2', screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
+    {ext:'.GR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SR1', gs:'.SR1'},	// BSAVE / GS
 ];
 function getExtInfo( ext )
 {
@@ -676,8 +690,9 @@ class VDP {
         switch (p.screen_no) {
         case 0:
         case 1:
-            // screen 0, 1 未対応だけど画面処理は追加
-            b.fill(32, mdoe_info.patnam, mdoe_info.patnam + txsize);
+        case 2:
+        case 4:
+            b.fill(32,mode_info.patnam, mode_info.patnam + txsize);
             break;
         }
     }
@@ -715,6 +730,9 @@ class VDP {
             offset = p.draw_page * p.mode_info.namsiz;
         }
         let limit = p.vram.length - offset;
+        if (offset > limit) {
+            return;
+        }
         if (d.length > limit) {
             p.vram.set( d.subarray(0, limit), offset );
         } else {
@@ -1498,12 +1516,16 @@ function saveImage(file, page, commpress, with_pal)
         let fname = getBasename( f.name ) + sav_ext;
 
         let start = 0;
-        let size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
-        if (with_pal) {
-            let withpal_size = vdp.mode_info.palend + 1;
-            if (size < withpal_size) {
-                vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
-                size = withpal_size;
+        let size = vdp.mode_info.page_size;
+        // SCREEN 0～4はVRAM 0x0000～0x3FFFまるごとセーブ
+        if (vdp.screen_no >= 5) {
+            size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
+            if (with_pal) {
+                let withpal_size = vdp.mode_info.palend + 1;
+                if (size < withpal_size) {
+                    vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
+                    size = withpal_size;
+                }
             }
         }
 
@@ -1537,6 +1559,10 @@ function detectImageHeight( mode_info, header, size )
         } else {
             force_height = mode_info.height;
         }
+    }
+    else
+    {
+        force_height = 192;
     }
     return force_height;
 }
@@ -1573,6 +1599,8 @@ function loadImage(d, ext_info)
         info.interlace = vdp.interlace_mode;
         info.page = 0;
     }
+    if (info.page < 0) info.page = 0;
+    if (info.interlace < 0) info.interlace = vdp.interlace_mode;
 
     let mode_info = VDP.getScreenModeSetting( info.screen_no, info.txw );
     vdp.auto_detect_height = detectImageHeight( mode_info, header, dat.length );
@@ -1581,7 +1609,8 @@ function loadImage(d, ext_info)
         disp_height = vdp.auto_detect_height;
     }
 
-    if ((ext_info.page > 0) && info.interlace &&
+    if ((ext_info.page != 0) &&
+         (ext_info.interlace != 0) &&
          (info.screen_no == vdp.screen_no) &&
          (info.interlace == vdp.interlace_mode) &&
          (disp_height == vdp.height)
@@ -1597,8 +1626,7 @@ function loadImage(d, ext_info)
         header.start + info.page * vdp.mode_info.page_size);
 
     // VRAMパレットテーブル読み込み
-    if (header.isBinary && !header.isCompress) 
-    {
+    if (header.isBinary && !header.isCompress) {
         if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
             if (!pal_lock.checked) {
                 vdp.restorePalette(); 
@@ -1640,6 +1668,9 @@ function openGsFile( target_file )
         // パレット
         pal_file = LogFile( target_file );
     } else
+    if ((ext_info.interlace < 0) || (ext_info.interlace < 0)) {
+        // 特殊追加データはどうするか？
+    } else
     if (ext_info.interlace && ext_info.page) {
         // メイン画像とフォーマットが違う場合はクリア
         if ((vdp.screen_no != ext_info.screen_no) ||
@@ -1656,7 +1687,6 @@ function openGsFile( target_file )
         pal_file = empty_file;
         sub_file = empty_file;
         main_file = LogFile( target_file );
-        // メイン画像読み込み時はVRAMクリア
         vdp.cls();
     }
     

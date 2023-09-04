@@ -183,52 +183,83 @@ function isPaletteFile( ext )
 // 画像拡張子
 // 拡張子でパレットの有無を判定しない
 const ext_info = [
-//	{ext:".SC1", screen_no: 1, interlace:0, page:0, type:0, bsave:".SC1", gs:".SR1"},	// BSAVE
-	{ext:".SC2", screen_no: 2, interlace:0, page:0, type:0, bsave:".SC2", gs:".SR2"},	// BSAVE
-	{ext:".SC3", screen_no: 3, interlace:0, page:0, type:0, bsave:".SC3", gs:".SR4"},	// BSAVE
-	{ext:".SC4", screen_no: 4, interlace:0, page:0, type:0, bsave:".SC4", gs:".SR3"},	// BSAVE
-	{ext:".SC5", screen_no: 5, interlace:0, page:0, type:0, bsave:".SC5", gs:".SR5"},	// BSAVE
-	{ext:".SC6", screen_no: 6, interlace:0, page:0, type:0, bsave:".SC6", gs:".SR6"},	// BSAVE
-	{ext:".SC7", screen_no: 7, interlace:0, page:0, type:0, bsave:".SC7", gs:".SR7"},	// BSAVE
-	{ext:".SC8", screen_no: 8, interlace:0, page:0, type:0, bsave:".SC8", gs:".SR8"},	// BSAVE
-	{ext:".S10", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// BSAVE
-	{ext:".S12", screen_no:12, interlace:0, page:0, type:0, bsave:".S12", gs:".SRC"},	// BSAVE
-	{ext:".SCA", screen_no:10, interlace:0, page:0, type:0, bsave:".SCA", gs:".SRA"},	// BSAVE
-	{ext:".SCC", screen_no:12, interlace:0, page:0, type:0, bsave:".SCC", gs:".SRC"},	// BSAVE
-	{ext:".S50", screen_no: 5, interlace:1, page:0, type:0, bsave:".S50", gs:".R50"},	// BSAVE interlace
-    {ext:".S51", screen_no: 5, interlace:1, page:1, type:0, bsave:".S51", gs:".R51"},	// BSAVE interlace
-	{ext:".S60", screen_no: 6, interlace:1, page:0, type:0, bsave:".S60", gs:".R60"},	// BSAVE interlace
-    {ext:".S61", screen_no: 6, interlace:1, page:1, type:0, bsave:".S61", gs:".R61"},	// BSAVE interlace
-	{ext:".S70", screen_no: 7, interlace:1, page:0, type:0, bsave:".S70", gs:".R70"},	// BSAVE interlace
-    {ext:".S71", screen_no: 7, interlace:1, page:1, type:0, bsave:".S71", gs:".R71"},	// BSAVE interlace
-	{ext:".S80", screen_no: 8, interlace:1, page:0, type:0, bsave:".S80", gs:".R80"},	// BSAVE interlace
-    {ext:".S81", screen_no: 8, interlace:1, page:1, type:0, bsave:".S81", gs:".R81"},	// BSAVE interlace
-	{ext:".SA0", screen_no:10, interlace:1, page:0, type:0, bsave:".SA0", gs:".RA0"},	// BSAVE interlace
-    {ext:".SA1", screen_no:10, interlace:1, page:1, type:0, bsave:".SA1", gs:".RA1"},	// BSAVE interlace
-	{ext:".SC0", screen_no:12, interlace:1, page:0, type:0, bsave:".SC0", gs:".RC0"},	// BSAVE interlace
-    {ext:".SC1", screen_no:12, interlace:1, page:1, type:0, bsave:".SC1", gs:".RC1"},	// BSAVE interlace
-	{ext:".SR2", screen_no: 2, interlace:0, page:0, type:1, bsave:".SC2", gs:".SR2"},	// GRAPH SAURUS
-	{ext:".SR4", screen_no: 3, interlace:0, page:0, type:1, bsave:".SC3", gs:".SR4"},	// GRAPH SAURUS
-	{ext:".SR3", screen_no: 4, interlace:0, page:0, type:1, bsave:".SC4", gs:".SR3"},	// GRAPH SAURUS
-	{ext:".SR5", screen_no: 5, interlace:0, page:0, type:1, bsave:".SC5", gs:".SR5"},	// GRAPH SAURUS
-	{ext:".SR6", screen_no: 6, interlace:0, page:0, type:1, bsave:".SC6", gs:".SR6"},	// GRAPH SAURUS
-	{ext:".SR7", screen_no: 7, interlace:0, page:0, type:1, bsave:".SC7", gs:".SR7"},	// GRAPH SAURUS
-	{ext:".SR8", screen_no: 8, interlace:0, page:0, type:1, bsave:".SC8", gs:".SR8"},	// GRAPH SAURUS
-	{ext:".SRA", screen_no:10, interlace:0, page:0, type:0, bsave:".S10", gs:".SRA"},	// GRAPH SAURUS
-	{ext:".SRC", screen_no:12, interlace:0, page:0, type:0, bsave:".S12", gs:".SRC"},	// GRAPH SAURUS
-	{ext:".SRS", screen_no:12, interlace:0, page:0, type:1, bsave:".S12", gs:".SRS"},	// GRAPH SAURUS
-	{ext:".R50", screen_no: 5, interlace:1, page:0, type:1, bsave:".S50", gs:".R50"},	// GRAPH SAURUS interlace
-    {ext:".R51", screen_no: 5, interlace:1, page:1, type:1, bsave:".S51", gs:".R51"},	// GRAPH SAURUS interlace
-	{ext:".R60", screen_no: 6, interlace:1, page:0, type:1, bsave:".S60", gs:".R60"},	// GRAPH SAURUS interlace
-    {ext:".R61", screen_no: 6, interlace:1, page:1, type:1, bsave:".S61", gs:".R61"},	// GRAPH SAURUS interlace
-	{ext:".R70", screen_no: 7, interlace:1, page:0, type:1, bsave:".S70", gs:".R70"},	// GRAPH SAURUS interlace
-    {ext:".R71", screen_no: 7, interlace:1, page:1, type:1, bsave:".S71", gs:".R71"},	// GRAPH SAURUS interlace
-	{ext:".R80", screen_no: 8, interlace:1, page:0, type:1, bsave:".S80", gs:".R80"},	// GRAPH SAURUS interlace
-    {ext:".R81", screen_no: 8, interlace:1, page:1, type:1, bsave:".S81", gs:".R81"},	// GRAPH SAURUS interlace
-	{ext:".RA0", screen_no:10, interlace:1, page:0, type:1, bsave:".SA0", gs:".RA0"},	// GRAPH SAURUS interlace
-    {ext:".RA1", screen_no:10, interlace:1, page:1, type:1, bsave:".SA1", gs:".RA1"},	// GRAPH SAURUS interlace
-	{ext:".RC0", screen_no:12, interlace:1, page:0, type:1, bsave:".SC0", gs:".RC0"},	// GRAPH SAURUS interlace
-    {ext:".RC1", screen_no:12, interlace:1, page:1, type:1, bsave:".SC1", gs:".RC1"},	// GRAPH SAURUS interlace
+
+    // グラフィック
+    {ext:'.SC2', screen_no: 2, interlace:0, page:0, type:0, bsave:'.SC2', gs:'.SR2'},	// BSAVE
+	{ext:'.SC3', screen_no: 3, interlace:0, page:0, type:0, bsave:'.SC3', gs:'.SR4'},	// BSAVE
+	{ext:'.SC4', screen_no: 4, interlace:0, page:0, type:0, bsave:'.SC4', gs:'.SR3'},	// BSAVE
+	{ext:'.SC5', screen_no: 5, interlace:0, page:0, type:0, bsave:'.SC5', gs:'.SR5'},	// BSAVE
+	{ext:'.SC6', screen_no: 6, interlace:0, page:0, type:0, bsave:'.SC6', gs:'.SR6'},	// BSAVE
+	{ext:'.SC7', screen_no: 7, interlace:0, page:0, type:0, bsave:'.SC7', gs:'.SR7'},	// BSAVE
+	{ext:'.SC8', screen_no: 8, interlace:0, page:0, type:0, bsave:'.SC8', gs:'.SR8'},	// BSAVE
+	{ext:'.S10', screen_no:10, interlace:0, page:0, type:0, bsave:'.S10', gs:'.SRA'},	// BSAVE
+	{ext:'.S12', screen_no:12, interlace:0, page:0, type:0, bsave:'.S12', gs:'.SRC'},	// BSAVE
+	{ext:'.SCA', screen_no:10, interlace:0, page:0, type:0, bsave:'.SCA', gs:'.SRA'},	// BSAVE
+	{ext:'.SCC', screen_no:12, interlace:0, page:0, type:0, bsave:'.SCC', gs:'.SRC'},	// BSAVE
+
+    {ext:'.S50', screen_no: 5, interlace:1, page:0, type:0, bsave:'.S50', gs:'.R50'},	// BSAVE interlace
+    {ext:'.S51', screen_no: 5, interlace:1, page:1, type:0, bsave:'.S51', gs:'.R51'},	// BSAVE interlace
+	{ext:'.S60', screen_no: 6, interlace:1, page:0, type:0, bsave:'.S60', gs:'.R60'},	// BSAVE interlace
+    {ext:'.S61', screen_no: 6, interlace:1, page:1, type:0, bsave:'.S61', gs:'.R61'},	// BSAVE interlace
+	{ext:'.S70', screen_no: 7, interlace:1, page:0, type:0, bsave:'.S70', gs:'.R70'},	// BSAVE interlace
+    {ext:'.S71', screen_no: 7, interlace:1, page:1, type:0, bsave:'.S71', gs:'.R71'},	// BSAVE interlace
+	{ext:'.S80', screen_no: 8, interlace:1, page:0, type:0, bsave:'.S80', gs:'.R80'},	// BSAVE interlace
+    {ext:'.S81', screen_no: 8, interlace:1, page:1, type:0, bsave:'.S81', gs:'.R81'},	// BSAVE interlace
+	{ext:'.SA0', screen_no:10, interlace:1, page:0, type:0, bsave:'.SA0', gs:'.RA0'},	// BSAVE interlace
+    {ext:'.SA1', screen_no:10, interlace:1, page:1, type:0, bsave:'.SA1', gs:'.RA1'},	// BSAVE interlace
+	{ext:'.SC0', screen_no:12, interlace:1, page:0, type:0, bsave:'.SC0', gs:'.RC0'},	// BSAVE interlace
+    {ext:'.SC1', screen_no:12, interlace:1, page:1, type:0, bsave:'.SC1', gs:'.RC1'},	// BSAVE interlace
+
+    {ext:'.SR2', screen_no: 2, interlace:0, page:0, type:1, bsave:'.SC2', gs:'.SR2'},	// GRAPH SAURUS
+	{ext:'.SR4', screen_no: 3, interlace:0, page:0, type:1, bsave:'.SC3', gs:'.SR4'},	// GRAPH SAURUS
+	{ext:'.SR3', screen_no: 4, interlace:0, page:0, type:1, bsave:'.SC4', gs:'.SR3'},	// GRAPH SAURUS
+	{ext:'.SR5', screen_no: 5, interlace:0, page:0, type:1, bsave:'.SC5', gs:'.SR5'},	// GRAPH SAURUS
+	{ext:'.SR6', screen_no: 6, interlace:0, page:0, type:1, bsave:'.SC6', gs:'.SR6'},	// GRAPH SAURUS
+	{ext:'.SR7', screen_no: 7, interlace:0, page:0, type:1, bsave:'.SC7', gs:'.SR7'},	// GRAPH SAURUS
+	{ext:'.SR8', screen_no: 8, interlace:0, page:0, type:1, bsave:'.SC8', gs:'.SR8'},	// GRAPH SAURUS
+	{ext:'.SRA', screen_no:10, interlace:0, page:0, type:0, bsave:'.S10', gs:'.SRA'},	// GRAPH SAURUS
+	{ext:'.SRC', screen_no:12, interlace:0, page:0, type:0, bsave:'.S12', gs:'.SRC'},	// GRAPH SAURUS
+	{ext:'.SRS', screen_no:12, interlace:0, page:0, type:1, bsave:'.S12', gs:'.SRS'},	// GRAPH SAURUS
+
+    {ext:'.R50', screen_no: 5, interlace:1, page:0, type:1, bsave:'.S50', gs:'.R50'},	// GRAPH SAURUS interlace
+    {ext:'.R51', screen_no: 5, interlace:1, page:1, type:1, bsave:'.S51', gs:'.R51'},	// GRAPH SAURUS interlace
+	{ext:'.R60', screen_no: 6, interlace:1, page:0, type:1, bsave:'.S60', gs:'.R60'},	// GRAPH SAURUS interlace
+    {ext:'.R61', screen_no: 6, interlace:1, page:1, type:1, bsave:'.S61', gs:'.R61'},	// GRAPH SAURUS interlace
+	{ext:'.R70', screen_no: 7, interlace:1, page:0, type:1, bsave:'.S70', gs:'.R70'},	// GRAPH SAURUS interlace
+    {ext:'.R71', screen_no: 7, interlace:1, page:1, type:1, bsave:'.S71', gs:'.R71'},	// GRAPH SAURUS interlace
+	{ext:'.R80', screen_no: 8, interlace:1, page:0, type:1, bsave:'.S80', gs:'.R80'},	// GRAPH SAURUS interlace
+    {ext:'.R81', screen_no: 8, interlace:1, page:1, type:1, bsave:'.S81', gs:'.R81'},	// GRAPH SAURUS interlace
+	{ext:'.RA0', screen_no:10, interlace:1, page:0, type:1, bsave:'.SA0', gs:'.RA0'},	// GRAPH SAURUS interlace
+    {ext:'.RA1', screen_no:10, interlace:1, page:1, type:1, bsave:'.SA1', gs:'.RA1'},	// GRAPH SAURUS interlace
+	{ext:'.RC0', screen_no:12, interlace:1, page:0, type:1, bsave:'.SC0', gs:'.RC0'},	// GRAPH SAURUS interlace
+    {ext:'.RC1', screen_no:12, interlace:1, page:1, type:1, bsave:'.SC1', gs:'.RC1'},	// GRAPH SAURUS interlace
+
+    // 特殊 
+    {ext:'.BIN', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.BIN', gs:'.BIN'},	// 汎用
+    {ext:'.SPR', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.SPR', gs:'.SPR'},	// スプライト
+    {ext:'.SPC', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.SPC', gs:'.SPC'},	// スプライトカラー
+    {ext:'.NAM', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.NAM', gs:'.NAM'},	// SC2 パターンネーム
+    {ext:'.COL', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.COL', gs:'.COL'},	// SC2 パターンカラー
+    {ext:'.GEN', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GEN', gs:'.GEN'},	// SC2 パターンジェネレータ
+    {ext:'.PAT', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.PAT', gs:'.PAT'},	// SC2 パターンジェネレータ
+
+    {ext:'.NM' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.NM' , gs:'.NM' },	// SC2 パターンネーム
+    {ext:'.CL' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL' , gs:'.CL' },	// SC2 パターンカラー
+    {ext:'.GN' , screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN' , gs:'.GN' },	// SC2 パターンジェネレータ
+
+    {ext:'.CL0', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL0', gs:'.CL0'},	// SC2 パターンカラー
+    {ext:'.CL1', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL1', gs:'.CL1'},	// SC2 パターンカラー
+    {ext:'.CL2', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.CL2', gs:'.CL2'},	// SC2 パターンカラー
+
+    {ext:'.GN0', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN0', gs:'.GN0'},	// SC2 パターンジェネレータ
+    {ext:'.GN1', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN1', gs:'.GN1'},	// SC2 パターンジェネレータ
+    {ext:'.GN2', screen_no: 2, interlace:-1, page:-1, type:0, bsave:'.GN2', gs:'.GN2'},	// SC2 パターンジェネレータ
+
+    // 対応未定：スクリーン0、1
+    //	{ext:'.SC1', screen_no: 1, interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
+    {ext:'.TX1', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
+    {ext:'.TX2', screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
+    {ext:'.GR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SR1', gs:'.SR1'},	// BSAVE / GS
 ];
 function getExtInfo( ext )
 {
@@ -454,10 +485,8 @@ class VDP {
     	} else {
             // SCREEN 0
             // width 40 か 80 か
-            if (arguments.length > 1) {
-                if (width > 40) {
-                    no += 1;
-                }
+            if ((width !== undefined) && (width > 40)) {
+                no += 1;
             }
         }
 
@@ -539,7 +568,8 @@ class VDP {
         p.img_width  = p.width;
         p.img_height = p.height;
         p.interlace_mode = 0;
-        p.changeScreen( 5 , 0 );
+        p.aspect_ratio = 1.177;
+        p.changeScreen( p.screen_no , p.mode_info.txw, p.interlace_mode );
     }
 
     //------------------------
@@ -587,11 +617,11 @@ class VDP {
     //------------------------
     // 画面モード変更
     //------------------------
-    changeScreen( screen_no, interlace_mode, force_height ) {
+    changeScreen( screen_no, txw, interlace_mode, force_height ) {
         const p = this;
 
         p.screen_no = screen_no;
-        p.mode_info = VDP.getScreenModeSetting( screen_no );
+        p.mode_info = VDP.getScreenModeSetting( screen_no, txw );
         p.width  = p.mode_info.width;
         p.height = p.mode_info.height;
         if (force_height === undefined) {
@@ -600,7 +630,7 @@ class VDP {
         if (force_height) {
             p.height = force_height;
         }
-        if (arguments.length >= 2 ) {
+        if (interlace_mode !== undefined ) {
             p.interlace_mode = interlace_mode;
         } else {
             p.interlace_mode = 0;
@@ -646,9 +676,24 @@ class VDP {
     // VRAMクリア
     //------------------------
     cls() {
-        this.vram.fill( 0 );
+        const p = this;
+        p.vram.fill( 0 );
         if (!pal_lock.checked) {
-            this.resetPalette();
+            p.resetPalette();
+        }
+
+        // 初期値
+        const b = p.vram;
+        const mode_info = p.mode_info;
+        const txsize = mode_info.txw * mode_info.txh;
+        let n = mode_info.patnam;
+        switch (p.screen_no) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+            b.fill(32,mode_info.patnam, mode_info.patnam + txsize);
+            break;
         }
     }
 
@@ -685,6 +730,9 @@ class VDP {
             offset = p.draw_page * p.mode_info.namsiz;
         }
         let limit = p.vram.length - offset;
+        if (offset > limit) {
+            return;
+        }
         if (d.length > limit) {
             p.vram.set( d.subarray(0, limit), offset );
         } else {
@@ -692,6 +740,19 @@ class VDP {
         }
     }
 
+    setCanvasSize()
+    {
+    	const p = this;
+        if (p.canvas) {
+            // メインキャンバスサイズ
+            p.canvas.height = p.height * 2;
+            if (p.width <= 256) {
+                p.canvas.width = p.width * 2 * p.aspect_ratio;
+            } else {
+                p.canvas.width = p.width * p.aspect_ratio;
+            }
+        }
+    }
 
     //------------------------
     // 描画
@@ -704,7 +765,7 @@ class VDP {
             //------------------------
             // メインキャンバス
             //------------------------
-            p.canvas.height = p.height * 2;
+            p.setCanvasSize();
 
             var ctx = p.canvas.getContext('2d');
             ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
@@ -786,9 +847,15 @@ class VDP {
             return;
         }
         switch (p.screen_no) {
+        case 0:
+            p.update_chrgen(0xff, 6);
+            break;
+        case 1:
+            p.update_chrgen(0xff, 8);
+            break;
         case 2:
         case 4:
-            p.update_chrgen_x3();
+            p.update_chrgen(0x3ff, 8);
             break;
         case 3:
             p.update_multi_color();
@@ -833,11 +900,11 @@ class VDP {
             }
         }
     }
-    update_chrgen_x3() {
+    update_chrgen( chr_mask, chr_w ) {
     	const p = this;
 
         if (!p.imgData) {
-            console.log('update_chrgen_x3 - this.imgData is null.');
+            console.log('update_chrgen - this.imgData is null.');
             return;
         }
         let pg_count = 2;//p.interlace_mode + 1;
@@ -863,6 +930,7 @@ class VDP {
                     // main view : page 0
                     chr_d = (d[ndx++] + (i & 0xff00));
                 }
+                chr_d &= chr_mask;  // screen 1 / 2,4
                 chr_d *= 8;
                 let dy = odx
                         + (i & txmask)      // i & 31
@@ -874,7 +942,7 @@ class VDP {
                     let patbit = d[patgen + chr_d];
                     let colset = d[patcol + chr_d];
                     let dx = dy; 
-                    for(var px = 0; px < 8; ++px, dx+=4) {
+                    for(var px = 0; px < chr_w; ++px, dx+=4) {
                         let c_shift = (patbit >> 5) & 4; // 128 >> 5 = 4
                         let c = p.pal_rgba[ (colset >> c_shift) & 15 ];
                         buf[ dx + 0 ] = c[0];
@@ -1448,12 +1516,16 @@ function saveImage(file, page, commpress, with_pal)
         let fname = getBasename( f.name ) + sav_ext;
 
         let start = 0;
-        let size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
-        if (with_pal) {
-            let withpal_size = vdp.mode_info.palend + 1;
-            if (size < withpal_size) {
-                vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
-                size = withpal_size;
+        let size = vdp.mode_info.page_size;
+        // SCREEN 0～4はVRAM 0x0000～0x3FFFまるごとセーブ
+        if (vdp.screen_no >= 5) {
+            size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
+            if (with_pal) {
+                let withpal_size = vdp.mode_info.palend + 1;
+                if (size < withpal_size) {
+                    vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
+                    size = withpal_size;
+                }
             }
         }
 
@@ -1488,6 +1560,10 @@ function detectImageHeight( mode_info, header, size )
             force_height = mode_info.height;
         }
     }
+    else
+    {
+        force_height = 192;
+    }
     return force_height;
 }
 
@@ -1512,31 +1588,45 @@ function loadImage(d, ext_info)
         dat = gs_rle_decode( dat );
     }
 
-    let mode_info = VDP.getScreenModeSetting( ext_info.screen_no );
+    let info = {
+        screen_no:  ext_info.screen_no,
+        interlace:  ext_info.interlace,
+        page:       ext_info.page,
+        txw:        ext_info.txw,
+    };
+    if (info.screen_no < 0) {
+        info.screen_no = vdp.screen_no;
+        info.interlace = vdp.interlace_mode;
+        info.page = 0;
+    }
+    if (info.page < 0) info.page = 0;
+    if (info.interlace < 0) info.interlace = vdp.interlace_mode;
+
+    let mode_info = VDP.getScreenModeSetting( info.screen_no, info.txw );
     vdp.auto_detect_height = detectImageHeight( mode_info, header, dat.length );
     let disp_height = vdp.force_height;
     if (!disp_height) {
         disp_height = vdp.auto_detect_height;
     }
 
-    if (ext_info.page && ext_info.interlace &&
-         (ext_info.screen_no == vdp.screen_no) &&
-         (ext_info.interlace == vdp.interlace_mode) &&
+    if ((ext_info.page != 0) &&
+         (ext_info.interlace != 0) &&
+         (info.screen_no == vdp.screen_no) &&
+         (info.interlace == vdp.interlace_mode) &&
          (disp_height == vdp.height)
        ) {
     } else {
-        vdp.changeScreen( ext_info.screen_no, ext_info.interlace, disp_height );
+        vdp.changeScreen( info.screen_no, info.txw, info.interlace, disp_height );
     }
     if (!ext_info || !ext_info.page) {
         vdp.cls();
     }
 
     vdp.loadBinary(dat, 
-        header.start + ext_info.page * vdp.mode_info.page_size);
+        header.start + info.page * vdp.mode_info.page_size);
 
     // VRAMパレットテーブル読み込み
-    if (header.isBinary && !header.isCompress) 
-    {
+    if (header.isBinary && !header.isCompress) {
         if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
             if (!pal_lock.checked) {
                 vdp.restorePalette(); 
@@ -1578,6 +1668,9 @@ function openGsFile( target_file )
         // パレット
         pal_file = LogFile( target_file );
     } else
+    if ((ext_info.interlace < 0) || (ext_info.interlace < 0)) {
+        // 特殊追加データはどうするか？
+    } else
     if (ext_info.interlace && ext_info.page) {
         // メイン画像とフォーマットが違う場合はクリア
         if ((vdp.screen_no != ext_info.screen_no) ||
@@ -1594,7 +1687,6 @@ function openGsFile( target_file )
         pal_file = empty_file;
         sub_file = empty_file;
         main_file = LogFile( target_file );
-        // メイン画像読み込み時はVRAMクリア
         vdp.cls();
     }
     
@@ -1837,14 +1929,14 @@ function() {
     const stretch_screen_radio = document.getElementsByName('stretch_screen');
     stretch_screen_radio.forEach(e => { 
         if (e.checked) {
-            canvas_area.width = 512 * Number.parseFloat(e.value);
+            vdp.aspect_ratio = Number.parseFloat(e.value);
             vdp.draw();
         }
     });
     let onChangeStrechMode = function(event) {
         const e = event.srcElement;
         if (e.checked) {
-            canvas_area.width = 512 * Number.parseFloat(e.value);
+            vdp.aspect_ratio = Number.parseFloat(e.value);
             vdp.draw();
         }
     }
@@ -1865,7 +1957,7 @@ function() {
             if (!disp_height) {
                 disp_height = vdp.auto_detect_height;
             }
-            vdp.changeScreen( vdp.screen_no, vdp.interlace_mode, disp_height );
+            vdp.changeScreen( vdp.screen_no, vdp.mode_info.txw, vdp.interlace_mode, disp_height );
             vdp.update();
             vdp.draw();
         }
