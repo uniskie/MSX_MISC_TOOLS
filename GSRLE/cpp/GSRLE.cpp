@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 //#include <fstream>
-#include <filesystem>
+#include <filesystem>	// need c++17
 #include <algorithm>
 	
 // GRAPH SAURUS"S COMPRESSION (GS RLE)
@@ -73,6 +73,10 @@ void showHelp()
 		"/cp     Force output size : to palette table.\n"
 		"/212    Force output size : to line 212.\n"
 		"/256    Force output size : to line 256.\n"
+		"/org    Force output size : to original size.\n"
+		"/auto   Auto output size : compress: pixel only\n"
+		"                           BSAVE:    origin size.\n"
+		"        (Default : px)"
 		"/np     No output palette(pl?) file.\n"
 		"/fp     Force output palette(pl?) file\n"
 		"        (at over 256 line data).\n"
@@ -124,8 +128,8 @@ struct ExtInfo
 const ExtInfo EXT_INFO_LIST[] = {
 	// BSAVE
 	{".SC2", 2,0,0,".SC2",".SR2"},
-	{".SC3", 3,0,0,".SC3",".SR4"},
-	{".SC4", 4,0,0,".SC4",".SR3"},
+	{".SC3", 3,0,0,".SC3",".SR3"},
+	{".SC4", 4,0,0,".SC4",".SR4"},
 	{".SC5", 5,0,0,".SC5",".SR5"},
 	{".SC7", 7,0,0,".SC7",".SR7"},
 	{".SC8", 8,0,0,".SC8",".SR8"},
@@ -139,8 +143,8 @@ const ExtInfo EXT_INFO_LIST[] = {
 	{".SC0",12,1,0,".SC0",".RC0"},  {".SC1",12,1,0,".SC1",".RC1"},
 	// GRAPH SAURUS
 	{".SR2", 2,0,1,".SC2",".SR2"},
-	{".SR4", 3,0,1,".SC3",".SR4"},
-	{".SR3", 4,0,1,".SC4",".SR3"},
+	{".SR3", 3,0,1,".SC3",".SR3"},
+	{".SR4", 4,0,1,".SC4",".SR4"},
 	{".SR5", 5,0,1,".SC5",".SR5"},
 	{".SR7", 7,0,1,".SC7",".SR7"},
 	{".SR8", 8,0,1,".SC8",".SR8"},
@@ -326,8 +330,16 @@ const u8* rleEncode(const u8* src, const u8* src_end, u8* dst, u8* dst_end)
 int main(int argc, char *argv[])
 {
 	// setting
+	enum OutputPixelMode {
+		origin = 0,		// 元のバイナリヘッダで指定されたサイズでVRAMを出力する
+		autoSize,		// 圧縮ならピクセルデータのみ。BSAVEなら元ファイルの範囲
+		toPalette,		// パレットテーブルまでのVRAMを出力する
+		line212,		// 212ラインまでのVRAMを出力する
+		line256,		// 256ラインまでのVRAMを出力する
+
+	};
+	OutputPixelMode output_pixel_mode = OutputPixelMode::autoSize;
 	int output_pixel_height = 0;	// 指定したラインまでのVRAMを出力する
-	bool out_put_pixel_to_vram_pal_table = false;	// パレットテーブルの位置までのVRAMを出力する
 	bool output_gs_file = true; // GRAPH SAURUS形式で書き出す
 	bool silent_mode = false; //!< キー入力待ちをしない
 	bool protect_infile = false; //!< 元ファイルへの上書きを禁止する
@@ -375,22 +387,36 @@ int main(int argc, char *argv[])
 			//// arg: force include palette
 			if (l == "/cp")
 			{
-				out_put_pixel_to_vram_pal_table = true;
+				output_pixel_mode = OutputPixelMode::toPalette;
 				print(string("arg: clip size = force include palette : ") + arg);
 			}
 			else
 			//// arg: force 255 line
 			if (l == "/256")
 			{
-				output_pixel_height = 256;
+				output_pixel_mode = OutputPixelMode::line256;
 				print(string("arg: clip size = force 256 line : ") + arg);
 			}
 			else
 			//// arg: force 212 line
 			if (l == "/212")
 			{
-				output_pixel_height =212;
+				output_pixel_mode = OutputPixelMode::line212;
 				print(string("arg: clip size = force 212 line : ") + arg);
+			}
+			else
+			//// arg: force include palette
+			if (l == "/org")
+			{
+				output_pixel_mode = OutputPixelMode::origin;
+				print(string("arg: clip size = binary original size : ") + arg);
+			}
+			else
+			//// arg: force include palette
+			if (l == "/auto")
+			{
+				output_pixel_mode = OutputPixelMode::autoSize;
+				print(string("arg: clip size = gs: pixel only / bsave: original size : ") + arg);
 			}
 			else
 			//// arg: use BSABE header address
@@ -507,7 +533,7 @@ int main(int argc, char *argv[])
 	errno_t err_no = fopen_s(&inFile, inFileName.c_str(), "rb");
 	if (err_no != 0)
 	{
-		print(string("[ERROR] file can not open. \"") + inFileName + "\"");
+		print(string("[ERROR] can not open file. \"") + inFileName + "\"");
 		if (!silent_mode)   std::cin.get();
 		return 1; // error end
 	}
@@ -520,12 +546,13 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		print(string("[ERROR] file size can not get."));
+		print(string("[ERROR] can not get file size. \"") + inFileName + "\"");
 		if (!silent_mode)   std::cin.get();
 		return 1; // error end
 	}
 	print(string("in_file size = ") + std::to_string(inFileSize));
 
+	// read file
 	std::vector<u8> data( inFileSize );
 	size_t rsize = fread( &data[0], 1, inFileSize, inFile );
 	if (rsize != inFileSize)
@@ -558,7 +585,7 @@ int main(int argc, char *argv[])
 	//  色々ややこしいので使わない方がいい。
 	if (!use_bsave_header_address)
 	{
-		print(string("data_size (from file size) : ") + std::to_string(org_size));
+		print(string("data_size (from file size) : ") + std::to_string(org_size) + " (0x" + hex(org_size) + ")");
 	}
 	else
 	{
@@ -594,7 +621,7 @@ int main(int argc, char *argv[])
 			org_size = org_size - header.start_address + 1; //BSAVE type
 			org_size &= SIZE_MAX ^ 1; // 偶数丸め込み 0xFFFFFFFF xor 1
 		}
-		print(string("data_size (from HEADER): ") + std::to_string(org_size));
+		print(string("data_size (from HEADER): ") + std::to_string(org_size) + " (0x" + hex(org_size) + ")");
 	}
 
 	if ((org_size < 1) || (header.type_id != gsrle::HEAD_ID_LINEAR))
@@ -606,23 +633,40 @@ int main(int argc, char *argv[])
 
 	//// 圧縮対象のサイズを決定
 	size_t pixel_size = 0;
-	if (output_pixel_height==212)
-	{
+	switch (output_pixel_mode) {
+	case OutputPixelMode::line212:
 		pixel_size = pixel_end_212 + 1;
-	}
-	else if (output_pixel_height==256)
-	{
+		break;
+	case OutputPixelMode::line256:
 		pixel_size = pixel_end_256 + 1;
-	}
-	else if (out_put_pixel_to_vram_pal_table)
-	{
+		break;
+	case OutputPixelMode::toPalette:
 		pixel_size = pixel_end_with_pal + 1;
-	}
-	else // そのまま
-	{
+		break;
+	case OutputPixelMode::origin:
 		pixel_size = org_size;
+		break;
+	case OutputPixelMode::autoSize:
+	default:
+		if (output_gs_file)
+		{
+			// ピクセル範囲判定
+			if (org_size <= (pixel_end_with_pal + 1))
+			{
+				pixel_size = pixel_end_212 + 1;
+			}
+			else
+			{
+				pixel_size = pixel_end_256 + 1;
+			}
+		}
+		else
+		{
+			pixel_size = org_size;
+		}
+		break;
 	}
-	print(string("need_pixel_size: ") + std::to_string(pixel_size));
+	print(string("need_pixel_size: ") + std::to_string(pixel_size) + " (0x" + hex(pixel_size) + ")");
 
 	// expand data to pixelsize
 	auto file_body_size = data.size() - gsrle::HEADER_SIZE;
@@ -638,11 +682,11 @@ int main(int argc, char *argv[])
 			if (!silent_mode)   std::cin.get();
 			return 1; // error end
 		}
-		print(string("(expand source pixel to ") + std::to_string(pixel_size));
+		print(string("(expand source pixel to ") + std::to_string(pixel_size) + " (0x" + hex(pixel_size) + ")");
 	}
 
 	size_t use_size = std::min(pixel_size, file_body_size);
-	print(string("use_size: ") + std::to_string(use_size));
+	print(string("use_size: ") + std::to_string(use_size) + " (0x" + hex(use_size) + ")");
 
 	//// RLE encode
 	std::vector<u8> outdata(gsrle::HEADER_SIZE + use_size * 2); // double size

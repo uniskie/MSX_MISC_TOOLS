@@ -31,6 +31,9 @@ def showHelp():
     print("/cp     Force output size : to palette table.")
     print("/212    Force output size : to line 212.")
     print("/256    Force output size : to line 256.")
+    print("/org    Force output size : to line 256.")
+    print("/auto   Auto output size : gs compress = pixel only.")
+    print("                           bsave = original size.")
     print("/np     No output palette(pl?) file.")
     print("/fp     Force output palette(pl?) file")
     print("        (at over 256 line data).")
@@ -65,8 +68,8 @@ class ExtInfo:
         self.gs_ext    = gs_ext     #GRAPH SAURUS拡張子
 EXT_INFO_LIST = {
     '.SC2': ExtInfo( 2,0,0,'.SC2','.SR2'),  '.SR2': ExtInfo( 2,0,1,'.SC2','.SR2'),
-    '.SC3': ExtInfo( 3,0,0,'.SC3','.SR4'),  '.SR4': ExtInfo( 3,0,1,'.SC3','.SR4'),
-    '.SC4': ExtInfo( 4,0,0,'.SC4','.SR3'),  '.SR3': ExtInfo( 4,0,1,'.SC4','.SR3'),
+    '.SC3': ExtInfo( 3,0,0,'.SC3','.SR3'),  '.SR3': ExtInfo( 3,0,1,'.SC3','.SR3'),
+    '.SC4': ExtInfo( 4,0,0,'.SC4','.SR4'),  '.SR4': ExtInfo( 4,0,1,'.SC4','.SR4'),
     '.SC5': ExtInfo( 5,0,0,'.SC5','.SR5'),  '.SR5': ExtInfo( 5,0,1,'.SC5','.SR5'),
     '.SC7': ExtInfo( 7,0,0,'.SC7','.SR7'),  '.SR7': ExtInfo( 7,0,1,'.SC7','.SR7'),
     '.SC8': ExtInfo( 8,0,0,'.SC8','.SR8'),  '.SR8': ExtInfo( 8,0,1,'.SC8','.SR8'),
@@ -196,8 +199,7 @@ def rleEncode(dat: bytes) -> "bytearray":
 #===============================================
 
 ## setting
-output_pixel_height = 0	# 指定したラインまでのVRAMを出力する
-out_put_pixel_to_vram_pal_table = False	# パレットテーブルの位置までのVRAMを出力する
+output_pixel_mode = "auto"	# 圧縮ならピクセルサイズのみ/BSAVEなら元のサイズ
 output_gs_file = True # GRAPH SAURUS形式で書き出す
 silent_mode = False #!< キー入力待ちをしない
 protect_infile = False #!< 元ファイルへの上書きを禁止する
@@ -233,16 +235,24 @@ while (argi < len(sys.argv)):
             print("arg: protect input file : " + arg)
         ## arg: force include palette
         elif (l == "/cp"):
-            out_put_pixel_to_vram_pal_table = True
+            output_pixel_mode = "toPalette"
             print("arg: clip size = force include palette : " + arg)
-        ## arg: force 255 line
-        elif (l == "/256"):
-            output_pixel_height = 256
-            print("arg: clip size = force 256 line : " + arg)
         ## arg: force 212 line
         elif (l == "/212"):
-            output_pixel_height =212
+            output_pixel_mode = "line212"
             print("arg: clip size = force 212 line : " + arg)
+        ## arg: force 255 line
+        elif (l == "/256"):
+            output_pixel_mode = "line256"
+            print("arg: clip size = force 256 line : " + arg)
+        ## arg: force org size
+        elif (l == "/org"):
+            output_pixel_mode = "org"
+            print("arg: clip size = force original size : " + arg)
+        ## arg: auto size
+        elif (l == "/auto"):
+            output_pixel_mode = "auto"
+            print("arg: clip size = auto size (gs:pixel only / bsave:original size) : " + arg)
         ## arg: use BSABE header address
         elif (l == "/bh"):
             use_bsave_header_address = True
@@ -392,14 +402,24 @@ print('----------------')
 
 ## 圧縮対象のサイズを決定
 pixel_size = 0
-if (output_pixel_height==212):
+if (output_pixel_mode=="line212"):
     pixel_size = pixel_end_212 + 1
-elif (output_pixel_height==256):
+elif (output_pixel_mode=="line256"):
     pixel_size = pixel_end_256 + 1
-elif (out_put_pixel_to_vram_pal_table):
+elif (output_pixel_mode=="toPalette"):
     pixel_size = pixel_end_with_pal + 1
-else: # そのまま
+elif (output_pixel_mode=="org"):
     pixel_size = org_size
+#elif (output_pixel_mode=="auto"):
+else: # auto または それ以外
+	if (output_gs_file):
+		# ピクセル範囲判定
+		if (org_size <= (pixel_end_with_pal + 1)):
+			pixel_size = pixel_end_212 + 1
+		else:
+			pixel_size = pixel_end_256 + 1
+	else:
+		pixel_size = org_size
 print("need_pixel_size: " + str(pixel_size))
 
 # expand data to pixelsize
