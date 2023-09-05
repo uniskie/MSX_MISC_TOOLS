@@ -257,9 +257,11 @@ const ext_info = [
 
     // 対応未定：スクリーン0、1
     //	{ext:'.SC1', screen_no: 1, interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
-    {ext:'.TX1', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
-    {ext:'.TX2', screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
-    {ext:'.GR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SR1', gs:'.SR1'},	// BSAVE / GS
+    {ext:'.TX1', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.TX1', gs:'.TX1'},	// BSAVE / GS
+    {ext:'.TX2', screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:'.TX2', gs:'.TX2'},	// BSAVE / GS
+    {ext:'.GR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.GR1', gs:'.GR1'},	// BSAVE / GS
+    {ext:'.SR0', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.SR0', gs:'.SR0'},	// BSAVE / GS
+    {ext:'.SR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SR1', gs:'.SR1'},	// BSAVE / GS
 ];
 function getExtInfo( ext )
 {
@@ -428,12 +430,12 @@ class VDP {
     //------------------------------------------------
     // 画面モード別 スペック
     static get screen_mode_spec1() { return [
-        { no: 0, txw:40, txh:24, name:'TEXT1',      width:240, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 0, txw:80, txh:24, name:'TEXT2',      width:480, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 1, txw:32, txh:24, name:'GRAPHIC1',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 2, txw:32, txh:24, name:'GRAPHIC2',   width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 3, txw:64, txh:48, name:'MULTICOLOR', width:256, height:192, bpp:1, page_size:0x04000, }, 
-        { no: 4, txw:32, txh:24, name:'GRAPHIC3',   width:256, height:192, bpp:1, page_size:0x04000, }, 
+        { no: 0, txw:40, txh:24, name:'TEXT1',      width:240, height:192, bpp:0, page_size:0x04000, }, 
+        { no: 0, txw:80, txh:24, name:'TEXT2',      width:480, height:192, bpp:0, page_size:0x04000, }, 
+        { no: 1, txw:32, txh:24, name:'GRAPHIC1',   width:256, height:192, bpp:0, page_size:0x04000, }, 
+        { no: 2, txw:32, txh:24, name:'GRAPHIC2',   width:256, height:192, bpp:0, page_size:0x04000, }, 
+        { no: 3, txw:32, txh:24, name:'MULTICOLOR', width:256, height:192, bpp:0, page_size:0x04000, }, 
+        { no: 4, txw:32, txh:24, name:'GRAPHIC3',   width:256, height:192, bpp:0, page_size:0x04000, }, 
         { no: 5, txw:32, txh:26, name:'GRAPHIC4',   width:256, height:212, bpp:4, page_size:0x08000, }, 
         { no: 6, txw:64, txh:26, name:'GRAPHIC5',   width:512, height:212, bpp:2, page_size:0x08000, }, 
         { no: 7, txw:64, txh:26, name:'GRAPHIC6',   width:512, height:212, bpp:4, page_size:0x10000, }, 
@@ -449,7 +451,7 @@ class VDP {
         { no: 0, txw:80, namsiz:0x00800, patnam:0x0000, patgen:0x1000, patcol:0x0800, paltbl:0x0F00, s192:0x17FF, s212:0x17FF, }, 
         { no: 1, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
         { no: 2, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
-        { no: 3, txw:64, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
+        { no: 3, txw:32, namsiz:0x00200, patnam:0x0800, patgen:0x0000, patcol:-1    , paltbl:0x2020, s192:0x37FF, s212:0x37FF, }, 
         { no: 4, txw:32, namsiz:0x00200, patnam:0x1800, patgen:0x0000, patcol:0x2000, paltbl:0x1B80, s192:0x37FF, s212:0x37FF, }, 
         { no: 5, txw:32, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
         { no: 6, txw:64, namsiz:0x08000, patnam:0x0000, patgen:-1    , patcol:-1    , paltbl:0x7680, s192:0x5FFF, s212:0x69FF, }, 
@@ -467,7 +469,7 @@ class VDP {
         { no: 0, txw:80, spratr:-1    , sprgen:-1    , sprcol:-1    , }, 
         { no: 1, txw:32, spratr:0x1B00, sprgen:0x3800, sprcol:-1    , }, 
         { no: 2, txw:32, spratr:0x2000, sprgen:0x3800, sprcol:-1    , }, 
-        { no: 3, txw:64, spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
+        { no: 3, txw:32, spratr:0x0800, sprgen:0x3800, sprcol:-1    , }, 
         { no: 4, txw:32, spratr:0x2000, sprgen:0x3800, sprcol:0x3800, }, 
         { no: 5, txw:32, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
         { no: 6, txw:64, spratr:0x7600, sprgen:0x7800, sprcol:0x7400, }, 
@@ -570,6 +572,7 @@ class VDP {
         p.interlace_mode = 0;
         p.aspect_ratio = 1.177;
         p.changeScreen( p.screen_no , p.mode_info.txw, p.interlace_mode );
+        p.cls();
     }
 
     //------------------------
@@ -675,49 +678,61 @@ class VDP {
     //------------------------
     // VRAMクリア
     //------------------------
-    cls() {
+    cls( resetPalette ) {
         const p = this;
         p.vram.fill( 0 );
-        if (!pal_lock.checked) {
+        if (resetPalette === undefined) resetPalette = false;
+        if (!pal_lock.checked || resetPalette) {
             p.resetPalette();
         }
 
         // 初期値
         const b = p.vram;
         const mode_info = p.mode_info;
-        const txsize = mode_info.txw * mode_info.txh;
+        const tx_size = mode_info.txw * mode_info.txh;
         let n = mode_info.patnam;
         switch (p.screen_no) {
         case 0:
         case 1:
+            b.fill(32,mode_info.patnam, mode_info.patnam + tx_size);
+            b.fill(0xf0, mode_info.patcol, mode_info.patcol + 32);
+            /*
+            // test
+            if (-1 < mode_info.patcol) {
+                for (var i=0; i<32; ++i) {
+                    b[mode_info.patcol + i] = i;
+                }
+            }
+            for (let i = 0; i < tx_size; ++i, ++n) {
+                b[n] = i;
+            }
+            */
+            break;
         case 2:
         case 4:
-            b.fill(32,mode_info.patnam, mode_info.patnam + txsize);
+            for (let i = 0; i < tx_size; ++i, ++n) {
+                b[n] = i;
+            }
+            b.fill(0xf0, mode_info.patcol, mode_info.patcol + tx_size * 8);
+            /*
+            // test
+            for (var i=0; i<tx_size * 8; ++i) {
+                b[mode_info.patcol + i] = i;
+            }
+            */
+            break;
+        case 3:
+            for (let i = 0; i < tx_size; ++i, ++n) {
+                b[n] = (i & 31) + 32 * (i >> 2);
+            }
+            /*
+            // test
+            for (var i=0; i<tx_size * 8; ++i) {
+                b[mode_info.patgen + i] = i;
+            }
+            */
             break;
         }
-    }
-
-    //------------------------
-    // 指定したYに対応するアドレスを返す
-    //------------------------
-    lineAddress( y ) {
-        let adr = 0;
-        if (this.screen_no >= 5) {
-            adr = y * this.mode_info.bpp * this.width / 8;
-        } else
-        if (this.screen_no == 3) {
-            // 64x48ブロック
-            // ブロック=4x4ドット
-            // 2バイトが2x2ブロック = 8x8ドット
-            // 64x2バイトが64x2ブロック
-            // int(y/8) * 128 + (y & 1);
-            adr = (y >> 3) * 128 + (y & 1);
-        } else {
-            // 1バイトが 6x8 または 8x8
-            // 画面横文字数 バイト が 8 ライン
-            adr = (y >> 3) * this.mode_info.txw;
-        }
-        return this.mode_info.patnam + adr;
     }
 
     //------------------------
@@ -760,11 +775,10 @@ class VDP {
     draw( disp_mode ) {
     	const p = this;
 
+        //------------------------
+        // メインキャンバス
+        //------------------------
         if (p.canvas) {
-
-            //------------------------
-            // メインキャンバス
-            //------------------------
             p.setCanvasSize();
 
             var ctx = p.canvas.getContext('2d');
@@ -788,55 +802,55 @@ class VDP {
                     break;
                 }
             }
+        }
 
-            //------------------------
-            // ページ毎表示キャンバス
-            //------------------------
-            if (p.page_canvas) {
-                let i = 0;
-                if (p.interlace_mode || (p.screen_no < 5)) ++i;
-                var offscreen = p.offscreen[i];
+        //------------------------
+        // ページ毎表示キャンバス
+        //------------------------
+        if (p.page_canvas) {
+            let off_pg = 0;
+            if (p.interlace_mode || (p.screen_no < 5)) ++off_pg;
+            var offscreen = p.offscreen[off_pg];
 
-                for (var pg = 0; pg < p.page_canvas.length; ++pg) {
-                    var canvas = p.page_canvas[pg];
-                    if (canvas) {
-                        canvas.width  = p.canvas.width;
-                        canvas.height = p.canvas.height;
-                        ctx = canvas.getContext('2d');
-                        ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
-                        ctx.drawImage( offscreen, 
-                            0, pg * p.height, p.width, p.height,
-                            0, 0, canvas.width, canvas.height );
-                    }
+            for (var pg = 0; pg < p.page_canvas.length; ++pg) {
+                var canvas = p.page_canvas[pg];
+                if (canvas) {
+                    canvas.width  = p.canvas.width;
+                    canvas.height = p.canvas.height;
+                    ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
+                    ctx.drawImage( offscreen, 
+                        0, pg * p.height, p.width, p.height,
+                        0, 0, canvas.width, canvas.height );
                 }
             }
+        }
 
-            //------------------------
-            // パレットキャンバス
-            //------------------------
-            if (p.pal_canvas)
-            {
-                var pal = p.pal;
-                if (p.screen_no == 8) {
-                    pal = p.pal256;
-                }
+        //------------------------
+        // パレットキャンバス
+        //------------------------
+        if (p.pal_canvas)
+        {
+            var pal = p.pal;
+            if (p.screen_no == 8) {
+                pal = p.pal256;
+            }
 
-                var canvas = p.pal_canvas;
-                var ctx = canvas.getContext('2d');
+            var canvas = p.pal_canvas;
+            var ctx = canvas.getContext('2d');
 
-                canvas.width = 32 * VDP.palette_count;
-                canvas.height = 24;
+            canvas.width = 32 * VDP.palette_count;
+            canvas.height = 24;
 
-                ctx.fillStyle = "black";
-                ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "black";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
 
-                var w = Math.floor(canvas.width / pal.length);
-                for (var i = 0; i < pal.length; ++i) {
-                    ctx.fillStyle = pal[i].rgb_string;
-                    ctx.fillRect(
-                        canvas.width * i / pal.length, 0,
-                        w, canvas.height);
-                }
+            var w = Math.floor(canvas.width / pal.length);
+            for (var i = 0; i < pal.length; ++i) {
+                ctx.fillStyle = pal[i].rgb_string;
+                ctx.fillRect(
+                    canvas.width * i / pal.length, 0,
+                    w, canvas.height);
             }
         }
     }
@@ -848,14 +862,14 @@ class VDP {
         }
         switch (p.screen_no) {
         case 0:
-            p.update_chrgen(0xff, 6);
+            p.update_chrgen(0xff, 6, -1);
             break;
         case 1:
-            p.update_chrgen(0xff, 8);
+            p.update_chrgen(0xff, 8, 6);
             break;
         case 2:
         case 4:
-            p.update_chrgen(0x3ff, 8);
+            p.update_chrgen(0x3ff, 8, 0);
             break;
         case 3:
             p.update_multi_color();
@@ -866,7 +880,7 @@ class VDP {
             break;
         case 6:
         case 9:
-            p.update_bitmap8();
+            p.update_bitmap4();
             break;
         case 8:
             p.update_bitmap256();
@@ -900,61 +914,70 @@ class VDP {
             }
         }
     }
-    update_chrgen( chr_mask, chr_w ) {
+    update_chrgen( chr_mask, chr_w, col_shift ) {
     	const p = this;
 
         if (!p.imgData) {
             console.log('update_chrgen - this.imgData is null.');
             return;
         }
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
         let buf = p.imgData.data;
         let d = p.vram;
+        let cd = p.vram;
 
-        let patgen = p.mode_info.patgen;
+        const patgen = p.mode_info.patgen;
         let patcol = p.mode_info.patcol;
-        const line_size = 4 * vdp.width;
-
         let txw = p.mode_info.txw;
-        let txmask = txw - 1;
-        let txshift = 0; while((txw >> txshift) > 1) {txshift ++;}
-        let tx_size = txw * p.mode_info.txh;
+        let txh = p.mode_info.txh;
+        const  line_size = 4 * vdp.width;
+        let chr_size = 4 * chr_w;
 
         let ndx = p.mode_info.patnam;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            for (var i = 0; i < tx_size; ++i) {
-                // chr gen view : page 1
-                let chr_d = i;
-                if (pg == 0) {
-                    // main view : page 0
-                    chr_d = (d[ndx++] + (i & 0xff00));
-                }
-                chr_d &= chr_mask;  // screen 1 / 2,4
-                chr_d *= 8;
-                let dy = odx
-                        + (i & txmask)      // i & 31
-                        * 32                // 8px * 4byte
-                        + (i >> txshift)    // i / 32
-                        * (line_size * 8);  // 8 line
-
-                for(var py = 0; py < 8; ++py, ++chr_d) {
-                    let patbit = d[patgen + chr_d];
-                    let colset = d[patcol + chr_d];
-                    let dx = dy; 
-                    for(var px = 0; px < chr_w; ++px, dx+=4) {
-                        let c_shift = (patbit >> 5) & 4; // 128 >> 5 = 4
-                        let c = p.pal_rgba[ (colset >> c_shift) & 15 ];
-                        buf[ dx + 0 ] = c[0];
-                        buf[ dx + 1 ] = c[1];
-                        buf[ dx + 2 ] = c[2];
-                        buf[ dx + 3 ] = c[3];
-                        patbit <<= 1;
+            let i = 0;
+            for (let y = 0; y < txh; ++y) {
+                let ody = odx;
+                for (let x = 0; x < txw; ++x) {
+                    // chr gen view : page 1
+                    let chr_d = i;
+                    if (pg == 0) {
+                        // main view : page 0
+                        chr_d = (d[ndx++] + (i & 0xff00));
                     }
-                    dy += line_size;
+                    chr_d &= chr_mask;  // screen 1 / 2,4
+                    chr_d *= 8;
+                    let dy = ody;
+                    for(var py = 0; py < 8; ++py, ++chr_d) {
+                        let patbit = d[patgen + chr_d];
+                        let colset = 0xf0;
+                        if (-1 < col_shift) {
+                            colset = cd[patcol + (chr_d >> col_shift)];
+                        }
+                        let dx = dy; 
+                        for(var px = 0; px < chr_w; ++px, dx+=4) {
+                            let c_shift = (patbit >> 5) & 4; // 128 >> 5 = 4
+                            let c = p.pal_rgba[ (colset >> c_shift) & 15 ];
+                            buf[ dx + 0 ] = c[0];
+                            buf[ dx + 1 ] = c[1];
+                            buf[ dx + 2 ] = c[2];
+                            buf[ dx + 3 ] = c[3];
+                            patbit <<= 1;
+                        }
+                        dy += line_size;
+                    }
+                    ody += chr_size;
+                    ++i;
                 }
+                odx += 8 * line_size;
             }
-            odx += p.width * p.height * 4;
+
+            // page 1 = chara preview
+            txw = 32;
+            if (vdp.screen_no < 2) {
+                txh = 8;
+            }
         }
     }
     update_multi_color() {
@@ -964,16 +987,15 @@ class VDP {
             console.log('update_multi_color - this.imgData is null.');
             return;
         }
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
         let buf = p.imgData.data;
         let d = p.vram;
 
-        let patnam = p.mode_info.patnam;
-        let patgen = p.mode_info.patgen;
-        
-        let txw = Math.floor(p.mode_info.width  / 8);
-        let txh = Math.floor(p.mode_info.height / 8);
-        let tx_size = txw * txh;
+        const patnam = p.mode_info.patnam;
+        const patgen = p.mode_info.patgen;
+        const txw = p.mode_info.txw;
+        const txh = p.mode_info.txh;
+        const tx_size = txw * txh;
         const line_size = 4 * vdp.width;
         const b_line_size = line_size * 4; // 1block 4x4px
 
@@ -1018,15 +1040,14 @@ class VDP {
     }
     update_bitmap16() {
     	const p = this;
-
         if (!p.imgData) {
             console.log('update_bitmap16 - this.imgData is null.');
             return;
         }
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
+        const sz = p.width / 2 * p.height;
         let buf = p.imgData.data;
         let d = p.vram;
-        let sz = p.width / 2 * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let idx = p.mode_info.patnam
@@ -1048,17 +1069,16 @@ class VDP {
             }
         }
     }
-    update_bitmap8() {
+    update_bitmap4() {
     	const p = this;
-
         if (!p.imgData) {
             console.log('update_bitmap16 - this.imgData is null.');
             return;
         }
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
+        const sz = p.width / 4 * p.height;
         let buf = p.imgData.data;
         let d = p.vram;
-        let sz = p.width / 4 * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let idx = p.mode_info.patnam
@@ -1079,15 +1099,14 @@ class VDP {
     }
     update_bitmap256() {
     	const p = this;
-
         if (!p.imgData) {
             console.log('update_bitmap256 - this.imgData is null.');
             return;
         }
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
+        const sz = p.width * p.height;
         let buf = p.imgData.data;
         let d = p.vram;
-        let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let idx = p.mode_info.patnam
@@ -1115,10 +1134,10 @@ class VDP {
         let j = 0;  // -32 ~ +31
         let k = 0;  // -32 ~ +31
 
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
+        const sz = p.width * p.height;
         let buf = p.imgData.data;
         let d = p.vram;
-        let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let idx = p.mode_info.patnam
@@ -1152,10 +1171,10 @@ class VDP {
         let j = 0;  // -32 ~ +31
         let k = 0;  // -32 ~ +31
 
-        let pg_count = 2;//p.interlace_mode + 1;
+        const pg_count = 2;//p.interlace_mode + 1;
+        const sz = p.width * p.height;
         let buf = p.imgData.data;
         let d = p.vram;
-        let sz = p.width * p.height;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let idx = p.mode_info.patnam
@@ -1187,8 +1206,7 @@ class VDP {
     }
 };
 
-let vdp = new VDP();
-//console.log(vdp);
+let vdp = null;
 
 // ========================================================
 // 空白桁埋め数値文字列
@@ -1518,14 +1536,16 @@ function saveImage(file, page, commpress, with_pal)
         let start = 0;
         let size = vdp.mode_info.page_size;
         // SCREEN 0～4はVRAM 0x0000～0x3FFFまるごとセーブ
-        if (vdp.screen_no >= 5) {
+        if (vdp.mode_info.bpp) {
             size = vdp.height * vdp.mode_info.bpp * vdp.width / 8;
-            if (with_pal) {
-                let withpal_size = vdp.mode_info.palend + 1;
-                if (size < withpal_size) {
-                    vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
-                    size = withpal_size;
-                }
+        }
+        if (with_pal) {
+            let withpal_size = vdp.mode_info.palend + 1;
+            if (size < withpal_size) {
+                size = withpal_size;
+            }
+            if (withpal_size <= size) {
+                vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
             }
         }
 
@@ -1600,7 +1620,13 @@ function loadImage(d, ext_info)
         info.page = 0;
     }
     if (info.page < 0) info.page = 0;
-    if (info.interlace < 0) info.interlace = vdp.interlace_mode;
+    if (info.interlace < 0) {
+        if (info.screen_no != vdp.screen_no) {
+            info.interlace = 0;
+        } else {
+            info.interlace = vdp.interlace_mode;
+        }
+    }
 
     let mode_info = VDP.getScreenModeSetting( info.screen_no, info.txw );
     vdp.auto_detect_height = detectImageHeight( mode_info, header, dat.length );
@@ -1617,6 +1643,7 @@ function loadImage(d, ext_info)
        ) {
     } else {
         vdp.changeScreen( info.screen_no, info.txw, info.interlace, disp_height );
+        vdp.cls( true );
     }
     if (!ext_info || !ext_info.page) {
         vdp.cls();
@@ -1626,10 +1653,12 @@ function loadImage(d, ext_info)
         header.start + info.page * vdp.mode_info.page_size);
 
     // VRAMパレットテーブル読み込み
-    if (header.isBinary && !header.isCompress) {
-        if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
-            if (!pal_lock.checked) {
-                vdp.restorePalette(); 
+    if (4 <= vdp.screen_no) { // スクリーン4以上の場合のみ
+        if (header.isBinary && !header.isCompress) {
+            if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
+                if (!pal_lock.checked) {
+                    vdp.restorePalette(); 
+                }
             }
         }
     }
@@ -1669,7 +1698,15 @@ function openGsFile( target_file )
         pal_file = LogFile( target_file );
     } else
     if ((ext_info.interlace < 0) || (ext_info.interlace < 0)) {
-        // 特殊追加データはどうするか？
+        // 現在とフォーマットが違う場合はクリア
+        if (((ext_info.screen_no >= 0) && (vdp.screen_no != ext_info.screen_no)) ||
+            ((ext_info.interlace >= 0) && (vdp.interlace_mode != ext_info.interlace)))
+        {
+            pal_file = empty_file;
+            sub_file = empty_file;
+            main_file = empty_file;
+            vdp.cls();
+        }
     } else
     if (ext_info.interlace && ext_info.page) {
         // メイン画像とフォーマットが違う場合はクリア
@@ -1864,6 +1901,9 @@ function isValidDropItem(e)
 // ========================================================
 window.addEventListener('DOMContentLoaded',
 function() {
+    vdp = new VDP();
+    //console.log(vdp);
+
     // 各種画面要素
     const canvas_area = document.getElementById('canvas_area');
     const canvas_page0 = document.getElementById('canvas_page0');
@@ -2115,5 +2155,11 @@ function() {
     //canvas_smoothing.addEventListener("change", function(e) { vdp.draw(); });
     // ぼやけすぎて使えない
 
+    /* test
+    vdp.changeScreen(1);
+    vdp.cls();
+    vdp.update();
+    vdp.draw();
+    */
 });
 

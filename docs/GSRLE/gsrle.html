@@ -84,7 +84,7 @@
             <div id="help_guide"></div>
             </div>
         </details>
-        <details open id="tab_settings">
+        <details open id="tab_settings" id="height_mode">
             <summary class="tab_label">設定</summary>
             <span class="selector">
                 <label class="label">画面縦サイズ</label>
@@ -93,7 +93,7 @@
                 <label class="click"><input type="radio" name="height_mode" value="212"         >212固定</label>
                 <label class="click"><input type="radio" name="height_mode" value="256"         >256固定</label>
             </span>
-            <span class="selector">
+            <span class="selector" id="stretch_screen">
                 <label class="label">DotAspect比 (ピクセル縦横比)</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.177" checked>1.177:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.166"        >1.166:1</label>
@@ -107,7 +107,7 @@
                     カラーパレット固定(パレットファイル読み込み時のみ変更)
                 </label>
             </span>
-            <span class="selector">
+            <span class="selector" id="qick_save">
                 <label class="label">読み込み後：自動保存</label>
                 <label class="click"><input type="radio" name="qick_save" value="none" checked>なし</label>
                 <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(FULL)</label>
