@@ -1,53 +1,15 @@
 @charset "utf-8";
 
 /* ==================================== */
-/*	アコーディオンラベル */
-/* ==================================== */
-.tab_label {
-    padding: 0.1em 0.5em;
-    font-weight: bolder;
-    background: #101;
-    color: white;
-    border: outset 2px #a67;
-}
-.tab_label:hover {
-    /* background-color:  #334; */
-    animation: 1s blink linear infinite;
-}
-@keyframes blink {
-    0% {
-      background-color: #101;
-    }
-    50% {
-        background-color: #148;
-    }
-    100% {
-        background-color: #101;
-    }
-  }
-/* アコーディオンラベル内のリンク */
-.tab_label a {
-    color:#Fdd;
-    text-decoration:underline;
-
-    transition: .5s;
-}
-.tab_label a:hover {
-    color:#f88;
-}
-.tab_label a:active {
-    color:#af8;
-}
-
-/* ==================================== */
 /*	メインブロック */
 /* ==================================== */
 #main{
-    margin: 0%;
+    margin: 0;
     padding: 0.5em;
     box-sizing: border-box;
     display: grid;
     grid-template-rows: 
+        fit-content(100%)
         fit-content(100%)
         fit-content(100%)
         1fr
@@ -60,18 +22,80 @@
 }
 
 /* ==================================== */
+/*	途中改行を抑制したい要素	*/
+/* ==================================== */
+label {
+    display: inline-block;
+}
+
+/* ==================================== */
+/*	アコーディオンラベル */
+/* ==================================== */
+details.details {
+    border: solid 1px #000;
+    border-radius: 0.5em;
+}
+.tab_label {
+    padding: 0.1em 0.5em;
+    font-size: medium;
+    font-weight: bolder;
+    background-color: #101;
+    color: white;
+    border-top: double 3px #86a;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+}
+.tab_label:hover {
+    /* background-color:  #334; */
+    animation: 2s blink linear infinite;
+}
+@keyframes blink {
+    0% {
+      background-color: #101;
+    }
+    20% {
+        background-color: #464;
+    }
+    40% {
+        background-color: #886;
+    }
+    60% {
+        background-color: #66a;
+    }
+    80% {
+        background-color: #644;
+    }
+    100% {
+        background-color: #101;
+    }
+  }
+/* アコーディオンラベル内のリンク */
+.tab_label a {
+    color:#Fdd;
+    text-decoration:underline;
+
+    /*transition: .5s;*/
+}
+.tab_label a:hover {
+    color:#f88;
+}
+.tab_label a:active {
+    color:#af8;
+}
+
+/* ==================================== */
 /*	タイトルブロック */
 /* ==================================== */
 #title{
     padding: 0.2em 0.5em;
-    background: #111;
+    background-color: #111;
     color: white;
     font-weight: bold;
     font-size: larger;
 }
 #title:hover {
     /* background-color:  #334; */
-    animation: 1s blink linear infinite;
+    animation: 2s blink linear infinite;
 }
 
 .guide {
@@ -79,7 +103,7 @@
     margin: 0;
     padding: 0;
     padding-left: 1.25em;
-    background: #aaa;
+    background-color: #aaa;
     color: #eee;
 }
 /* ==================================== */
@@ -88,7 +112,7 @@
 #info {
     padding: 0.2em;
     box-sizing: border-box;
-    background:#666;
+    background-color:#666;
     color: white;
     font-size: small;
     /*
@@ -99,28 +123,6 @@
     font-size:smaller;
     padding: 0 0.5em;
     position: relative;
-}
-
-/* ==================================== */
-/*	テキスト表示ブロック */
-/* ==================================== */
-#text_area {
-    padding: 0.5em;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-
-    overflow:auto;
-    white-space:pre-line;
-    word-wrap:break-word;
-
-    background:#f0f0f0;
-    color: black;
-    border:2px inset #888;
-}
-/** ドラッグオーバー **/
-#text_area.dropEffect {
-    border-color:#f88;
 }
 
 /* ==================================== */
@@ -139,8 +141,16 @@
     width: 644;
     height: 484;
     */
-    background:black;
+
+    background-image: 
+    linear-gradient(45deg, #aaa 25%, transparent 25%, transparent 75%, #aaa 75%),
+    linear-gradient(45deg, #aaa 25%, transparent 25%, transparent 75%, #aaa 75%);
+    background-position: 0 0, 16px 16px;
+    background-size: 32px 32px;
+
+    background-color: gray;
     color: white;
+
     /*
     border:2px inset #888;
     */
@@ -152,30 +162,41 @@
 }
 /** コンテナ **/
 .canvas_container {
+    /*
     width: 100%;
     height: 100%;
+    */
     overflow: auto;
 }
 .canvas_container .main_area {
     background-color: #888;
+    /*background:transparent;*/
+
+    border: solid 1px gray;
+
+    text-align: center;
 }
-.canvas_container span {
+.canvas_container > span {
     vertical-align: top;
 }
-#spec_details {
-    min-height: 1.5em;
+.spec_details {
     background-color: #226;
+    border: solid 1px #66a;
+
     color: #dadade;
     font-size: smaller;
     margin: 0;
-    padding: 0px 2px 1px 6px;
+    padding: 2px 2px 2px 6px;
 
+    /*display:inline-block;*/
+    vertical-align: middle;
+    text-align: left;
 }
-#color_palette_area {
-    /*width : 256px;*/
-    /*height : 32px;*/
-    background-color: black;
+#spec_details2 {
+    padding: 1px 4px 1px 4px;
 }
+
+
 /* ==================================== */
 /* ログメッセージ */
 /* ==================================== */
@@ -187,32 +208,28 @@
     */
     padding: 1px 6px 1px 2px;
 
-    background: #484848;
+    background-color: #484848;
 }
 /* ==================================== */
 /* 追加情報表示 */
 /* ==================================== */
 .details {
-    font-size:smaller;
-    background-color: #888;
-}
-
-details.details {
-    padding: 0.5em;
-}
-
-.details .canvas_area {
-    border: none;
+    background-color: #eee;
 }
 
 .detail_tab_label {
-    padding: 0.1em 0.5em;
+    font-size:smaller;
     font-weight: bolder;
-    /*background: #101;*/
-    background: #767;
+
+    padding: 0.1em 0.5em;
+
+    /*background-color: #101;*/
+    background-color: #767;
     color: white;
 
-    min-width: 512px;
+    min-width: 480px;
+
+    border: none;
 }
 .detail_tab_label:hover {
     animation: 2s blink2 linear infinite;
@@ -223,51 +240,65 @@ details.details {
         background-color: #767;
     }
     50% {
-        background-color: #656;
+        background-color: #b89;
     }
     100% {
         /*background-color: #101;*/
         background-color: #767;
     }
   }
-.details .detail_group {
+
+/* ==================================== */
+/* 詳細 */
+/* ==================================== */
+.detail_group {
+    font-size:smaller;
+
     text-align: center;
-    line-height: 1em;
-    background-color: #844;
+
+    /*background-color: #844;*/
+    background-color: gray;
     color: white;
-    padding: 2px;
-    margin: 1px;
+
+    padding: 2px 0;
+    margin: 1px 0;
+    
+    /*
+    width:  100%;
+    */
 }
-/*.details*/ .label_title {
+
+.label_title {
     text-align: left;
+    vertical-align: middle;
+
     background-color: #644;
+    /*color: white;*/
     padding: 2px 0.5em;
     margin: 0;
+
 }
-/*.details*/ .label_text {
-    padding-right: 1em;
-    font-weight: bolder;
+.label_title .select_group {
+    background-color: #433;
+    color: #fee
+}
+
+.label_text {
+    padding: 1px;
+
+    /*font-weight: bolder;*/
+
     color: #edd;
-}
- button.save_button {
-    color: #622;
-    background-color: #dbb;
-    vertical-align:top;
-    border-radius: 0.8em;
-    transition: .25s;
-    padding: 0 10px;
-    margin: 0 2px;
-
-    box-sizing: content-box;
-
-    border: 2px outset gray;
-}
-button.save_button:hover {
-    background-color: #caa;
+    vertical-align: middle;
 }
 
-button.save_button:active {
-    border: 2px inset red;
+.save_button_group {
+    background-color: #533;
+}
+
+.gen_spec {
+    background-color: #422;
+    padding: 0 0.5em;
 }
 /* ==================================== */
 /*	クリックアイテムのカーソル変更 */
@@ -287,12 +318,128 @@ span {
 button {
     cursor: pointer;
 }
+select {
+    cursor: pointer;
+}
 
 /* ==================================== */
-/*	途中改行を抑制したい要素	*/
+/* ドロップダウンリスト */
 /* ==================================== */
-label {
-    display: inline-block;
+select
+{
+    background-color: #44a;
+    color: white;
+}
+.label_title select 
+{
+    background-color: #785858;
+    color: #fff;
+}
+select:hover
+{
+    background-color: #435;
+    color: white;
+}
+select:focus
+{
+    background-color: #112;
+    /*background-color: #338;*/
+    color: white;
+    border-color: #d8f;
+}
+select:focus > option:checked
+{
+    background-color: #88e;
+    color: black;
+}
+select:focus > option:hover
+{
+    background-color:  #86f; /*うまくいかない*/
+}
+
+/* ==================================== */
+/* INPUTコントロール系 */
+/* ==================================== */
+input
+{
+    position: relative;
+    top: -0.15em;
+
+    vertical-align: middle;
+}
+
+/* ==================================== */
+/* 保存ボタン */
+/* ==================================== */
+button.save_button {
+    color: #622;
+    background-color: #dbb;
+    
+    padding: 0 10px;
+    margin: 0 2px;
+
+    box-sizing: content-box;
+    vertical-align:middle;
+
+    border: 2px outset gray;
+    border-radius: 0.8em;
+
+    /*transition: .25s;*/
+}
+button.save_button:hover {
+    background-color: #caa;
+}
+button.save_button:active {
+    border: 2px inset red;
+}
+
+/* ==================================== */
+/* チェックボックス */
+/* ==================================== */
+.toggle_button {
+    border: outset 1px #aaf;
+    /*background-color: #dbb;
+    color: black;*/
+
+    margin: 0;
+    padding: 0;
+
+    vertical-align: middle;
+
+    /*transition: .25s;*/
+
+    cursor:pointer;
+}
+.spec_details .toggle_button {
+    background-color: #44a;
+}
+.detail_group .toggle_button {
+    background-color: #855;
+    /*
+    width: 100%;
+    */
+}
+.toggle_button input[type="checkbox"] {
+    position: relative;
+    margin-top: 1px;
+    margin-bottom: -1px;
+}
+.toggle_button span {
+    padding: 0 0.5em 0 0;
+}
+.spec_details .toggle_button:hover {
+    background-color: #435;
+ }
+ .detail_group .toggle_button:hover {
+    background-color: #643;
+ }
+ .toggle_button:active {
+    background-color: #a48;
+}
+#color_palette_area {
+    /*width : 256px;*/
+    /*height : 32px;*/
+    background-color: black;
 }
 
 /* ==================================== */
@@ -300,11 +447,35 @@ label {
 /* ==================================== */
 #tab_helps {
     font-size: smaller;
-
 }
 #help_guide {
+    font-size: medium;
+
     background-color: #eed;
-    padding: 0.1em 0.2em 0.1em 0.5em;
+    color:#331;
+    padding: 0;
+}
+#help_guide .label_title {
+    font-size: medium;
+
+    background-color: #866;
+    color: #fff;
+    font-weight: bolder;
+    padding: 2px 1em;
+}
+#help_guide div {
+    font-size: smaller;
+}
+#help_guide ol {
+    margin: 0.2em;
+    padding: 0 2em;
+}
+#help_guide code {
+    background-color: #ddc;
+    color: #111;
+    font-weight: bolder;
+    font-size:large;
+    padding: 0.2em 1em;
 }
 
 /* ==================================== */
@@ -317,21 +488,33 @@ label {
 .label {
     padding: 0.1em 0.5em;
     font-weight: bolder;
-    background: #a9c;
+    background-color: #a9c;
     color: white;
 }
-.selector {
-    margin: 0.1em;
-    padding: 0;
+.select_group {
+    margin: 0; /*0.1em;*/
+    padding: 0 0.2em;
     /*border: dotted 2px #a9c;*/
     border: solid 1px #a9c;
+    border-radius: 0.5em;
 }
-.selector .label {
+.select_group .label {
     display: block;
     padding: 0 0.8em;
 }
-.selector .click {
+.select_group .click {
     padding:  0 4px 0 2px;
+}
+.select_label {
+    font-weight: bolder;
+    background-color:#c56;
+    color: white;
+    padding: 0.1em 0.5em;
+}
+
+label.click {
+    border: dashed 1px #a9c;
+    border-radius: 0.75em;
 }
 
 /* ==================================== */
@@ -356,22 +539,19 @@ label.button {
     display: inline-block;
     margin: 0 0.2em;
     border: outset 2px #888;
-    border-radius: 0.8em;
-    background: #f0e8f8;
+    border-radius: 0.75em;
+    background-color: #f0e8f8;
     color: black;
 
-    transition: .25s;
+    /*transition: .25s;*/
 }
 label.button span {
     /* label.button で paddingが効かないので */
     padding: 1px 4px;
 }
-@media (any-hover: hover) {
-    label.button:hover {
-        background: #e0d0e0;
-    }
+label.button:hover {
+    background-color: #e0c8e8;
 }
-/*class="focus:outline"*/
 label.button:focus {
     outline: auto;
 }

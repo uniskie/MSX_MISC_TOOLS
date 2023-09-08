@@ -1,15 +1,16 @@
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>MSX画像ビューア</title>
-<style>
-    @import url(base.css);
-</style>
+    <meta charset="UTF-8">
+    <title>MSX画像ビューア</title>
+    <link rel="icon" href="./img/favicon.ico">
+    <style>
+        @import url(base.css);
+    </style>
 </head>
 <body id="main">
     <details open id="tab_title">
         <summary id="title">
-            MSX GRAPHIC Viewer
+            HTML5 MSX GRAPHICS Viewer ver.0.12
         </summary>
         <div class="guide">
             <div id="log_text">使い方：画像ファイルをドロップ（複数可）</div>
@@ -19,58 +20,196 @@
     <div id="info">
         <label for="file_open" id="file_open_label" class="button" tabIndex="0">
             <span> ファイル </span>
-            <input type="file" id="file_open" accept=".s??,.r??,.pl?" multiple>
+            <input type="file" id="file_open" accept=".s??,.r??,.pl?,.g??,.bmp,.bin,.col,.cl?,.nam,.tx1,.tx2" multiple>
         </label>
         <span id="filename_area"></span>
         <span id="filename_area2"></span>
         <span id="filename_area3"></span>
     </div>
+    <div id="spec_details" class="spec_details">
+        <span class="select_group">
+            Screen
+            <select name="sel_screen_no" id="sel_screen_no">
+            <option value="-1">SCREEN 0</option>
+            <option value="0">SCREEN 0</option>
+            </select>
+            <Label class="toggle_button"><input id="chk_screen_interlace" type="checkbox">
+                <span id="label_screen_interlace">Interlace</span>
+            </Label>
+            <!--
+            <select name="sel_screen_interlace" id="sel_screen_interlace">
+                <option value="0">Non Interlace</option>
+                <option value="1">Interlace On</option>
+            </select>
+            -->
+        </span>
+        <span class="select_group">
+            Sprite
+            <Label class="toggle_button"><input id="chk_sprite_use" type="checkbox" checked>
+                <span id="label_sprite_use">Sprite Use</span>
+            </Label>
+            <select name="sel_sprite_mode" id="sel_sprite_mode">
+                <option value="0">8x8</option>
+                <option value="1">8x8 2倍</option>
+                <option value="2">16x16</option>
+                <option value="3">16x16 2倍</option>
+            </select>
+        </span>
+    </div>
     <div class="canvas_container">
         <span class="main_area">
-            <canvas id="canvas_area" class="canvas_area"></canvas>
-            <div id="spec_details"></div>
+            <canvas id="canvas_area" class="canvas_area" width="512px" height="424px"></canvas>
+            <div id="spec_details2" class="spec_details">
+                <span id="detail_screen_mode_name"></span>
+                <span id="detail_screen_width"></span>
+                <span id="detail_screen_height"></span>
+                <span id="detail_interlace"></span>
+                <span id="detail_sprite_on"></span>
+            </div>
+            <div class="label_title">
+                <span class="label_text">全体保存</span>
+                <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
+                <button type="button" class="save_button" id="all_save_bsave">BSAVE(VRAMパレット書込)</button>
+                <button type="button" class="save_button" id="all_save_bsave_np">BSAVE+PLT分離</button>
+                <button type="button" class="save_button" id="all_save_gsrle">GS圧縮+PLT分離</button>
+            </div>
             <div class="details">
                 <span id="detail_pal" class="detail_group">
+                    <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
                     <div class="label_title">
-                        <span class="label_text">【カラーパレット】</span>
-                        <span id="detail_pal_file"></span>
+                        <Label class="toggle_button"><input id="chk_palette_use" type="checkbox" checked>
+                            <span id="label_pal_file" class="label_text">【カラーパレット】</span>
+                            <span id="detail_pal_file"></span>
+                        </label>
                     </div>
-                    <canvas id="palette_area"></canvas>
-                    <button class="hide" type="button">デフォルト反応抑制ダミー</button>
+                    <canvas id="palette_area" width="512px" height="24px"></canvas>
                     <button class="save_button" id="pal_save">PLT保存</button>
                 </span>
             </div>
         </span>
         <span><details open id="tab_details" class="details">
-            <summary class="detail_tab_label">詳細</summary>
+            <summary class="detail_tab_label">VRAMページ</summary>
             <div>
                 <span id="detail_page0" class="detail_group">
                     <div class="label_title">
-                        <span class="label_text">【Page 0】</span>
-                        <span id="detail_page0_file"></span>
-                        <span id="detail_page0_spec"></span>
+                        <div>
+                            <span class="label_text" id="page0_id">【PAGE0】</span>
+                            <span id="detail_page0_file"></span>
+                            <span id="detail_page0_spec"></span>
+                        </div>
+                        <div id="page0_save_group" class="save_button_group">
+                            <span class="label_text">PAGE保存</span>
+                            <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
+                            <button type="button" class="save_button" id="page0_save_bsave">BSAVE(VRAMパレット書込)</button>
+                            <button type="button" class="save_button" id="page0_save_bsave_np">BSAVE(画素のみ)</button>
+                            <button type="button" class="save_button" id="page0_save_gsrle">GS圧縮(画素のみ)</button>
+                        </div>
                     </div>
-                    <div>
-                        <button class="hide" type="button">デフォルト反応抑制ダミー</button>
-                        <button type="button" class="save_button" id="page0_save_bsave">BSAVE保存(パレット込み)</button>
-                        <button type="button" class="save_button" id="page0_save_bsave_np">BSAVE保存(画素のみ)</button>
-                        <button type="button" class="save_button" id="page0_save_gsrle">GS圧縮保存(画素のみ)</button>
-                    </div>
-                    <canvas id="canvas_page0" class="canvas_area"></canvas>
+                    <canvas id="canvas_page0" class="canvas_area" width="512px" height="424px"></canvas>
                 </span>
                 <span id="detail_page1" class="detail_group">
                     <div class="label_title">
-                        <span class="label_text">【Page 1】</span>
-                        <span id="detail_page1_file"></span>
-                        <span id="detail_page1_spec"></span>
+                        <div>
+                            <span class="label_text" id="page1_id">【PAGE1】</span>
+                            <span id="detail_page1_file"></span>
+                            <span id="detail_page1_spec"></span>
+                        </div>
+                        <div id="page1_save_group" class="save_button_group">
+                            <span class="label_text">PAGE保存</span>
+                            <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
+                            <button type="button" class="save_button" id="page1_save_bsave">BSAVE(VRAMパレット書込)</button>
+                            <button type="button" class="save_button" id="page1_save_bsave_np">BSAVE(画素のみ)</button>
+                            <button type="button" class="save_button" id="page1_save_gsrle">GS圧縮(画素のみ)</button>
+                        </div>
                     </div>
-                    <div>
-                        <button class="hide" type="button">デフォルト反応抑制ダミー</button>
-                        <button type="button" class="save_button" id="page1_save_bsave">BSAVE保存(パレット込み)</button>
-                        <button type="button" class="save_button" id="page1_save_bsave_np">BSAVE保存(画素のみ)</button>
-                        <button type="button" class="save_button" id="page1_save_gsrle">GS圧縮保存(画素のみ)</button>
+                    <canvas id="canvas_page1" class="canvas_area" width="512px" height="424px"></canvas>
+                </span>
+                <span id="detail_page2" class="detail_group">
+                    <div class="label_title">
+                        <div>
+                            <span class="label_text" id="page2_id">【PAGE2】</span>
+                            <span id="detail_page2_file"></span>
+                            <span id="detail_page2_spec"></span>
+                        </div>
+                        <div id="page2_save_group" class="save_button_group">
+                            <span class="label_text">PAGE保存</span>
+                            <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
+                            <button type="button" class="save_button" id="page2_save_bsave">BSAVE(VRAMパレット書込)</button>
+                            <button type="button" class="save_button" id="page2_save_bsave_np">BSAVE(画素のみ)</button>
+                            <button type="button" class="save_button" id="page2_save_gsrle">GS圧縮(画素のみ)</button>
+                        </div>
                     </div>
-                    <canvas id="canvas_page1" class="canvas_area"></canvas>
+                    <canvas id="canvas_page2" class="canvas_area" width="512px" height="424px"></canvas>
+                </span>
+                <span id="detail_page3" class="detail_group">
+                    <div class="label_title">
+                        <div>
+                            <span class="label_text" id="page3_id">【PAGE3】</span>
+                            <span id="detail_page3_file"></span>
+                            <span id="detail_page3_spec"></span>
+                        </div>
+                        <div id="page3_save_group" class="save_button_group">
+                            <span class="label_text">PAGE保存</span>
+                            <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
+                            <button type="button" class="save_button" id="page3_save_bsave">BSAVE(VRAMパレット書込)</button>
+                            <button type="button" class="save_button" id="page3_save_bsave_np">BSAVE(画素のみ)</button>
+                            <button type="button" class="save_button" id="page3_save_gsrle">GS圧縮(画素のみ)</button>
+                        </div>
+                    </div>
+                    <canvas id="canvas_page3" class="canvas_area" width="512px" height="424px"></canvas>
+                </span>
+            </div>
+        </details></span>
+        <span><details open id="tab_detail_chrgen" class="details">
+            <summary class="detail_tab_label">キャラクタジェネレータ</summary>
+            <div>
+                <span id="detail_chrgen" class="detail_group">
+                    <div class="label_title">
+                        <div class="label_text" id="patgen_id">
+                            <span>【CHARACTER GENERATOR】</span>
+                            <span id="detail_chrgen_spec" class="gen_spec"></span>
+                        </div>
+                        <span class="select_group">
+                            Name
+                            <select name="sel_patnam_page" id="sel_patnam_page"></select>
+                            <select name="sel_patnam_ofs" id="sel_patnam_ofs"></select>
+                        </span>
+                        <span class="select_group">
+                            Gen
+                            <select name="sel_patgen_page" id="sel_patgen_page"></select>
+                            <select name="sel_patgen_ofs" id="sel_patgen_ofs"></select>
+                        </span>
+                        <span class="select_group">
+                            Col
+                            <select name="sel_patcol_page" id="sel_patcol_page"></select>
+                            <select name="sel_patcol_ofs" id="sel_patcol_ofs"></select>
+                        </span>
+                    </div>
+                    <canvas id="canvas_patgen" class="canvas_area" width="512px" height="256px"></canvas>
+                </span>
+            </div>
+        </details></span>
+        <span><details open id="tab_detail_sprgen" class="details">
+            <summary class="detail_tab_label">スプライト</summary>
+            <div>
+                <span id="detail_sprgen" class="detail_group">
+                    <div class="label_title">
+                        <div class="label_text" id="sprgen_id">
+                            <span>【SPRITE GENERATOR】</span>
+                            <span id="detail_sprgen_spec" class="gen_spec"></span>
+                        </div>
+                        <span class="select_group">
+                            Atr
+                            <select name="sel_spratr_page" id="sel_spratr_page"></select>
+                            <select name="sel_spratr_ofs" id="sel_spratr_ofs"></select>
+                        </span>
+                        <span class="select_group">
+                            Pat
+                            <select name="sel_sprpat_page" id="sel_sprpat_page"></select>
+                            <select name="sel_sprpat_ofs" id="sel_sprpat_ofs"></select>
+                        </span>
+                    </div>
+                    <canvas id="canvas_sprgen" class="canvas_area" width="512px" height="256px"></canvas>
                 </span>
             </div>
         </details></span>
@@ -81,41 +220,60 @@
                 <a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/" target="_blank">
                     【 説明ページ 】</a>
             </summary>
-            <div id="help_guide"></div>
+            <div id="help_guide">
+                <div class="label_title">-使い方-</div>
+                <ol>
+                    <li>ファイルをドロップ または、ファイルボタンを押して開く</li>
+                    <li>メイン画像を開いた後にインターレースページ1画像やパレットを追加可能</li>
+                </ol>
+                <div class="label_title">- 補足 -</div>
+                <ol>
+                    <li>グラフサウルス圧縮形式を読み込み・保存可能</li>
+                    <li>保存時は現在表示中のの画面縦サイズで保存</li>
+                    <li><span>openMSXのtclコンソールから</span>
+                        <span><code>vram2bmp ファイル名.bmp 0 256 1024⏎</code></span>
+                        <span>でVRAMまるごと＋パレット保存したBMPを表示可能</span>
+                    </li>
+                    <li><span>SC0,SC1はSSCREEN12のインターレース画像として扱うため</span>
+                        <span>SCREEN1はSR1、SCREEN0はTX1,TX2などを使用可能</span>
+                    </li>
+                    <li>ドットアスペクト比 1.177:1 はOpenMSXに近い値</li>
+                </ol>
+            </div>
             </div>
         </details>
         <details open id="tab_settings" id="height_mode">
             <summary class="tab_label">設定</summary>
-            <span class="selector">
+            <span class="select_group">
+                <label class="label">カラーパレット</label>
+                <label class="click" for="pal_lock">
+                    <input type="checkbox" id="pal_lock" value="pal_lock">
+                    カラーパレットをVRAMから読み込まない(パレットファイルのみ反映)
+                </label>
+            </span>
+            <span class="select_group">
                 <label class="label">画面縦サイズ</label>
                 <label class="click"><input type="radio" name="height_mode" value="0"    checked>自動</label>
                 <label class="click"><input type="radio" name="height_mode" value="192"         >192固定</label>
                 <label class="click"><input type="radio" name="height_mode" value="212"         >212固定</label>
                 <label class="click"><input type="radio" name="height_mode" value="256"         >256固定</label>
             </span>
-            <span class="selector" id="stretch_screen">
+            <span class="select_group" id="stretch_screen">
                 <label class="label">DotAspect比 (ピクセル縦横比)</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.177" checked>1.177:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.166"        >1.166:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.133"        >1.133:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1"            >1:1</label>
             </span>
-            <span class="selector">
-                <label class="label">カラーパレット</label>
-                <label class="click" for="pal_lock">
-                    <input type="checkbox" id="pal_lock" value="pal_lock">
-                    カラーパレット固定(パレットファイル読み込み時のみ変更)
-                </label>
-            </span>
-            <span class="selector" id="qick_save">
+            <span class="select_group" id="qick_save">
                 <label class="label">読み込み後：自動保存</label>
                 <label class="click"><input type="radio" name="qick_save" value="none" checked>なし</label>
                 <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(パレット込み)</label>
-                <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE(画素のみ)+PLT</label>
-                <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮(画素のみ)+PLT</label>
+                <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE(画素のみ) + PLTファイル</label>
+                <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮(画素のみ) + PLTファイル</label>
             </span>
             <!--
-            <span class="selector">
+            <span class="select_group">
                 <label class="label">キャンバス</label>
                 <label class="click" for="canvas_smoothing">
                     <input type="checkbox" id="canvas_smoothing" value="canvas_smoothing">
@@ -125,6 +283,7 @@
             -->
         </details>
     </div>
+	<script type="text/javascript" src="fontdat.js" defer></script>
 	<script type="text/javascript" src="gsrle.js" defer></script>
 </body>
 </html>
