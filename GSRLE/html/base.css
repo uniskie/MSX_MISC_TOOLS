@@ -347,6 +347,8 @@ select
     background-color: #44a;
     color: white;
     font-size: smaller;
+
+    border: solid 1px #cbe;
 }
 .label_title select 
 {
@@ -365,12 +367,12 @@ select:focus
     color: white;
     border-color: #d8f;
 }
-select:focus > option:checked
+select option:checked
 {
     background-color: #88e;
     color: black;
 }
-select:focus > option:hover
+select option:hover
 {
     background-color:  #86f; /*うまくいかない*/
 }
