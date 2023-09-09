@@ -254,8 +254,6 @@ details.details {
 .detail_group {
     font-size:smaller;
 
-    text-align: center;
-
     /*background-color: #844;*/
     background-color: gray;
     color: white;
@@ -266,6 +264,15 @@ details.details {
     /*
     width:  100%;
     */
+    border-radius: 0.5em;
+}
+
+.vmid {
+    vertical-align: middle;
+}
+.round100 {
+    width: 100%;
+    border-radius: 0.5em;
 }
 
 .label_title {
@@ -276,7 +283,6 @@ details.details {
     /*color: white;*/
     padding: 2px 0.5em;
     margin: 0;
-
 }
 .label_title .select_group {
     background-color: #433;
@@ -305,21 +311,26 @@ details.details {
 /* ==================================== */
 .click {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
 }
 summary {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
 }
 input {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
 }
 span {
     display: inline-block;
 }
 button {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
 }
 select {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
 }
 
 /* ==================================== */
@@ -329,6 +340,7 @@ select
 {
     background-color: #44a;
     color: white;
+    /*font-size: smaller;*/
 }
 .label_title select 
 {
@@ -363,7 +375,7 @@ select:focus > option:hover
 input
 {
     position: relative;
-    top: -0.15em;
+    top: -0.125em;
 
     vertical-align: middle;
 }
@@ -385,6 +397,8 @@ button.save_button {
     border-radius: 0.8em;
 
     /*transition: .25s;*/
+
+    user-select: none;  /*テキスト選択禁止*/
 }
 button.save_button:hover {
     background-color: #caa;
@@ -410,6 +424,9 @@ button.save_button:active {
 
     cursor:pointer;
 }
+.toggle_button span {
+    user-select: none;  /*テキスト選択禁止*/
+}
 .spec_details .toggle_button {
     background-color: #44a;
 }
@@ -426,6 +443,7 @@ button.save_button:active {
 }
 .toggle_button span {
     padding: 0 0.5em 0 0;
+    user-select: none;  /*テキスト選択禁止*/
 }
 .spec_details .toggle_button:hover {
     background-color: #435;
@@ -513,7 +531,7 @@ button.save_button:active {
 }
 
 label.click {
-    border: dashed 1px #a9c;
+    border: solid 1px #cbe;
     border-radius: 0.75em;
 }
 
@@ -536,6 +554,8 @@ label.click {
 /* ==================================== */
 label.button {
     cursor: pointer;
+    user-select: none;  /*テキスト選択禁止*/
+
     display: inline-block;
     margin: 0 0.2em;
     border: outset 2px #888;

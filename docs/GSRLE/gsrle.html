@@ -10,7 +10,7 @@
 <body id="main">
     <details open id="tab_title">
         <summary id="title">
-            HTML5 MSX GRAPHICS Viewer ver.0.12
+            HTML5 MSX GRAPHICS Viewer ver.0.13
         </summary>
         <div class="guide">
             <div id="log_text">使い方：画像ファイルをドロップ（複数可）</div>
@@ -36,12 +36,12 @@
             <Label class="toggle_button"><input id="chk_screen_interlace" type="checkbox">
                 <span id="label_screen_interlace">Interlace</span>
             </Label>
-            <!--
-            <select name="sel_screen_interlace" id="sel_screen_interlace">
-                <option value="0">Non Interlace</option>
-                <option value="1">Interlace On</option>
+            <select name="sel_disp_page" id="sel_disp_page">
+                <option value="0">PAGE 0</option>
+                <option value="1">PAGE 1</option>
+                <option value="2">PAGE 2</option>
+                <option value="3">PAGE 3</option>
             </select>
-            -->
         </span>
         <span class="select_group">
             Sprite
@@ -66,7 +66,7 @@
                 <span id="detail_interlace"></span>
                 <span id="detail_sprite_on"></span>
             </div>
-            <div class="label_title">
+            <div class="label_title" id="tab_save_all">
                 <span class="label_text">全体保存</span>
                 <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
                 <button type="button" class="save_button" id="all_save_bsave">BSAVE(VRAMパレット書込)</button>
@@ -74,7 +74,7 @@
                 <button type="button" class="save_button" id="all_save_gsrle">GS圧縮+PLT分離</button>
             </div>
             <div class="details">
-                <span id="detail_pal" class="detail_group">
+                <span id="detail_pal" class="detail_group round100">
                     <!--button class="hide" type="button">デフォルト反応抑制ダミー</button-->
                     <div class="label_title">
                         <Label class="toggle_button"><input id="chk_palette_use" type="checkbox" checked>
@@ -82,8 +82,8 @@
                             <span id="detail_pal_file"></span>
                         </label>
                     </div>
-                    <canvas id="palette_area" width="512px" height="24px"></canvas>
-                    <button class="save_button" id="pal_save">PLT保存</button>
+                    <canvas id="palette_area" class="vmid"></canvas>
+                    <button class="save_button vmid" id="pal_save" >PLT保存</button>
                 </span>
             </div>
         </span>
@@ -179,7 +179,7 @@
                             <select name="sel_patgen_page" id="sel_patgen_page"></select>
                             <select name="sel_patgen_ofs" id="sel_patgen_ofs"></select>
                         </span>
-                        <span class="select_group">
+                        <span class="select_group" id="sel_patcol_group">
                             Col
                             <select name="sel_patcol_page" id="sel_patcol_page"></select>
                             <select name="sel_patcol_ofs" id="sel_patcol_ofs"></select>
@@ -245,13 +245,6 @@
         <details open id="tab_settings" id="height_mode">
             <summary class="tab_label">設定</summary>
             <span class="select_group">
-                <label class="label">カラーパレット</label>
-                <label class="click" for="pal_lock">
-                    <input type="checkbox" id="pal_lock" value="pal_lock">
-                    カラーパレットをVRAMから読み込まない(パレットファイルのみ反映)
-                </label>
-            </span>
-            <span class="select_group">
                 <label class="label">画面縦サイズ</label>
                 <label class="click"><input type="radio" name="height_mode" value="0"    checked>自動</label>
                 <label class="click"><input type="radio" name="height_mode" value="192"         >192固定</label>
@@ -271,6 +264,17 @@
                 <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(パレット込み)</label>
                 <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE(画素のみ) + PLTファイル</label>
                 <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮(画素のみ) + PLTファイル</label>
+            </span>
+            <span class="select_group">
+                <label class="label">カラーパレット</label>
+                <label class="click" for="pal_not_use_vram">
+                    <input type="checkbox" id="pal_not_use_vram" value="pal_not_use_vram">
+                    カラーパレットをVRAMから読み込まない(パレットファイルのみ反映)
+                </label>
+                <label class="click" for="pal_use_tms9918">
+                    <input type="checkbox" id="pal_use_tms9918" value="pal_use_tms9918" checked>
+                    スクリーン0～3でカラーパレット無効時にTMS9918風の色にする
+                </label>
             </span>
             <!--
             <span class="select_group">
