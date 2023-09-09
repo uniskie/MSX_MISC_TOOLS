@@ -131,6 +131,8 @@ function displayCurrentFilename() {
 
     if (bmp_file.name.length) {
         filename_area.textContent = fileText(bmp_file);
+        filename_area2.textContent = '';
+        filename_area3.textContent = '';
         detail_page0_file.textContent = fileText(bmp_file);
         if (bmp_file.header) {
             detail_page0_spec.textContent = 
@@ -251,7 +253,7 @@ function displayCurrentFilename() {
             detail_pal_file.textContent = fileText(pal_file);
         } else
         if (bmp_file.name.length) {
-            filename_area3.textContent = fileText(bmp_file);
+            filename_area3.textContent = '';
             detail_pal_file.textContent = fileText(bmp_file);
         } else {
             filename_area3.textContent = '';
