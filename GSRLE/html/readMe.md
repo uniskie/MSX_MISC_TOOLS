@@ -210,6 +210,7 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | .RC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | GRAPH SAURUS interlace
 
 ### 暫定対応：スクリーン0～1
+
 | 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|---|---|---|---|---|
 | .TX1 | SCREEN 0 WIDTH 40 | non-interlace    | .TX1 |.TX1 | BSAVE / GS
@@ -219,6 +220,7 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | .SR1 | SCREEN 1          | non-interlace    | .SR1 |.SR1 | BSAVE / GS
 
 ### 特殊 
+
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|------|---|---|---|
 | .BIN'  | 現在の画面モード | .BIN | .BIN | 汎用
