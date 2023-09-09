@@ -346,7 +346,7 @@ select
 {
     background-color: #44a;
     color: white;
-    /*font-size: smaller;*/
+    font-size: smaller;
 }
 .label_title select 
 {
