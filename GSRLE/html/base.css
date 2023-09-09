@@ -175,6 +175,9 @@ details.details {
     border: solid 1px gray;
 
     text-align: center;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+
 }
 .canvas_container > span {
     vertical-align: top;
@@ -230,6 +233,9 @@ details.details {
     min-width: 480px;
 
     border: none;
+
+    border-top-left-radius:  0.5em;
+    border-top-right-radius:  0.5em;
 }
 .detail_tab_label:hover {
     animation: 2s blink2 linear infinite;
@@ -519,6 +525,11 @@ button.save_button:active {
 .select_group .label {
     display: block;
     padding: 0 0.8em;
+    margin-left: -0.2em;
+    margin-right: -0.2em;
+
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
 }
 .select_group .click {
     padding:  0 4px 0 2px;
