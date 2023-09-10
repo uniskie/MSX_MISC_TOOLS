@@ -10,7 +10,7 @@
 <body id="main">
     <details open id="tab_title">
         <summary id="title">
-            HTML5 MSX GRAPHICS Viewer ver.0.14
+            HTML5 MSX GRAPHICS Viewer ver.0.15
         </summary>
         <div class="guide">
             <div id="log_text">使い方：画像ファイルをドロップ（複数可）</div>
@@ -243,7 +243,10 @@
             </div>
         </details>
         <details open id="tab_settings" id="height_mode">
-            <summary class="tab_label">設定</summary>
+            <summary class="tab_label">
+                <span>設定</span>
+                <button class="save_button vmid" id="config_save">設定保存</button>
+            </summary>
             <span class="select_group">
                 <label class="label">画面縦サイズ</label>
                 <label class="click"><input type="radio" name="height_mode" value="0"    checked>自動</label>
@@ -261,9 +264,9 @@
             <span class="select_group" id="qick_save">
                 <label class="label">読み込み後：自動保存</label>
                 <label class="click"><input type="radio" name="qick_save" value="none" checked>なし</label>
-                <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(パレット込み)</label>
-                <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE(画素のみ) + PLTファイル</label>
-                <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮(画素のみ) + PLTファイル</label>
+                <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(VRAMパレット書込)</label>
+                <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE+PLT分離</label>
+                <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮+PLT分離</label>
             </span>
             <span class="select_group">
                 <label class="label">カラーパレット</label>

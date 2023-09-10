@@ -22,6 +22,8 @@ let palette_use = true;
 let quick_save_mode = 'none';
 const quick_save_mode_value = 
  ['none', 'bsave_full', 'bsave_mini', 'gsrle_save'];
+ let need_save_all = false;
+
 // ========================================================
 
 // ========================================================
@@ -66,6 +68,88 @@ function zerosup( n, k ) {
     if (n < 0) return '-' + ns;
     return ns;
 }
+
+// ========================================================
+// 空白桁埋め数値文字列
+// in:  n - 数値
+//      d - 桁数
+// ========================================================
+function formatNum( n, d ) {
+    if (n < 0) {
+        return '-' + ('       ' + (-n)).slice(-d);
+    }
+    return ('   ' + n).slice(-d);
+}
+
+// ========================================================
+// ゼロ桁埋め数値文字列
+// in:  n - 数値
+//      d - 桁数
+// ========================================================
+function formatNum0( n, d ) {
+    if (n < 0) {
+        return '-' + ('0000000' + (-n)).slice(-d);
+    }
+    return ('0000000' + n).slice(-d);
+}
+
+// ========================================================
+// 空白桁埋め16進数文字列
+// in:  n - 数値
+//      d - 桁数
+// ========================================================
+function formatHex( n, d ) {
+    if (n < 0) {
+        return '-' + ('       ' + (-n).toString(16).toUpperCase()).slice(-d);
+    }
+    return ('       ' + n.toString(16).toUpperCase()).slice(-d);
+}
+
+// ========================================================
+// ゼロ桁埋め16進数文字列
+// in:  n - 数値
+//      d - 桁数
+// ========================================================
+function formatHex0( n, d ) {
+    if (n < 0) {
+        return '-' + ('0000000' + (-n).toString(16).toUpperCase()).slice(-d);
+    }
+    return ('0000000' + n.toString(16).toUpperCase()).slice(-d);
+}
+
+// ========================================================
+// バイナリをダウンロードさせる
+// ========================================================
+function startDownload( dat, filename )
+{
+    const blob = new Blob( [dat], { "type" : "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement( 'a' );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1E4);
+}
+
+// ========================================================
+// ラジオスイッチ：チェックされた値を返す
+//  in: name - タグのid
+// ========================================================
+function getCheckedRadioSwtchValue( name )
+{
+    let radio_sw = document.getElementsByName( name );
+    for (let i = 0; i < radio_sw.length; ++i)
+    {
+        if (radio_sw[i].checked) {
+            return radio_sw[i].value;
+        }
+    }
+    return '';
+}
+
 
 // ========================================================
 // 動作ログ表示
@@ -267,7 +351,6 @@ function displayCurrentFilename() {
 // 現在の画面モード情報
 // ========================================================
 function displayCurrentScreenMode() {
-
     if (vdp.base.patcol < 0) {
         detail_chrgen_spec.innerText = 
         `[name:0x${zerosup(vdp.base.patnam, 5)}] `+
@@ -599,7 +682,8 @@ const ext_info = [
     {ext:'.GN1', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.GN1', gs:'.GN1'},	// SC2 パターンジェネレータ
     {ext:'.GN2', screen_no:-1, interlace:-1, page:-1, type:0, bsave:'.GN2', gs:'.GN2'},	// SC2 パターンジェネレータ
 
-    {ext:'.BMP', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ OpenMSX vram2bmp の非圧縮BMP
+    {ext:'.VRM', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.VRM', gs:'.GSR'},	// RAWイメージ 新10倍カートリッジ
+    {ext:'.BMP', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.VRM', gs:'.GSR'},	// RAWイメージ OpenMSX vram2bmp の非圧縮BMP
     {ext:'.SCR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
     {ext:'.GSR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
 
@@ -1197,7 +1281,6 @@ class VDP {
         }
         return p.base.patcol;
     }
-
 
     //------------------------
     // カラーパレット初期化
@@ -2339,87 +2422,6 @@ class VDP {
 
 let vdp = null;
 
-// ========================================================
-// 空白桁埋め数値文字列
-// in:  n - 数値
-//      d - 桁数
-// ========================================================
-function formatNum( n, d ) {
-    if (n < 0) {
-        return '-' + ('       ' + (-n)).slice(-d);
-    }
-    return ('   ' + n).slice(-d);
-}
-
-// ========================================================
-// ゼロ桁埋め数値文字列
-// in:  n - 数値
-//      d - 桁数
-// ========================================================
-function formatNum0( n, d ) {
-    if (n < 0) {
-        return '-' + ('0000000' + (-n)).slice(-d);
-    }
-    return ('0000000' + n).slice(-d);
-}
-
-// ========================================================
-// 空白桁埋め16進数文字列
-// in:  n - 数値
-//      d - 桁数
-// ========================================================
-function formatHex( n, d ) {
-    if (n < 0) {
-        return '-' + ('       ' + (-n).toString(16).toUpperCase()).slice(-d);
-    }
-    return ('       ' + n.toString(16).toUpperCase()).slice(-d);
-}
-
-// ========================================================
-// ゼロ桁埋め16進数文字列
-// in:  n - 数値
-//      d - 桁数
-// ========================================================
-function formatHex0( n, d ) {
-    if (n < 0) {
-        return '-' + ('0000000' + (-n).toString(16).toUpperCase()).slice(-d);
-    }
-    return ('0000000' + n.toString(16).toUpperCase()).slice(-d);
-}
-
-// ========================================================
-// バイナリをダウンロードさせる
-// ========================================================
-function startDownload( dat, filename )
-{
-    const blob = new Blob( [dat], { "type" : "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement( 'a' );
-    a.download = filename;
-    a.href = url;
-    a.click();
-    a.remove();
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1E4);
-}
-
-// ========================================================
-// ラジオスイッチ：チェックされた値を返す
-//  in: name - タグのid
-// ========================================================
-function getCheckedRadioSwtchValue( name )
-{
-    let radio_sw = document.getElementsByName( name );
-    for (let i = 0; i < radio_sw.length; ++i)
-    {
-        if (radio_sw[i].checked) {
-            return radio_sw[i].value;
-        }
-    }
-    return '';
-}
-
 
 // ========================================================
 // MSX ANK 文字 -> Unicode/S-JIS系変換
@@ -2654,6 +2656,152 @@ function createBsaveImage( start, size, page, isCompress )
     dat.set( body, header_bin.length );
     
     return dat.subarray(0, body.length + header_bin.length );
+}
+// ========================================================
+// 設定保存
+// ========================================================
+const config_name = 'gsrle_html_view_config';
+function saveConfig()
+{
+    let config = 
+    {
+        name: config_name,
+        vdp:
+        {
+            screen_no       : vdp.screen_no,
+            txw             : vdp.mode_info.txw,
+            interlace_mode  : vdp.interlace_mode,
+            disp_page       : vdp.disp_page,
+            sprite_disable  : vdp.sprite_disable,
+            aspect_ratio    : vdp.aspect_ratio,
+            force_height    : vdp.force_height,
+
+            sprite16x16     : vdp.sprite16x16,
+            sprite_double   : vdp.sprite_double,
+
+            base:
+            {
+                patnam      : vdp.base.patnam,
+                patgen      : vdp.base.patgen,
+                patcol      : vdp.base.patcol,
+
+                spratr      : vdp.base.spratr,
+                sprpat      : vdp.base.sprpat,
+            },
+         },
+        
+        quick_save_mode : quick_save_mode,
+        palette_use     : palette_use,
+        pal_use_tms9918 : pal_use_tms9918.checked,
+    };
+
+    let filename = config.name + '.json';
+
+    let json_data = JSON.stringify( config, null, '    ' );
+    //console.log(json_data);
+
+    const blob = new Blob( [json_data], { "type" : "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement( 'a' );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1E4);
+}
+// ========================================================
+// 設定読み込み
+// ========================================================
+function getParam( obj, name, def ) {
+    return (name in obj) ? obj[name] : def;
+}
+function loadConfig( d, file_text )
+{
+    let c = null;
+    try {
+        c = JSON.parse( d );
+    } catch( err ) {
+        add_log( '"' + file_text + '": 読み込みエラー\n' + err );
+        return false;
+    }
+    if (!('name' in c)) {
+        return false;
+    }
+    if (c.name != config_name) {
+        console.log('設定名が違います');
+        return false;
+    }
+    if ('vdp' in c) {
+        let cv = c.vdp;
+        if (('screen_no' in cv) ||
+            ('txw' in cv) ||
+            ('interlace_mode' in cv) ||
+            ('force_height' in cv)
+        ) {
+            vdp.force_height = 
+                getParam( cv, 'force_height', vdp.force_height);
+            vdp.changeScreen(
+                getParam( cv, 'screen_no', vdp.screen_no),
+                getParam( cv, 'txw', vdp.txw),
+                getParam( cv, 'interlace_mode', vdp.interlace_mode)
+            );
+        }
+        if ('disp_page' in cv) {
+            vdp.setPage( cv.disp_page );
+        }
+        vdp.sprite_disable = 
+        getParam(cv, 'sprite_disable', vdp.sprite_disable);
+        vdp.aspect_ratio = 
+        getParam(cv, 'aspect_ratio', vdp.aspect_ratio);
+        vdp.force_height = 
+        getParam(cv, 'force_height', vdp.force_height);
+        vdp.sprite16x16 = 
+        getParam(cv, 'sprite16x16', vdp.sprite16x16);
+        vdp.sprite_double = 
+        getParam(cv, 'sprite_double', vdp.sprite_double);
+
+        if ('base' in cv) {
+            let cvb = cv.base;
+            if ('patnam' in cvb) {
+                vdp.setPatternNameTable( cvb.patnam );
+            }
+            if ('patgen' in cvb) {
+                vdp.setPatternGeneratorTable( cvb.patgen );
+            }
+            if ('patcol' in cvb) {
+                vdp.setPatternColorTable( cvb.patcol );
+            }
+
+            if ('spratr' in cvb) {
+                vdp.setSpriteAttributeTable( cvb.spratr );
+            }
+            if ('sprpat' in cvb) {
+                vdp.setSpritePatternTable( cvb.sprpat );
+            }
+        }
+    }
+
+    quick_save = document.getElementsByName('qick_save');
+    quick_save_mode = getParam( c, 'quick_save_mode', quick_save_mode);
+    quick_save.forEach(e => {
+        if (e.value == quick_save_mode) {
+            e.checked = true;
+        }
+    });
+
+    pal_use_tms9918.checked = 
+    getParam( c, 'pal_use_tms9918', pal_use_tms9918.checked);
+
+    palette_use = 
+    chk_palette_use.checked = 
+        getParam( c, 'palette_use', palette_use);
+
+    vdp.updateDefaultColorPalette();
+    vdp.update();
+    vdp.draw();
+    return true;
 }
 
 // ========================================================
@@ -3015,9 +3163,10 @@ function openGsFile( target_file )
 
     // 拡張子検査
     let file_ext = getExt(target_file.name);
+    let is_config = (file_ext == 'JSON');
     let is_pal = isPaletteFile(file_ext);
     let ext_info = getExtInfo(file_ext);
-    if (!ext_info && !is_pal)
+    if (!ext_info && !is_pal && !is_config)
     {
         // 画像ファイルでなければ無視
         add_log( '"' + file_text + '": 画像ファイルではありません。' );
@@ -3025,6 +3174,9 @@ function openGsFile( target_file )
     }
 
     // カレントファイル表示処理
+    if (is_config) {
+
+    } else
     if (is_pal) {
         // パレット
         pal_file = LogFile( target_file );
@@ -3082,44 +3234,51 @@ function openGsFile( target_file )
     let reader = new FileReader();
     reader.onload = function(f) {
         let u8array = null;
-        try {
-            u8array = new Uint8Array(f.target.result);
-        } catch (e) {
-            add_log( '"' + file_text + '": 読み込みデータに問題があります' );
-        }
-        if (u8array != null)
-        {
-            if (is_pal) {
-                vdp.restorePalette( u8array );
-                vdp.update();
-                vdp.draw();
-            } else
-            if (ext_info.ext == '.BMP') {
-                let ts = loadBmp(u8array, ext_info, file_text);
-                if (ts < 0) {
-                    // エラー
-                    bmp_file = empty_file;
-                    file_load_que.length = 0;    //残りをすべて破棄
-                    drop_avilable = true;
-                    displayCurrentFilename();
-                    return;
-                }
-                let h = new BinHeader();
-                h.id    = BinHeader.HEAD_ID_LINEAR;
-                h.start = 0;
-                h.end   = ts - 1;
-                h.run   = 0;
-                bmp_file.header = h;
-                bmp_file.size = ts - 1;
-            } else {
-                let h = loadImage(u8array, ext_info);
-                if (ext_info.interlace && ext_info.page) {
-                    sub_file.header = h;
-                } else {
-                    main_file.header = h;
-                }
+        if (is_config) {
+            if (loadConfig( f.target.result, file_text ))
+            {
+                add_log( '"' + file_text + '": 読み込み完了' );
             }
-            add_log( '"' + file_text + '": 読み込み完了' );
+        } else {
+            try {
+                u8array = new Uint8Array(f.target.result);
+            } catch (e) {
+                add_log( '"' + file_text + '": 読み込みデータに問題があります' );
+            }
+            if (u8array != null)
+            {
+                if (is_pal) {
+                    vdp.restorePalette( u8array );
+                    vdp.update();
+                    vdp.draw();
+                } else
+                if (ext_info.ext == '.BMP') {
+                    let ts = loadBmp(u8array, ext_info, file_text);
+                    if (ts < 0) {
+                        // エラー
+                        bmp_file = empty_file;
+                        file_load_que.length = 0;    //残りをすべて破棄
+                        drop_avilable = true;
+                        displayCurrentFilename();
+                        return;
+                    }
+                    let h = new BinHeader();
+                    h.id    = BinHeader.HEAD_ID_LINEAR;
+                    h.start = 0;
+                    h.end   = ts - 1;
+                    h.run   = 0;
+                    bmp_file.header = h;
+                    bmp_file.size = ts - 1;
+                } else {
+                    let h = loadImage(u8array, ext_info);
+                    if (ext_info.interlace && ext_info.page) {
+                        sub_file.header = h;
+                    } else {
+                        main_file.header = h;
+                    }
+                }
+                add_log( '"' + file_text + '": 読み込み完了' );
+            }
         }
         drop_avilable = true;
         displayCurrentFilename();
@@ -3131,9 +3290,12 @@ function openGsFile( target_file )
         }
         else
         {
-            // 全て完了した後
-            // 自動保存があれば実行
-            saveAll();
+            if (need_save_all)
+            {
+                // 全て完了した後
+                // 自動保存があれば実行
+                saveAll();
+            }
         }
     };
     reader.onerror = function(e) {
@@ -3158,10 +3320,15 @@ function openGsFile( target_file )
         }
         */
         file_load_que.length = 0;    //残りをすべて破棄
+        need_save_all = false;
     };
 
     drop_avilable = false;
-    reader.readAsArrayBuffer(target_file);
+    if (is_config) {
+        reader.readAsText(target_file, 'UTF-8');
+    } else {
+        reader.readAsArrayBuffer(target_file);
+    }
 
     return true;
 }
@@ -3179,17 +3346,24 @@ function openFiles( files )
     for (var i = 0; i < files.length; ++i) {
 
         let file_ext = getExt(files[i].name);
+        let is_config = (file_ext == 'JSON');
         let is_pal = isPaletteFile(file_ext);
         let ext_info = getExtInfo(file_ext);
 
+        if (is_config) {
+            file_load_que.push( files[i] );
+        } else
         if (is_pal) {
             pal = files[i];
+            need_save_all = true;
         } else
         if (ext_info) {
             if (ext_info.interlace && ext_info.page) {
                 sub = files[i];
+                need_save_all = true;
             } else {
                 main = files[i];
+                need_save_all = true;
             }
         } else {
             add_log( '"' + files[i].name + '": 読み込み対象ファイルではありません' );
@@ -3215,6 +3389,7 @@ function openFiles( files )
 // ========================================================
 function saveAll( commpress, with_pal )
 {
+    need_save_all = false;
     if (commpress === undefined)
     {
         switch (quick_save_mode)
@@ -3369,6 +3544,9 @@ function() {
     const page3_save_bsave_np = document.getElementById('page3_save_bsave_np');
     const page3_save_gsrle    = document.getElementById('page3_save_gsrle');
 
+    // 設定保存ボタン
+    const config_save         = document.getElementById('config_save');
+
     // --------------------------------------------------------
     // ファイルを開くボタン
     // --------------------------------------------------------
@@ -3440,7 +3618,17 @@ function() {
     //const canvas_smoothing = document.getElementById('canvas_smoothing');
 
     // ========================================================
-    // 処理
+    // ドロップダウンリストアイテムの対策
+    // ========================================================
+    //let options = document.getElementsByTagName('option');
+    //options.forEach( (e) => ;
+    //
+    //});
+
+    // ========================================================
+    // 入力パーツイベント処理
+    //  リロード時に初期状態が変わるブラウザがあるので
+    //  現時点でのINPUTコントロールの状態を見て反映する事
     // ========================================================
     // --------------------------------
     // 画面モード
@@ -3525,18 +3713,15 @@ function() {
     // イベント：画面縦横比(DotAspect比)変更
     // ========================================================
     canvas_area.height = VDP.screen_height;
-    stretch_screen_radio.forEach(e => { 
+    function changeStrechMode(e) { 
         if (e.checked) {
             vdp.aspect_ratio = Number.parseFloat(e.value);
             vdp.draw();
         }
-    });
+    }
+    stretch_screen_radio.forEach(e => { changeStrechMode(e); });
     let onChangeStrechMode = function(event) {
-        const e = event.target;
-        if (e.checked) {
-            vdp.aspect_ratio = Number.parseFloat(e.value);
-            vdp.draw();
-        }
+        changeStrechMode( event.target );
     }
     stretch_screen_radio.forEach(e => {
         e.addEventListener("change", onChangeStrechMode );
@@ -3545,8 +3730,7 @@ function() {
     // ========================================================
     // イベント：画面縦サイズモード変更
     // ========================================================
-    let onChangeHeightMode = function(event) {
-        const e = event.target;
+    function changeHeightMode(e) {
         if (e.checked) {
             vdp.force_height = Number.parseInt(e.value);
 
@@ -3555,9 +3739,43 @@ function() {
             vdp.draw();
         }
     }
+    height_mode_radio.forEach(e => { changeHeightMode( e ); });
+    let onChangeHeightMode = function(event) {
+        changeHeightMode( event.target );
+    }
     height_mode_radio.forEach(e => {
         e.addEventListener("change", onChangeHeightMode );
     });
+
+    // ========================================================
+    // イベント：自動保存モード変更
+    // ========================================================
+    let onChangeQuickSaveMode = function(event) {
+        const e = event.target;
+        if (e.checked) {
+            quick_save_mode = e.value;
+        }
+    }
+    quick_save.forEach(e => {
+        e.addEventListener("change", onChangeQuickSaveMode );
+    });
+
+    // ========================================================
+    // キャンバススムージング
+    // ========================================================
+    //canvas_smoothing.addEventListener("change", function(e) { vdp.draw(); });
+    // ぼやけすぎて使えない
+    
+    // ========================================================
+    // パレット反映スイッチ
+    // ========================================================
+    chk_palette_use.addEventListener("change", function() {
+        palette_use = chk_palette_use.checked;
+        vdp.update();
+        vdp.draw();
+        displayCurrentFilename();
+    });
+    palette_use = chk_palette_use.checked;
 
     // ========================================================
     // イベント：TMS9918Aカラーの使用
@@ -3767,12 +3985,13 @@ function() {
     // イベント：ファイルを保存するボタン
     // ========================================================
     // --------------------------------------------------------
+    // 設定ファイル
+    // --------------------------------------------------------
+    config_save.addEventListener("click", e => { saveConfig(); });
+    // --------------------------------------------------------
     // パレットファイル
     // --------------------------------------------------------
-    pal_save.addEventListener("click", 
-    function(e) {
-        savePalette();
-    });
+    pal_save.addEventListener("click", e => { savePalette(); });
     // ========================================================
     function savePage(file, page, commpress, with_pal)
     {
@@ -3833,49 +4052,12 @@ function() {
     page3_save_gsrle.addEventListener("click",
     function(e) { savePage( null, 3, 1, 0 ); });
     
-
-    // ========================================================
-    // イベント：自動保存モード変更
-    // ========================================================
-    let onChangeQuickSaveMode = function(event) {
-        const e = event.target;
-        if (e.checked) {
-            quick_save_mode = e.value;
-        }
-    }
-    quick_save.forEach(e => {
-        e.addEventListener("change", onChangeQuickSaveMode );
-    });
-
-    // ========================================================
-    // キャンバススムージング
-    // ========================================================
-    //canvas_smoothing.addEventListener("change", function(e) { vdp.draw(); });
-    // ぼやけすぎて使えない
-
-    // ========================================================
-    // ドロップダウンリストアイテムの対策
-    // ========================================================
-    //let options = document.getElementsByTagName('option');
-    //options.forEach( (e) => ;
-    
-    //});
-    
-    // ========================================================
-    // パレット反映スイッチ
-    // ========================================================
-    chk_palette_use.addEventListener("change", function() {
-        palette_use = chk_palette_use.checked;
-        vdp.update();
-        vdp.draw();
-        displayCurrentFilename();
-    });
-
     ///* test
     vdp.changeScreen(5);
     vdp.sprite16x16 = 1;
     //*/
 
+	vdp.updateDefaultColorPalette();
     vdp.cls();
     vdp.setColor();
     vdp.print('Hello World.');
@@ -3889,5 +4071,7 @@ function() {
     vdp.update();
     vdp.draw();
     displayCurrentFilename();
+
+//    saveConfig
 });
 
