@@ -10,7 +10,7 @@
 <body id="main">
     <details open id="tab_title">
         <summary id="title">
-            HTML5 MSX GRAPHICS Viewer ver.0.15
+            HTML5 MSX GRAPHICS Viewer ver.0.16
         </summary>
         <div class="guide">
             <div id="log_text">使い方：画像ファイルをドロップ（複数可）</div>
@@ -267,6 +267,13 @@
                 <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(VRAMパレット書込)</label>
                 <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE+PLT分離</label>
                 <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮+PLT分離</label>
+            </span>
+            <span class="select_group">
+                <label class="label">スプライト</label>
+                <label class="click" for="sprite_no_limit">
+                    <input type="checkbox" id="sprite_no_limit" value="sprite_no_limit">
+                    スプライト横並び制限なし
+                </label>
             </span>
             <span class="select_group">
                 <label class="label">カラーパレット</label>

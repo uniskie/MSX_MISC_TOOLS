@@ -1783,7 +1783,6 @@ class VDP {
         const chrw = 8 << chr_shift;
         const sprh = (8 + 8 * x16) << chr_shift;
 
-    
         let buf = p.sprData.data;
         let d = p.vram;
 
@@ -1812,6 +1811,7 @@ class VDP {
         let step = 1;
 
         const line_limit = 4 + 4 * mode2;
+        const no_limit = sprite_no_limit.checked;
 
         let line_buff_i = new Uint8Array(width);
         let line_buff_c = new Uint8Array(width);
@@ -1923,7 +1923,9 @@ class VDP {
                     }
                     //
                     line_counter += 1 - pg;
-                    //if (line_counter >= line_limit) break;
+                    if (!no_limit && (line_counter >= line_limit)) {
+                        break;
+                    }
                 }
             }
             pgofs += 256;
@@ -2693,6 +2695,7 @@ function saveConfig()
         quick_save_mode : quick_save_mode,
         palette_use     : palette_use,
         pal_use_tms9918 : pal_use_tms9918.checked,
+        sprite_no_limit : sprite_no_limit.checked,
     };
 
     let filename = config.name + '.json';
@@ -2790,6 +2793,9 @@ function loadConfig( d, file_text )
             e.checked = true;
         }
     });
+
+    sprite_no_limit.checked = 
+    getParam( c, 'sprite_no_limit', sprite_no_limit.checked);
 
     pal_use_tms9918.checked = 
     getParam( c, 'pal_use_tms9918', pal_use_tms9918.checked);
@@ -3571,6 +3577,11 @@ function() {
     const tab_settings = document.getElementById('tab_settings'); // settings detail tag
 
     // --------------------------------------------------------
+    // スプライトの横並び制限解除
+    // --------------------------------------------------------
+    const sprite_no_limit = document.getElementById('sprite_no_limit');
+    
+    // --------------------------------------------------------
     // カラーパレットをVRAMから読み込まない
     // --------------------------------------------------------
     const pal_not_use_vram = document.getElementById('pal_not_use_vram');
@@ -3776,6 +3787,17 @@ function() {
         displayCurrentFilename();
     });
     palette_use = chk_palette_use.checked;
+
+    // ========================================================
+    // スプライト制限無効
+    // ========================================================
+    sprite_no_limit.addEventListener("change", function() {
+        //sprite_no_limit = chk_sprite_no_limit.checked;
+        vdp.update();
+        vdp.draw();
+        displayCurrentFilename();
+    });
+    //sprite_no_limit = chk_sprite_no_limit.checked;
 
     // ========================================================
     // イベント：TMS9918Aカラーの使用
