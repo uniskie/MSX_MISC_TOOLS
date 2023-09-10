@@ -1,4 +1,14 @@
 {
-    "dotnet.defaultSolution": "disable",
-    "cmake.configureOnOpen": false
+	"markdown-pdf.mermaidServer": "",
+	"markdown-pdf.outputDirectoryRelativePathFile": true,
+	"markdown-pdf.stylesRelativePathFile": true,
+	"markdown-pdf.styles": [
+		"img/markdown.css"
+	],
+	"markdown-pdf.type": [
+		"html"
+	],
+	"markdown-pdf.convertOnSave": true,
+	"markdown-pdf.includeDefaultStyles": false,
+	"dotnet.defaultSolution": "disable",
 }

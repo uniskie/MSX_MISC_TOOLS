@@ -7,7 +7,7 @@ const toString = Object.prototype.toString;
 // 初期画面モード
 const default_screen_no = 1;
 
-let default_log_hml = ''
+let default_log_html = ''
 
 // 初回（自動でアコーディオンタブを閉じる）
 let isFirst = true;
@@ -20,6 +20,12 @@ let palette_use = true;
 
 // スプライト制限モード
 let sprite_limit_mode = 0;
+
+// パレットをVRAMから読み込まない
+let pal_not_use_vram = 0;
+
+// カラーパレット未使用時にTMS9918Aの色にする
+let pal_use_tms9918 = 0;
 
 // 自動保存モード
 let quick_save_mode = 'none';
@@ -388,7 +394,7 @@ function displayCurrentScreenMode() {
     }
 
     // スプライト無効/有効
-    chk_sprite_use.checked = !vdp.sprite_disable;
+    sprite_use_chk.checked = !vdp.sprite_disable;
     if (vdp.sprite_disable) {
         label_sprite_use.innerText = 'Sprite Off';
     } else {
@@ -402,7 +408,7 @@ function displayCurrentScreenMode() {
     // 画面設定表示
     {
         sel_screen_no.selectedIndex = vdp.screen_no;
-        chk_screen_interlace.checked = vdp.interlace_mode;
+        screen_interlace_chk.checked = vdp.interlace_mode;
         if (vdp.screen_no < 5) {
             //sel_disp_page.disabled = true;
             let page_size = vdp.mode_info.page_size;
@@ -1327,7 +1333,7 @@ class VDP {
     //------------------------
     updateDefaultColorPalette() {
         const p = this;
-        if ((p.screen_no < 4) && (pal_use_tms9918.checked)) {
+        if ((p.screen_no < 4) && (pal_use_tms9918)) {
             p.pal_def = new Palette( VDP.palette_count, VDP.msx1fpal );
             p.pal_def.setRgba( VDP.tms9918pal8888 ); // 8888精度の色で表示
         } else {
@@ -1442,7 +1448,7 @@ class VDP {
 
         p.vram.fill( 0 );
         if (resetPalette === undefined) resetPalette = false;
-        if (!pal_not_use_vram.checked || resetPalette) {
+        if (!pal_not_use_vram || resetPalette) {
             p.resetPalette();
             p.vram.set( p.getPalTbl(), p.mode_info.paltbl );
         }
@@ -1744,7 +1750,7 @@ class VDP {
             // メインスクリーンに合成
             if (!p.sprite_disable) {
                 let dst = p.offscreen[0];
-                ctx = dst.getContext('2d');
+                ctx = dst.getContext('2d', {willReadFrequently: true});
                 let dd = ctx.getImageData( 0, 0, dst.width, dst.height );
                 // アルファブレンド＆拡大
                 let xr = src.width / dst.width;
@@ -2715,10 +2721,11 @@ function saveConfig()
             },
          },
         
-        quick_save_mode : quick_save_mode,
-        palette_use     : palette_use,
-        pal_use_tms9918 : pal_use_tms9918.checked,
-        sprite_limit_mode : sprite_limit_mode,
+        quick_save_mode     : quick_save_mode,
+        palette_use         : palette_use,
+        pal_not_use_vram    : pal_not_use_vram,
+        pal_use_tms9918     : pal_use_tms9918,
+        sprite_limit_mode   : sprite_limit_mode,
     };
 
     let filename = config.name + '.json';
@@ -2761,32 +2768,32 @@ function loadConfig( d, file_text )
     }
     if ('vdp' in c) {
         let cv = c.vdp;
+        if ('disp_page' in cv) {
+            vdp.setPage( cv.disp_page );
+        }
+        vdp.sprite_disable = getParam(cv, 'sprite_disable', vdp.sprite_disable);
+        vdp.aspect_ratio = getParam(cv, 'aspect_ratio', vdp.aspect_ratio);
+        setCheckedRadioSwitch( 'stretch_screen', vdp.aspect_ratio );
+        vdp.force_height = getParam(cv, 'force_height', vdp.force_height);
+        setCheckedRadioSwitch( 'height_mode', vdp.force_height );
+
         if (('screen_no' in cv) ||
             ('txw' in cv) ||
             ('interlace_mode' in cv) ||
             ('force_height' in cv)
         ) {
-            vdp.force_height = 
-                getParam( cv, 'force_height', vdp.force_height);
+            let disp_height = vdp.force_height ? vdp.force_height : vdp.auto_detect_height;
+
             vdp.changeScreen(
                 getParam( cv, 'screen_no', vdp.screen_no),
                 getParam( cv, 'txw', vdp.txw),
-                getParam( cv, 'interlace_mode', vdp.interlace_mode)
+                getParam( cv, 'interlace_mode', vdp.interlace_mode),
+                disp_height
             );
         }
-        if ('disp_page' in cv) {
-            vdp.setPage( cv.disp_page );
-        }
-        vdp.sprite_disable = 
-        getParam(cv, 'sprite_disable', vdp.sprite_disable);
-        vdp.aspect_ratio = 
-        getParam(cv, 'aspect_ratio', vdp.aspect_ratio);
-        vdp.force_height = 
-        getParam(cv, 'force_height', vdp.force_height);
-        vdp.sprite16x16 = 
-        getParam(cv, 'sprite16x16', vdp.sprite16x16);
-        vdp.sprite_double = 
-        getParam(cv, 'sprite_double', vdp.sprite_double);
+
+        vdp.sprite16x16 = getParam(cv, 'sprite16x16', vdp.sprite16x16);
+        vdp.sprite_double = getParam(cv, 'sprite_double', vdp.sprite_double);
 
         if ('base' in cv) {
             let cvb = cv.base;
@@ -2809,18 +2816,20 @@ function loadConfig( d, file_text )
         }
     }
 
-    quick_save = document.getElementsByName('qick_save');
     quick_save_mode = getParam( c, 'quick_save_mode', quick_save_mode);
     setCheckedRadioSwitch( 'qick_save', quick_save_mode );
 
-    sprite_limit_mode = 
-    getParam( c, 'sprite_limit_mode', sprite_limit_mode);
+    sprite_limit_mode = getParam( c, 'sprite_limit_mode', sprite_limit_mode);
     setCheckedRadioSwitch( 'rd_sprite_limit_mode', sprite_limit_mode );
 
-    pal_use_tms9918.checked = getParam( c, 'pal_use_tms9918', pal_use_tms9918.checked);
+    pal_not_use_vram_chk.checked = 
+    pal_not_use_vram = getParam( c, 'pal_not_use_vram', pal_not_use_vram);
+    pal_use_tms9918_chk.checked = 
+    pal_use_tms9918 = getParam( c, 'pal_use_tms9918', pal_use_tms9918);
 
-    palette_use = 
-    chk_palette_use.checked = getParam( c, 'palette_use', palette_use);
+    palette_use_chk2.checked = 
+    palette_use_chk.checked = 
+    palette_use = getParam( c, 'palette_use', palette_use);
 
     vdp.updateDefaultColorPalette();
     vdp.update();
@@ -3008,7 +3017,7 @@ function loadImage(d, ext_info)
     //if (4 <= vdp.screen_no) { // スクリーン4以上の場合のみ
         if (header.isBinary && !header.isCompress) {
             if (!ext_info.page && (header.end >= vdp.mode_info.palend)) {
-                if (!pal_not_use_vram.checked) {
+                if (!pal_not_use_vram) {
                     vdp.restorePalette(); 
                 }
             }
@@ -3506,9 +3515,9 @@ function() {
     // --------------------------------------------------------
     //const spec_details             = document.getElementById('spec_details'); // div
     const sel_screen_no            = document.getElementById('sel_screen_no');  // select
-    const chk_screen_interlace     = document.getElementById('chk_screen_interlace'); // check
+    const screen_interlace_chk     = document.getElementById('screen_interlace_chk'); // check
     const sel_disp_page            = document.getElementById('sel_disp_page');  // select
-    const chk_sprite_use           = document.getElementById('chk_sprite_use'); // check
+    const sprite_use_chk           = document.getElementById('sprite_use_chk'); // check
     const label_sprite_use         = document.getElementById('label_sprite_use');
 
     const detail_screen_mode_name  = document.getElementById('detail_screen_mode_name');  // span
@@ -3600,24 +3609,25 @@ function() {
     const rd_sprite_limit_mode = document.getElementsByName('rd_sprite_limit_mode');
     
     // --------------------------------------------------------
-    // カラーパレットをVRAMから読み込まない
-    // --------------------------------------------------------
-    const pal_not_use_vram = document.getElementById('pal_not_use_vram');
-
+    // カラーパレット
     // --------------------------------------------------------
     // カラーパレットをVRAMから読み込まない
-    // --------------------------------------------------------
-    const pal_use_tms9918 = document.getElementById('pal_use_tms9918');
+    const pal_not_use_vram_chk = document.getElementById('pal_not_use_vram_chk');
 
-    // --------------------------------------------------------
+    // カラーパレット未使用時にTMS9918Aの色にする
+    const pal_use_tms9918_chk = document.getElementById('pal_use_tms9918_chk');
+
     // カラーパレット有効/無効
-    // --------------------------------------------------------
-    const chk_palette_use = document.getElementById('chk_palette_use');
+    const palette_use_chk = document.getElementById('palette_use_chk');
+    const palette_use_chk2 = document.getElementById('palette_use_chk2');
 
     // --------------------------------------------------------
     // 画面表示設定
     // --------------------------------------------------------
+    // ドットアスペクト比
     const stretch_screen_radio = document.getElementsByName('stretch_screen');
+
+    // 画面縦サイズモード
     const height_mode_radio = document.getElementsByName('height_mode');
 
     // --------------------------------------------------------
@@ -3647,15 +3657,7 @@ function() {
     //const canvas_smoothing = document.getElementById('canvas_smoothing');
 
     // ========================================================
-    // ドロップダウンリストアイテムの対策
-    // ========================================================
-    //let options = document.getElementsByTagName('option');
-    //options.forEach( (e) => ;
-    //
-    //});
-
-    // ========================================================
-    // 入力パーツイベント処理
+    // UIイベント処理
     //  リロード時に初期状態が変わるブラウザがあるので
     //  現時点でのINPUTコントロールの状態を見て反映する事
     // ========================================================
@@ -3685,7 +3687,7 @@ function() {
     // --------------------------------
     // インターレースモード
     // --------------------------------
-    chk_screen_interlace.addEventListener('change',
+    screen_interlace_chk.addEventListener('change',
     function(ev) {
         let e = ev.target;
         let i = e.checked ? 1 : 0;
@@ -3712,8 +3714,8 @@ function() {
     // --------------------------------
     // スプライト非表示
     // --------------------------------
-    if (chk_sprite_use) {
-        chk_sprite_use.addEventListener('change',
+    if (sprite_use_chk) {
+        sprite_use_chk.addEventListener('change',
         function(ev) {
             let e = ev.target;
             vdp.sprite_disable = e.checked ? 0 : 1;
@@ -3722,7 +3724,6 @@ function() {
             displayCurrentFilename();
         });
     }
-
 
     // ========================================================
     // vdpにキャンバスを指定
@@ -3736,7 +3737,7 @@ function() {
     });
 
     //log_text.innerText = '';
-    default_log_hml = help_guide.innerHTML;
+    default_log_html = help_guide.innerHTML;
     
     // ========================================================
     // イベント：画面縦横比(DotAspect比)変更
@@ -3798,13 +3799,22 @@ function() {
     // ========================================================
     // パレット反映スイッチ
     // ========================================================
-    chk_palette_use.addEventListener("change", function() {
-        palette_use = chk_palette_use.checked;
+    palette_use_chk.addEventListener("change", function() {
+        palette_use_chk2.checked = 
+        palette_use = palette_use_chk.checked;
         vdp.update();
         vdp.draw();
         displayCurrentFilename();
     });
-    palette_use = chk_palette_use.checked;
+    palette_use_chk2.addEventListener("change", function() {
+        palette_use_chk.checked = 
+        palette_use = palette_use_chk2.checked;
+        vdp.update();
+        vdp.draw();
+        displayCurrentFilename();
+    });
+    palette_use_chk2.checked = 
+    palette_use = palette_use_chk.checked;
 
     // ========================================================
     // イベント：スプライト制限変更
@@ -3825,10 +3835,20 @@ function() {
     });
 
     // ========================================================
-    // イベント：TMS9918Aカラーの使用
+    // イベント：カラーパレットをVRAMから読み込まない
     // ========================================================
-    pal_use_tms9918.addEventListener('change', 
+    pal_not_use_vram_chk.addEventListener('change', 
     function(event) {
+        pal_not_use_vram = pal_not_use_vram_chk.checked;
+    });
+
+    
+    // ========================================================
+    // イベント：カラーパレット未使用時にTMS9918Aの色にする
+    // ========================================================
+    pal_use_tms9918_chk.addEventListener('change', 
+    function(event) {
+        pal_use_tms9918 = pal_use_tms9918_chk.checked;
         vdp.updateDefaultColorPalette();
         vdp.update();
         vdp.draw();

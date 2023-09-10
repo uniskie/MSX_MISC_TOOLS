@@ -2,21 +2,25 @@
 
 グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。
 
-![プレビュー](img/gsrle_html_preview.png)
+- [ブラウザから直接実行（ローカル）](gsrle.html)
+- [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
+- [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
+  （丸ごとダウンロードして、ローカルからgsrle.htmlを開くのがお勧めです）
 
-メインはスクリーン5～12の画像です。
-
-グラフサウルス形式画像の読み書きをするツールをHTML5+javascriptの勉強ついでに作成しています。
-
-いつの間にか趣味で遊び機能が増えていくかもしれません。
-
+----
 ## 概要
+
+![プレビュー](img/gsrle_html_preview.png)
 
 - SCREEN 0～SCREEN 12のMSX画像ファイルに対応
 - BSAVE形式、グラフサウルス圧縮形式の読み書き表示
 - インターレース画像対応（SCREEN5以上）
 - openMSXコンソールから```vram2bmp ファイル名.bmp 0 256 1024```で保存したBMPに対応
 - スプライト(モード1&2)に対応
+
+メインターゲットはスクリーン5～12のMSX画像です。
+
+HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。
 
 ![プレビュー](img/gsrle_html_default.png)
 
@@ -50,20 +54,7 @@
 
 
 ----
-## ソースコード  
-[https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)
-
-こちらから丸ごとダウンロードし、ローカルからgsrle.htmlを開くのがお勧めです。
-
-----
-## github pages の WEBページでブラウザから直接実行
-
-[https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-
-github pagesはdocsフォルダに手作業で移動しているので、更新は遅れるかもしれません。
-
-----
-## MSX実機でのロード
+## MSX実機でのロード(グラフサウルス圧縮形式)
 
 ローダーのサンプルがあります。
 
@@ -71,6 +62,8 @@ github pagesはdocsフォルダに手作業で移動しているので、更新�
 
 ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。
+
+画像ファイルの再利用はご遠慮ください。
 
 ----
 ## MSX画像の圧縮・展開 保存機能
@@ -80,7 +73,9 @@ github pagesはdocsフォルダに手作業で移動しているので、更新�
 また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。
 
 ### 全体保存 / PLT保存 / ページ保存
+
 ![プレビュー](img/gsrle_html_savebutton.png)
+
 ![プレビュー](img/gsrle_html_savebutton2.png)
 
 | ボタン名 | 説明 | 補足 |
@@ -98,6 +93,7 @@ github pagesはdocsフォルダに手作業で移動しているので、更新�
 ----
 
 ## 設定保存・読み込み
+
 ![プレビュー](img/gsrle_html_savebutton3.png)
 
 各種設定を保存、読み込み出来ます。
@@ -124,6 +120,7 @@ openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPフ�
 
 1. openMSXでF10キーを押してコンソールを表示
 2. コンソールで ```vram2bmp ファイル名.bmp 0 256 1024```でVRAM全体保存
+
    ![](img/openmsx_console.png)
 
 ```vram2bmp```で保存されるのはRAWイメージなので普通のBMPとして表示すると実際の画面に表示されている映像とは異なる見た目になります。
@@ -135,17 +132,20 @@ openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPフ�
 
 
 ### 表示例
+
 ![display RAW BMP](img/gsrle_html_raw_bmp_preview.png)
+
 ![display RAW BMP](img/gsrle_html_raw_bmp_preview2.png)
+
 HYDLIDE3 (C) T&E SOFT / D4 Enterprise
 
 ----
 ## スプライト・キャラジェネの表示ベースアドレス指定
 
-- スクリーン0～4ではキャラクタジェネレータ欄が表示されます。
+- スクリーン0～4ではキャラクタジェネレータ欄が表示されます。  
   ![キャラクタジェネレータ](img/gsrle_html_chrgen.png)
 
-- スクリーン1～12ではスプライト欄が表示されます。
+- スクリーン1～12ではスプライト欄が表示されます。  
   ![スプライトジェネレータ](img/gsrle_html_sprgen.png)
 
 
@@ -287,15 +287,31 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 ## 使用許諾
 
+
+### 禁止
+
+音楽データや画像ファイルの再利用はご遠慮ください。（全体的に）
+
+### 再利用可能
+
 画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。
 改変なども可能です。
 
-ただし、それらについてのサポートは致しかねます。
-またこのツールの使用による問題が起きた場合、当方は責任を負いません。
+### 引責
+
+私以外の方が改変した部分についてサポートは致しかねます。
+また、このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。
 
 
 ----
 ## 更新履歴
+
+- 2023/09/11 ver.0.19
+  - 設定読み書きにVRAMパレットテーブル読み込み抑制スイッチ追加
+  - パレット無効化スイッチを画面下にも追加
+
+- 2023/09/10 ver.0.18
+  - 設定読み込み時、"画面縦サイズ"、"DotAspect比"のラジオボタン選択状態が反映されないのを修正
 
 - 2023/09/09 ver.0.17
   - スプライト横並び制限設定に半透明追加
