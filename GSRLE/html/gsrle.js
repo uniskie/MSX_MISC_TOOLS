@@ -18,6 +18,9 @@ let drop_avilable = true;
 // パレット反映スイッチ
 let palette_use = true;
 
+// スプライト制限モード
+let sprite_limit_mode = 0;
+
 // 自動保存モード
 let quick_save_mode = 'none';
 const quick_save_mode_value = 
@@ -138,7 +141,7 @@ function startDownload( dat, filename )
 // ラジオスイッチ：チェックされた値を返す
 //  in: name - タグのid
 // ========================================================
-function getCheckedRadioSwtchValue( name )
+function getCheckedRadioSwitchValue( name )
 {
     let radio_sw = document.getElementsByName( name );
     for (let i = 0; i < radio_sw.length; ++i)
@@ -148,6 +151,17 @@ function getCheckedRadioSwtchValue( name )
         }
     }
     return '';
+}
+// ========================================================
+// ラジオスイッチ：指定した値のものをチェック
+//  in: name - タグのid
+// ========================================================
+function setCheckedRadioSwitch( name, value )
+{
+    let radio_sw = document.getElementsByName( name );
+    radio_sw.forEach( e => {
+        e.checked = (e.value == value);
+    });
 }
 
 
@@ -1744,10 +1758,17 @@ class VDP {
                         let si = sx * 4 + sy * src_line_size;
                         if (sd.data[si + 3]) {
                             let di = x * 4 + y * dst_line_size;
+                            /*
                             dd.data[di + 0] = sd.data[si + 0];
                             dd.data[di + 1] = sd.data[si + 1];
                             dd.data[di + 2] = sd.data[si + 2];
                             //dd.data[di + 3] = sd.data[si + 3];
+                            */
+                           let a = sd.data[si + 3];
+                           let b = 255 - a;
+                            dd.data[di + 0] = ( dd.data[di + 0] * b + sd.data[si + 0] * a ) / 255;
+                            dd.data[di + 1] = ( dd.data[di + 1] * b + sd.data[si + 1] * a ) / 255;
+                            dd.data[di + 2] = ( dd.data[di + 2] * b + sd.data[si + 2] * a ) / 255;
                         }
                     }
                 }
@@ -1811,7 +1832,7 @@ class VDP {
         let step = 1;
 
         const line_limit = 4 + 4 * mode2;
-        const no_limit = sprite_no_limit.checked;
+        const no_limit = sprite_limit_mode;
 
         let line_buff_i = new Uint8Array(width);
         let line_buff_c = new Uint8Array(width);
@@ -1827,6 +1848,7 @@ class VDP {
                 line_buff_i.fill(0);
                 line_buff_c.fill(0);
                 let cur_line_cc0 = spr_count;
+                let alpha = 255;
                 for (let i = 0; i < spr_count; i+=step) {
                     if (!pg) {
                         let n = spratr + i * atr_size;
@@ -1906,7 +1928,7 @@ class VDP {
                                     buf[ dx + 0 ] = c[0];
                                     buf[ dx + 1 ] = c[1];
                                     buf[ dx + 2 ] = c[2];
-                                    buf[ dx + 3 ] = 255;//c[3];
+                                    buf[ dx + 3 ] = alpha;//c[3];
                                 }
                             } else
                             if (pg) {
@@ -1923,8 +1945,9 @@ class VDP {
                     }
                     //
                     line_counter += 1 - pg;
-                    if (!no_limit && (line_counter >= line_limit)) {
-                        break;
+                    if (line_counter >= line_limit) {
+                        if (0 == no_limit) break;
+                        if (2 == no_limit) alpha = 160; //半透明
                     }
                 }
             }
@@ -2695,7 +2718,7 @@ function saveConfig()
         quick_save_mode : quick_save_mode,
         palette_use     : palette_use,
         pal_use_tms9918 : pal_use_tms9918.checked,
-        sprite_no_limit : sprite_no_limit.checked,
+        sprite_limit_mode : sprite_limit_mode,
     };
 
     let filename = config.name + '.json';
@@ -2788,21 +2811,16 @@ function loadConfig( d, file_text )
 
     quick_save = document.getElementsByName('qick_save');
     quick_save_mode = getParam( c, 'quick_save_mode', quick_save_mode);
-    quick_save.forEach(e => {
-        if (e.value == quick_save_mode) {
-            e.checked = true;
-        }
-    });
+    setCheckedRadioSwitch( 'qick_save', quick_save_mode );
 
-    sprite_no_limit.checked = 
-    getParam( c, 'sprite_no_limit', sprite_no_limit.checked);
+    sprite_limit_mode = 
+    getParam( c, 'sprite_limit_mode', sprite_limit_mode);
+    setCheckedRadioSwitch( 'rd_sprite_limit_mode', sprite_limit_mode );
 
-    pal_use_tms9918.checked = 
-    getParam( c, 'pal_use_tms9918', pal_use_tms9918.checked);
+    pal_use_tms9918.checked = getParam( c, 'pal_use_tms9918', pal_use_tms9918.checked);
 
     palette_use = 
-    chk_palette_use.checked = 
-        getParam( c, 'palette_use', palette_use);
+    chk_palette_use.checked = getParam( c, 'palette_use', palette_use);
 
     vdp.updateDefaultColorPalette();
     vdp.update();
@@ -3579,7 +3597,7 @@ function() {
     // --------------------------------------------------------
     // スプライトの横並び制限解除
     // --------------------------------------------------------
-    const sprite_no_limit = document.getElementById('sprite_no_limit');
+    const rd_sprite_limit_mode = document.getElementsByName('rd_sprite_limit_mode');
     
     // --------------------------------------------------------
     // カラーパレットをVRAMから読み込まない
@@ -3789,15 +3807,22 @@ function() {
     palette_use = chk_palette_use.checked;
 
     // ========================================================
-    // スプライト制限無効
+    // イベント：スプライト制限変更
     // ========================================================
-    sprite_no_limit.addEventListener("change", function() {
-        //sprite_no_limit = chk_sprite_no_limit.checked;
-        vdp.update();
-        vdp.draw();
-        displayCurrentFilename();
+    function changeSpriteLimitMode(e) { 
+        if (e.checked) {
+            sprite_limit_mode = parseInt(e.value);
+            vdp.update();
+            vdp.draw();
+        }
+    }
+    rd_sprite_limit_mode.forEach(e => { changeSpriteLimitMode(e); });
+    let onChangeSpriteLimitMode = function(event) {
+        changeSpriteLimitMode( event.target );
+    }
+    rd_sprite_limit_mode.forEach(e => {
+        e.addEventListener("change", onChangeSpriteLimitMode );
     });
-    //sprite_no_limit = chk_sprite_no_limit.checked;
 
     // ========================================================
     // イベント：TMS9918Aカラーの使用
