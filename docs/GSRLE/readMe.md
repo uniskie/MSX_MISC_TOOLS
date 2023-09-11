@@ -1,11 +1,14 @@
-# MSX画像ビューア ブラウザ版
+# HTML5 MSX GRAPHICS Viewer
+ ブラウザ版 MSX画像ビューア
 
 グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_020.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/HTML_MSX_GRAPHICS_Viewer_020.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
-  （丸ごとダウンロードして、ローカルからgsrle.htmlを開くのがお勧めです）
+
+ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
 
 ----
 ## 概要
@@ -306,7 +309,11 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 ## 更新履歴
 
-- 2023/09/11 ver.0.19
+- 2023/09/11 [ver.0.20](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/HTML_MSX_GRAPHICS_Viewer_020.7z)
+  - スプライト横並び制限設定に網掛追加
+  - アーカイブ置き場変更
+
+- 2023/09/11 [ver.0.19](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/HTML_MSX_GRAPHICS_Viewer_019.7z)
   - 設定読み書きにVRAMパレットテーブル読み込み抑制スイッチ追加
   - パレット無効化スイッチを画面下にも追加
 

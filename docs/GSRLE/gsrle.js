@@ -1118,6 +1118,14 @@ class VDP {
         p.pal8spr = new Palette( VDP.palette_count, VDP.sc8spr_pal );
 
         //------------------------
+        // black/white color palette
+        p.pal_bf = new Palette( VDP.palette_count, 
+            Uint16Array.from([
+                0,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff
+            ]) );
+
+
+        //------------------------
         // canvas
         p.cs = {
             canvas:         null,
@@ -1386,8 +1394,10 @@ class VDP {
             }
         }
 
-        p.img_width  = p.width;
-        p.img_height = p.height * (p.interlace_mode + 1);
+        //p.img_width  = p.width;
+        //p.img_height = p.height * (p.interlace_mode + 1);
+        p.img_width  = p.width * (p.width <= 256 ? 2 : 1); // 常にNTSCラインサイズ
+        p.img_height = p.height * 2; // 常にNTSCラインサイズ
 
         // base address
         reset_base |= false;
@@ -1709,6 +1719,7 @@ class VDP {
 
         // ワークスクリーンからメインスクリーンにコピー
         ctx = p.offscreen[0].getContext('2d');
+        ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
         if (p.interlace_mode && (5 <= p.screen_no)) {
             // 奇数行・偶数行を交互に合成
             let y = 0;
@@ -1720,14 +1731,13 @@ class VDP {
             }
         } else {
             // 表示ページ部分をそのまま転送
-            //src領域指定が必要なら使えない → ctx.putImageData( p.imgData, 0, p.disp_page * p.height );
             let y = 0;
             if (5 <= p.screen_no) {
                 y = p.disp_page * p.scan_line_count;
             }
             ctx.drawImage( work,
                  0, y, p.width, p.height,
-                 0, 0, p.width, p.height );
+                 0, 0, p.img_width, p.img_height );
         }
 
         //--------------------------------
@@ -1751,6 +1761,7 @@ class VDP {
             if (!p.sprite_disable) {
                 let dst = p.offscreen[0];
                 ctx = dst.getContext('2d', {willReadFrequently: true});
+                ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
                 let dd = ctx.getImageData( 0, 0, dst.width, dst.height );
                 // アルファブレンド＆拡大
                 let xr = src.width / dst.width;
@@ -1762,19 +1773,25 @@ class VDP {
                         let sx = Math.floor(x * xr);
                         let sy = Math.floor(y * yr);
                         let si = sx * 4 + sy * src_line_size;
-                        if (sd.data[si + 3]) {
+                        let a = sd.data[si + 3];
+                        if (0 < a) {
                             let di = x * 4 + y * dst_line_size;
-                            /*
-                            dd.data[di + 0] = sd.data[si + 0];
-                            dd.data[di + 1] = sd.data[si + 1];
-                            dd.data[di + 2] = sd.data[si + 2];
-                            //dd.data[di + 3] = sd.data[si + 3];
-                            */
-                           let a = sd.data[si + 3];
-                           let b = 255 - a;
-                            dd.data[di + 0] = ( dd.data[di + 0] * b + sd.data[si + 0] * a ) / 255;
-                            dd.data[di + 1] = ( dd.data[di + 1] * b + sd.data[si + 1] * a ) / 255;
-                            dd.data[di + 2] = ( dd.data[di + 2] * b + sd.data[si + 2] * a ) / 255;
+                            if ((a == 255)
+                             || (sprite_limit_mode == 1)
+                             || ((sprite_limit_mode == 3) && ((y ^ x) & 1))
+                            ) {
+                                dd.data[di + 0] = sd.data[si + 0];
+                                dd.data[di + 1] = sd.data[si + 1];
+                                dd.data[di + 2] = sd.data[si + 2];
+                                //dd.data[di + 3] = a;
+                            } else 
+                            if (sprite_limit_mode == 2) {
+                                let b = 255 - a;
+                                dd.data[di + 0] = ( dd.data[di + 0] * b + sd.data[si + 0] * a ) / 255;
+                                dd.data[di + 1] = ( dd.data[di + 1] * b + sd.data[si + 1] * a ) / 255;
+                                dd.data[di + 2] = ( dd.data[di + 2] * b + sd.data[si + 2] * a ) / 255;
+                                //dd.data[di + 3] = a;
+                            }
                         }
                     }
                 }
@@ -1843,6 +1860,8 @@ class VDP {
         let line_buff_i = new Uint8Array(width);
         let line_buff_c = new Uint8Array(width);
         buf.fill(0);
+
+        let write0bit = 0; // 透明ビットを描画する
 
         let spr_count = 32;
         for (var pg = 0; pg < pg_count; ++pg) {
@@ -1937,7 +1956,7 @@ class VDP {
                                     buf[ dx + 3 ] = alpha;//c[3];
                                 }
                             } else
-                            if (pg) {
+                            if (write0bit) {
                                 buf[ dx + 0 ] = 0;
                                 buf[ dx + 1 ] = 0;
                                 buf[ dx + 2 ] = 0;
@@ -1953,13 +1972,14 @@ class VDP {
                     line_counter += 1 - pg;
                     if (line_counter >= line_limit) {
                         if (0 == no_limit) break;
-                        if (2 == no_limit) alpha = 160; //半透明
+                        alpha = 160; //半透明
                     }
                 }
             }
             pgofs += 256;
             step = chr_count;
-            pal = vdp.pal_def;
+            pal = vdp.pal_bf;
+            write0bit = 1;
         }
     }
     //------------------------
@@ -2820,7 +2840,7 @@ function loadConfig( d, file_text )
     setCheckedRadioSwitch( 'qick_save', quick_save_mode );
 
     sprite_limit_mode = getParam( c, 'sprite_limit_mode', sprite_limit_mode);
-    setCheckedRadioSwitch( 'rd_sprite_limit_mode', sprite_limit_mode );
+    setCheckedRadioSwitch( 'sprite_limit_mode', sprite_limit_mode );
 
     pal_not_use_vram_chk.checked = 
     pal_not_use_vram = getParam( c, 'pal_not_use_vram', pal_not_use_vram);
@@ -3606,7 +3626,7 @@ function() {
     // --------------------------------------------------------
     // スプライトの横並び制限解除
     // --------------------------------------------------------
-    const rd_sprite_limit_mode = document.getElementsByName('rd_sprite_limit_mode');
+    const sprite_limit_mode_radio = document.getElementsByName('sprite_limit_mode');
     
     // --------------------------------------------------------
     // カラーパレット
@@ -3826,11 +3846,11 @@ function() {
             vdp.draw();
         }
     }
-    rd_sprite_limit_mode.forEach(e => { changeSpriteLimitMode(e); });
+    sprite_limit_mode_radio.forEach(e => { changeSpriteLimitMode(e); });
     let onChangeSpriteLimitMode = function(event) {
         changeSpriteLimitMode( event.target );
     }
-    rd_sprite_limit_mode.forEach(e => {
+    sprite_limit_mode_radio.forEach(e => {
         e.addEventListener("change", onChangeSpriteLimitMode );
     });
 
