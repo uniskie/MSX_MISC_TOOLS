@@ -7,7 +7,7 @@
 	"markdown-pdf.type": [
 		"html"
 	],
-	"markdown-pdf.convertOnSave": true,
-	"markdown-pdf.includeDefaultStyles": false,
+	"markdown-pdf.convertOnSave": false,
+	"markdown-pdf.includeDefaultStyles": true,
 	"dotnet.defaultSolution": "disable",
 }
