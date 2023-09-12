@@ -50,25 +50,32 @@ let pal_file = empty_file;
 // ファイル読み込み待ちキュー
 var file_load_que = new Array();
 
-//================================================
+// ========================================================
 // クランプ
-//================================================
+// ========================================================
 function clamp( n, min, max ) {
     n = Math.max( min, Math.min( n, max ) );
     return n;
 }
 
-//================================================
+// ========================================================
 // 指定値単位になるビットマスクを作成
-//================================================
-function bitmask32( d ) 
+// ========================================================
+function alignMask32( d ) 
 {
     return 0xffffffff - (d - 1);
 }
+// ========================================================
+// 指定値未満に収まるビットマスクを作成
+// ========================================================
+function areaMask32( d ) 
+{
+    return (d - 1);
+}
 
-//================================================
+// ========================================================
 // 桁サプレス
-//================================================
+// ========================================================
 function zerosup( n, k ) {
     let ns = Math.abs(n).toString(16);
     if (ns.length < k) {
@@ -127,22 +134,6 @@ function formatHex0( n, d ) {
 }
 
 // ========================================================
-// バイナリをダウンロードさせる
-// ========================================================
-function startDownload( dat, filename )
-{
-    const blob = new Blob( [dat], { "type" : "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement( 'a' );
-    a.download = filename;
-    a.href = url;
-    a.click();
-    a.remove();
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1E4);
-}
-
 // ========================================================
 // ラジオスイッチ：チェックされた値を返す
 //  in: name - タグのid
@@ -169,7 +160,56 @@ function setCheckedRadioSwitch( name, value )
         e.checked = (e.value == value);
     });
 }
+// ========================================================
+// ドロップダウンリスト 要素：クリア
+// ========================================================
+function removeAllSelectOption( e ) {
+    while (e.options.length) {
+        e.remove(0);
+    }
+}
+// ========================================================
+// ドロップダウンリスト 要素：追加
+// ========================================================
+function addSelectOption( e, t, v ) {
+    let o = new Option( t, v );
+    e.options[ e.options.length ] = o;
+    return o;
+}
+// ========================================================
+// ドロップダウンリスト 要素：指定値を選択
+// ========================================================
+function selSelectOption( e, v ) {
+    //let old = e.disabled;
+    //e.disabled = true;
+    for (let i = 0; i < e.options.length; ++i) {
+        if (e.options[ i ].value == v) {
+            e.selectedIndex = i;
+            break;
+        }
+    }
+    //e.disabled = old;
+}
+// ========================================================
+// ========================================================
 
+// ========================================================
+// バイナリをダウンロードさせる
+// ========================================================
+function startDownload( dat, filename )
+{
+    const blob = new Blob( [dat], { "type" : "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement( 'a' );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1E4);
+}
+// ========================================================
 
 // ========================================================
 // 動作ログ表示
@@ -184,7 +224,6 @@ function add_log( s )
     log_string.push( s );
     log_text.innerText = '' + log_string.join('\n');
 }
-
 
 // ========================================================
 // ファイル情報テキスト作成
@@ -367,6 +406,7 @@ function displayCurrentFilename() {
 
     displayCurrentScreenMode();
 }
+
 // ========================================================
 // 現在の画面モード情報
 // ========================================================
@@ -407,7 +447,7 @@ function displayCurrentScreenMode() {
 
     // 画面設定表示
     {
-        sel_screen_no.selectedIndex = vdp.screen_no;
+        sel_screen_no.selectedIndex = vdp.mode_info.idx;
         screen_interlace_chk.checked = vdp.interlace_mode;
         if (vdp.screen_no < 5) {
             //sel_disp_page.disabled = true;
@@ -423,10 +463,10 @@ function displayCurrentScreenMode() {
             sel_disp_page.selectedIndex = vdp.disp_page;
         }
         detail_screen_mode_name.textContent = `[${vdp.mode_info.name}]`;
-        detail_screen_width.textContent = `[WIDTH:${vdp.width}]`;
-        detail_screen_height.textContent = `[HEIGHT:${vdp.height}]`;
+        detail_screen_width.textContent  = `[W:${vdp.width}]`;
+        detail_screen_height.textContent = `[H:${vdp.height}]`;
         if (vdp.interlace_mode) detail_interlace.textContent = '[Interlaced]';
-        else                    detail_interlace.textContent = '[Non-Interlace]';
+        else                    detail_interlace.textContent = '[No-Interlace]';
         if (vdp.sprite_disable) detail_sprite_on.textContent = '[SPRITE OFF]';
         else 
         if (vdp.sprite_double) {
@@ -436,6 +476,8 @@ function displayCurrentScreenMode() {
             if (vdp.sprite16x16 )   detail_sprite_on.textContent = '[SPRITE 16x16]';
             else                    detail_sprite_on.textContent = '[SPRITE 8x8]';
         }
+        detail_vscroll.textContent = `[VScroll:${vdp.vscroll}]`;
+        detail_hscroll.textContent = `[HScroll:${vdp.hscroll}]`;
 
         let page_size = vdp.mode_info.page_size;
         let page_mask = page_size - 1;
@@ -457,7 +499,10 @@ function displayCurrentScreenMode() {
     }
 }
 
-function setAttributeTableList()
+// ========================================================
+// ベースアドレス ドロップダウンリスト更新
+// ========================================================
+function updateBaseAddressList()
 {
     if (!vdp) return;
     if (!sel_spratr_page) return;
@@ -492,9 +537,9 @@ function setAttributeTableList()
         funcn( def_v );
     }
 
-    //================================================
+    // ========================================================
     // CHARACTER GENERATOR TABLE
-    //================================================
+    // ========================================================
     sel_patnam_page.disabled = true;
     sel_patnam_ofs .disabled = true;
     sel_patgen_page.disabled = true;
@@ -533,9 +578,9 @@ function setAttributeTableList()
     sel_patcol_page.disabled = false;
     sel_patcol_ofs .disabled = false;
     
-    //================================================
+    // ========================================================
     // SPRITE TABLE
-    //================================================
+    // ========================================================
     sel_spratr_page.disabled = true;
     sel_spratr_ofs .disabled = true;
     sel_sprpat_page.disabled = true;
@@ -576,40 +621,9 @@ function setAttributeTableList()
     sel_disp_page.disabled   = false;
 }
 
-//================================================
-// ドロップダウンリスト 要素：クリア
-//================================================
-function removeAllSelectOption( e ) {
-    while (e.options.length) {
-        e.remove(0);
-    }
-}
-//================================================
-// ドロップダウンリスト 要素：追加
-//================================================
-function addSelectOption( e, t, v ) {
-    let o = new Option( t, v );
-    e.options[ e.options.length ] = o;
-    return o;
-}
-//==========ｌ=====================================
-// ドロップダウンリスト 要素：指定値を選択
-//================================================
-function selSelectOption( e, v ) {
-    //let old = e.disabled;
-    //e.disabled = true;
-    for (let i = 0; i < e.options.length; ++i) {
-        if (e.options[ i ].value == v) {
-            e.selectedIndex = i;
-            break;
-        }
-    }
-    //e.disabled = old;
-}
-
-//================================================
+// ========================================================
 // 拡張子情報
-//================================================
+// ========================================================
 function getExt( filename )
 {
     return filename.split('.').pop().toUpperCase();
@@ -723,9 +737,9 @@ function getExtInfo( ext )
 	if (-1 < idx) return ext_info[idx];
 	return null;
 }
-//================================================
+// ========================================================
 // BSAVE/GSファイルヘッダー
-//================================================
+// ========================================================
 class BinHeader {
     [Symbol.toStringTag] = 'BinHeader';
     static get HEADER_SIZE() { return 7; }
@@ -763,12 +777,19 @@ class BinHeader {
         return (this.id == BinHeader.HEAD_ID_COMPRESS);
     }
     toBin() {
+        // BSAVEのヘッダで示すサイズが0x10000以上だと
+        // BLOADで異常をきたすので0xffffに抑える
+        // （STARTが0のときENDは0xFFFEが最大）
+        // （ヘッダのENDを見ずにファイルサイズをみると
+        //   最後まで読み込める）
+        let size = Math.min(0xfffe, this.end -this.start);
+        let end = this.start + this.end;
         return Uint8Array.from([
             this.id, 
             this.start & 255,
             (this.start >> 8) & 255,
-            this.end & 255,
-            (this.end >> 8) & 255,
+            end & 255,
+            (end >> 8) & 255,
             this.run & 255,
             (this.run >> 8) & 255,
         ]);
@@ -782,10 +803,9 @@ class BinHeader {
     }
 }
 
-
-//================================================
+// ========================================================
 // カラーパレット
-//================================================
+// ========================================================
 class PaletteEntry {
     [Symbol.toStringTag] = 'PaletteEntry';
     /*
@@ -853,75 +873,75 @@ class PaletteEntry {
 class Palette {
     [Symbol.toStringTag] = 'PaletteEntry';
     constructor( entry_count, d ) {
-        const p = this;
-        p.color = new Array( entry_count );
-        p.rgba = new Array( entry_count );
-        p.setPalette( d );
+        const vdp = this;
+        vdp.color = new Array( entry_count );
+        vdp.rgba = new Array( entry_count );
+        vdp.setPalette( d );
     }
     setPalette( d ) {
-        const p = this;
-        let entry_count = p.color.length;
+        const vdp = this;
+        let entry_count = vdp.color.length;
         if (d === undefined) {
             if (entry_count == 16) {
                 d = VDP.msx2pal;    // MSX2カラーパレット
                 //d = VDP.msx1fpal;   // MSX1風カラーパレット
-                for (var i = 0; i <p.color.length; ++i) {
-                    p.color[i] = new PaletteEntry( d[i] );
+                for (var i = 0; i <vdp.color.length; ++i) {
+                    vdp.color[i] = new PaletteEntry( d[i] );
                 }
             } else 
             if (entry_count == 256) {
                 // screen8 color : GGGRRRBB
                 for (var i = 0; i < entry_count; ++i) {
-                    p.color[i] = new PaletteEntry(
+                    vdp.color[i] = new PaletteEntry(
                         (i >> 2) & 7, i >> 5, (i << 1) & 7);
                 }
             } else {
-                for (var i = 0; i <p.color.length; ++i) {
-                    p.color[i] = new PaletteEntry( 0, 0, 0 );
+                for (var i = 0; i <vdp.color.length; ++i) {
+                    vdp.color[i] = new PaletteEntry( 0, 0, 0 );
                 }
             }
         } else
         if (d.constructor === Uint8Array) {
-            for (var i = 0; i < p.color.length; ++i) {
-                p.color[i] = new PaletteEntry( d[i*2] + d[i*2+1] * 256 );
+            for (var i = 0; i < vdp.color.length; ++i) {
+                vdp.color[i] = new PaletteEntry( d[i*2] + d[i*2+1] * 256 );
             }
         } else
         {
-            for (var i = 0; i < p.color.length; ++i) {
-                p.color[i] = new PaletteEntry( d[i] );
+            for (var i = 0; i < vdp.color.length; ++i) {
+                vdp.color[i] = new PaletteEntry( d[i] );
             }
         }
-        p.makeRgba();
+        vdp.makeRgba();
     }
     makeRgba() {
-        const p = this;
-        for (var i = 0; i < p.color.length; ++i) {
-            p.rgba[i] = p.color[i].rgba;
+        const vdp = this;
+        for (var i = 0; i < vdp.color.length; ++i) {
+            vdp.rgba[i] = vdp.color[i].rgba;
         }
-        return p.rgba;
+        return vdp.rgba;
     }
     setRgba( ar ) {
-        const p = this;
-        for (var i = 0; i < p.color.length; ++i) {
-            p.rgba[i] = ar[i];
+        const vdp = this;
+        for (var i = 0; i < vdp.color.length; ++i) {
+            vdp.rgba[i] = ar[i];
         }
-        return p.rgba;
+        return vdp.rgba;
     }
     getPalTbl() {
-        const p = this;
-        let d = new Uint8Array( p.color.length * 2 );
+        const vdp = this;
+        let d = new Uint8Array( vdp.color.length * 2 );
         let idx = 0;
-        for (var i = 0; i < p.color.length; ++i, idx+=2) {
-            d[idx + 0] = p.color[i].rgb777 & 255;
-            d[idx + 1] = (p.color[i].rgb777 >> 8) & 255;
+        for (var i = 0; i < vdp.color.length; ++i, idx+=2) {
+            d[idx + 0] = vdp.color[i].rgb777 & 255;
+            d[idx + 1] = (vdp.color[i].rgb777 >> 8) & 255;
         }
         return d;
     }
 };
 
-//================================================
+// ========================================================
 // VDP
-//================================================
+// ========================================================
 class VDP {
     [Symbol.toStringTag] = 'VDP';
     /*
@@ -1051,6 +1071,23 @@ class VDP {
         { no:11, txw:32, u_patnam:0x10000, u_patgen:-1    , u_patcol:-1    , }, 
         { no:12, txw:32, u_patnam:0x10000, u_patgen:-1    , u_patcol:-1    , }, 
     ]; }
+    static getScreenModeSettingByIdx( idx ) {
+        if ((idx < 0) || (VDP.screen_mode_spec1.length <= idx)) {
+            return null;
+        }
+    	// 結合して返す
+    	let info = { 
+            idx: idx
+            , ...VDP.screen_mode_spec1[idx]
+            , ...VDP.screen_mode_spec2[idx]
+            , ...VDP.screen_mode_spec3[idx] 
+            , ...VDP.screen_mode_spec4[idx] 
+        };
+        // VRAMパレットエントリエンド
+        info.palend = info.paltbl + 32 -1;
+        info.sPal = Math.max(info.s212, info.palend);
+        return info;
+    }
     static getScreenModeSetting( no, width ) {
     	if (0 < no) {
             // SCREEN 1 以上
@@ -1062,252 +1099,271 @@ class VDP {
                 no += 1;
             }
         }
-
         if ((no < 0) || (VDP.screen_mode_spec1.length <= no))
         {
             return null;
         }
-
-    	// 結合して返す
-    	let info = { 
-              ...VDP.screen_mode_spec1[no]
-             , ...VDP.screen_mode_spec2[no]
-             , ...VDP.screen_mode_spec3[no] 
-             , ...VDP.screen_mode_spec4[no] 
-        };
-
-        // VRAMパレットエントリエンド
-        info.palend = info.paltbl + 32 -1;
-
-        info.sPal = Math.max(info.s212, info.palend);
-        return info;
+        return VDP.getScreenModeSettingByIdx(no);
     }
 
     //------------------------
     // コンストラクタ
     //------------------------
 	constructor( cs ) {
-        const p = this;
+        const vdp = this;
 
         //------------------------
         // vram area
-        p.vram = new Uint8Array( VDP.vram_size );
+        vdp.vram = new Uint8Array( VDP.vram_size );
 
         //------------------------
         // 表示page
-        p.disp_page = 0;
+        vdp.disp_page = 0;
 
         //------------------------
         // お遊び
-        p.draw_page = 0;    // お遊び用
-        p.x = 0;
-        p.y = 0;
-        p.color = 15;
-
+        vdp.draw_page = 0;    // お遊び用
+        vdp.x = 0;
+        vdp.y = 0;
+        vdp.color = 15;
 
         //------------------------
         // default color palette
-        p.pal_def = new Palette( VDP.palette_count, VDP.msx2pal );
+        vdp.pal_def = new Palette( VDP.palette_count, VDP.msx2pal );
 
         // current color palette
-        p.palette = new Palette( VDP.palette_count, VDP.msx2pal );
+        vdp.palette = new Palette( VDP.palette_count, VDP.msx2pal );
         
         //------------------------
         // screen8 color palette
-        p.pal256 = new Palette( 256 );
-        p.pal8spr = new Palette( VDP.palette_count, VDP.sc8spr_pal );
+        vdp.pal256 = new Palette( 256 );
+        vdp.pal8spr = new Palette( VDP.palette_count, VDP.sc8spr_pal );
 
         //------------------------
         // black/white color palette
-        p.pal_bf = new Palette( VDP.palette_count, 
+        vdp.pal_bf = new Palette( VDP.palette_count, 
             Uint16Array.from([
                 0,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff
             ]) );
 
-
         //------------------------
         // canvas
-        p.cs = {
+        vdp.cs = {
             canvas:         null,
             pal_canvas:     null,
             page_canvas:    [null, null, null, null],
             patgen_canvas:  null,
             sprgen_canvas:  null
         };
-        p.offscreen = [null, null, null]; // disp, work, spr
-        p.imgData   = null;
-        p.sprData   = null;
+        vdp.offscreen = [null, null, null]; // disp, work, spr
+        vdp.imgData   = null;
+        vdp.sprData   = null;
 
         if (cs !== undefined) {
-            if (cs.canvas !== undefined)        p.cs.canvas = cs.canvas;
-            if (cs.pal_canvas !== undefined)    p.cs.pal_canvas = cs.pal_canvas;
+            if (cs.canvas !== undefined)        vdp.cs.canvas = cs.canvas;
+            if (cs.pal_canvas !== undefined)    vdp.cs.pal_canvas = cs.pal_canvas;
             if (cs.page_canvas !== undefined) {
-                p.cs.page_canvas[0] = cs.page_canvas[0];
-                p.cs.page_canvas[1] = cs.page_canvas[1];
-                p.cs.page_canvas[2] = cs.page_canvas[2];
-                p.cs.page_canvas[3] = cs.page_canvas[3];
+                vdp.cs.page_canvas[0] = cs.page_canvas[0];
+                vdp.cs.page_canvas[1] = cs.page_canvas[1];
+                vdp.cs.page_canvas[2] = cs.page_canvas[2];
+                vdp.cs.page_canvas[3] = cs.page_canvas[3];
             }
-            if (cs.patgen_canvas !== undefined)    p.cs.patgen_canvas = cs.patgen_canvas;
-            if (cs.sprgen_canvas !== undefined)    p.cs.sprgen_canvas = cs.sprgen_canvas;
+            if (cs.patgen_canvas !== undefined)    vdp.cs.patgen_canvas = cs.patgen_canvas;
+            if (cs.sprgen_canvas !== undefined)    vdp.cs.sprgen_canvas = cs.sprgen_canvas;
         }
 
         //------------------------
         // screen 情報
-        p.screen_no = default_screen_no;
-        p.mode_info = VDP.getScreenModeSetting( p.screen_no );
-        p.width     = p.mode_info.width;
-        p.height    = p.mode_info.height;
-        p.scan_line_count = 256;
-        p.max_page  = p.vram.length / p.mode_info.page_size;
-        p.canvas_max_page = Math.min(p.cs.page_canvas.length, p.max_page);
-        p.force_height = 0;
-        p.auto_detect_height = 0;
-        p.img_width  = p.width;
-        p.img_height = p.height;
-        p.interlace_mode = 0;
-        p.disp_page = 0;
-        p.aspect_ratio = 1.177;
-        p.base = {
-            patnam: p.mode_info.patnam,
-            patgen: p.mode_info.patgen,
-            patcol: p.mode_info.patcol,
-            spratr: p.mode_info.spratr,
-            sprpat: p.mode_info.sprpat,
-            sprcol: p.mode_info.sprcol,
+        vdp.screen_no = default_screen_no;
+        vdp.mode_info = VDP.getScreenModeSetting( vdp.screen_no );
+        vdp.width     = vdp.mode_info.width;
+        vdp.height    = vdp.mode_info.height;
+        vdp.scan_line_count = 256;
+        vdp.max_page  = vdp.vram.length / vdp.mode_info.page_size;
+        vdp.canvas_max_page = Math.min(vdp.cs.page_canvas.length, vdp.max_page);
+        vdp.force_height = 0;
+        vdp.auto_detect_height = 0;
+        vdp.img_width  = vdp.width;
+        vdp.img_height = vdp.height;
+        vdp.interlace_mode = 0;
+        vdp.disp_page = 0;
+        vdp.aspect_ratio = 1.177;
+        vdp.base = {
+            patnam: vdp.mode_info.patnam,
+            patgen: vdp.mode_info.patgen,
+            patcol: vdp.mode_info.patcol,
+            spratr: vdp.mode_info.spratr,
+            sprpat: vdp.mode_info.sprpat,
+            sprcol: vdp.mode_info.sprcol,
         };
 
         //------------------------
+        // スクロール
+        vdp.r23 = 0;  // 表示開始ライン 上へ1ドット単位
+        vdp.r25_msk = 0;
+        vdp.r25_sp2 = 0;
+        vdp.r26 = 0;  // 表示開始アドレス 左へ8ドット単位
+        vdp.r27 = 0;  // 右へ1ドット単位
+                    // 横スクロール：横512の時は2倍移動
+
+        //------------------------
         // スプライト
-        p.spr_scan_width = 256;
-        p.spr_scan_height = 256;
+        vdp.spr_scan_width = 256;
+        vdp.spr_scan_height = 256;
 
-        p.sprite16x16 = 0;
-        p.sprite_double = 0;
+        vdp.sprite16x16 = 0;
+        vdp.sprite_double = 0;
 
-        p.changeScreen( p.screen_no , p.mode_info.txw, p.interlace_mode );
-        p.cls();
+        //------------------------
+        // 画面初期化
+        vdp.changeScreen( vdp.screen_no , vdp.mode_info.txw, vdp.interlace_mode );
+        vdp.cls();
     }
 
+    //------------------------
+    // スクロール
+    //------------------------
+    get vscroll() {
+        const vdp = this;
+        return vdp.r23;
+    }
+    set vscroll( v ) {
+        const vdp = this;
+        vdp.r23 = v;
+    }
+    get hscroll() {
+        const vdp = this;
+        return (vdp.r26 & 63) * 8 - (vdp.r27 & 7);
+    }
+    set hscroll( h ) {
+        const vdp = this;
+        vdp.r26 = (h >> 3) & 63;    // h / 8
+        vdp.r27 = (-h) & 7;
+    }
+
+    //------------------------
+    // 表示ページ設定
+    //------------------------
     setPage( page ) {
-        let p = this;
-        p.disp_page = Math.max(0, Math.min( page, p.max_page - 1));
-        if (p.screen_no < 5) {
-            let page_add = p.disp_page * p.mode_info.page_size;
-            let page_mask = (p.mode_info.page_size - 1);
-            p.setPatternNameTable( (p.base.patnam & page_mask) + page_add );
-            p.setPatternGeneratorTable( (p.base.patgen & page_mask) + page_add );
-            if (0 <= p.base.patcol) {
-                p.setPatternColorTable( (p.base.patcol & page_mask) + page_add );
+        let vdp = this;
+        vdp.disp_page = Math.max(0, Math.min( page, vdp.max_page - 1));
+        if (vdp.screen_no < 5) {
+            let page_add = vdp.disp_page * vdp.mode_info.page_size;
+            let page_mask = (vdp.mode_info.page_size - 1);
+            vdp.setPatternNameTable( (vdp.base.patnam & page_mask) + page_add );
+            vdp.setPatternGeneratorTable( (vdp.base.patgen & page_mask) + page_add );
+            if (0 <= vdp.base.patcol) {
+                vdp.setPatternColorTable( (vdp.base.patcol & page_mask) + page_add );
             }
         }
-        return p.disp_page;
+        return vdp.disp_page;
     }
 
     //------------------------
     // ベースアドレス設定
     //------------------------
     setSpriteAttributeTable( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.spratr = p.mode_info.spratr;
+            vdp.base.spratr = vdp.mode_info.spratr;
         } else 
-        if (p.screen_no < 4) {
+        if (vdp.screen_no < 4) {
             // SPRITE mode 1
-            p.base.spratr = n & bitmask32(0x80);
-            p.base.sprcol = -1;
+            vdp.base.spratr = n & alignMask32(0x80);
+            vdp.base.sprcol = -1;
         } else {
-            n &= bitmask32(0x400);
-            p.base.spratr = n + 0x200;
-            p.base.sprcol = n;
+            n &= alignMask32(0x400);
+            vdp.base.spratr = n + 0x200;
+            vdp.base.sprcol = n;
         }
-        return p.base.spratr;
+        return vdp.base.spratr;
     }
     setSpriteAttributeTableIdx( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.spratr = p.mode_info.spratr;
+            vdp.base.spratr = vdp.mode_info.spratr;
         } else 
-        if (p.screen_no < 4) {
+        if (vdp.screen_no < 4) {
             // SPRITE mode 1
-            p.base.spratr = n * 0x80;
-            p.base.sprcol = -1;
+            vdp.base.spratr = n * 0x80;
+            vdp.base.sprcol = -1;
         } else {
-            p.base.spratr = n * 0x400 + 0x200;
-            p.base.sprcol = n * 0x400;
+            vdp.base.spratr = n * 0x400 + 0x200;
+            vdp.base.sprcol = n * 0x400;
         }
-        return p.base.spratr;
+        return vdp.base.spratr;
     }
     setSpritePatternTable( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.sprpat = p.mode_info.sprpat;
+            vdp.base.sprpat = vdp.mode_info.sprpat;
         } else {
-            p.base.sprpat = n & bitmask32(0x800);
+            vdp.base.sprpat = n & alignMask32(0x800);
         }
-        return p.base.sprpat;
+        return vdp.base.sprpat;
     }
     setSpritePatternTableIdx( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.sprpat = p.mode_info.sprpat;
+            vdp.base.sprpat = vdp.mode_info.sprpat;
         } else {
-            p.base.sprpat = n * 0x800;
+            vdp.base.sprpat = n * 0x800;
         }
-        return p.base.sprpat;
+        return vdp.base.sprpat;
     }
     setPatternNameTable( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patnam = p.mode_info.patnam;
+            vdp.base.patnam = vdp.mode_info.patnam;
         } else {
-            p.base.patnam = n & bitmask32(p.mode_info.u_patnam);
+            vdp.base.patnam = n & alignMask32(vdp.mode_info.u_patnam);
         }
-        return p.base.patnam;
+        return vdp.base.patnam;
     }
     setPatternNameTableIdx( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patnam = p.mode_info.patnam;
+            vdp.base.patnam = vdp.mode_info.patnam;
         } else {
-            p.base.patnam = p.mode_info.u_patnam * n;
+            vdp.base.patnam = vdp.mode_info.u_patnam * n;
         }
-        return p.base.patnam;
+        return vdp.base.patnam;
     }
     setPatternGeneratorTable( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patgen = p.mode_info.patgen;
+            vdp.base.patgen = vdp.mode_info.patgen;
         } else {
-            p.base.patgen = n & bitmask32(p.mode_info.u_patgen);
+            vdp.base.patgen = n & alignMask32(vdp.mode_info.u_patgen);
         }
-        return p.base.patgen;
+        return vdp.base.patgen;
     }
     setPatternGeneratorTableIdx( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patgen = p.mode_info.patgen;
+            vdp.base.patgen = vdp.mode_info.patgen;
         } else {
-            p.base.patgen = p.mode_info.u_patgen * n;
+            vdp.base.patgen = vdp.mode_info.u_patgen * n;
         }
-        return p.base.patgen;
+        return vdp.base.patgen;
     }
     setPatternColorTable( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patcol = p.mode_info.patcol;
+            vdp.base.patcol = vdp.mode_info.patcol;
         } else {
-            p.base.patcol = n & bitmask32(p.mode_info.u_patgen);
+            vdp.base.patcol = n & alignMask32(vdp.mode_info.u_patgen);
         }
-        return p.base.patcol;
+        return vdp.base.patcol;
     }
     setPatternColorTableIdx( n ) {
-        const p = this;
+        const vdp = this;
         if (n === undefined) {
-            p.base.patcol = p.mode_info.patcol;
+            vdp.base.patcol = vdp.mode_info.patcol;
         } else {
-            p.base.patcol = p.mode_info.u_patgen * n;
+            vdp.base.patcol = vdp.mode_info.u_patgen * n;
         }
-        return p.base.patcol;
+        return vdp.base.patcol;
     }
 
     //------------------------
@@ -1320,13 +1376,13 @@ class VDP {
     // カラーパレットを設定
     //------------------------
     restorePalette( d ) {
-        const p = this;
+        const vdp = this;
         if (d === undefined) {
             // VRAMから読み込む
-            p.palette.setPalette( p.vram.subarray( p.mode_info.paltbl, p.mode_info.paltbl + 32  ) );
+            vdp.palette.setPalette( vdp.vram.subarray( vdp.mode_info.paltbl, vdp.mode_info.paltbl + 32  ) );
         } else {
             // 指定データから読み込む
-            p.palette.setPalette( d );
+            vdp.palette.setPalette( d );
         }
     }
     //------------------------
@@ -1340,12 +1396,12 @@ class VDP {
     // デフォルトカラーパレット更新
     //------------------------
     updateDefaultColorPalette() {
-        const p = this;
-        if ((p.screen_no < 4) && (pal_use_tms9918)) {
-            p.pal_def = new Palette( VDP.palette_count, VDP.msx1fpal );
-            p.pal_def.setRgba( VDP.tms9918pal8888 ); // 8888精度の色で表示
+        const vdp = this;
+        if ((vdp.screen_no < 4) && (pal_use_tms9918)) {
+            vdp.pal_def = new Palette( VDP.palette_count, VDP.msx1fpal );
+            vdp.pal_def.setRgba( VDP.tms9918pal8888 ); // 8888精度の色で表示
         } else {
-            p.pal_def = new Palette( VDP.palette_count, VDP.msx2pal );
+            vdp.pal_def = new Palette( VDP.palette_count, VDP.msx2pal );
         }
     }
 
@@ -1353,136 +1409,143 @@ class VDP {
     // 画面モード変更
     //------------------------
     changeScreen( screen_no, txw, interlace_mode, force_height, reset_base ) {
-        const p = this;
+        const vdp = this;
 
-        let old_screen_no = p.screen_no;
+        let old_screen_no = vdp.screen_no;
 
-        p.screen_no = screen_no;
-        p.mode_info = VDP.getScreenModeSetting( screen_no, txw );
-        p.width  = p.mode_info.width;
-        p.height = p.mode_info.height;
-        p.max_page  = p.vram.length / p.mode_info.page_size;
-        p.canvas_max_page = Math.min(p.cs.page_canvas.length, p.max_page);
+        vdp.screen_no = screen_no;
+        vdp.mode_info = VDP.getScreenModeSetting( screen_no, txw );
+        vdp.width  = vdp.mode_info.width;
+        vdp.height = vdp.mode_info.height;
+        vdp.max_page  = vdp.vram.length / vdp.mode_info.page_size;
+        vdp.canvas_max_page = Math.min(vdp.cs.page_canvas.length, vdp.max_page);
 
-        p.updateDefaultColorPalette();
+        vdp.updateDefaultColorPalette();
 
-        if (p.auto_detect_height) {
-            p.height = p.auto_detect_height;
+        if (vdp.auto_detect_height) {
+            vdp.height = vdp.auto_detect_height;
         }
         if (force_height === undefined) {
-            force_height = p.force_height;
+            force_height = vdp.force_height;
         }
         if (force_height) {
-            p.height = force_height;
+            vdp.height = force_height;
         }
 
-        if (p.screen_no < 5) {
+        if (vdp.screen_no < 5) {
             // SCREEN0～4は仕様が分からないのでインターレースモードは禁止
-            p.interlace_mode = 0;
+            vdp.interlace_mode = 0;
         } else {
             if (interlace_mode === undefined ) {
                 interlace_mode = 0;
             }
             if (screen_no != old_screen_no)
             {
-                p.setPage( 0 );
+                vdp.setPage( 0 );
             }
-            if (p.interlace_mode != interlace_mode) {
-                p.interlace_mode = interlace_mode
+            if (vdp.interlace_mode != interlace_mode) {
+                vdp.interlace_mode = interlace_mode
                 // ページはインターレース（＋フリップ）時では奇数に指定
-                p.setPage( (p.disp_page & 254) + p.interlace_mode);
+                vdp.setPage( (vdp.disp_page & 254) + vdp.interlace_mode);
             }
         }
 
-        //p.img_width  = p.width;
-        //p.img_height = p.height * (p.interlace_mode + 1);
-        p.img_width  = p.width * (p.width <= 256 ? 2 : 1); // 常にNTSCラインサイズ
-        p.img_height = p.height * 2; // 常にNTSCラインサイズ
+        //vdp.img_width  = vdp.width;
+        //vdp.img_height = vdp.height * (vdp.interlace_mode + 1);
+        vdp.img_width  = vdp.width * (vdp.width <= 256 ? 2 : 1); // 常にNTSCラインサイズ
+        //vdp.img_height = vdp.height * 2; // 常にNTSCラインサイズ
+        vdp.img_height = vdp.scan_line_count * 2; // 常にNTSCラインフルサイズ
 
         // base address
         reset_base |= false;
         if (reset_base || (screen_no != old_screen_no)) {
-            p.base.patnam = p.mode_info.patnam;
-            p.base.patgen = p.mode_info.patgen;
-            p.base.patcol = p.mode_info.patcol;
-            p.base.spratr = p.mode_info.spratr;
-            p.base.sprpat = p.mode_info.sprpat;
-            p.base.sprcol = p.mode_info.sprcol;
+            vdp.base.patnam = vdp.mode_info.patnam;
+            vdp.base.patgen = vdp.mode_info.patgen;
+            vdp.base.patcol = vdp.mode_info.patcol;
+            vdp.base.spratr = vdp.mode_info.spratr;
+            vdp.base.sprpat = vdp.mode_info.sprpat;
+            vdp.base.sprcol = vdp.mode_info.sprcol;
         }
 
-        if (p.cs.canvas) {
-    		p.initCanvas();
+        vdp.r23 = 0;
+        vdp.r25_msk = 0;
+        vdp.r25_sp2 = 0;
+        vdp.r26 = 0;
+        vdp.r27 = 0;
+
+        if (vdp.cs.canvas) {
+    		vdp.initCanvas();
         }
 
-        setAttributeTableList();
+        updateBaseAddressList();
     }
 
     //------------------------
     // 描画キャンバス初期化
     //------------------------
     initCanvas( cs ) {
-    	const p = this;
+    	const vdp = this;
 
         if (cs !== undefined) {
-            if (cs.canvas !== undefined)        p.cs.canvas = cs.canvas;
-            if (cs.pal_canvas !== undefined)    p.cs.pal_canvas = cs.pal_canvas;
+            if (cs.canvas !== undefined)        vdp.cs.canvas = cs.canvas;
+            if (cs.pal_canvas !== undefined)    vdp.cs.pal_canvas = cs.pal_canvas;
             if (cs.page_canvas !== undefined) {
-                p.cs.page_canvas[0] = cs.page_canvas[0];
-                p.cs.page_canvas[1] = cs.page_canvas[1];
-                p.cs.page_canvas[2] = cs.page_canvas[2];
-                p.cs.page_canvas[3] = cs.page_canvas[3];
+                vdp.cs.page_canvas[0] = cs.page_canvas[0];
+                vdp.cs.page_canvas[1] = cs.page_canvas[1];
+                vdp.cs.page_canvas[2] = cs.page_canvas[2];
+                vdp.cs.page_canvas[3] = cs.page_canvas[3];
             }
-            if (cs.patgen_canvas !== undefined)    p.cs.patgen_canvas = cs.patgen_canvas;
-            if (cs.sprgen_canvas !== undefined)    p.cs.sprgen_canvas = cs.sprgen_canvas;
+            if (cs.patgen_canvas !== undefined)    vdp.cs.patgen_canvas = cs.patgen_canvas;
+            if (cs.sprgen_canvas !== undefined)    vdp.cs.sprgen_canvas = cs.sprgen_canvas;
         }
 
-        if (!p.cs.canvas) {
-            console.log('initCanvas - p.cs.canvas is null.');
+        if (!vdp.cs.canvas) {
+            console.log('initCanvas - vdp.cs.canvas is null.');
             return;
         }
 
          // イメージバッファ作成
-         p.offscreen[0] = new OffscreenCanvas(p.img_width, p.img_height);//最終出力先
-         p.offscreen[1] = new OffscreenCanvas(p.width, p.scan_line_count * p.canvas_max_page);   // ページ分
-         p.offscreen[2] = new OffscreenCanvas(p.spr_scan_width, p.spr_scan_height + 64);           // 1画面 + パターンリスト
-        var ctx = p.offscreen[1].getContext('2d');
-        p.imgData = ctx.createImageData(p.offscreen[1].width, p.offscreen[1].height);
-        p.sprData = ctx.createImageData(p.offscreen[2].width, p.offscreen[2].height);
+         vdp.offscreen[0] = new OffscreenCanvas(vdp.img_width, vdp.img_height);//最終出力先
+         vdp.offscreen[1] = new OffscreenCanvas(vdp.width, vdp.scan_line_count * vdp.canvas_max_page);   // ページ分
+         vdp.offscreen[2] = new OffscreenCanvas(vdp.spr_scan_width, vdp.spr_scan_height + 64);           // 1画面 + パターンリスト
+        var ctx = vdp.offscreen[1].getContext('2d');
+        vdp.imgData = ctx.createImageData(vdp.offscreen[1].width, vdp.offscreen[1].height);
+        vdp.sprData = ctx.createImageData(vdp.offscreen[2].width, vdp.offscreen[2].height);
     }
 
     //------------------------
     // VRAMクリア
     //------------------------
     cls( resetPalette ) {
-        const p = this;
+        const vdp = this;
 
-        p.vram.fill( 0 );
+        vdp.vram.fill( 0 );
         if (resetPalette === undefined) resetPalette = false;
         if (!pal_not_use_vram || resetPalette) {
-            p.resetPalette();
-            p.vram.set( p.getPalTbl(), p.mode_info.paltbl );
+            vdp.resetPalette();
+            vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
         }
 
         // お遊び
-        p.x = 0;
-        p.y = 0;
-        p.color = 15;
+        vdp.x = 0;
+        vdp.y = 0;
+        vdp.color = 15;
 
         // 初期値
-        const b = p.vram;
-        const tx_size = p.mode_info.txw * p.mode_info.txh;
-        let n = p.base.patnam;
-        switch (p.screen_no) {
+        const b = vdp.vram;
+        const tx_size = vdp.mode_info.txw * vdp.mode_info.txh;
+        let n = vdp.base.patnam;
+        switch (vdp.screen_no) {
         case 0:
         case 1:
-            b.fill(32,p.base.patnam, p.base.patnam + tx_size);
-            b.fill(0xf0, p.base.patcol, p.base.patcol + 32);
-            b.set( fontdat, p.base.patgen );
+            b.fill(32,vdp.base.patnam, vdp.base.patnam + tx_size);
+            b.fill(0xf0, vdp.base.patcol, vdp.base.patcol + 32);
+            b.set( fontdat, vdp.base.patgen );
             /*
             // test
-            if (-1 < p.base.patcol) {
+            if (-1 < vdp.base.patcol) {
                 for (var i=0; i<32; ++i) {
-                    b[p.base.patcol + i] = i;
+                    b[vdp.base.patcol + i] = i;
                 }
             }
             for (let i = 0; i < tx_size; ++i, ++n) {
@@ -1495,11 +1558,11 @@ class VDP {
             for (let i = 0; i < tx_size; ++i, ++n) {
                 b[n] = i;
             }
-            b.fill(0xf0, p.base.patcol, p.base.patcol + tx_size * 8);
+            b.fill(0xf0, vdp.base.patcol, vdp.base.patcol + tx_size * 8);
             /*
             // test
             for (var i=0; i<tx_size * 8; ++i) {
-                b[p.base.patcol + i] = i;
+                b[vdp.base.patcol + i] = i;
             }
             */
             break;
@@ -1510,7 +1573,7 @@ class VDP {
             /*
             // test
             for (var i=0; i<tx_size * 8; ++i) {
-                b[p.base.patgen + i] = i;
+                b[vdp.base.patgen + i] = i;
             }
             //*/
             break;
@@ -1522,31 +1585,31 @@ class VDP {
     //------------------------
     loadBinary( d, offset )
     {
-    	const p = this;
+    	const vdp = this;
         if (offset == undefined) {
-            offset = p.draw_page * p.mode_info.namsiz;
+            offset = vdp.draw_page * vdp.mode_info.namsiz;
         }
-        let limit = p.vram.length - offset;
+        let limit = vdp.vram.length - offset;
         if (offset > limit) {
             return;
         }
         if (d.length > limit) {
-            p.vram.set( d.subarray(0, limit), offset );
+            vdp.vram.set( d.subarray(0, limit), offset );
         } else {
-            p.vram.set( d, offset );
+            vdp.vram.set( d, offset );
         }
     }
 
     setCanvasSize()
     {
-    	const p = this;
-        if (p.cs.canvas) {
+    	const vdp = this;
+        if (vdp.cs.canvas) {
             // メインキャンバスサイズ
-            p.cs.canvas.height = p.height * 2;
-            if (p.width <= 256) {
-                p.cs.canvas.width = p.width * 2 * p.aspect_ratio;
+            vdp.cs.canvas.height = vdp.height * 2;
+            if (vdp.width <= 256) {
+                vdp.cs.canvas.width = vdp.width * 2 * vdp.aspect_ratio;
             } else {
-                p.cs.canvas.width = p.width * p.aspect_ratio;
+                vdp.cs.canvas.width = vdp.width * vdp.aspect_ratio;
             }
         }
     }
@@ -1555,62 +1618,62 @@ class VDP {
     // 描画出力
     //------------------------
     draw( disp_mode ) {
-    	const p = this;
+    	const vdp = this;
 
         //------------------------
         // メインキャンバス
         //------------------------
-        if (p.cs.canvas) {
-            p.setCanvasSize();
+        if (vdp.cs.canvas) {
+            vdp.setCanvasSize();
 
-            var ctx = p.cs.canvas.getContext('2d');
+            var ctx = vdp.cs.canvas.getContext('2d');
             ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
 
-            //switch (p.disp_page) {
-            //case 0:
-            //case 1:
-            //    ctx.drawImage( p.offscreen[1], 
-            //        0, p.disp_page * p.scan_line_count, p.width, p.height,
-            //        0, 0, p.cs.canvas.width, p.cs.canvas.height );
-            //    break;
-            //default:
-                ctx.drawImage( p.offscreen[0],
-                    0, 0, p.img_width, p.img_height,
-                    0, 0, p.cs.canvas.width, p.cs.canvas.height );
-            //    break;
-            //}
+            let vscroll = vdp.vscroll;
+            if (vscroll) {
+                for (let i = 0; i < vdp.height; ++i) {
+                    let y = ((i + vscroll) & 255) * 2;
+                    ctx.drawImage( vdp.offscreen[0],
+                        0, y    , vdp.img_width, 2,
+                        0, i * 2, vdp.cs.canvas.width, 2 );
+                }
+            } else {
+                ctx.drawImage( vdp.offscreen[0],
+                    0, 0, vdp.img_width, vdp.height * 2,
+                    0, 0, vdp.cs.canvas.width, vdp.cs.canvas.height );
+            }
         }
 
         //------------------------
         // ページ毎表示キャンバス
         //------------------------
-        if (p.cs.page_canvas) {
-            var offscreen = p.offscreen[1];
+        if (vdp.cs.page_canvas) {
+            var offscreen = vdp.offscreen[1];
 
-            let height = p.height;
+            let height = vdp.height;
 
-            for (var pg = 0; pg < p.cs.page_canvas.length; ++pg) {
-                if (pg >= p.canvas_max_page) break;
+            for (var pg = 0; pg < vdp.cs.page_canvas.length; ++pg) {
+                if (pg >= vdp.canvas_max_page) break;
 
-                var canvas = p.cs.page_canvas[pg];
-                if (pg && (p.screen_no < 5)) {
-                    canvas = p.cs.patgen_canvas;
-                    //if (3 == p.screen_no) {
+                var canvas = vdp.cs.page_canvas[pg];
+                if (pg && (vdp.screen_no < 5)) {
+                    canvas = vdp.cs.patgen_canvas;
+                    //if (3 == vdp.screen_no) {
                     //    height = 256; // chara_height * chara_count * 4 / txw;
                     //} else
-                    if (1 < p.screen_no) {
+                    if (1 < vdp.screen_no) {
                         height = 64 * 3; // chara_height * chara_count * chara_gen_count / txw;
                     } else {
                         height = 64;    // chara_height * chara_count  / txw;
                     }
                 }
                 if (canvas) {
-                    canvas.width  = p.cs.canvas.width;
+                    canvas.width  = vdp.cs.canvas.width;
                     canvas.height = height * 2;
                     ctx = canvas.getContext('2d');
                     ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
                     ctx.drawImage( offscreen, 
-                        0, pg * p.scan_line_count, p.width, height,
+                        0, pg * vdp.scan_line_count, vdp.width, height,
                         0, 0, canvas.width, canvas.height );
                 }
             }
@@ -1618,18 +1681,18 @@ class VDP {
         //------------------------
         // スプライトジェネレータ
         //------------------------
-        if (p.cs.sprgen_canvas) {
-            var offscreen = p.offscreen[2];
+        if (vdp.cs.sprgen_canvas) {
+            var offscreen = vdp.offscreen[2];
 
             // test
             const h = 0;
-            const lh = p.spr_scan_height + 64; // 8 * chara_count / txw = 64
+            const lh = vdp.spr_scan_height + 64; // 8 * chara_count / txw = 64
 
-            //const h = p.spr_scan_height;
+            //const h = vdp.spr_scan_height;
             //const lh = 64; // // 8 * chara_count / txw = 64
 
-            let canvas = p.cs.sprgen_canvas;
-            canvas.width  = p.cs.canvas.width;
+            let canvas = vdp.cs.sprgen_canvas;
+            canvas.width  = vdp.cs.canvas.width;
             canvas.height = lh * 2;
             ctx = canvas.getContext('2d');
             ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
@@ -1641,17 +1704,17 @@ class VDP {
         //------------------------
         // パレットキャンバス
         //------------------------
-        if (p.cs.pal_canvas)
+        if (vdp.cs.pal_canvas)
         {
-            var pal = p.palette.color;
+            var pal = vdp.palette.color;
             if (!palette_use) {
-                pal = p.pal_def.color;
+                pal = vdp.pal_def.color;
             }
-            if (p.screen_no == 8) {
-                pal = p.pal256.color;
+            if (vdp.screen_no == 8) {
+                pal = vdp.pal256.color;
             }
 
-            var canvas = p.cs.pal_canvas;
+            var canvas = vdp.cs.pal_canvas;
             var ctx = canvas.getContext('2d');
 
             canvas.width = 32 * VDP.palette_count;
@@ -1673,99 +1736,99 @@ class VDP {
     // 描画更新
     //------------------------
     update() {
-    	const p = this;
-        if (!p.imgData) {
+    	const vdp = this;
+        if (!vdp.imgData) {
             console.log('const - this.imgData is null.');
             return;
         }
-        switch (p.screen_no) {
+        switch (vdp.screen_no) {
         case 0:
-            p.update_chrgen(0xff, 6, -1);
+            vdp.update_chrgen(0xff, 6, -1);
             break;
         case 1:
-            p.update_chrgen(0xff, 8, 6);
+            vdp.update_chrgen(0xff, 8, 6);
             break;
         case 2:
         case 4:
-            p.update_chrgen(0x3ff, 8, 0);
+            vdp.update_chrgen(0x3ff, 8, 0);
             break;
         case 3:
-            p.update_multi_color();
+            vdp.update_multi_color();
             break;
         case 5:
         case 7:
-            p.update_bitmap16();
+            vdp.update_bitmap16();
             break;
         case 6:
         case 9:
-            p.update_bitmap4();
+            vdp.update_bitmap4();
             break;
         case 8:
-            p.update_bitmap256();
+            vdp.update_bitmap256();
             break;
         case 10:
         case 11:
-            p.update_bitmap_yae();
+            vdp.update_bitmap_yae();
             break;
         case 12:
-            p.update_bitmap_yjk();
+            vdp.update_bitmap_yjk();
             break;
         }
 
         // ワークスクリーン（２ページ分）にピクセルイメージを反映
-        let work = p.offscreen[1];
+        let work = vdp.offscreen[1];
         var ctx = work.getContext('2d');
-        ctx.putImageData( p.imgData, 0, 0 );
+        ctx.putImageData( vdp.imgData, 0, 0 );
 
         // ワークスクリーンからメインスクリーンにコピー
-        ctx = p.offscreen[0].getContext('2d');
+        ctx = vdp.offscreen[0].getContext('2d');
         ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
-        if (p.interlace_mode && (5 <= p.screen_no)) {
+        if (vdp.interlace_mode && (5 <= vdp.screen_no)) {
             // 奇数行・偶数行を交互に合成
             let y = 0;
-            let l0 = (p.disp_page & 254 ) * p.scan_line_count;
-            let l1 = (p.disp_page       ) * p.scan_line_count;
-                for (var i = 0; i < p.height;  ++i, y+=2) {
-                ctx.drawImage( work, 0, i + l0, p.width, 1, 0, y    , p.width, 1 );
-                ctx.drawImage( work, 0, i + l1, p.width, 1, 0, y + 1, p.width, 1 );
+            let l0 = (vdp.disp_page & 254 ) * vdp.scan_line_count;
+            let l1 = (vdp.disp_page       ) * vdp.scan_line_count;
+            for (var i = 0; i < vdp.scan_line_count;  ++i, y+=2) {
+                ctx.drawImage( work, 0, i + l0, vdp.width, 1, 0, y    , vdp.width, 1 );
+                ctx.drawImage( work, 0, i + l1, vdp.width, 1, 0, y + 1, vdp.width, 1 );
             }
         } else {
             // 表示ページ部分をそのまま転送
             let y = 0;
-            if (5 <= p.screen_no) {
-                y = p.disp_page * p.scan_line_count;
+            if (5 <= vdp.screen_no) {
+                y = vdp.disp_page * vdp.scan_line_count;
             }
             ctx.drawImage( work,
-                 0, y, p.width, p.height,
-                 0, 0, p.img_width, p.img_height );
+                 0, y, vdp.width, vdp.scan_line_count,
+                 0, 0, vdp.img_width, vdp.scan_line_count * 2 );
         }
 
         //--------------------------------
         // スプライト
         //--------------------------------
-        if (-1 < p.base.spratr) {
+        if (-1 < vdp.base.spratr) {
             //--------------------------------
             // ラスタライズ
-            let mode2 = (p.screen_no < 4) ? 0 : 1;
-            p.update_spr_rasterize( mode2, p.sprite16x16, p.sprite_double, 0 );
+            let mode2 = (vdp.screen_no < 4) ? 0 : 1;
+            vdp.update_spr_rasterize( mode2, vdp.sprite16x16, vdp.sprite_double, 0 );
 
             //--------------------------------
             // ワークスクリーン（２ページ分）にピクセルイメージを反映
-            let src = p.offscreen[2];
+            let src = vdp.offscreen[2];
             var ctx = src.getContext('2d');
-            ctx.putImageData( p.sprData, 0, 0 );
-            let sd = p.sprData;//ctx.getImageData( 0, 0, src.width, p.height );
+            ctx.putImageData( vdp.sprData, 0, 0 );
+            let sd = vdp.sprData;
 
             //--------------------------------
             // メインスクリーンに合成
-            if (!p.sprite_disable) {
-                let dst = p.offscreen[0];
+            if (!vdp.sprite_disable) {
+                let dst = vdp.offscreen[0];
                 ctx = dst.getContext('2d', {willReadFrequently: true});
                 ctx.imageSmoothingEnabled = false;//canvas_smoothing.checked;
                 let dd = ctx.getImageData( 0, 0, dst.width, dst.height );
                 // アルファブレンド＆拡大
                 let xr = src.width / dst.width;
-                let yr = p.height / dst.height;
+                let yr = vdp.scan_line_count / dst.height;
                 let src_line_size = src.width * 4;
                 let dst_line_size = dst.width * 4;
                 for (let y = 0; y < dd.height; ++y) {
@@ -1786,6 +1849,7 @@ class VDP {
                                 //dd.data[di + 3] = a;
                             } else 
                             if (sprite_limit_mode == 2) {
+                                a = 160;
                                 let b = 255 - a;
                                 dd.data[di + 0] = ( dd.data[di + 0] * b + sd.data[si + 0] * a ) / 255;
                                 dd.data[di + 1] = ( dd.data[di + 1] * b + sd.data[si + 1] * a ) / 255;
@@ -1804,21 +1868,23 @@ class VDP {
     // 少し重い
     update_spr_rasterize( mode2, x16, x2, tp ) 
     {
-    	const p = this;
+    	const vdp = this;
+
+        const bit_mask = [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
 
         // tp はカラーコード0を透明ではなくパレットからーで表示
         tp &= mode2; // mode 2でのみ有効
 
-        if (!p.sprData) {
-            console.log('update_chrgen - this.sprData is null.');
+        if (!vdp.sprData) {
+            console.log('update_spr_rasterize - this.sprData is null.');
             return;
         }
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        if (p.screen_no == 8) {
-            pal = p.pal8spr;
+        if (vdp.screen_no == 8) {
+            pal = vdp.pal8spr;
         }
 
         const pg_count = 2;
@@ -1827,19 +1893,19 @@ class VDP {
         const chrw = 8 << chr_shift;
         const sprh = (8 + 8 * x16) << chr_shift;
 
-        let buf = p.sprData.data;
-        let d = p.vram;
+        let buf = vdp.sprData.data;
+        let d = vdp.vram;
 
         const stop_y = mode2 ? 216 : 208; // 以降非表示
         const pat_count = 256;
-        const width = p.spr_scan_width;
-        const height = p.spr_scan_width; 
+        const width = vdp.spr_scan_width;
+        const height = vdp.spr_scan_width; 
         const dotw = 4; // rgba
         const line_size = dotw * width;
 
-        const sprpat = p.base.sprpat;
-        const sprcol = p.base.sprcol;  // mode1 : no use
-        const spratr = p.base.spratr;
+        const sprpat = vdp.base.sprpat;
+        const sprcol = vdp.base.sprcol;  // mode1 : no use
+        const spratr = vdp.base.spratr;
 
         let atr_y   = stop_y - 1;
         let atr_x   = 0;
@@ -1856,6 +1922,7 @@ class VDP {
 
         const line_limit = 4 + 4 * mode2;
         const no_limit = sprite_limit_mode;
+        const ar_alpha = [0, 255, 128, 128]; //
 
         let line_buff_i = new Uint8Array(width);
         let line_buff_c = new Uint8Array(width);
@@ -1868,13 +1935,19 @@ class VDP {
             if (pg) spr_count = pat_count;
             let use_sprcol = mode2 && !pg;
 
-            for (let y = 0; y < 256; ++y) {
+            for (let y = 0; y < vdp.spr_scan_height; ++y) {
                 let line_counter = 0;
                 line_buff_i.fill(0);
                 line_buff_c.fill(0);
                 let cur_line_cc0 = spr_count;
                 let alpha = 255;
                 for (let i = 0; i < spr_count; i+=step) {
+                    // 1ラインの表示上限を越えた場合
+                    if (line_counter >= line_limit) {
+                        if (0 == no_limit) break; // 非表示
+                        alpha = ar_alpha[no_limit];
+                    }
+
                     if (!pg) {
                         let n = spratr + i * atr_size;
                         atr_y   = d[n + 0];
@@ -1899,6 +1972,9 @@ class VDP {
                     let iy = (y - atr_y - 1) & 255;
                     if (sprh <= iy) continue;
 
+                    //--------------------------------
+                    // ライン上に存在
+
                     // パターン＆カラーの参照位置補正
                     let idy = iy >> chr_shift;
 
@@ -1911,6 +1987,7 @@ class VDP {
                     
                     if (cc) {
                         if (i < cur_line_cc0) {
+                            line_counter += 1 - pg; //カウントはする
                             continue; // CC0が存在しない
                         }
                     } else {
@@ -1921,6 +1998,7 @@ class VDP {
                     // TP=0 なら カラー0は透過
                     if (!tp && !(atr_col & 15))
                     {
+                        line_counter += 1 - pg; //カウントはする
                         continue;
                     }
 
@@ -1929,14 +2007,14 @@ class VDP {
                     let ofx = 0;
                     let shift_c = 1;
                     for (let cx = 0; cx <= x16; ++cx) {
-                        let patbit = d[pa];
+                        let pattern = d[pa];
                         for (let ix = 0; ix < chrw; ++ix) {
                             let x = atr_x + ix + ofx;
                             x -= ec_shift;  // EC bit => 32
                             if (x < 0) continue;
                             if (255 < x) continue;
                             let dx = x * dotw + ((y & 255) + pgofs) * line_size;
-                            if (patbit & 0x80) {
+                            if (pattern & bit_mask[ix]) {
                                 if ((!buf[ dx + 3 ])
                                  || (cc && (line_buff_i[x] == cur_line_cc0)) // CC=1のとき、直近のCC=0のピクセルならOK
                                 )
@@ -1953,7 +2031,7 @@ class VDP {
                                     buf[ dx + 0 ] = c[0];
                                     buf[ dx + 1 ] = c[1];
                                     buf[ dx + 2 ] = c[2];
-                                    buf[ dx + 3 ] = alpha;//c[3];
+                                    buf[ dx + 3 ] |= alpha;
                                 }
                             } else
                             if (write0bit) {
@@ -1963,17 +2041,12 @@ class VDP {
                                 buf[ dx + 3 ] = 255;
                             }
                             shift_c ^= chr_shift;
-                            patbit <<= shift_c;
                         }
                         pa += 16; 
                         ofx += chrw;
                     }
                     //
                     line_counter += 1 - pg;
-                    if (line_counter >= line_limit) {
-                        if (0 == no_limit) break;
-                        alpha = 160; //半透明
-                    }
                 }
             }
             pgofs += 256;
@@ -1983,30 +2056,33 @@ class VDP {
         }
     }
     //------------------------
-    update_chrgen( chr_mask, chr_w, col_shift ) {
-    	const p = this;
+    update_chrgen( chr_mask, chr_w, coltbl_shift ) {
+    	const vdp = this;
 
-        if (!p.imgData) {
+        const bit_shift = [7, 6, 5, 4, 3, 2, 1, 0];
+
+        if (!vdp.imgData) {
             console.log('update_chrgen - this.imgData is null.');
             return;
         }
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        const pg_count = p.canvas_max_page;
-        let buf = p.imgData.data;
-        let d = p.vram;
-        let cd = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
+        let cd = vdp.vram;
 
-        const patgen = p.base.patgen;
-        let patcol = p.base.patcol;
-        let txw = Math.floor((p.width  + chr_w - 1) / chr_w);
-        let txh = (p.scan_line_count + 7) >> 3;  // / 8
-        const  line_size = 4 * p.width;
+        const patgen = vdp.base.patgen;
+        let patcol = vdp.base.patcol;
+        let txw = Math.floor((vdp.width  + chr_w - 1) / chr_w);
+        let txh = (vdp.scan_line_count + 7) >> 3;  // / 8
+        const  line_size = 4 * vdp.width;
         let chr_size = 4 * chr_w;
 
-        let ndx = p.base.patnam;
+        let colset = [0, 15];
+        let ndx = vdp.base.patnam;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             let i = 0;
@@ -2023,22 +2099,21 @@ class VDP {
                     chr_d *= 8;
                     let dy = ody;
                     for(var py = 0; py < 8; ++py, ++chr_d) {
-                        let patbit = d[patgen + chr_d];
-                        let colset = 0xf0;
-                        if (-1 < col_shift) {
-                            if (0 <= patcol) {
-                                colset = cd[patcol + (chr_d >> col_shift)];
-                            }
+                        let pattern = d[patgen + chr_d];
+                        if ((0 <= coltbl_shift) && (0 <= patcol)) {
+                            let col = cd[patcol + (chr_d >> coltbl_shift)];
+                            colset[0] = col & 15;
+                            colset[1] = col >> 4;
                         }
                         let dx = dy; 
-                        for(var px = 0; px < chr_w; ++px, dx+=4) {
-                            let c_shift = (patbit >> 5) & 4; // 128 >> 5 = 4
-                            let c = pal.rgba[ (colset >> c_shift) & 15 ];
+                        for(var px = 0; px < chr_w; ++px) {
+                            let cid = (pattern >> bit_shift[px]) & 1;
+                            let c = pal.rgba[ colset[cid] ];
                             buf[ dx + 0 ] = c[0];
                             buf[ dx + 1 ] = c[1];
                             buf[ dx + 2 ] = c[2];
                             buf[ dx + 3 ] = c[3];
-                            patbit <<= 1;
+                            dx+=4;
                         }
                         dy += line_size;
                     }
@@ -2050,35 +2125,36 @@ class VDP {
 
             // page 1 = chara preview
             txw = 32;
-            if (p.screen_no < 2) {
+            if (vdp.screen_no < 2) {
                 txh = 8;
             }
         }
     }
     //------------------------
     update_multi_color() {
-    	const p = this;
+    	const vdp = this;
 
-        if (!p.imgData) {
+        if (!vdp.imgData) {
             console.log('update_multi_color - this.imgData is null.');
             return;
         }
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        const pg_count = p.canvas_max_page;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
 
-        const patnam = p.base.patnam;
-        const patgen = p.base.patgen;
-        const txw = (p.width  + 7) >> 3; // / 8;
-        let   txh = (p.scan_line_count + 7) >> 3; // / 8;
+        const patnam = vdp.base.patnam;
+        const patgen = vdp.base.patgen;
+        const txw = (vdp.width  + 7) >> 3; // / 8;
+        let   txh = (vdp.scan_line_count + 7) >> 3; // / 8;
         //const tx_size = txw * txh;
-        const line_size = 4 * p.width;
+        const line_size = 4 * vdp.width;
         const b_line_size = line_size * 4; // 1block 4x4px
 
+        const c_shift = [4, 0];
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
             for (var y = 0; y < txh; ++y) {
@@ -2098,14 +2174,15 @@ class VDP {
                         for (var diy = 0; diy < 4; ++diy) {
                             // 8x1
                             let ddx = ddy;
-                            for(var c_shift = 4; c_shift >= 0; c_shift -= 4) {
-                                var c = pal.rgba[ (colval >> c_shift) & 15 ];
+                            for(var i = 0; i < 2; ++i) {
+                                var c = pal.rgba[ (colval >> c_shift[i]) & 15 ];
                                 // 4x1
                                 for (var dix = 0; dix < 4; ++dix) {
-                                    buf[ ddx++ ] = c[0];
-                                    buf[ ddx++ ] = c[1];
-                                    buf[ ddx++ ] = c[2];
-                                    buf[ ddx++ ] = c[3];
+                                    buf[ ddx + 0 ] = c[0];
+                                    buf[ ddx + 1 ] = c[1];
+                                    buf[ ddx + 2 ] = c[2];
+                                    buf[ ddx + 3 ] = c[3];
+                                    ddx += 4;
                                 }
                             }
                             ddy += line_size;
@@ -2121,23 +2198,23 @@ class VDP {
     }
     //------------------------
     update_bitmap16() {
-    	const p = this;
-        if (!p.imgData) {
+    	const vdp = this;
+        if (!vdp.imgData) {
             console.log('update_bitmap16 - this.imgData is null.');
             return;
         }
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        const pg_count = p.canvas_max_page;
-        const sz = p.width / 2 * p.scan_line_count;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        const sz = vdp.width / 2 * vdp.scan_line_count;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.base.patnam
-                    + p.mode_info.namsiz * pg;
+            let idx = vdp.base.patnam
+                    + vdp.mode_info.namsiz * pg;
             for (var i = 0; i < sz; ++i) {
                 let px = d[idx];
                 let c = pal.rgba[px >> 4];
@@ -2157,23 +2234,23 @@ class VDP {
     }
     //------------------------
     update_bitmap4() {
-    	const p = this;
-        if (!p.imgData) {
+    	const vdp = this;
+        if (!vdp.imgData) {
             console.log('update_bitmap16 - this.imgData is null.');
             return;
         }
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        const pg_count = p.canvas_max_page;
-        const sz = p.width / 4 * p.scan_line_count;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        const sz = vdp.width / 4 * vdp.scan_line_count;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.base.patnam
-                    + p.mode_info.namsiz * pg;
+            let idx = vdp.base.patnam
+                    + vdp.mode_info.namsiz * pg;
             for (var i = 0; i < sz; ++i) {
                 let px = d[idx];
                 for (var c_shift = 6; c_shift>= 0; c_shift-=2 ) {
@@ -2190,22 +2267,22 @@ class VDP {
     }
     //------------------------
     update_bitmap256() {
-    	const p = this;
-        if (!p.imgData) {
+    	const vdp = this;
+        if (!vdp.imgData) {
             console.log('update_bitmap256 - this.imgData is null.');
             return;
         }
-        const pg_count = p.canvas_max_page;
-        const sz = p.width * p.scan_line_count;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        const sz = vdp.width * vdp.scan_line_count;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.base.patnam
-                    + p.mode_info.namsiz * pg;
+            let idx = vdp.base.patnam
+                    + vdp.mode_info.namsiz * pg;
             for (var i = 0; i < sz; ++i) {
                 let px = d[idx];
-                let c = p.pal256.rgba[px];
+                let c = vdp.pal256.rgba[px];
                 buf[ odx + 0 ] = c[0];
                 buf[ odx + 1 ] = c[1];
                 buf[ odx + 2 ] = c[2];
@@ -2217,9 +2294,9 @@ class VDP {
     }
     //------------------------
     update_bitmap_yjk() {
-    	const p = this;
+    	const vdp = this;
 
-        if (!p.imgData) {
+        if (!vdp.imgData) {
             console.log('update_bitmap_yjk - this.imgData is null.');
             return;
         }
@@ -2227,14 +2304,14 @@ class VDP {
         let j = 0;  // -32 ~ +31
         let k = 0;  // -32 ~ +31
 
-        const pg_count = p.canvas_max_page;
-        const sz = p.width * p.scan_line_count;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        const sz = vdp.width * vdp.scan_line_count;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.base.patnam
-                    + p.mode_info.namsiz * pg;
+            let idx = vdp.base.patnam
+                    + vdp.mode_info.namsiz * pg;
             for (var i = 0; i < sz; i+=4) {
                 y[0] = d[idx] >> 3; k = d[idx] & 7;        ++idx;
                 y[1] = d[idx] >> 3; k += (d[idx] & 7) * 8; ++idx;
@@ -2255,9 +2332,9 @@ class VDP {
     }
     //------------------------
     update_bitmap_yae() {
-    	const p = this;
+    	const vdp = this;
 
-        if (!p.imgData) {
+        if (!vdp.imgData) {
             console.log('update_bitmap_yae - this.imgData is null.');
             return;
         }
@@ -2265,18 +2342,18 @@ class VDP {
         let j = 0;  // -32 ~ +31
         let k = 0;  // -32 ~ +31
 
-        var pal = p.palette;
+        var pal = vdp.palette;
         if (!palette_use) {
-            pal = p.pal_def;
+            pal = vdp.pal_def;
         }
-        const pg_count = p.canvas_max_page;
-        const sz = p.width * p.scan_line_count;
-        let buf = p.imgData.data;
-        let d = p.vram;
+        const pg_count = vdp.canvas_max_page;
+        const sz = vdp.width * vdp.scan_line_count;
+        let buf = vdp.imgData.data;
+        let d = vdp.vram;
         let odx = 0;
         for (var pg = 0; pg < pg_count; ++pg) {
-            let idx = p.base.patnam
-                    + p.mode_info.namsiz * pg;
+            let idx = vdp.base.patnam
+                    + vdp.mode_info.namsiz * pg;
             for (var i = 0; i < sz; i+=4) {
                 y[0] = d[idx] >> 3; k = d[idx] & 7;        ++idx;
                 y[1] = d[idx] >> 3; k += (d[idx] & 7) * 8; ++idx;
@@ -2307,33 +2384,33 @@ class VDP {
     //------------------------
     setColor( color )
     {
-        const p = this;
+        const vdp = this;
         if (color === undefined) {
             color = 15;
-            if (p.screen_no == 8) color = 0xff;
-            if (p.screen_no == 10) color = 0xf0;
-            if (p.screen_no == 11) color = 0xf0;
-            if (p.screen_no == 12) color = 0xf8;
+            if (vdp.screen_no == 8) color = 0xff;
+            if (vdp.screen_no == 10) color = 0xf0;
+            if (vdp.screen_no == 11) color = 0xf0;
+            if (vdp.screen_no == 12) color = 0xf8;
         }
-        p.color = color;
+        vdp.color = color;
     }
 
     //------------------------
     // 1文字出力
     //------------------------
     putChar( c, x, y, color ) {
-        const p = this;
-        let d = p.vram;
-        const m = p.mode_info;
-        const base = p.base;
+        const vdp = this;
+        let d = vdp.vram;
+        const m = vdp.mode_info;
+        const base = vdp.base;
 
         if (color === undefined) {
-            color = p.color;
+            color = vdp.color;
         }
 
         let txw = m.txw;
-        let txh = (p.height + 7) >> 3; // height / 8;
-        if (p.screen_no == 3) {
+        let txh = (vdp.height + 7) >> 3; // height / 8;
+        if (vdp.screen_no == 3) {
             txw = 32;
         }
 
@@ -2343,7 +2420,7 @@ class VDP {
         if (txh <= y) return [x, y];
 
    
-        switch (p.screen_no) {
+        switch (vdp.screen_no) {
         case 0:
         case 1:
             {
@@ -2448,26 +2525,26 @@ class VDP {
     //------------------------
     print( s, x, y, color )
     {
-        const p = this;
+        const vdp = this;
         if (x === undefined) {
-            x = p.x;
+            x = vdp.x;
         }
         if (y === undefined) {
-            y = p.y;
+            y = vdp.y;
         }
         let sa = s.split('\n');
         for (let l = 0; l < sa.length; ++l) {
             let m = toMSX_ankChar(sa[l]);
             for (let i = 0; i < m.length; ++i) {
-                let a = p.putChar( m[i], x, y, color );
+                let a = vdp.putChar( m[i], x, y, color );
                 x = a[0];
                 y = a[1];
             }
             x = 0;
             ++y;
         }
-        p.x = x;
-        p.y = y;
+        vdp.x = x;
+        vdp.y = y;
     }
 };
 
@@ -2953,11 +3030,11 @@ function detectImageHeight( mode_info, header, size )
         // 自動なら画像ピクセルサイズから表示サイズを判断
         if (header.isCompress && (mode_info.s212 < end)) {
             // 圧縮形式はパレットを含まないのでline212と比較
-            force_height = 256;
+            force_height = vdp.scan_line_count;
         } else
         if (mode_info.palend < end) {
             // リニア形式はパレットテーブルを越えているかで判断
-            force_height = 256;
+            force_height = vdp.scan_line_count;
         } else {
             force_height = mode_info.height;
         }
@@ -3545,7 +3622,9 @@ function() {
     const detail_screen_height     = document.getElementById('detail_screen_height');  // span
     const detail_interlace         = document.getElementById('detail_interlace');  // span
     const detail_sprite_on         = document.getElementById('detail_sprite_on');  // span
-
+    const detail_vscroll               = document.getElementById('detail_vscroll');  // span
+    const detail_hscroll               = document.getElementById('detail_hscroll');  // span
+    
     // --------------------------------------------------------
     // ファイル情報詳細
     // --------------------------------------------------------
@@ -3685,10 +3764,13 @@ function() {
     // 画面モード
     // --------------------------------
     removeAllSelectOption( sel_screen_no );
-    for (let i = 0; i <= 12; ++i) {
-        let o = addSelectOption(sel_screen_no, 'SCREEN ' + i, i );
-        // VDPモードが被るものはスキップ
-        if ((i==9) || (i==11)) {
+    for (let i = 0; ; ++i) {
+        let m = VDP.getScreenModeSettingByIdx(i);
+        if (!m) break;
+        let o = addSelectOption(sel_screen_no, 
+            `SCREEN ${m.no}${(m.no==0) && (m.txw==80) ? '-2' : ''}`,  i);
+        // BASICでは区別されるがVDP上では同じモードを非表示
+        if ((m.no==9) || (m.no==11)) {
             o.style.display = 'none'; // 表示は'block'
         }
     }
@@ -3697,7 +3779,8 @@ function() {
         let e = ev.target;
         let i = parseInt(e.options[e.selectedIndex].value);
         if (0 <= i) {
-            vdp.changeScreen(i, vdp.mode_info.txw, vdp.interlace_mode );
+            let m = VDP.getScreenModeSettingByIdx(i);
+            vdp.changeScreen(m.no, m.txw, vdp.interlace_mode );
             //vdp.cls();
             vdp.update();
             vdp.draw();
@@ -3966,6 +4049,115 @@ function() {
     sel_sprpat_page.addEventListener('change', onChangeSprPat );
     sel_sprpat_ofs .addEventListener('change', onChangeSprPat );
 
+    // ========================================================
+    // イベント：スクロール
+    // ========================================================
+    function DragInfo() {
+        return {
+            start: { x: 0, y: 0, v: 0 },
+            rel  : { x: 0, y: 0, v: 0 },
+            drag : false,
+        };
+    }
+    // --------------------------------------------------------
+    // 縦スクロール
+    // --------------------------------------------------------
+    //let vscroll_controll = canvas_area;
+    let vscroll_controll = detail_vscroll;
+    let vscroll_drag = DragInfo();
+    function onMouseDownVScroll(e) {
+        // 選択解除
+        //if (window.getSelection) window.getSelection().removeAllRanges();
+        // 全体を選択不能にする
+        document.getElementById('main').style['user-select'] = 'none';
+
+        let rect = vscroll_controll.getBoundingClientRect();
+        vscroll_drag.start.x = e.clientX - rect.left;
+        vscroll_drag.start.y = e.clientY - rect.top;
+        vscroll_drag.start.v = vdp.vscroll;
+        vscroll_drag.drag = true;
+      }
+        function onMouseMoveVScroll(e) {
+        if (vscroll_drag.drag) {
+            // 選択解除
+            //if (window.getSelection) window.getSelection().removeAllRanges();
+            let rect = vscroll_controll.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            vscroll_drag.rel.x = x - vscroll_drag.start.x;
+            vscroll_drag.rel.y = y - vscroll_drag.start.y;
+            vdp.vscroll = (vscroll_drag.start.v - vscroll_drag.rel.y / 2) & 255;
+            vdp.draw();
+            displayCurrentScreenMode();
+        }
+        }
+    function onMouseUpVScroll(e) {
+    if (vscroll_drag.drag) {
+        // 選択解除
+        //if (window.getSelection) window.getSelection().removeAllRanges();
+        // 全体を選択可能に戻す
+        document.getElementById('main').style['user-select'] = 'auto';
+    }
+    vscroll_drag.drag = false;
+    }
+    detail_vscroll.addEventListener("click", e => {
+        vdp.vscroll = 0;
+        vdp.draw();
+        displayCurrentScreenMode();
+    });
+    vscroll_controll.addEventListener("mousedown", onMouseDownVScroll);
+    window.addEventListener("mousemove", onMouseMoveVScroll);
+    window.addEventListener("mouseup", onMouseUpVScroll);
+    // --------------------------------------------------------
+    // 横スクロール
+    // --------------------------------------------------------
+    //let hscroll_controll = canvas_area;
+    let hscroll_controll = detail_hscroll;
+    let hscroll_drag = DragInfo();
+    function onMouseDownHScroll(e) {
+        // 選択解除
+        //if (window.getSelection) window.getSelection().removeAllRanges();
+        // 全体を選択不能にする
+        document.getElementById('main').style['user-select'] = 'none';
+
+        let rect = hscroll_controll.getBoundingClientRect();
+        hscroll_drag.start.x = e.clientX - rect.left;
+        hscroll_drag.start.y = e.clientY - rect.top;
+        hscroll_drag.start.v = vdp.hscroll;
+        hscroll_drag.drag = true;
+      }
+        function onMouseMoveHScroll(e) {
+        if (hscroll_drag.drag) {
+            // 選択解除
+            //if (window.getSelection) window.getSelection().removeAllRanges();
+            let rect = hscroll_controll.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            hscroll_drag.rel.x = x - hscroll_drag.start.x;
+            hscroll_drag.rel.y = y - hscroll_drag.start.y;
+            vdp.hscroll = (hscroll_drag.start.v - hscroll_drag.rel.x / 2) & 255;
+            vdp.draw();
+            displayCurrentScreenMode();
+        }
+        }
+    function onMouseUpHScroll(e) {
+    if (hscroll_drag.drag) {
+        // 選択解除
+        //if (window.getSelection) window.getSelection().removeAllRanges();
+        // 全体を選択可能に戻す
+        document.getElementById('main').style['user-select'] = 'auto';
+    }
+    hscroll_drag.drag = false;
+    }
+    detail_hscroll.addEventListener("click", e => {
+        vdp.hscroll = 0;
+        vdp.draw();
+        displayCurrentScreenMode();
+    });
+    hscroll_controll.addEventListener("mousedown", onMouseDownHScroll);
+    window.addEventListener("mousemove", onMouseMoveHScroll);
+    window.addEventListener("mouseup", onMouseUpHScroll);
+    detail_hscroll.style.display = "none"; // 未実装なので一旦非表示
     // ========================================================
     // イベント：ドラッグ中のアイテムがドラッグ領域
     // ========================================================

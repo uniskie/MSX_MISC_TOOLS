@@ -362,7 +362,7 @@ code {
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_020.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_020.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_021.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -469,6 +469,42 @@ code {
 <li>画面縦サイズ設定、DotAspect比、読み込み後自動保存設定</li>
 <li>カラーパレットVRAM読み込み設定、TMS9918風カラー設定</li>
 </ul>
+<h3 id="%E6%B3%A8bsave%E4%BF%9D%E5%AD%98%E6%99%82%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%98%E3%83%83%E3%83%80%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">注：BSAVE保存時のファイルヘッダについて</h3>
+<p>BLOADで読み込むときに、サイズ&amp;hFFFFを越えるファイルは読みだしたデータが化けます。</p>
+<blockquote>
+<p>例)<br>
+<code>START=0, END=FFFF</code> を越えるファイル<br>
+ファイル全体では<code>&amp;h10007</code>バイト以上</p>
+<ul>
+<li>VRAM全体セーブ</li>
+<li>SCREEN7,8,10,12での1ページ丸ごと保存</li>
+</ul>
+</blockquote>
+<p>そのため、BSAVEファイルヘッダのENDエントリはサイズが&amp;hFFFFを越えない値を書き出します。
+ファイル自体は最後まで書き込まれまます。</p>
+<blockquote>
+<p>例)</p>
+<ul>
+<li>
+<p>VRAM全体セーブ</p>
+<p><code>START=0, END=FFFE</code> → <code>START=0, END=FFFE</code><br>
+実際にファイルに書きだされるVRAMの範囲は<code>&amp;h0000～&amp;hFFFF</code><br>
+ファイル全体のサイズは<code>&amp;h10007</code>バイト</p>
+</li>
+<li>
+<p>SCREEN7,8,10,12での1ページ丸ごと保存</p>
+<p><code>START=0, END=FFFE</code> → <code>START=0, END=FFFE</code><br>
+実際にファイルに書きだされるVRAMの範囲は<code>&amp;h0000～&amp;hFFFF</code><br>
+ファイル全体のサイズは<code>&amp;h10007</code>バイト</p>
+</li>
+</ul>
+</blockquote>
+<p>この対策によりデータは化けなくなりますが<br>
+BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
+<p>全体を読みだしたいときは独自のローダーを使用し、<br>
+ファイルサイズを見て読みだすようにすれば、<br>
+データの最後まで読み込むことが出来ます。</p>
+<p>( <a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a> など)</p>
 <hr>
 <h2 id="openmsx-vram2bmp%E5%87%BA%E5%8A%9B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A1%A8%E7%A4%BA">openMSX vram2bmp出力ファイルの表示</h2>
 <p>openMSXでは<code>vram2bmp</code>でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。</p>
@@ -1168,6 +1204,15 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2023/09/13 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z">ver.0.21</a></p>
+<ul>
+<li>スプライトモード2の時の表示制限判定を修正</li>
+<li>スプライトモード2の時の表示制限で半透明処理をする際に不透明ピクセルの透明度を上書きしないように修正</li>
+<li>メインキャンバスをドラッグでスクロールする機能を追加</li>
+<li>BSAVEヘッダのサイズ制限について説明追加</li>
+</ul>
+</li>
 <li>
 <p>2023/09/11 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_020.7z">ver.0.20</a></p>
 <ul>

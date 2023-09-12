@@ -5,7 +5,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_020.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_020.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_021.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -114,6 +114,41 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 - 画面縦サイズ設定、DotAspect比、読み込み後自動保存設定
 - カラーパレットVRAM読み込み設定、TMS9918風カラー設定
 
+### 注：BSAVE保存時のファイルヘッダについて
+
+BLOADで読み込むときに、サイズ&hFFFFを越えるファイルは読みだしたデータが化けます。
+
+> 例)  
+> ```START=0, END=FFFF``` を越えるファイル  
+> ファイル全体では```&h10007```バイト以上
+>
+> - VRAM全体セーブ
+> - SCREEN7,8,10,12での1ページ丸ごと保存
+
+そのため、BSAVEファイルヘッダのENDエントリはサイズが&hFFFFを越えない値を書き出します。
+ファイル自体は最後まで書き込まれまます。
+
+> 例)
+> - VRAM全体セーブ
+>
+>   ```START=0, END=FFFE``` → ```START=0, END=FFFE```  
+>   実際にファイルに書きだされるVRAMの範囲は```&h0000～&hFFFF```  
+>   ファイル全体のサイズは```&h10007```バイト
+>
+> - SCREEN7,8,10,12での1ページ丸ごと保存
+>
+>   ```START=0, END=FFFE``` → ```START=0, END=FFFE```  
+>   実際にファイルに書きだされるVRAMの範囲は```&h0000～&hFFFF```  
+>   ファイル全体のサイズは```&h10007```バイト
+
+この対策によりデータは化けなくなりますが  
+BLOADでは&h0000～&hFFFEまでしか読み込めません。
+
+全体を読みだしたいときは独自のローダーを使用し、  
+ファイルサイズを見て読みだすようにすれば、  
+データの最後まで読み込むことが出来ます。
+
+( [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD) など)
 
 ----
 ## openMSX vram2bmp出力ファイルの表示
@@ -327,6 +362,12 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 
 ----
 ## 更新履歴
+
+- 2023/09/13 [ver.0.21](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z)
+  - スプライトモード2の時の表示制限判定を修正
+  - スプライトモード2の時の表示制限で半透明処理をする際に不透明ピクセルの透明度を上書きしないように修正
+  - メインキャンバスをドラッグでスクロールする機能を追加
+  - BSAVEヘッダのサイズ制限について説明追加
 
 - 2023/09/11 [ver.0.20](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_020.7z)
   - スプライト横並び制限設定に網掛追加

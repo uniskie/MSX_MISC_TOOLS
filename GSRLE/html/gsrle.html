@@ -13,7 +13,7 @@
             HTML5 MSX GRAPHICS Viewer
         </summary>
         <div class="guide">
-            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.20
+            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.21
                 <br>使い方：画像ファイルをドロップ（複数可）</div>
         </div>
     </details>
@@ -65,6 +65,8 @@
                 <span id="detail_screen_height"></span>
                 <span id="detail_interlace"></span>
                 <span id="detail_sprite_on"></span>
+                <button id="detail_vscroll"></button>
+                <button id="detail_hscroll"></button>
             </div>
             <div class="label_title" id="tab_save_all">
                 <span class="label_text">全体保存</span>
@@ -81,9 +83,9 @@
                             <span id="label_pal_file" class="label_text">【カラーパレット】</span>
                             <span id="detail_pal_file"></span>
                         </label>
+                        <button class="save_button vmid" id="pal_save" >PLT保存</button>
                     </div>
                     <canvas id="palette_area" class="vmid"></canvas>
-                    <button class="save_button vmid" id="pal_save" >PLT保存</button>
                 </span>
             </div>
         </span>
