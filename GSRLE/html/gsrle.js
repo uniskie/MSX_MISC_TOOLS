@@ -15,6 +15,9 @@ let isFirst = true;
 // ドラッグアンドドロップ受付状態
 let drop_avilable = true;
 
+// SCREEN 7,8,19,11,12でVRAMインターリーブ接続
+let vram_interleave = true;
+
 // パレット反映スイッチ
 let palette_use = true;
 
@@ -644,6 +647,9 @@ function updateBaseAddressList()
     sel_sprpat_page.disabled = false;
     sel_sprpat_ofs .disabled = false;
 
+    // ========================================================
+    // Display Page
+    // ========================================================
     sel_disp_page.disabled   = true;
     removeAllSelectOption( sel_disp_page );
     for (let n = 0; n < vdp.max_page; ++n ) {
@@ -1511,10 +1517,13 @@ class VDP {
         let old_screen_no = vdp.screen_no;
         let old_interlace_mode = vdp.interlace_mode;
 
+        let mode_info = VDP.getScreenModeSetting( screen_no, txw );
+        vdp.interleaveVram( mode_info.page_size );
+        vdp.mode_info = mode_info;
         vdp.screen_no = screen_no;
-        vdp.mode_info = VDP.getScreenModeSetting( screen_no, txw );
         vdp.width  = vdp.mode_info.width;
         vdp.height = vdp.mode_info.height;
+        vdp.max_block  = vdp.vram.length / vdp.mode_info.block_size;
         vdp.max_page  = vdp.vram.length / vdp.mode_info.page_size;
         vdp.canvas_max_page = Math.min(vdp.cs.page_canvas.length, vdp.max_page);
 
@@ -1617,6 +1626,39 @@ class VDP {
         var ctx = vdp.offscreen[1].getContext('2d');
         vdp.imgData = ctx.createImageData(vdp.offscreen[1].width, vdp.offscreen[1].height);
         vdp.sprData = ctx.createImageData(vdp.spr_buff_width, this.spr_buff_height);
+    }
+    // ========================================================
+    // VRAM配列変更
+    // ========================================================
+    interleaveVram( dst_page_size ) {
+        const vdp = this;
+        if (!vram_interleave || !vdp.mode_info
+         || (dst_page_size == vdp.mode_info.page_size)) {
+            return;
+        }
+
+        let length = vdp.vram.length >> 1;
+        let vram = new Uint8Array( vdp.vram.length );
+        let src = vdp.vram;
+
+        if (dst_page_size == 0x10000) {
+            // page 0x8000 mode -> page 0x10000 mode
+            let p = 0;
+            let p1 = 0x10000;
+            for (let p0 = 0; p0 < length;) {
+                vram[p++] = src[p0++];
+                vram[p++] = src[p1++];
+            }
+        } else {
+            // page 0x10000 mode -> page 0x8000 mode
+            let p = 0;
+            let p1 = 0x10000;
+            for (let p0 = 0; p0 < length;) {
+                vram[p0++] = src[p++];
+                vram[p1++] = src[p++];
+            }
+        }
+        vdp.vram = vram;
     }
 
     // ========================================================
@@ -3137,6 +3179,7 @@ function saveConfig()
         pal_not_use_vram    : pal_not_use_vram,
         pal_use_tms9918     : pal_use_tms9918,
         sprite_limit_mode   : sprite_limit_mode,
+        vram_interleave     : vram_interleave,
     };
 
     let filename = config.name + '.json';
@@ -3241,6 +3284,8 @@ function loadConfig( d, file_text )
     palette_use_chk2.checked = 
     palette_use_chk.checked = 
     palette_use = getParam( c, 'palette_use', palette_use);
+
+    vram_interleave_chk.checked = getParam( c, 'vram_interleave', vram_interleave);
 
     vdp.updateDefaultColorPalette();
     vdp.update();
@@ -4044,6 +4089,11 @@ function() {
     const palette_use_chk2 = document.getElementById('palette_use_chk2');
 
     // --------------------------------------------------------
+    // VRAM接続
+    // --------------------------------------------------------
+    const vram_interleave_chk = document.getElementById('vram_interleave_chk');
+    
+    // --------------------------------------------------------
     // 画面表示設定
     // --------------------------------------------------------
     // ドットアスペクト比
@@ -4261,6 +4311,15 @@ function() {
         e.addEventListener("change", onChangeSpriteLimitMode );
     });
 
+    // ========================================================
+    // イベント：VRAM接続方式
+    // ========================================================
+    vram_interleave_chk.addEventListener('change', 
+    function(event) {
+        vram_interleave = pal_not_use_vram_chk.checked;
+    });
+    vram_interleave = vram_interleave_chk.checked;
+    
     // ========================================================
     // イベント：カラーパレットをVRAMから読み込まない
     // ========================================================

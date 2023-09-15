@@ -13,7 +13,7 @@
             HTML5 MSX GRAPHICS Viewer
         </summary>
         <div class="guide">
-            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.22
+            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.23
                 <br>使い方：画像ファイルをドロップ（複数可）</div>
         </div>
     </details>
@@ -285,15 +285,13 @@
                 <label class="click"><input type="radio" name="sprite_limit_mode" value="2"        >半透明</label>
                 <label class="click"><input type="radio" name="sprite_limit_mode" value="3"        >網掛</label>
             </span>
-        <!--
             <span class="select_group">
-                <label class="label">スプライト</label>
-                <label class="click" for="sprite_no_limit_chk">
-                    <input type="checkbox" id="sprite_no_limit_chk">
-                    スプライト横並び制限なし
+                <label class="label">VRAMアドレスラッチ</label>
+                <label class="click" for="vram_interleave_chk">
+                    <input type="checkbox" id="vram_interleave_chk" checked>
+                    SCREEN7,8,10,12でインターリーブ
                 </label>
             </span>
-        -->
             <span class="select_group">
                 <label class="label" for="palette_use_chk2">
                     <input type="checkbox" id="palette_use_chk2">
@@ -301,11 +299,11 @@
                 </label>
                 <label class="click" for="pal_not_use_vram_chk">
                     <input type="checkbox" id="pal_not_use_vram_chk">
-                    カラーパレットをVRAMから読み込まない(パレットファイルのみ反映)
+                    VRAMから読み込まない(パレットファイルのみ反映)
                 </label>
                 <label class="click" for="pal_use_tms9918_chk">
                     <input type="checkbox" id="pal_use_tms9918_chk" checked>
-                    スクリーン0～3でカラーパレット無効時にTMS9918風の色にする
+                    スクリーン0～3でカラーパレット無効時にTMS9918色
                 </label>
             </span>
             <!--
