@@ -362,7 +362,7 @@ code {
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_021.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_022.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_022.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -455,7 +455,7 @@ code {
 </ul>
 <hr>
 <h2 id="%E8%A8%AD%E5%AE%9A%E4%BF%9D%E5%AD%98%E3%83%BB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF">設定保存・読み込み</h2>
-<p><img src="img/gsrle_html_savebutton3.png" alt="プレビュー"></p>
+<p><img src="img/gsrle_html_config.png" alt="プレビュー"></p>
 <p>各種設定を保存、読み込み出来ます。</p>
 <p>保存時には <code>gsrle_html_config.json</code> というJSONファイルが保存されます。<br>
 任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。</p>
@@ -509,13 +509,9 @@ BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
 <h2 id="openmsx-vram2bmp%E5%87%BA%E5%8A%9B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A1%A8%E7%A4%BA">openMSX vram2bmp出力ファイルの表示</h2>
 <p>openMSXでは<code>vram2bmp</code>でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。</p>
 <ol>
-<li>
-<p>openMSXでF10キーを押してコンソールを表示</p>
-</li>
-<li>
-<p>コンソールで <code>vram2bmp ファイル名.bmp 0 256 1024</code>でVRAM全体保存</p>
-<p><img src="img/openmsx_console.png" alt=""></p>
-</li>
+<li>openMSXでF10キーを押してコンソールを表示</li>
+<li>コンソールで <code>vram2bmp ファイル名.bmp 0 256 1024</code>でVRAM全体保存
+<img src="img/openmsx_console.png" alt="openMSX console"></li>
 </ol>
 <blockquote>
 <p><strong>Note</strong>: 保存先について</p>
@@ -598,6 +594,52 @@ BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
 </tr>
 </tbody>
 </table>
+<hr>
+<h2 id="%E3%81%8A%E3%81%BE%E3%81%91%E7%B8%A6%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB%EF%BC%8F%E6%A8%AA%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB">おまけ：縦スクロール／横スクロール</h2>
+<p>VDPシミュレートの検証で付けている処理です。</p>
+<p><img src="img/gsrle_html_scroll.png" alt="スクロール機能"></p>
+<ol>
+<li>
+<p><strong>▲▼VScroll</strong><br>
+縦スクロールスイッチ</p>
+<ul>
+<li>上下にドラッグで縦スクロール</li>
+<li>クリックでリセット</li>
+</ul>
+<p>スプライトごと移動する</p>
+</li>
+<li>
+<p><strong>◀▶HScroll</strong><br>
+横スクロールスイッチ</p>
+<ul>
+<li>上下にドラッグで縦スクロール</li>
+<li>クリックでリセット</li>
+</ul>
+<p>スプライトは影響をうけない</p>
+</li>
+<li>
+<p><strong>HScroll Mask</strong><br>
+画面左に8ドット幅の周辺色マスクを表示する
+スプライトもマスクされる</p>
+</li>
+<li>
+<p><strong>2Page HScroll</strong><br>
+VDP R#25 bit0：2画面横スクロール<br>
+表示ページは奇数を指定する</p>
+<p>1ページのVRAMサイズ</p>
+<ul>
+<li>SCREEN0～6,9は<code>0x8000</code></li>
+<li>SCREEN7,8,10～12は<code>0x10000</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="%E8%A3%9C%E8%B6%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9%EF%BC%86%E3%83%95%E3%83%AA%E3%83%83%E3%83%97%E3%83%A2%E3%83%BC%E3%83%89">補足：インターレース＆フリップモード</h2>
+<p>インターレースモードで2ページをフリップさせて疑似的に424ライン表示する機能</p>
+<p><img src="img/gsrle_html_topbar.png" alt="interlace button"></p>
+<p><code>Interlace</code>にチェックを付けるとインターレース＆フリップモードになります。<br>
+市販ソフトではDPSSGがSCREEN7で使用して、VGAに近い解像度を実現していました。</p>
+<p>※ SCREEN0～4では使用できません</p>
+<p>※ <code>2Page HScroll</code>と同様に強制的に表示ページを奇数ページに変更します。</p>
 <hr>
 <h2 id="%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">対応拡張子</h2>
 <p>拡張子で判定して、インターレースモードでの読込先ページを決定します。</p>
@@ -1204,6 +1246,17 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2023/09/15 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_022.7z">ver.0.22</a></p>
+<ul>
+<li>スプライト処理最適化に伴う拡大表示のバグ修正</li>
+<li>スクロール対応描画処理最適化に伴うインターレース表示時の横256ドット時のバグ修正</li>
+<li>横スクロールの処理追加</li>
+<li>表示更新処理を最適化</li>
+<li>インターレースモード画像表示時に違う画面モードのインターレース画像を表示した際に表示ページが0になるバグの修正<br>
+（※ インタレース＆フリップでの424ライン表示の場合はVDP表示ページを奇数にする必要がある）</li>
+</ul>
+</li>
 <li>
 <p>2023/09/13 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z">ver.0.21</a></p>
 <ul>

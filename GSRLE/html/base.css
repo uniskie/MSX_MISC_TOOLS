@@ -208,17 +208,6 @@ details.details {
 #spec_details2 {
     padding: 1px 4px 1px 4px;
 }
-#spec_details2 button {
-    background-color: #226;
-    color: #dadade;
-    border: outset 1px #eee;
-}
-#spec_details2 button:hover {
-    background-color: #448;
-}
-#spec_details2 button:active {
-    border: 1px inset red;
-}
 
 
 /* ==================================== */
@@ -458,15 +447,16 @@ button.save_button:active {
 .toggle_button span {
     user-select: none;  /*テキスト選択禁止*/
 }
-.spec_details .toggle_button {
-    background-color: #44a;
-}
 .detail_group .toggle_button {
     background-color: #855;
     /*
     width: 100%;
     */
 }
+.detail_group .toggle_button:hover {
+    background-color: #643;
+ }
+
 .toggle_button input[type="checkbox"] {
     position: relative;
     margin-top: 1px;
@@ -476,15 +466,38 @@ button.save_button:active {
     padding: 0 0.5em 0 0;
     user-select: none;  /*テキスト選択禁止*/
 }
+.toggle_button:active {
+    background-color: #a48;
+}
+
+.spec_details .toggle_button {
+    background-color: #44a;
+}
 .spec_details .toggle_button:hover {
     background-color: #435;
  }
- .detail_group .toggle_button:hover {
-    background-color: #643;
+ .spec_details .toggle_button:active {
+    /*background-color: #435;*/
+    background-color: #114;
+    border: 1px inset red;
  }
- .toggle_button:active {
-    background-color: #a48;
+.spec_details button {
+    background-color: #44a;
+    /*background-color: #482048;*/
+    color: #dadade;
+    border: outset 1px #cce;
+    border-radius: 0.25em;
 }
+.spec_details button:hover {
+    background-color: #435;
+    /*background-color: #2c122c;*/
+}
+.spec_details button:active {
+    background-color: #114;
+    border: 1px inset red;
+}
+
+
 #color_palette_area {
     /*width : 256px;*/
     /*height : 32px;*/

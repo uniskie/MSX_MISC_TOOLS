@@ -1,16 +1,18 @@
 # HTML5 MSX GRAPHICS Viewer
+
  ブラウザ版 MSX画像ビューア
 
 グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_021.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_022.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_022.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
 
 ----
+
 ## 概要
 
 ![プレビュー](img/gsrle_html_preview.png)
@@ -55,8 +57,8 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 また、ファイルボタンから開くことも可能です。  
 （その場合も複数ファイル指定可能です）
 
-
 ----
+
 ## MSX実機でのロード(グラフサウルス圧縮形式)
 
 ローダーのサンプルがあります。
@@ -69,6 +71,7 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 画像ファイルの再利用はご遠慮ください。
 
 ----
+
 ## MSX画像の圧縮・展開 保存機能
 
 読み込み済みファイルがあれば保存・圧縮保存が可能です。
@@ -97,7 +100,7 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 
 ## 設定保存・読み込み
 
-![プレビュー](img/gsrle_html_savebutton3.png)
+![プレビュー](img/gsrle_html_config.png)
 
 各種設定を保存、読み込み出来ます。
 
@@ -107,6 +110,7 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 読み込み時はJSONファイルを開くかドロップしてください。
 
 保存・読み込みされる設定内容：
+
 - スクリーンモード番号、インターレースモード、表示ページ
 - スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）
 - キャラクタジェネレータ・ベースアドレス
@@ -129,6 +133,7 @@ BLOADで読み込むときに、サイズ&hFFFFを越えるファイルは読み
 ファイル自体は最後まで書き込まれまます。
 
 > 例)
+>
 > - VRAM全体セーブ
 >
 >   ```START=0, END=FFFE``` → ```START=0, END=FFFE```  
@@ -151,15 +156,14 @@ BLOADでは&h0000～&hFFFEまでしか読み込めません。
 ( [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD) など)
 
 ----
-## openMSX vram2bmp出力ファイルの表示
 
+## openMSX vram2bmp出力ファイルの表示
 
 openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。
 
 1. openMSXでF10キーを押してコンソールを表示
 2. コンソールで ```vram2bmp ファイル名.bmp 0 256 1024```でVRAM全体保存
-
-   ![](img/openmsx_console.png)
+   ![openMSX console](img/openmsx_console.png)
 
 > **Note**: 保存先について
 >
@@ -171,6 +175,7 @@ openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPフ�
 > ```cd```（チェンジディレクトリ）コマンドでカレントディレクトリを変えておくとファイルが整理しやすくて良いかもしれません。
 >
 > **Note**: 保存先の変更例
+>
 > 1. ```マイドキュメント\openMSX\``` に ```bmp``` フォルダを作成
 > 2. コンソールから ```cd $env(OPENMSX_USER_DATA)/bmp```
 >
@@ -187,7 +192,6 @@ openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPフ�
 
 自分向け遊び機能ですが、内容確認などの使い道はあるかもしれません。
 
-
 ### 表示例
 
 ![display RAW BMP](img/gsrle_html_raw_bmp_preview.png)
@@ -197,6 +201,7 @@ openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPフ�
 HYDLIDE3 (C) T&E SOFT / D4 Enterprise
 
 ----
+
 ## スプライト・キャラジェネの表示ベースアドレス指定
 
 - スクリーン0～4ではキャラクタジェネレータ欄が表示されます。  
@@ -204,7 +209,6 @@ HYDLIDE3 (C) T&E SOFT / D4 Enterprise
 
 - スクリーン1～12ではスプライト欄が表示されます。  
   ![スプライトジェネレータ](img/gsrle_html_sprgen.png)
-
 
 ### 各ベースアドレス
 
@@ -218,8 +222,8 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 
 ※ SPRCOL (スプライトカラーテーブル) は```SPRATR (スプライトアトリビュートテーブル) - 512```にVDPが自動決定します。
 
-
 ----
+
 ## 設定：読み込み後自動保存
 
 画像の読み込みが終わった後に指定の形式で自動保存するオプション
@@ -233,6 +237,54 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | GS圧縮+PLT分離 | グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット | PLTファイル |
 
 ----
+
+## おまけ：縦スクロール／横スクロール
+
+VDPシミュレートの検証で付けている処理です。
+
+![スクロール機能](img/gsrle_html_scroll.png)
+
+1. **▲▼VScroll**  
+   縦スクロールスイッチ  
+   - 上下にドラッグで縦スクロール
+   - クリックでリセット
+
+   スプライトごと移動する
+
+2. **◀▶HScroll**  
+   横スクロールスイッチ  
+   - 上下にドラッグで縦スクロール
+   - クリックでリセット
+
+   スプライトは影響をうけない
+
+3. **HScroll Mask**  
+   画面左に8ドット幅の周辺色マスクを表示する
+   スプライトもマスクされる
+
+4. **2Page HScroll**  
+   VDP R#25 bit0：2画面横スクロール  
+   表示ページは奇数を指定する
+
+   1ページのVRAMサイズ
+   - SCREEN0～6,9は```0x8000```
+   - SCREEN7,8,10～12は```0x10000```
+
+## 補足：インターレース＆フリップモード
+
+インターレースモードで2ページをフリップさせて疑似的に424ライン表示する機能
+
+![interlace button](img/gsrle_html_topbar.png)
+
+```Interlace```にチェックを付けるとインターレース＆フリップモードになります。  
+市販ソフトではDPSSGがSCREEN7で使用して、VGAに近い解像度を実現していました。
+
+※ SCREEN0～4では使用できません
+
+※ ```2Page HScroll```と同様に強制的に表示ページを奇数ページに変更します。
+
+----
+
 ## 対応拡張子
 
 拡張子で判定して、インターレースモードでの読込先ページを決定します。
@@ -299,7 +351,7 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | .SR0 | SCREEN 0 WIDTH 40 | non-interlace    | .SR0 |.SR0 | BSAVE / GS
 | .SR1 | SCREEN 1          | non-interlace    | .SR1 |.SR1 | BSAVE / GS
 
-### 特殊 
+### 特殊
 
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|------|---|---|---|
@@ -324,8 +376,8 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | .BMP'  | 現在の画面モード | .SCR | .GSR | RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
 | .VRM'  | 現在の画面モード | .VRM | .GSR | RAWイメージ - 新10倍で読み込み変換したもの等
 
-
 ----
+
 ## PNGやBMPからMSX用画像への変換について
 
 本ツールにはMSX画像形式からの圧縮や展開のみをサポートしています。  
@@ -340,10 +392,9 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 - その他ツール紹介ページ  
   [Gigamax Online Webアプリ多め！ネットで見つけたMSX向け画像編集ツールまとめ](https://gigamix.hatenablog.com/entry/devmsx/graphics-tools#MSX-Screen-Converter%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3-MSX%E5%90%91%E3%81%91%E5%90%84%E7%A8%AE%E7%94%BB%E5%83%8F%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF)
 
-
 ----
-## 使用許諾
 
+## 使用許諾
 
 ### 禁止事項
 
@@ -359,9 +410,17 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 転載や改変についてサポートは致しかねます。  
 また、このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。
 
-
 ----
+
 ## 更新履歴
+
+- 2023/09/15 [ver.0.22](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_022.7z)
+  - スプライト処理最適化に伴う拡大表示のバグ修正
+  - スクロール対応描画処理最適化に伴うインターレース表示時の横256ドット時のバグ修正
+  - 横スクロールの処理追加
+  - 表示更新処理を最適化
+  - インターレースモード画像表示時に違う画面モードのインターレース画像を表示した際に表示ページが0になるバグの修正  
+    （※ インタレース＆フリップでの424ライン表示の場合はVDP表示ページを奇数にする必要がある）
 
 - 2023/09/13 [ver.0.21](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z)
   - スプライトモード2の時の表示制限判定を修正
@@ -405,8 +464,7 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
      （TPビット:カラー０を指定したときに透明にならずにカラーパレットの色で表示する）
   - スクリーン0,1,2,3でカラーパレットのチェックを外して無効にした際、TMS9918A風の色にする設定を追加
 
-
-- 2023/09/08 ver.0.12 
+- 2023/09/08 ver.0.12
   - 仮に HTML5 MSX GRAPHICS Viewer ver.0.12 とした。
   - 画面モードの変更や各種画面設定を変更できるようにUIや処理追加。
   - スプライトモード1と2に対応。表示サイズモードやスプライト非表示スイッチも追加。
@@ -416,7 +474,6 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
   - SCREEN0 WIDTH80でのブリンクは非対応
   - スプライトモード2のTRビット（透明色ではなくカラー0で描画）には非対応
   - 細かいUIデザイン変更。
-
 
 - 2023/09/05
   - SCREEN2～4の画像保存が正常動作しないのを修正。
