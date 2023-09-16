@@ -147,6 +147,23 @@ function formatHex0( n, d ) {
 }
 
 // ========================================================
+// Uint8Array(2) -> Uint16
+// ========================================================
+function get_u16(d, i) {
+    return  d[i] + 
+            d[i + 1] * 0x100;
+}
+// ========================================================
+// Uint8Array(4) -> Uint32
+// ========================================================
+function get_u32(d, i) {
+    return  d[i] + 
+            d[i + 1] * 0x100 + 
+            d[i + 2] * 0x10000 + 
+            d[i + 3] * 0x1000000;
+}
+
+// ========================================================
 // ========================================================
 // ラジオスイッチ：チェックされた値を返す
 //  in: name - タグのid
@@ -767,8 +784,16 @@ const ext_info = [
     {ext:'.SCR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
     {ext:'.GSR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
 
+    {ext:'.CPY', screen_no:-1, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CP5', screen_no: 5, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CP6', screen_no: 6, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CP7', screen_no: 7, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CP8', screen_no: 8, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CPA', screen_no:10, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    {ext:'.CPC', screen_no:12, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+
     // 仮対応：スクリーン0、1
-    //	{ext:'.SC1', screen_no: 1, interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
+//	{ext:'.SC1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
     {ext:'.TX1', screen_no: 0, txw:40, interlace:0, page:0, type:0, bsave:'.TX1', gs:'.TX1'},	// BSAVE / GS
     {ext:'.TX2', screen_no: 0, txw:80, interlace:0, page:0, type:0, bsave:'.TX2', gs:'.TX2'},	// BSAVE / GS
     {ext:'.GR1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.GR1', gs:'.GR1'},	// BSAVE / GS
@@ -3409,7 +3434,7 @@ function detectImageHeight( mode_info, header, size )
 // ========================================================
 // 画像バイナリ読み込み
 // in:  d - Uint8Array
-//      config - loadVcdConfig（設定オブジェクト）
+//      ext_info - file info
 // ========================================================
 function loadImage(d, ext_info)
 {
@@ -3487,6 +3512,81 @@ function loadImage(d, ext_info)
 }
 
 // ========================================================
+// COPY文で保存された画像読み込み
+
+// in:  buf - Uint8Array
+//      ext_info - file info
+//      file_text - filename
+// ========================================================
+function loadCpy(buf, ext_info, file_text)
+{
+    let width = get_u16(buf, 0);
+    let height = get_u16(buf, 2);
+    let d = buf.subarray( 4 );
+
+    vdp.auto_height = 212 < height ? 256 : 212;
+    let screen_no = ext_info.screen_no < 0 ? vdp.screen_no : ext_info.screen_no;
+
+    if (screen_no < 5) {
+        add_log( '"' + file_text + '": COPY画像はSCREEN4以下では読み込めません。' );
+        return 0;
+    }
+
+    vdp.changeScreen( screen_no );
+    vdp.cls();
+
+    let x,y,xi,mi;
+    let vram = vdp.vram;
+    let screen_width  = vdp.mode_info.width;
+    let screen_height = vdp.mode_info.height;
+    let line_size = vdp.mode_info.bpp * screen_width / 8;
+
+    let n = 0;
+    let i = 0;
+    if (vdp.mode_info.bpp == 4) {
+        const mask = [0xf0, 0x0f];
+        for (y = 0; y < height; ++y) {
+            if (y < screen_height) {
+                xi = n;
+                for (x = 0; x < width; ++x) {
+                    if (x < screen_width) {
+                        mi = x & 1;
+                        if (i < d.length) {
+                            vram[xi] = (vram[xi] & mask[1-mi]) | (d[i] & mask[mi]);
+                        }
+                    }
+                    xi += mi;
+                    i += mi;
+                }
+            }
+            i += width & 1;
+            n += line_size;
+        }
+    } else {
+        const mask = [0xf0, 0x0f];
+        for (y = 0; y < height; ++y) {
+            if (y < screen_height) {
+                xi = n;
+                for (x = 0; x < width; ++x) {
+                    if (x < screen_width) {
+                        if (i < d.length) {
+                            vram[xi] = d[i];
+                        }
+                    }
+                    ++xi;
+                    ++i;
+                }
+            }
+            n += line_size;
+        }
+    }
+    vdp.update();
+    vdp.draw();
+
+    return n;
+}
+
+// ========================================================
 // BMP読み込み (OpenMSXのvram2bmpで出力した物)
 //  
 //  openMSXでF10→コンソール
@@ -3495,18 +3595,9 @@ function loadImage(d, ext_info)
 //      16bitビットマップモードではパレットも保存される。
 //
 // in:  d - Uint8Array
-//      config - loadVcdConfig（設定オブジェクト）
+//      ext_info - file info
+//      file_text - filename
 // ========================================================
-function get_u16(d, i) {
-    return  d[i] + 
-            d[i + 1] * 0x100;
-}
-function get_u32(d, i) {
-    return  d[i] + 
-            d[i + 1] * 0x100 + 
-            d[i + 2] * 0x10000 + 
-            d[i + 3] * 0x1000000;
-}
 function loadBmp(d, ext_info, file_text)
 {
     // ========================================================
@@ -3602,6 +3693,10 @@ function loadBmp(d, ext_info, file_text)
         return 0;
     }
 
+    // 高さ指定
+    vdp.auto_height = 256;
+    vdp.changeScreen( vdp.screen_no, vdp.mode_info.txw, vdp.interlace_mode );
+
     // パレット RGBQUAD BGR0_8888
     let pal_s = file_header.length + info_header.length;
     let pal_size = file_header.bfOffBits - pal_s;
@@ -3630,8 +3725,6 @@ function loadBmp(d, ext_info, file_text)
     let trans_size = Math.min( dat.length , vdp.vram.length );
     vdp.vram.set( dat.subarray( 0, trans_size ) );
 
-    vdp.auto_height = 256;
-    vdp.changeScreen( vdp.screen_no, vdp.mode_info.txw, vdp.interlace_mode );
     vdp.update();
     vdp.draw();
 
@@ -3671,7 +3764,15 @@ function openGsFile( target_file )
         // パレット
         pal_file = LogFile( target_file );
     } else
-    if (ext_info.type == 2) {
+    if (ext_info.type == 3) { // .CPY
+        // COPY 画像
+        pal_file = empty_file;
+        sub_file = empty_file;
+        main_file = empty_file;
+        bmp_file = LogFile( target_file );
+        vdp.cls();
+    } else 
+    if (ext_info.type == 2) { // .BMP
         // BMP / RAW 画像
         pal_file = empty_file;
         sub_file = empty_file;
@@ -3742,9 +3843,27 @@ function openGsFile( target_file )
                     vdp.update();
                     vdp.draw();
                 } else
-                if (ext_info.ext == '.BMP') {
+                if (ext_info.type == 3) { // .CPY
+                    let ts = loadCpy(u8array, ext_info, file_text);
+                    if (ts <= 0) {
+                        // エラー
+                        bmp_file = empty_file;
+                        file_load_que.length = 0;    //残りをすべて破棄
+                        drop_avilable = true;
+                        displayCurrentFilename();
+                        return;
+                    }
+                    let h = new BinHeader();
+                    h.id    = BinHeader.HEAD_ID_LINEAR;
+                    h.start = 0;
+                    h.end   = ts - 1;
+                    h.run   = 0;
+                    bmp_file.header = h;
+                    bmp_file.size = ts - 1;
+                } else
+                if (ext_info.type == 2) { // .BMP
                     let ts = loadBmp(u8array, ext_info, file_text);
-                    if (ts < 0) {
+                    if (ts <= 0) {
                         // エラー
                         bmp_file = empty_file;
                         file_load_que.length = 0;    //残りをすべて破棄
