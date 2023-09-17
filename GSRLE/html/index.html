@@ -362,7 +362,7 @@ code {
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024b.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -1220,49 +1220,98 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>現在の画面モード</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CP5</td>
-<td>現在の画面モード</td>
+<td>SCREEN  5</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CP6</td>
-<td>現在の画面モード</td>
+<td>SCREEN  6</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CP7</td>
-<td>現在の画面モード</td>
+<td>SCREEN  7</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CP8</td>
-<td>現在の画面モード</td>
+<td>SCREEN  8</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CPA</td>
-<td>現在の画面モード</td>
+<td>SCREEN 10</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
 </tr>
 <tr>
 <td>.CPC</td>
-<td>現在の画面モード</td>
+<td>SCREEN 12</td>
 <td>.VRM</td>
 <td>.GSR</td>
-<td>COPY文イメージ</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.GL5</td>
+<td>SCREEN  5</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GL6</td>
+<td>SCREEN  6</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GL7</td>
+<td>SCREEN  7</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GL8</td>
+<td>SCREEN  8</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GLA</td>
+<td>SCREEN 10</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GLC</td>
+<td>SCREEN 12</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GLS</td>
+<td>SCREEN 12</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
 </tr>
 </tbody>
 </table>
@@ -1295,6 +1344,12 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2023/09/17 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z">ver.0.24b</a></p>
+<ul>
+<li>COPY文で保存したファイルの拡張子にグラフサウルスのGL?を追加</li>
+</ul>
+</li>
 <li>
 <p>2023/09/16 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024.7z">ver.0.24</a></p>
 <ul>

@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024b.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -355,33 +355,40 @@ VDPシミュレートの検証で付けている処理です。
 
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|------|---|---|---|
-| .BIN  | 現在の画面モード | .BIN | .BIN | 汎用
-| .SPR  | 現在の画面モード | .SPR | .SPR | スプライト
-| .SPC  | 現在の画面モード | .SPC | .SPC | スプライトカラー
-| .NAM  | 現在の画面モード | .NAM | .NAM | SC2 パターンネーム
-| .COL  | 現在の画面モード | .COL | .COL | SC2 パターンカラー
-| .GEN  | 現在の画面モード | .GEN | .GEN | SC2 パターンジェネレータ
-| .PAT  | 現在の画面モード | .PAT | .PAT | SC2 パターンジェネレータ
-| .NM   | 現在の画面モード | .NM' | .NM' | SC2 パターンネーム
-| .CL   | 現在の画面モード | .CL' | .CL' | SC2 パターンカラー
-| .GN   | 現在の画面モード | .GN' | .GN' | SC2 パターンジェネレータ
-| .CL0  | 現在の画面モード | .CL0 | .CL0 | SC2 パターンカラー
-| .CL1  | 現在の画面モード | .CL1 | .CL1 | SC2 パターンカラー
-| .CL2  | 現在の画面モード | .CL2 | .CL2 | SC2 パターンカラー
-| .GN0  | 現在の画面モード | .GN0 | .GN0 | SC2 パターンジェネレータ
-| .GN1  | 現在の画面モード | .GN1 | .GN1 | SC2 パターンジェネレータ
-| .GN2  | 現在の画面モード | .GN2 | .GN2 | SC2 パターンジェネレータ
-| .SCR  | 現在の画面モード | .SCR | .GSR | RAWイメージ
-| .GSR  | 現在の画面モード | .SCR | .GSR | RAWイメージ
-| .BMP  | 現在の画面モード | .SCR | .GSR | RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
-| .VRM  | 現在の画面モード | .VRM | .GSR | RAWイメージ - 新10倍で読み込み変換したもの等
-| .CPY  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CP5  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CP6  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CP7  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CP8  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CPA  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
-| .CPC  | 現在の画面モード | .VRM | .GSR | COPY文イメージ
+| .BIN | 現在の画面モード | .BIN | .BIN | 汎用
+| .SPR | 現在の画面モード | .SPR | .SPR | スプライト
+| .SPC | 現在の画面モード | .SPC | .SPC | スプライトカラー
+| .NAM | 現在の画面モード | .NAM | .NAM | SC2 パターンネーム
+| .COL | 現在の画面モード | .COL | .COL | SC2 パターンカラー
+| .GEN | 現在の画面モード | .GEN | .GEN | SC2 パターンジェネレータ
+| .PAT | 現在の画面モード | .PAT | .PAT | SC2 パターンジェネレータ
+| .NM  | 現在の画面モード | .NM' | .NM' | SC2 パターンネーム
+| .CL  | 現在の画面モード | .CL' | .CL' | SC2 パターンカラー
+| .GN  | 現在の画面モード | .GN' | .GN' | SC2 パターンジェネレータ
+| .CL0 | 現在の画面モード | .CL0 | .CL0 | SC2 パターンカラー
+| .CL1 | 現在の画面モード | .CL1 | .CL1 | SC2 パターンカラー
+| .CL2 | 現在の画面モード | .CL2 | .CL2 | SC2 パターンカラー
+| .GN0 | 現在の画面モード | .GN0 | .GN0 | SC2 パターンジェネレータ
+| .GN1 | 現在の画面モード | .GN1 | .GN1 | SC2 パターンジェネレータ
+| .GN2 | 現在の画面モード | .GN2 | .GN2 | SC2 パターンジェネレータ
+| .SCR | 現在の画面モード | .SCR | .GSR | RAWイメージ
+| .GSR | 現在の画面モード | .SCR | .GSR | RAWイメージ
+| .BMP | 現在の画面モード | .SCR | .GSR | RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
+| .VRM | 現在の画面モード | .VRM | .GSR | RAWイメージ - 新10倍で読み込み変換したもの等
+| .CPY | 現在の画面モード | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CP5 | SCREEN  5 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CP6 | SCREEN  6 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CP7 | SCREEN  7 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CP8 | SCREEN  8 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CPA | SCREEN 10 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .CPC | SCREEN 12 | .VRM | .GSR | 範囲画像（BASIC COPY文）
+| .GL5 | SCREEN  5 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+| .GL6 | SCREEN  6 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+| .GL7 | SCREEN  7 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+| .GL8 | SCREEN  8 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+| .GLA | SCREEN 10 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+| .GLC | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+| .GLS | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
 
 ----
 
@@ -420,6 +427,9 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2023/09/17 [ver.0.24b](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z)
+  - COPY文で保存したファイルの拡張子にグラフサウルスのGL?を追加
 
 - 2023/09/16 [ver.0.24](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024.7z)
   - COPY文で保存したファイルの読み込みに対応

@@ -783,14 +783,22 @@ const ext_info = [
     {ext:'.BMP', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.VRM', gs:'.GSR'},	// RAWイメージ OpenMSX vram2bmp の非圧縮BMP
     {ext:'.SCR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
     {ext:'.GSR', screen_no:-1, interlace:-1, page:-1, type:2, bsave:'.SCR', gs:'.GSR'},	// RAWイメージ
-
-    {ext:'.CPY', screen_no:-1, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CP5', screen_no: 5, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CP6', screen_no: 6, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CP7', screen_no: 7, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CP8', screen_no: 8, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CPA', screen_no:10, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
-    {ext:'.CPC', screen_no:12, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// COPYイメージ
+    
+    {ext:'.CPY', screen_no:-1, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CP5', screen_no: 5, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CP6', screen_no: 6, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CP7', screen_no: 7, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CP8', screen_no: 8, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CPA', screen_no:10, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    {ext:'.CPC', screen_no:12, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文）
+    
+    {ext:'.GL5', screen_no: 5, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+    {ext:'.GL6', screen_no: 6, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+    {ext:'.GL7', screen_no: 7, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+    {ext:'.GL8', screen_no: 8, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+    {ext:'.GLA', screen_no:10, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+    {ext:'.GLC', screen_no:12, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
+    {ext:'.GLS', screen_no:12, interlace:-1, page:-1, type:3, bsave:'.VRM', gs:'.CPR'},	// 範囲画像（BASIC COPY文/グラフサウルス拡張子）
 
     // 仮対応：スクリーン0、1
 //	{ext:'.SC1', screen_no: 1,         interlace:0, page:0, type:0, bsave:'.SC1', gs:'.SR1'},	// BSAVE
