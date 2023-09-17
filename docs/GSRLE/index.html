@@ -362,7 +362,7 @@ code {
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024b.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_025.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_025.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -375,6 +375,7 @@ code {
 <li>インターレース画像対応（SCREEN5以上）</li>
 <li>openMSXコンソールから<code>vram2bmp ファイル名.bmp 0 256 1024</code>で保存したBMPに対応</li>
 <li>スプライト(モード1&amp;2)に対応</li>
+<li>COPY文での範囲保存（グラフサウルスではGL?）ファイルに対応</li>
 </ul>
 <p>メインターゲットはスクリーン5～12のMSX画像です。</p>
 <p>HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。</p>
@@ -650,6 +651,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 <li>SCREEN 9は未テストです。</li>
 <li>保存時は現在表示している縦サイズで保存します。</li>
 </ol>
+<h3 id="%E3%83%8E%E3%83%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">ノンインターレース ビットマップ画像</h3>
 <table>
 <thead>
 <tr>
@@ -662,30 +664,6 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>.SC2</td>
-<td>SCREEN  2</td>
-<td>non-interlace</td>
-<td>.SC2</td>
-<td>.SR2</td>
-<td>BSAVE</td>
-</tr>
-<tr>
-<td>.SC3</td>
-<td>SCREEN  3</td>
-<td>non-interlace</td>
-<td>.SC3</td>
-<td>.SR4</td>
-<td>BSAVE</td>
-</tr>
-<tr>
-<td>.SC4</td>
-<td>SCREEN  4</td>
-<td>non-interlace</td>
-<td>.SC4</td>
-<td>.SR3</td>
-<td>BSAVE</td>
-</tr>
 <tr>
 <td>.SC5</td>
 <td>SCREEN  5</td>
@@ -734,6 +712,77 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>.SRC</td>
 <td>BSAVE</td>
 </tr>
+<tr>
+<td>.SR5</td>
+<td>SCREEN  5</td>
+<td>non-interlace</td>
+<td>.SC5</td>
+<td>.SR5</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR6</td>
+<td>SCREEN  6</td>
+<td>non-interlace</td>
+<td>.SC6</td>
+<td>.SR6</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR7</td>
+<td>SCREEN  7</td>
+<td>non-interlace</td>
+<td>.SC7</td>
+<td>.SR7</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR8</td>
+<td>SCREEN  8</td>
+<td>non-interlace</td>
+<td>.SC8</td>
+<td>.SR8</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRA</td>
+<td>SCREEN 10</td>
+<td>non-interlace</td>
+<td>.S10</td>
+<td>.SRA</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRC</td>
+<td>SCREEN 12</td>
+<td>non-interlace</td>
+<td>.S12</td>
+<td>.SRC</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRS</td>
+<td>SCREEN 12</td>
+<td>non-interlace</td>
+<td>.S12</td>
+<td>.SRS</td>
+<td>GRAPH SAURUS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B92%E6%9E%9A%E7%B5%84-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">インターレース（2枚組） ビットマップ画像</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号</th>
+<th>インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td>.S50</td>
 <td>SCREEN  5</td>
@@ -829,86 +878,6 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>.SC1</td>
 <td>.RC1</td>
 <td>BSAVE interlace</td>
-</tr>
-<tr>
-<td>.SR2</td>
-<td>SCREEN  2</td>
-<td>non-interlace</td>
-<td>.SC2</td>
-<td>.SR2</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR4</td>
-<td>SCREEN  3</td>
-<td>non-interlace</td>
-<td>.SC3</td>
-<td>.SR4</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR3</td>
-<td>SCREEN  4</td>
-<td>non-interlace</td>
-<td>.SC4</td>
-<td>.SR3</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR5</td>
-<td>SCREEN  5</td>
-<td>non-interlace</td>
-<td>.SC5</td>
-<td>.SR5</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR6</td>
-<td>SCREEN  6</td>
-<td>non-interlace</td>
-<td>.SC6</td>
-<td>.SR6</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR7</td>
-<td>SCREEN  7</td>
-<td>non-interlace</td>
-<td>.SC7</td>
-<td>.SR7</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SR8</td>
-<td>SCREEN  8</td>
-<td>non-interlace</td>
-<td>.SC8</td>
-<td>.SR8</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SRA</td>
-<td>SCREEN 10</td>
-<td>non-interlace</td>
-<td>.S10</td>
-<td>.SRA</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SRC</td>
-<td>SCREEN 12</td>
-<td>non-interlace</td>
-<td>.S12</td>
-<td>.SRC</td>
-<td>GRAPH SAURUS</td>
-</tr>
-<tr>
-<td>.SRS</td>
-<td>SCREEN 12</td>
-<td>non-interlace</td>
-<td>.S12</td>
-<td>.SRS</td>
-<td>GRAPH SAURUS</td>
 </tr>
 <tr>
 <td>.R50</td>
@@ -1008,7 +977,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E6%9A%AB%E5%AE%9A%E5%AF%BE%E5%BF%9C%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B301">暫定対応：スクリーン0～1</h3>
+<h3 id="%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%8D%E3%83%AC%E3%83%BC%E3%82%BF%E7%B3%BBscreen-04">キャラクタージェネレータ系（SCREEN 0～4）</h3>
 <table>
 <thead>
 <tr>
@@ -1061,9 +1030,57 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>.SR1</td>
 <td>BSAVE / GS</td>
 </tr>
+<tr>
+<td>.SC2</td>
+<td>SCREEN  2</td>
+<td>non-interlace</td>
+<td>.SC2</td>
+<td>.SR2</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC3</td>
+<td>SCREEN  3</td>
+<td>non-interlace</td>
+<td>.SC3</td>
+<td>.SR4</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC4</td>
+<td>SCREEN  4</td>
+<td>non-interlace</td>
+<td>.SC4</td>
+<td>.SR3</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SR2</td>
+<td>SCREEN  2</td>
+<td>non-interlace</td>
+<td>.SC2</td>
+<td>.SR2</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR4</td>
+<td>SCREEN  3</td>
+<td>non-interlace</td>
+<td>.SC3</td>
+<td>.SR4</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR3</td>
+<td>SCREEN  4</td>
+<td>non-interlace</td>
+<td>.SC4</td>
+<td>.SR3</td>
+<td>GRAPH SAURUS</td>
+</tr>
 </tbody>
 </table>
-<h3 id="%E7%89%B9%E6%AE%8A">特殊</h3>
+<h3 id="%E7%89%B9%E6%AE%8A-%E3%83%90%E3%82%A4%E3%83%8A%E3%83%AA%E3%83%95%E3%82%A1%E3%82%A4%E3%83%ABbsavebload">特殊 バイナリファイル（BSAVE/BLOAD）</h3>
 <table>
 <thead>
 <tr>
@@ -1081,6 +1098,13 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>.BIN</td>
 <td>.BIN</td>
 <td>汎用</td>
+</tr>
+<tr>
+<td>.VRM</td>
+<td>現在の画面モード</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>BSAVE RAWイメージ - 新10倍で読み込み変換したもの等</td>
 </tr>
 <tr>
 <td>.SPR</td>
@@ -1187,34 +1211,55 @@ VDP R#25 bit0：2画面横スクロール<br>
 <td>.GN2</td>
 <td>SC2 パターンジェネレータ</td>
 </tr>
+</tbody>
+</table>
+<h3 id="%E7%89%B9%E6%AE%8A-raw%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 RAWイメージ</h3>
+<table>
+<thead>
 <tr>
-<td>.SCR</td>
-<td>現在の画面モード</td>
-<td>.SCR</td>
-<td>.GSR</td>
-<td>RAWイメージ</td>
+<th>拡張子</th>
+<th>SCREEN番号 &amp; インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
 </tr>
-<tr>
-<td>.GSR</td>
-<td>現在の画面モード</td>
-<td>.SCR</td>
-<td>.GSR</td>
-<td>RAWイメージ</td>
-</tr>
+</thead>
+<tbody>
 <tr>
 <td>.BMP</td>
 <td>現在の画面モード</td>
 <td>.SCR</td>
 <td>.GSR</td>
-<td>RAWイメージ - OpenMSX vram2bmp の非圧縮BMP</td>
+<td>BMPヘッダ+RAWイメージ - OpenMSX vram2bmp の非圧縮BMP</td>
 </tr>
 <tr>
-<td>.VRM</td>
+<td>.SCR</td>
 <td>現在の画面モード</td>
-<td>.VRM</td>
+<td>.SCR</td>
 <td>.GSR</td>
-<td>RAWイメージ - 新10倍で読み込み変換したもの等</td>
+<td>RAWイメージ</td>
 </tr>
+<tr>
+<td>.GSR</td>
+<td>現在の画面モード</td>
+<td>.SCR</td>
+<td>.GSR</td>
+<td>RAWイメージ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E7%89%B9%E6%AE%8A-%E7%AF%84%E5%9B%B2%E4%BF%9D%E5%AD%98%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 範囲保存イメージ</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号 &amp; インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td>.CPY</td>
 <td>現在の画面モード</td>
@@ -1344,6 +1389,16 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2023/09/18 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_025.7z">ver.0.25</a></p>
+<ul>
+<li>グレースケール表示追加</li>
+<li>テスト機能：SCREEN1,2,4で明るい色側をビット1に補正するボタン追加</li>
+<li>(.SC? .SR?ファイル)SCREEN4以下でも元のファイルの範囲だけ保存するように変更</li>
+<li>SCREEN4以下の時に0x0000～0x3FFFを保存する機能はオプションに移動</li>
+<li>.VRMファイルの扱いをRAWイメージからBSAVEイメージに修正</li>
+</ul>
+</li>
 <li>
 <p>2023/09/17 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z">ver.0.24b</a></p>
 <ul>

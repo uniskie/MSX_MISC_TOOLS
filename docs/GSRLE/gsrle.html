@@ -13,7 +13,7 @@
             HTML5 MSX GRAPHICS Viewer
         </summary>
         <div class="guide">
-            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.24b
+            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.25
                 <br>使い方：画像ファイルをドロップ（複数可）</div>
         </div>
     </details>
@@ -91,9 +91,9 @@
                             <span id="label_pal_file" class="label_text">【カラーパレット】</span>
                             <span id="detail_pal_file"></span>
                         </label>
-                        <button class="save_button vmid" id="pal_save" >PLT保存</button>
                     </div>
                     <canvas id="palette_area" class="vmid"></canvas>
+                    <button class="save_button vmid" id="pal_save" >PLT保存</button>
                 </span>
             </div>
         </span>
@@ -171,7 +171,10 @@
             </div>
         </details></span>
         <span><details open id="tab_detail_chrgen" class="details">
-            <summary class="detail_tab_label">キャラクタジェネレータ</summary>
+            <summary class="detail_tab_label">
+                キャラクタジェネレータ
+                <button class="func_button" id="test_button1">明るい色をbit1に補正</button>
+            </summary>
             <div>
                 <span id="detail_chrgen" class="detail_group">
                     <div class="label_title">
@@ -185,12 +188,18 @@
                             <select name="sel_patnam_ofs" id="sel_patnam_ofs"></select>
                         </span>
                         <span class="select_group">
-                            Gen
+                            <label class="click" for="patgen_chk">
+                                <input type="checkbox" id="patgen_chk" checked>
+                                Gen
+                            </label>
                             <select name="sel_patgen_page" id="sel_patgen_page"></select>
                             <select name="sel_patgen_ofs" id="sel_patgen_ofs"></select>
                         </span>
                         <span class="select_group" id="sel_patcol_group">
-                            Col
+                            <label class="click" for="patcol_chk">
+                                <input type="checkbox" id="patcol_chk" checked>
+                                Col
+                            </label>
                             <select name="sel_patcol_page" id="sel_patcol_page"></select>
                             <select name="sel_patcol_ofs" id="sel_patcol_ofs"></select>
                         </span>
@@ -271,6 +280,13 @@
                 <label class="click"><input type="radio" name="stretch_screen" value="1.133"        >1.133:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1"            >1:1</label>
             </span>
+            <span class="select_group">
+                <label class="label">ファイル保存範囲</label>
+                <label class="click" for="save_cg4000_chk">
+                    <input type="checkbox" id="save_cg4000_chk">
+                    SCREEN 4以下で0x0000～0x3FFF全体保存
+                </label>
+            </span>
             <span class="select_group" id="qick_save">
                 <label class="label">読み込み後：自動保存</label>
                 <label class="click"><input type="radio" name="qick_save" value="none" checked>なし</label>
@@ -304,6 +320,10 @@
                 <label class="click" for="pal_use_tms9918_chk">
                     <input type="checkbox" id="pal_use_tms9918_chk" checked>
                     スクリーン0～3でカラーパレット無効時にTMS9918色
+                </label>
+                <label class="click" for="pal_grayscale_chk">
+                    <input type="checkbox" id="pal_grayscale_chk">
+                    グレースケールで表示
                 </label>
             </span>
             <!--

@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_024b.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_025.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_025.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -22,6 +22,7 @@
 - インターレース画像対応（SCREEN5以上）
 - openMSXコンソールから```vram2bmp ファイル名.bmp 0 256 1024```で保存したBMPに対応
 - スプライト(モード1&2)に対応
+- COPY文での範囲保存（グラフサウルスではGL?）ファイルに対応
 
 メインターゲットはスクリーン5～12のMSX画像です。
 
@@ -295,17 +296,28 @@ VDPシミュレートの検証で付けている処理です。
 4. SCREEN 9は未テストです。
 5. 保存時は現在表示している縦サイズで保存します。
 
+### ノンインターレース ビットマップ画像
+
 | 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|---|---|---|---|---|
-| .SC2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | BSAVE
-| .SC3 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | BSAVE
-| .SC4 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | BSAVE
 | .SC5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | BSAVE
 | .SC6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | BSAVE
 | .SC7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | BSAVE
 | .SC8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | BSAVE
 | .S10 | SCREEN 10 | non-interlace    | .S10 |.SRA | BSAVE
 | .S12 | SCREEN 12 | non-interlace    | .S12 |.SRC | BSAVE
+| .SR5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | GRAPH SAURUS
+| .SR6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | GRAPH SAURUS
+| .SR7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | GRAPH SAURUS
+| .SR8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | GRAPH SAURUS
+| .SRA | SCREEN 10 | non-interlace    | .S10 |.SRA | GRAPH SAURUS
+| .SRC | SCREEN 12 | non-interlace    | .S12 |.SRC | GRAPH SAURUS
+| .SRS | SCREEN 12 | non-interlace    | .S12 |.SRS | GRAPH SAURUS
+
+### インターレース（2枚組） ビットマップ画像
+
+| 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
+|---|---|---|---|---|---|
 | .S50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | BSAVE interlace
 | .S51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | BSAVE interlace
 | .S60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | BSAVE interlace
@@ -318,16 +330,6 @@ VDPシミュレートの検証で付けている処理です。
 | .SA1 | SCREEN 10 | interlace page:1 | .SA1 |.RA1 | BSAVE interlace
 | .SC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | BSAVE interlace
 | .SC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | BSAVE interlace
-| .SR2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | GRAPH SAURUS
-| .SR4 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | GRAPH SAURUS
-| .SR3 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | GRAPH SAURUS
-| .SR5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | GRAPH SAURUS
-| .SR6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | GRAPH SAURUS
-| .SR7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | GRAPH SAURUS
-| .SR8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | GRAPH SAURUS
-| .SRA | SCREEN 10 | non-interlace    | .S10 |.SRA | GRAPH SAURUS
-| .SRC | SCREEN 12 | non-interlace    | .S12 |.SRC | GRAPH SAURUS
-| .SRS | SCREEN 12 | non-interlace    | .S12 |.SRS | GRAPH SAURUS
 | .R50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | GRAPH SAURUS interlace
 | .R51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | GRAPH SAURUS interlace
 | .R60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | GRAPH SAURUS interlace
@@ -341,7 +343,7 @@ VDPシミュレートの検証で付けている処理です。
 | .RC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | GRAPH SAURUS interlace
 | .RC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | GRAPH SAURUS interlace
 
-### 暫定対応：スクリーン0～1
+### キャラクタージェネレータ系（SCREEN 0～4）
 
 | 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|---|---|---|---|---|
@@ -350,12 +352,19 @@ VDPシミュレートの検証で付けている処理です。
 | .GR1 | SCREEN 1          | non-interlace    | .GR1 |.GR1 | BSAVE / GS
 | .SR0 | SCREEN 0 WIDTH 40 | non-interlace    | .SR0 |.SR0 | BSAVE / GS
 | .SR1 | SCREEN 1          | non-interlace    | .SR1 |.SR1 | BSAVE / GS
+| .SC2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | BSAVE
+| .SC3 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | BSAVE
+| .SC4 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | BSAVE
+| .SR2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | GRAPH SAURUS
+| .SR4 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | GRAPH SAURUS
+| .SR3 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | GRAPH SAURUS
 
-### 特殊
+### 特殊 バイナリファイル（BSAVE/BLOAD）
 
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
 |---|------|---|---|---|
 | .BIN | 現在の画面モード | .BIN | .BIN | 汎用
+| .VRM | 現在の画面モード | .VRM | .GSR | BSAVE RAWイメージ - 新10倍で読み込み変換したもの等
 | .SPR | 現在の画面モード | .SPR | .SPR | スプライト
 | .SPC | 現在の画面モード | .SPC | .SPC | スプライトカラー
 | .NAM | 現在の画面モード | .NAM | .NAM | SC2 パターンネーム
@@ -371,10 +380,19 @@ VDPシミュレートの検証で付けている処理です。
 | .GN0 | 現在の画面モード | .GN0 | .GN0 | SC2 パターンジェネレータ
 | .GN1 | 現在の画面モード | .GN1 | .GN1 | SC2 パターンジェネレータ
 | .GN2 | 現在の画面モード | .GN2 | .GN2 | SC2 パターンジェネレータ
+
+### 特殊 RAWイメージ
+
+| 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
+|---|------|---|---|---|
+| .BMP | 現在の画面モード | .SCR | .GSR | BMPヘッダ+RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
 | .SCR | 現在の画面モード | .SCR | .GSR | RAWイメージ
 | .GSR | 現在の画面モード | .SCR | .GSR | RAWイメージ
-| .BMP | 現在の画面モード | .SCR | .GSR | RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
-| .VRM | 現在の画面モード | .VRM | .GSR | RAWイメージ - 新10倍で読み込み変換したもの等
+
+### 特殊 範囲保存イメージ
+
+| 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
+|---|------|---|---|---|
 | .CPY | 現在の画面モード | .VRM | .GSR | 範囲画像（BASIC COPY文）
 | .CP5 | SCREEN  5 | .VRM | .GSR | 範囲画像（BASIC COPY文）
 | .CP6 | SCREEN  6 | .VRM | .GSR | 範囲画像（BASIC COPY文）
@@ -427,6 +445,13 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2023/09/18 [ver.0.25](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_025.7z)
+  - グレースケール表示追加
+  - テスト機能：SCREEN1,2,4で明るい色側をビット1に補正するボタン追加
+  - (.SC? .SR?ファイル)SCREEN4以下でも元のファイルの範囲だけ保存するように変更
+  - SCREEN4以下の時に0x0000～0x3FFFを保存する機能はオプションに移動
+  - .VRMファイルの扱いをRAWイメージからBSAVEイメージに修正
 
 - 2023/09/17 [ver.0.24b](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z)
   - COPY文で保存したファイルの拡張子にグラフサウルスのGL?を追加

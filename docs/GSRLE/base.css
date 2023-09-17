@@ -284,6 +284,9 @@ details.details {
 
     text-align: center;
 }
+#detail_pal {
+    text-align: left;
+}
 
 .vmid {
     vertical-align: middle;
@@ -426,6 +429,34 @@ button.save_button:hover {
 button.save_button:active {
     border: 2px inset red;
 }
+
+/* ==================================== */
+/* 機能ボタン */
+/* ==================================== */
+button.func_button {
+    color: #226;
+    background-color: #ccd;
+    
+    padding: 0 10px;
+    margin: 0 2px;
+
+    box-sizing: content-box;
+    vertical-align:middle;
+
+    border: 2px outset gray;
+    border-radius: 0.5em;
+
+    /*transition: .25s;*/
+
+    user-select: none;  /*テキスト選択禁止*/
+}
+button.func_button:hover {
+    background-color: #bbc;
+}
+button.func_button:active {
+    border: 2px inset red;
+}
+
 
 /* ==================================== */
 /* チェックボックス */
