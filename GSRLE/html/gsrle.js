@@ -916,6 +916,13 @@ function rgb_to_brightness(r,g,b) {
 }
 
 // ========================================================
+// RGB888をスタイルカラー文字列に変換
+// ========================================================
+function rgb_string(r) {
+    return `rgb( ${r[0]}, ${r[1]}, ${r[2]} )`;
+}
+
+// ========================================================
 // カラーパレット
 // ========================================================
 class PaletteEntry {
@@ -999,9 +1006,7 @@ class PaletteEntry {
     // fillStileなどに渡す文字列
     //--------------------------------
     get rgb_string() {
-        var r = this.rgba;
-        //return 'rgb('+r[0]+','+r[1]+','+r[2]+')';
-        return `rgb( ${r[0]}, ${r[1]}, ${r[2]} )`;
+        return rgb_string( this.rgba );
     }
     //--------------------------------
     // 輝度
@@ -1011,9 +1016,9 @@ class PaletteEntry {
         return rgb_to_brightness(rgba[0], rgba[1], rgba[2]);
     }
     get brightness_string() {
-        const b = this.brightness;
-        return `rgb( ${b}, ${b}, ${b} )`;
+        return rgb_string( this.brightness );
     }
+
 };
 class Palette {
     [Symbol.toStringTag] = 'PaletteEntry';
@@ -1971,13 +1976,18 @@ class VDP {
         //------------------------
         if (vdp.cs.pal_canvas)
         {
-            var pal = vdp.palette.color;
+            var palette = vdp.palette;
             if (!palette_use) {
-                pal = vdp.pal_def.color;
+                palette = vdp.pal_def;
             }
             if (screen_no == 8) {
-                pal = vdp.pal256.color;
+                palette = vdp.pal256;
             }
+            var pal = palette.rgba;
+            if (use_grayscale ^ use_grayscale_tmp) {
+                pal = palette.gray;
+            }
+            //if (nouse_patcol) pal = palette.gray;
 
             var canvas = vdp.cs.pal_canvas;
             var ctx = canvas.getContext('2d');
@@ -1990,11 +2000,7 @@ class VDP {
 
             var w = Math.floor(canvas.width / pal.length);
             for (var i = 0; i < pal.length; ++i) {
-                if (nouse_patcol) {
-                    ctx.fillStyle = pal[i].brightness_string;
-                } else{
-                    ctx.fillStyle = pal[i].rgb_string;
-                }
+                ctx.fillStyle = rgb_string(pal[i]);
                 ctx.fillRect(
                     canvas.width * i / pal.length, 0,
                     w, canvas.height);
