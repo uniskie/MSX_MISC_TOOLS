@@ -44,6 +44,9 @@ const quick_save_mode_value =
  ['none', 'bsave_full', 'bsave_mini', 'gsrle_save'];
  let need_save_all = false;
 
+ // スプライト 透明背景タイプ
+ let sprgen_bg_type = 0;
+
 // ========================================================
 
 // ========================================================
@@ -2284,13 +2287,17 @@ class VDP {
 
         const pg_count = 2;
         let chr_count = 1 + x16 * 3;
-        let chr_shift = x2;
-        const bit_mask = x2 ? 
+
+        const bit_masks = [
+            [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01],
             [0x80, 0x80, 0x40, 0x40, 0x20, 0x20, 0x10, 0x10,
-             0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x01, 0x01]:
-            [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
-        const chrw = 8 << chr_shift;
-        const sprh = (8 + 8 * x16) << chr_shift;
+             0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x01, 0x01],
+        ];
+
+        let chr_shift = x2;
+        let bit_mask = bit_masks[chr_shift];
+        let chrw = 8 << chr_shift;
+        let sprh = (8 + 8 * x16) << chr_shift;
 
         let buf = vdp.sprData.data;
         let d = vdp.vram;
@@ -2461,6 +2468,11 @@ class VDP {
             spr_count = pat_count;
             use_sprcol = 0;
             line_counter_d = 0;
+
+            chr_shift = 0;
+            bit_mask = bit_masks[chr_shift];
+            chrw = 8 << chr_shift;
+            sprh = (8 + 8 * x16) << chr_shift;
         }
     }
     // ========================================================
@@ -3387,6 +3399,7 @@ function saveConfig()
         pal_use_tms9918     : pal_use_tms9918,
         use_grayscale       : use_grayscale,
         sprite_limit_mode   : sprite_limit_mode,
+        sprgen_bg_type      : sprgen_bg_type,
         vram_interleave     : vram_interleave,
     };
 
@@ -3495,6 +3508,10 @@ function loadConfig( d, file_text )
 
     pal_grayscale_chk.checked = 
     use_grayscale = getParam( c, 'use_grayscale', use_grayscale);
+
+    sprgen_bg_type = getParam( c, 'sprgen_bg_type', sprgen_bg_type);
+    transparent_bg_chk.checked = (0 < sprgen_bg_type);
+    setTransparentBg(canvas_sprgen, sprgen_bg_type);
 
     palette_use_chk2.checked = 
     palette_use_chk.checked = 
@@ -4247,6 +4264,33 @@ function saveAll( commpress, with_pal )
 }
 
 // ========================================================
+//  透明背景の設定
+//  e: element
+//  t: タイプ 0 か 1
+// ========================================================
+function setTransparentBg(e, t)
+{
+    switch (t) {
+    case 0: // 明るめのクロスハッチ
+        e.style['background-image'] = 
+        'linear-gradient(45deg, #aaa 25%, transparent 25%, transparent 75%, #aaa 75%),' + 
+        'linear-gradient(45deg, #aaa 25%, transparent 25%, transparent 75%, #aaa 75%)';
+        e.style['background-position'] = '0 0, 16px 16px';
+        e.style['background-size'] = '32px 32px';
+        e.style['background-color'] = 'gray';
+        break;
+    case 1: // 暗めのクロスハッチ
+        e.style['background-image'] = 
+        'linear-gradient(45deg, #444 25%, transparent 25%, transparent 75%, #444 75%),' + 
+        'linear-gradient(45deg, #444 25%, transparent 25%, transparent 75%, #444 75%)';
+        e.style['background-position'] = '0 0, 16px 16px';
+        e.style['background-size'] = '32px 32px';
+        e.style['background-color'] = '#333';
+        break;
+    }
+}
+
+// ========================================================
 // ドラッグされたアイテムがファイルかどうか検査する関数
 // in:  e - dropイベントオブジェクト
 // ========================================================
@@ -4462,6 +4506,8 @@ function() {
     const sel_spratr_ofs  = document.getElementById('sel_spratr_ofs');
     const sel_sprpat_page = document.getElementById('sel_sprpat_page');
     const sel_sprpat_ofs  = document.getElementById('sel_sprpat_ofs');
+
+    const transparent_bg_chk = document.getElementById('transparent_bg_chk');
 
     // --------------------------------------------------------
     // キャンバススムージング
@@ -5128,7 +5174,7 @@ function() {
     // TEST
     // ========================================================
     // --------------------------------------------------------
-    // test button1
+    // test button1 明るい色側をビット1に変更する
     // --------------------------------------------------------
     let test_button1 = document.getElementById('test_button1');
     test_button1.addEventListener('click',
@@ -5139,7 +5185,7 @@ function() {
     });
 
     // --------------------------------------------------------
-    // test button2
+    // test button2 パレットクリックでグレースケール切替
     // --------------------------------------------------------
     palette_area.addEventListener('mousedown',
     function(e) {
@@ -5159,6 +5205,36 @@ function() {
             vdp.draw();
         }
     });
+
+    // --------------------------------------------------------
+    // スプライト 透明背景の色変更
+    // --------------------------------------------------------
+    transparent_bg_chk.addEventListener("change",
+    function(e) {
+        sprgen_bg_type = e.target.checked ? 1 : 0;
+        setTransparentBg(canvas_sprgen, sprgen_bg_type);
+    });
+    sprgen_bg_type = transparent_bg_chk.checked ? 1 : 0;
+    setTransparentBg(canvas_sprgen, sprgen_bg_type);
+
+    let sprgen_canvas_mousedown = false;
+    canvas_sprgen.addEventListener('mousedown',
+    function(e) {
+        // 全体を選択不能にする
+        document.getElementById('main').style['user-select'] = 'none';
+        sprgen_canvas_mousedown = true;
+        setTransparentBg(canvas_sprgen, 1 - sprgen_bg_type);
+    });
+    window.addEventListener('mouseup',
+    function(e) {
+        if (sprgen_canvas_mousedown) {
+            // 全体を選択可能に戻す
+            document.getElementById('main').style['user-select'] = 'auto';
+            sprgen_canvas_mousedown = false;
+            setTransparentBg(canvas_sprgen, sprgen_bg_type);
+        }
+    });
+
 
     // ========================================================
     // 実行
