@@ -45,13 +45,16 @@ indent_style = space
 indent_size = 1
 
 [*.c]
+charset = utf-8
 indent_style = tab
 indent_size = 4
 
 [*.cpp]
+charset = utf-8
 indent_style = tab
 indent_size = 4
 
 [*.h]
+charset = utf-8
 indent_style = tab
 indent_size = 4
