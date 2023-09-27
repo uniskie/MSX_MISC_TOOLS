@@ -1,4 +1,4 @@
-﻿# ASM
+# ASM
 
 [TNIASM](http://www.tni.nl/products/tniasm.html) を使用します。
 
@@ -43,6 +43,15 @@
 | [VRAM.ASM](VRAM.ASM)         | VRAM書き込み開始やスプライトアトリビュートテーブルの設定など |
 | [BGMDRV.ASM](BGMDRV.ASM)     | [hra!さんのPSG用BGMドライバー](https://github.com/hra1129/bgm_driver)のTNIASMポート (本体) |
 | [BGMDRV_D.ASM](BGMDRV_D.ASM) | [hra!さんのPSG用BGMドライバー](https://github.com/hra1129/bgm_driver)のTNIASMポート (定義など) |
+
+### ビルド用
+
+| ファイル名 | 説明 |
+|---|---|
+| [build.bat](build.bat)                  | SRX.BINとSRX2.BINをアセンブル出力する |
+| [_tniasm.BAT](_tniasm.BAT)              | [tniasm v0.45](http://www.tni.nl/products/tniasm.html)でアセンブルする |
+| [_sjasm.BAT](_sjasm.BAT)                | [sjasmplus](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3)でアセンブルする |
+| [sjasm_preamble.asm](sjasm_preamble.asm)| sjasmでtniasm用のソースをアセンブルする際の互換用マクロ定義 |
 
 ## LOADSRD.BINエントリー
 
