@@ -15,18 +15,27 @@ trim_trailing_whitespace = false
 indent_style = tab
 
 [*.bas]
+charset = shift_jis
 indent_style = tab
 indent_size = 8
 
 [*.asm]
+charset = shift_jis
 indent_style = tab
 indent_size = 4
 
 [*.mac]
+charset = shift_jis
+indent_style = tab
+indent_size = 4
+
+[*.inc]
+charset = shift_jis
 indent_style = tab
 indent_size = 4
 
 [*.asf]
+charset = shift_jis
 indent_style = space
 indent_size = 1
 
@@ -35,10 +44,6 @@ indent_style = tab
 indent_size = 4
 
 [*.cpp]
-indent_style = tab
-indent_size = 4
-
-[*.inc]
 indent_style = tab
 indent_size = 4
 
