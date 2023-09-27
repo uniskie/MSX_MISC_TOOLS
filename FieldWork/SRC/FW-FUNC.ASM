@@ -1,3 +1,4 @@
+;-*- tab-width: 8 -*-
 ;-- KANJI EDITOR "FIELD WORK" --
 
 ;    SUB RUTINES 2 (FUNCTION)
@@ -7,31 +8,31 @@
 ;--- STRING TO NUMBER
 ; IN  | HL:ADDRESS
 ; OUT | DE:NUMBER
-STOI:	LD		DE,0
-STOI_L:	LD		A,(HL)
-		INC		HL
-		OR		A
-		RET		Z
-		;
-		SUB		A,'0'
-		CP		10
-		JR		NC,STOI_L
-		;
-		EX		DE,HL
-		; HL=HL*10
-		LD		B,H
-		LD		C,L
-		ADD		HL,HL
-		ADD		HL,HL
-		ADD		HL,BC
-		ADD		HL,HL
-		; HL=HL+A
-		CALL	ADDHLA
-		EX		DE,HL
-		JR		STOI_L
+STOI:	LD	DE,0
+STOI_L:	LD	A,(HL)
+	INC	HL
+	OR	A
+	RET	Z
+	;
+	SUB	A,'0'
+	CP	10
+	JR	NC,STOI_L
+	;
+	EX	DE,HL
+	; HL=HL*10
+	LD	B,H
+	LD	C,L
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	ADD	HL,HL
+	; HL=HL+A
+	CALL	ADDHLA
+	EX	DE,HL
+	JR	STOI_L
 
 ;--- INPUT STR WORK AREA---
-INSTRMD:	DB		0	; 1 = NUMBER ONLY
+INSTRMD:	DB	0	; 1 = NUMBER ONLY
 
 ;--- INPUT LINE NUMBER STR ---
 ; OUT | DE:NUMBER
@@ -39,517 +40,517 @@ INSTRMD:	DB		0	; 1 = NUMBER ONLY
 ;     | Z : ON = CANSEL
 ; USE | AF,BC,DE,HL
 INPLINE:
-		LD		A,1
-		LD		(INSTRMD),A
-		LD		HL,M_INLIN
-		CALL	INPSTR_
-		
-		LD		DE,-1
-		LD		A,(HL)
-		SUB		EOF
-		RET		Z
-		CALL	STOI
-		OR		0FFH
-		RET
+	LD	A,1
+	LD	(INSTRMD),A
+	LD	HL,M_INLIN
+	CALL	INPSTR_
+	
+	LD	DE,-1
+	LD	A,(HL)
+	SUB	EOF
+	RET	Z
+	CALL	STOI
+	OR	0FFH
+	RET
 
 ;--- INPUT STR ---
-INPSTR:	XOR		A
-		LD		(INSTRMD),A
-		LD		HL,M_INSTR
+INPSTR:	XOR	A
+	LD	(INSTRMD),A
+	LD	HL,M_INSTR
 INPSTR_:
-		CALL	STBSET
-		LD		HL,STR
-		LD		DE,STR+1
-		LD		BC,STRSIZ
-		LD		(HL),' '
-		LDIR
-		LD		HL,STR+STRSIZ
-		LD		(HL),24
-		LD		E,0
-		LD		HL,STR
-		JR		LEINSTR
+	CALL	STBSET
+	LD	HL,STR
+	LD	DE,STR+1
+	LD	BC,STRSIZ
+	LD	(HL),' '
+	LDIR
+	LD	HL,STR+STRSIZ
+	LD	(HL),24
+	LD	E,0
+	LD	HL,STR
+	JR	LEINSTR
 
 L_INSTR:
-		CALL	INPUT2
-		CP		ESC
-		JR		Z,ESINSTR
-		CP		CR
-		JR		Z,E_INSTR
-		CP		DEL
-		JR		Z,D_INSTR
-		CP		BS
-		JR		Z,INSTRBS
-		CP		RIGHT
-		JR		Z,I_INSTR
-		CP		LEFT
-		JR		Z,INSTRLF
+	CALL	INPUT2
+	CP	ESC
+	JR	Z,ESINSTR
+	CP	CR
+	JR	Z,E_INSTR
+	CP	DEL
+	JR	Z,D_INSTR
+	CP	BS
+	JR	Z,INSTRBS
+	CP	RIGHT
+	JR	Z,I_INSTR
+	CP	LEFT
+	JR	Z,INSTRLF
 ;<---
-		LD		B,A
-		LD		A,(INSTRMD)
-		OR		A
-		LD		A,B
-		JR		Z,N_INSTR
-		
-		CP		'0'
-		JR		C,L_INSTR
-		CP		'9'+1
-		JR		NC,L_INSTR
-		
+	LD	B,A
+	LD	A,(INSTRMD)
+	OR	A
+	LD	A,B
+	JR	Z,N_INSTR
+	
+	CP	'0'
+	JR	C,L_INSTR
+	CP	'9'+1
+	JR	NC,L_INSTR
+	
 N_INSTR:
 ;--->
-		CALL	KANJI_F
-		JP		C,L_INSTR
-		LD		(HL),A
+	CALL	KANJI_F
+	JP	C,L_INSTR
+	LD	(HL),A
 I_INSTR:
-		LD		A,E
-		CP		STRSIZ-1
-		JR		NC,LEINSTR
-		INC		E
-		INC		HL
+	LD	A,E
+	CP	STRSIZ-1
+	JR	NC,LEINSTR
+	INC	E
+	INC	HL
 
 LEINSTR:
-		LD		A,E
-		ADD		A,6+1
-		LD		(STR+STRSIZ+1),A
-		PUSH	HL
-		PUSH	DE
-		LD		HL,M_STR
-		CALL	STBSET
-		POP		DE
-		POP		HL
-		JR		L_INSTR
+	LD	A,E
+	ADD	A,6+1
+	LD	(STR+STRSIZ+1),A
+	PUSH	HL
+	PUSH	DE
+	LD	HL,M_STR
+	CALL	STBSET
+	POP	DE
+	POP	HL
+	JR	L_INSTR
 
 E_INSTR:
-		CALL	JEMODE_
-		LD		HL,STR
-		RET
+	CALL	JEMODE_
+	LD	HL,STR
+	RET
 ESINSTR:
-		CALL	JEMODE_
-		LD		HL,EOFF
-		RET
+	CALL	JEMODE_
+	LD	HL,EOFF
+	RET
 
 INSTRLF:
-		CALL	R_INSTR
-		JP		LEINSTR
+	CALL	R_INSTR
+	JP	LEINSTR
 INSTRBS:
-		CALL	R_INSTR
-		JP		D_INSTR
+	CALL	R_INSTR
+	JP	D_INSTR
 R_INSTR:
-		LD		A,E
-		OR		A
-		RET		Z
-		DEC		E
-		DEC		HL
-		RET
+	LD	A,E
+	OR	A
+	RET	Z
+	DEC	E
+	DEC	HL
+	RET
 D_INSTR:
-		PUSH	HL
-		PUSH	DE
-		LD		A,STRSIZ
-		SUB		E
-		LD		C,A
-		LD		B,0
-		LD		E,L
-		LD		D,H
-		INC		HL
-		LDIR
-		LD		A,' '
-		LD		(STR+STRSIZ-1),A
-		POP		DE
-		POP		HL
-		JP		LEINSTR
+	PUSH	HL
+	PUSH	DE
+	LD	A,STRSIZ
+	SUB	E
+	LD	C,A
+	LD	B,0
+	LD	E,L
+	LD	D,H
+	INC	HL
+	LDIR
+	LD	A,' '
+	LD	(STR+STRSIZ-1),A
+	POP	DE
+	POP	HL
+	JP	LEINSTR
 
 ;--- TEXT CLEAR & PRINT Etc.
 TXCLEAR:
-		LD		HL,TA_HEAD-1
-		LD		(HL),HOF
-		INC		HL
-		LD		(HL),EOF
-		LD		BC,1
-		LD		(TD_MSIZ),BC
-		CALL	LINTES0
+	LD	HL,TA_HEAD-1
+	LD	(HL),HOF
+	INC	HL
+	LD	(HL),EOF
+	LD	BC,1
+	LD	(TD_MSIZ),BC
+	CALL	LINTES0
 
 ;--- PRINT & MAKE LINE (HEAD)
 TX_HEAD:
-		CALL	CD_CLS
-		LD		HL,TA_HEAD
-		CALL	MAKLINE
-		LD		A,12
-		CALL	LFSET
-		LD		DE,TA_HEAD
-		CALL	PRINT
-		CALL	LFRSET
-		LD		HL,0
-		LD		(TD_YNOW),HL
-		LD		(CUR_AXS),HL
-		RET
+	CALL	CD_CLS
+	LD	HL,TA_HEAD
+	CALL	MAKLINE
+	LD	A,12
+	CALL	LFSET
+	LD	DE,TA_HEAD
+	CALL	PRINT
+	CALL	LFRSET
+	LD	HL,0
+	LD	(TD_YNOW),HL
+	LD	(CUR_AXS),HL
+	RET
 
 ;--- PRINT & MAKE LINE (TAIL)
 TX_TAIL:
-		CALL	CD_CLS
-		LD		HL,(TD_MSIZ)
-		LD		DE,(TD_EOFS)
-		ADD		HL,DE		;(HL) = EOF
-		LD		DE,TA_HEAD-1
-		ADD		HL,DE
-		LD		DE,11
-		CALL	LINREV2
+	CALL	CD_CLS
+	LD	HL,(TD_MSIZ)
+	LD	DE,(TD_EOFS)
+	ADD	HL,DE	;(HL) = EOF
+	LD	DE,TA_HEAD-1
+	ADD	HL,DE
+	LD	DE,11
+	CALL	LINREV2
 TXTAILE:
-		LD		BC,(TD_YMAX)
-		LD		A,C
-		OR		B
-		JR		Z,TXTAIE_
-		LD		A,E
-		SUB		11
-		ADD		A,C
-		LD		C,A
-		JR		C,TXTAIE_
-		DEC		B
+	LD	BC,(TD_YMAX)
+	LD	A,C
+	OR	B
+	JR	Z,TXTAIE_
+	LD	A,E
+	SUB	11
+	ADD	A,C
+	LD	C,A
+	JR	C,TXTAIE_
+	DEC	B
 TXTAIE_:
-		LD		(TD_YNOW),BC
-		PUSH	HL
-		CALL	MAKLINE
-		LD		A,12
-		POP		DE
-		CALL	LFSET
-		CALL	PRINT
-		CALL	LFRSET
-		LD		HL,0
-		LD		(CUR_AXS),HL
-		RET
+	LD	(TD_YNOW),BC
+	PUSH	HL
+	CALL	MAKLINE
+	LD	A,12
+	POP	DE
+	CALL	LFSET
+	CALL	PRINT
+	CALL	LFRSET
+	LD	HL,0
+	LD	(CUR_AXS),HL
+	RET
 
 ;--- NEXT LINE (UP)
 TX_SCRU:
-		LD		HL,(TD_YNOW)
-		LD		A,H
-		OR		L
-		RET		Z
-		DEC		HL
-		LD		(TD_YNOW),HL
-		LD		HL,TD_LIN+35-3
-		LD		DE,TD_LIN+35
-		LD		BC,36-3
-		LDDR
-		LD		HL,(TD_LIN)
-		CALL	LINREV
-		LD		A,B
-		LD		(TD_LIN),HL
-		LD		(TD_LIN+2),A
-		EX		DE,HL
-		CALL	SCRL_DW
-		LD		HL,0
-		LD		(PR_AXS),HL
-		LD		A,1
-		CALL	LFSET
-		CALL	PRINT
-		CALL	LFRSET
-		RET
+	LD	HL,(TD_YNOW)
+	LD	A,H
+	OR	L
+	RET	Z
+	DEC	HL
+	LD	(TD_YNOW),HL
+	LD	HL,TD_LIN+35-3
+	LD	DE,TD_LIN+35
+	LD	BC,36-3
+	LDDR
+	LD	HL,(TD_LIN)
+	CALL	LINREV
+	LD	A,B
+	LD	(TD_LIN),HL
+	LD	(TD_LIN+2),A
+	EX	DE,HL
+	CALL	SCRL_DW
+	LD	HL,0
+	LD	(PR_AXS),HL
+	LD	A,1
+	CALL	LFSET
+	CALL	PRINT
+	CALL	LFRSET
+	RET
 
 ;--- NEXT LINE (DOWN)
 TX_SCRD:
-		LD		A,11
-		CALL	CALYNOW
-		LD		DE,(TD_YMAX)
-		OR		A
-		SBC		HL,DE
-		RET		Z
-		LD		HL,(TD_YNOW)
-		INC		HL
-		LD		(TD_YNOW),HL
-		LD		HL,TD_LIN+3
-		LD		DE,TD_LIN
-		LD		BC,36-3
-		LDIR
-		LD		HL,(TD_LIN+36-3)
-		CALL	LINFWD
-		LD		A,B
-		LD		(TD_LIN+36-3),HL
-		LD		(TD_LIN+36-1),A
-		EX		DE,HL
-		CALL	SCRL_UP
-		LD		H,UD_SCR
-		LD		L,0
-		LD		(PR_AXS),HL
-		LD		A,1
-		CALL	LFSET
-		CALL	PRINT
-		CALL	LFRSET
-		RET
+	LD	A,11
+	CALL	CALYNOW
+	LD	DE,(TD_YMAX)
+	OR	A
+	SBC	HL,DE
+	RET	Z
+	LD	HL,(TD_YNOW)
+	INC	HL
+	LD	(TD_YNOW),HL
+	LD	HL,TD_LIN+3
+	LD	DE,TD_LIN
+	LD	BC,36-3
+	LDIR
+	LD	HL,(TD_LIN+36-3)
+	CALL	LINFWD
+	LD	A,B
+	LD	(TD_LIN+36-3),HL
+	LD	(TD_LIN+36-1),A
+	EX	DE,HL
+	CALL	SCRL_UP
+	LD	H,UD_SCR
+	LD	L,0
+	LD	(PR_AXS),HL
+	LD	A,1
+	CALL	LFSET
+	CALL	PRINT
+	CALL	LFRSET
+	RET
 
 ;--- SKIP TO NEXT SCREEN(HEAD)
 TX_SKPU:
-		LD		HL,(TD_LIN)
-		LD		DE,12
-		CALL	LINREV2
-		PUSH	DE
-		CALL	MAKLINE
-		POP		DE
-		LD		A,12
-		SUB		E
-		RET		Z
-		LD		B,A
-		LD		HL,(TD_YNOW)
-		ADD		HL,DE
-		LD		DE,-12
-		ADD		HL,DE
-		LD		(TD_YNOW),HL
+	LD	HL,(TD_LIN)
+	LD	DE,12
+	CALL	LINREV2
+	PUSH	DE
+	CALL	MAKLINE
+	POP	DE
+	LD	A,12
+	SUB	E
+	RET	Z
+	LD	B,A
+	LD	HL,(TD_YNOW)
+	ADD	HL,DE
+	LD	DE,-12
+	ADD	HL,DE
+	LD	(TD_YNOW),HL
 L_TXSKU:
-		PUSH	BC
+	PUSH	BC
 ; XOR A
 ; LD (TIMERC),A
-		CALL	SCRL_DW
-		LD		HL,0
-		LD		(PR_AXS),HL
+	CALL	SCRL_DW
+	LD	HL,0
+	LD	(PR_AXS),HL
 ; POP BC
 ; PUSH BC
-		LD		A,B
-		ADD		A,A
-		ADD		A,B
-		LD		HL,TD_LIN-3
-		CALL	ADDHLA
-		LD		E,(HL)
-		INC		HL
-		LD		D,(HL)
-		LD		A,1
-		CALL	LFSET
-		CALL	PRINT
+	LD	A,B
+	ADD	A,A
+	ADD	A,B
+	LD	HL,TD_LIN-3
+	CALL	ADDHLA
+	LD	E,(HL)
+	INC	HL
+	LD	D,(HL)
+	LD	A,1
+	CALL	LFSET
+	CALL	PRINT
 ;WTSKPU LD A,(TIMERC)
 ; CP 1
 ; JP C,WTSKPU
-		POP		BC
-		DJNZ	L_TXSKU
-		JP		LFRSET
+	POP	BC
+	DJNZ	L_TXSKU
+	JP	LFRSET
 
 ;--- SKIP TO NEXT SCREEN(TAIL)
 TX_SKPD:
-		LD		A,11
-		CALL	CALYNOW
-		LD		DE,(TD_YMAX)
-		OR		A
-		SBC		HL,DE
-		RET		NC
-		LD		A,L
-		LD		DE,12
-		ADD		HL,DE
-		JP		NC,TXSKPD
-		NEG
-		LD		E,A
-		LD		D,0
-TXSKPD:	LD		HL,(TD_LIN)
-		PUSH	DE
-		CALL	LINFWD2
-		CALL	MAKLINE
-		POP		DE
-		LD		B,E
-		LD		HL,(TD_YNOW)
-		ADD		HL,DE
-		LD		(TD_YNOW),HL
+	LD	A,11
+	CALL	CALYNOW
+	LD	DE,(TD_YMAX)
+	OR	A
+	SBC	HL,DE
+	RET	NC
+	LD	A,L
+	LD	DE,12
+	ADD	HL,DE
+	JP	NC,TXSKPD
+	NEG
+	LD	E,A
+	LD	D,0
+TXSKPD:	LD	HL,(TD_LIN)
+	PUSH	DE
+	CALL	LINFWD2
+	CALL	MAKLINE
+	POP	DE
+	LD	B,E
+	LD	HL,(TD_YNOW)
+	ADD	HL,DE
+	LD	(TD_YNOW),HL
 L_TXSKD:
-		PUSH	BC
+	PUSH	BC
 ; XOR A
 ; LD (TIMERC),A
-		CALL	SCRL_UP
-		LD		H,UD_SCR
-		LD		L,0
-		LD		(PR_AXS),HL
+	CALL	SCRL_UP
+	LD	H,UD_SCR
+	LD	L,0
+	LD	(PR_AXS),HL
 ; POP BC
 ; PUSH BC
-		LD		A,B
-		ADD		A,A
-		ADD		A,B
-		LD		HL,TD_LIN+36
-		CALL	SUBHLA
-		LD		E,(HL)
-		INC		HL
-		LD		D,(HL)
-		LD		A,1
-		CALL	LFSET
-		CALL	PRINT
+	LD	A,B
+	ADD	A,A
+	ADD	A,B
+	LD	HL,TD_LIN+36
+	CALL	SUBHLA
+	LD	E,(HL)
+	INC	HL
+	LD	D,(HL)
+	LD	A,1
+	CALL	LFSET
+	CALL	PRINT
 ;WTSKPD LD A,(TIMERC)
 ; CP 1
 ; JP C,WTSKPD
-		POP		BC
-		DJNZ	L_TXSKD
-		JP		LFRSET
+	POP	BC
+	DJNZ	L_TXSKD
+	JP	LFRSET
 
 ;--- LINE SEARCH
 ; INP| DE:LINE SEARCH NUMBER
 
 TX_LINE:
-		LD		HL,(TD_YMAX)
-		OR		A
-		SBC		HL,DE	; YMAX-Y
-		LD		A,E_NOLINE
-		JP		C,ERROR_W
+	LD	HL,(TD_YMAX)
+	OR	A
+	SBC	HL,DE	; YMAX-Y
+	LD	A,E_NOLINE
+	JP	C,ERROR_W
 
-		PUSH	HL		; YMAX-Y
-		ADD		HL,DE	; YMAX
-		OR		A
-		LD		BC,12
-		SBC		HL,BC
-		POP		HL		; YMAX-Y
-		JR		NC,TXLINE0 ;YMAX >= 12
+	PUSH	HL	; YMAX-Y
+	ADD	HL,DE	; YMAX
+	OR	A
+	LD	BC,12
+	SBC	HL,BC
+	POP	HL	; YMAX-Y
+	JR	NC,TXLINE0 ;YMAX >= 12
 
-		; YMAX < 12
-		LD		A,E	;CURSOR_Y = Y*2
-		ADD		A,A
-		LD		B,A
-		LD		C,0
-		LD		DE,0
-		JR		TXLINE2
+	; YMAX < 12
+	LD	A,E	;CURSOR_Y = Y*2
+	ADD	A,A
+	LD	B,A
+	LD	C,0
+	LD	DE,0
+	JR	TXLINE2
 
 TXLINE0:
-		; YMAX >= 12
-		
-		LD		A,H
-		OR		A
-		JR		NZ,TXLINE1 ; (YMAX - Y) >= 16
-		LD		A,L
-		CP		11
-		JR		NC,TXLINE1 ; (YMAX - Y) >= 11
+	; YMAX >= 12
+	
+	LD	A,H
+	OR	A
+	JR	NZ,TXLINE1 ; (YMAX - Y) >= 16
+	LD	A,L
+	CP	11
+	JR	NC,TXLINE1 ; (YMAX - Y) >= 11
 
-		; (YMAX - Y) < 11
-		
-		; CORSOL_Y = (Y - (YMAX - 11)) * 2
-		NEG				; Y - YMAX
-		ADD		A,11	; Y - (YMAX - 11)
-		ADD		A,A
-		LD		B,A		;CURSOL Y
-		LD		C,0		;CURSOL X
+	; (YMAX - Y) < 11
+	
+	; CORSOL_Y = (Y - (YMAX - 11)) * 2
+	NEG		; Y - YMAX
+	ADD	A,11	; Y - (YMAX - 11)
+	ADD	A,A
+	LD	B,A	;CURSOL Y
+	LD	C,0	;CURSOL X
 
-		LD		HL,(TD_YMAX)
-		LD		DE,-11
-		ADD		HL,DE	;Y = YMAX - 11
-		EX		DE,HL
-		JR		TXLINE2
+	LD	HL,(TD_YMAX)
+	LD	DE,-11
+	ADD	HL,DE	;Y = YMAX - 11
+	EX	DE,HL
+	JR	TXLINE2
 
 TXLINE1:
-		LD		BC,0
-		LD		A,D
-		OR		E
-		JR		Z,TXLINE2
-		
-		; CURSOR_Y = 2, Y = DE-1
-		DEC		DE
-		LD		BC,0200H;
+	LD	BC,0
+	LD	A,D
+	OR	E
+	JR	Z,TXLINE2
+	
+	; CURSOR_Y = 2, Y = DE-1
+	DEC	DE
+	LD	BC,0200H;
 
 TXLINE2:
-		LD		HL,TA_HEAD
-		LD		(TD_YNOW),DE
-		PUSH	BC
+	LD	HL,TA_HEAD
+	LD	(TD_YNOW),DE
+	PUSH	BC
 L_TXLIN:
-		LD		A,D
-		OR		E
-		JR		Z,E_TXLIN
-		CALL	LINTES_
-		DEC		DE
-		JP		L_TXLIN
+	LD	A,D
+	OR	E
+	JR	Z,E_TXLIN
+	CALL	LINTES_
+	DEC	DE
+	JP	L_TXLIN
 E_TXLIN:
-		CALL	MAKLINE
-		CALL	CD_CLS
-		LD		DE,(TD_LIN)
-		LD		A,12
-		CALL	LFSET
-		CALL	PRINT
-		CALL	LFRSET
-		POP		HL
-		LD		L,0
-		LD		(CUR_AXS),HL
-		RET
+	CALL	MAKLINE
+	CALL	CD_CLS
+	LD	DE,(TD_LIN)
+	LD	A,12
+	CALL	LFSET
+	CALL	PRINT
+	CALL	LFRSET
+	POP	HL
+	LD	L,0
+	LD	(CUR_AXS),HL
+	RET
 
 ;;--- HELP MODE ---
 ;HELP_PG:	DW	M_HELP
 ;TX_HELP:
-;		LD		DE,M_HELP
+;	LD	DE,M_HELP
 ;TX_HEL_:
-;		LD		(HELP_PG),DE
-;		CALL	CD_CLS
-;		LD		A,C_MENU
-;		LD		(SPCFLG),A
-;		CALL	KANJI_C
-;		CALL	PRINT
-;		XOR		A
-;		LD		(SPCFLG),A
-;		LD		HL,161EH
-;		LD		(PR_AXS),HL
-;		LD		A,C_EROR
-;		CALL	KANJI_C
+;	LD	(HELP_PG),DE
+;	CALL	CD_CLS
+;	LD	A,C_MENU
+;	LD	(SPCFLG),A
+;	CALL	KANJI_C
+;	CALL	PRINT
+;	XOR	A
+;	LD	(SPCFLG),A
+;	LD	HL,161EH
+;	LD	(PR_AXS),HL
+;	LD	A,C_EROR
+;	CALL	KANJI_C
 ;
 ;L_HELP:	CALL	INPUT2
-;		CALL	KANJI_F
-;		JP		C,L_HELP2
+;	CALL	KANJI_F
+;	JP	C,L_HELP2
 ;L_HELP2:
-;;		LD		HL,HELPCHG
-;;		CP		' '
-;;		JP		Z,E_HELP
-;		LD		HL,TX_FILE
-;		CP		13
-;		JP		Z,E_HELP
-;		LD		HL,CSLFILE
-;		CP		27
-;		JP		Z,E_HELP
-;		LD		HL,HELPCHG
-;;		JP		L_HELP
+;;	LD	HL,HELPCHG
+;;	CP	' '
+;;	JP	Z,E_HELP
+;	LD	HL,TX_FILE
+;	CP	13
+;	JP	Z,E_HELP
+;	LD	HL,CSLFILE
+;	CP	27
+;	JP	Z,E_HELP
+;	LD	HL,HELPCHG
+;;	JP	L_HELP
 ;E_HELP:	PUSH	HL
-;		CALL	COLFLOD
-;		POP		HL
-;		JP		(HL)
+;	CALL	COLFLOD
+;	POP	HL
+;	JP	(HL)
 ;HELPCHG:
-;		LD		HL,(HELP_PG)
-;		LD		DE,M_HELP2
-;		OR		A
-;		SBC		HL,DE
-;		JR		C,TX_HEL_
-;		ADD		HL,DE
-;		LD		DE,M_HELP3
-;		OR		A
-;		SBC		HL,DE
-;		JR		C,TX_HEL_
-;		LD		DE,M_HELP
-;		JR		TX_HEL_
+;	LD	HL,(HELP_PG)
+;	LD	DE,M_HELP2
+;	OR	A
+;	SBC	HL,DE
+;	JR	C,TX_HEL_
+;	ADD	HL,DE
+;	LD	DE,M_HELP3
+;	OR	A
+;	SBC	HL,DE
+;	JR	C,TX_HEL_
+;	LD	DE,M_HELP
+;	JR	TX_HEL_
 ;
 ;M_HELP:
-;		DB		'HELP (PAGE 1/3)'	;*DM*
-;		DB		CR,LF,CR,LF	;*DM*
-;		DB		'[ESC]   メニュー表示／キャンセル'	;*DM*
-;		DB		'[SELECT](CTRL+X)  MSX-JEのON/OFF'	;*DM*
-;		DB		'[INS]        挿入/上書き切り替え'	;*DM*
-;		DB		'[DEL]   カーソル位置の１文字削除'	;*DM*
-;		DB		'[BS]    カーソル手前の１文字削除'	;*DM*
-;		DB		'[CTRL+E]    カーソルより右を削除'	;*DM*
-;		DB		CR,LF	;*DM*
-;		DB		'* ﾌｧｲﾙ名入力時 *'	;*DM*
-;		DB		CR,LF	;*DM*
-;		DB		'[ﾌｧｲﾙ名無しでRETURN]    ﾌｧｲﾙ一覧'	;*DM*
-;		DB		'- PUSH SPACE -'	;*DM*
-;		DB		0
+;	DB	'HELP (PAGE 1/3)'	;*DM*
+;	DB	CR,LF,CR,LF	;*DM*
+;	DB	'[ESC]   メニュー表示／キャンセル'	;*DM*
+;	DB	'[SELECT](CTRL+X)  MSX-JEのON/OFF'	;*DM*
+;	DB	'[INS]        挿入/上書き切り替え'	;*DM*
+;	DB	'[DEL]   カーソル位置の１文字削除'	;*DM*
+;	DB	'[BS]    カーソル手前の１文字削除'	;*DM*
+;	DB	'[CTRL+E]    カーソルより右を削除'	;*DM*
+;	DB	CR,LF	;*DM*
+;	DB	'* ﾌｧｲﾙ名入力時 *'	;*DM*
+;	DB	CR,LF	;*DM*
+;	DB	'[ﾌｧｲﾙ名無しでRETURN]    ﾌｧｲﾙ一覧'	;*DM*
+;	DB	'- PUSH SPACE -'	;*DM*
+;	DB	0
 ;M_HELP2:
-;		DB		'HELP (PAGE 2/3)'	;*DM*
-;		DB		CR,LF,CR,LF	;*DM*
-;		DB		'[HOME]          先頭ページを表示'	;*DM*
-;		DB		'[SHIFT+HOME]    最終ページを表示'	;*DM*
-;		DB		'[CTRL+上]       前のページを表示'	;*DM*
-;		DB		'[CTRL+下]       次のページを表示'	;*DM*
-;		DB		'[CTRL+左]             行頭へ移動'	;*DM*
-;		DB		'[CTRL+右]             行末へ移動'	;*DM*
-;		DB		'[CTRL+G]            指定行へ移動'	;*DM*
-;		DB		'[SHIFT+ESC]       エディタを終了'	;*DM*
-;		DB		CR,LF	;*DM*
-;		DB		'- PUSH SPACE -'	;*DM*
-;		DB		0
+;	DB	'HELP (PAGE 2/3)'	;*DM*
+;	DB	CR,LF,CR,LF	;*DM*
+;	DB	'[HOME]          先頭ページを表示'	;*DM*
+;	DB	'[SHIFT+HOME]    最終ページを表示'	;*DM*
+;	DB	'[CTRL+上]       前のページを表示'	;*DM*
+;	DB	'[CTRL+下]       次のページを表示'	;*DM*
+;	DB	'[CTRL+左]             行頭へ移動'	;*DM*
+;	DB	'[CTRL+右]             行末へ移動'	;*DM*
+;	DB	'[CTRL+G]            指定行へ移動'	;*DM*
+;	DB	'[SHIFT+ESC]       エディタを終了'	;*DM*
+;	DB	CR,LF	;*DM*
+;	DB	'- PUSH SPACE -'	;*DM*
+;	DB	0
 ;M_HELP3:
-;		DB		'HELP (PAGE 3/3)'	;*DM*
-;		DB		CR,LF,CR,LF	;*DM*
-;		DB		'* MSX-JE 入力時 *'	;*DM*
-;		DB		CR,LF	;*DM*
-;		DB		'[SPACE]             変換・次候補'	;*DM*
-;		DB		'[SHIFT+SPACE]             前候補'	;*DM*
-;		DB		'[F1]          ローマ字・英数切替'	;*DM*
-;		DB		'[F2]            全角カタカナ変換'	;*DM*
-;		DB		'[F3]            半角カタカナ変換'	;*DM*
-;		DB		'[F4](数字4文字+F4) JISコード変換'	;*DM*
-;		DB		'[F5][RETURN]                確定'	;*DM*
-;		DB		'[かな]        ローマ字・かな切替'	;*DM*
-;		DB		'- PUSH SPACE -'	;*DM*
-;		DB		0
+;	DB	'HELP (PAGE 3/3)'	;*DM*
+;	DB	CR,LF,CR,LF	;*DM*
+;	DB	'* MSX-JE 入力時 *'	;*DM*
+;	DB	CR,LF	;*DM*
+;	DB	'[SPACE]             変換・次候補'	;*DM*
+;	DB	'[SHIFT+SPACE]             前候補'	;*DM*
+;	DB	'[F1]          ローマ字・英数切替'	;*DM*
+;	DB	'[F2]            全角カタカナ変換'	;*DM*
+;	DB	'[F3]            半角カタカナ変換'	;*DM*
+;	DB	'[F4](数字4文字+F4) JISコード変換'	;*DM*
+;	DB	'[F5][RETURN]                確定'	;*DM*
+;	DB	'[かな]        ローマ字・かな切替'	;*DM*
+;	DB	'- PUSH SPACE -'	;*DM*
+;	DB	0
 
 

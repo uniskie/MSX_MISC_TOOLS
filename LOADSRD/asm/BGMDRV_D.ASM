@@ -1,28 +1,28 @@
-;TAB 4
+;-*- tab-width: 8 -*-
 ; Port for tniasm By Uniske
 ; -----------------------------------------------------------------------------
 ;	PSG BGM DRIVER DEFINE HEADER
 ; -----------------------------------------------------------------------------
 ;	Copyright (c) 2020 Takayuki Hara
 ;	http://hraroom.s602.xrea.com/msx/software/index.html
-;	
-;	Permission is hereby granted, free of charge, to any person obtaining a 
-;	copy of this software and associated documentation files (the 
-;	"Software"), to deal in the Software without restriction, including 
-;	without limitation the rights to use, copy, modify, merge, publish, 
-;	distribute, sublicense, and/or sell copies of the Software, and to 
-;	permit persons to whom the Software is furnished to do so, subject to 
+;
+;	Permission is hereby granted, free of charge, to any person obtaining a
+;	copy of this software and associated documentation files (the
+;	"Software"), to deal in the Software without restriction, including
+;	without limitation the rights to use, copy, modify, merge, publish,
+;	distribute, sublicense, and/or sell copies of the Software, and to
+;	permit persons to whom the Software is furnished to do so, subject to
 ;	the following conditions:
-;	
-;	The above copyright notice and this permission notice shall be 
+;
+;	The above copyright notice and this permission notice shall be
 ;	included in all copies or substantial portions of the Software.
-;	
-;	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-;	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-;	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-;	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
-;	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
-;	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+;
+;	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+;	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+;	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ; =============================================================================
 ;	2009/09/30	t.hara
@@ -132,17 +132,17 @@ BGM_TONE_A8:		EQU	9  + 84
 BGM_TONE_AS8:		EQU	10 + 84
 BGM_TONE_B8:		EQU	11 + 84
 
-BGM_DRUM_1:			EQU	96
-BGM_DRUM_2:			EQU	97
-BGM_DRUM_3:			EQU	98
-BGM_DRUM_4:			EQU	99
-BGM_DRUM_5:			EQU	100
+BGM_DRUM_1:		EQU	96
+BGM_DRUM_2:		EQU	97
+BGM_DRUM_3:		EQU	98
+BGM_DRUM_4:		EQU	99
+BGM_DRUM_5:		EQU	100
 
-BGM_KEYOFF:			EQU	101
-BGM_REST:			EQU	102
-BGM_VOL:			EQU	103
+BGM_KEYOFF:		EQU	101
+BGM_REST:		EQU	102
+BGM_VOL:		EQU	103
 BGM_SOUND_FONT:		EQU	104
-BGM_JUMP:			EQU	105
+BGM_JUMP:		EQU	105
 BGM_PLAY_END:		EQU	106
 BGM_DRUM1_FONT:		EQU	107
 BGM_DRUM2_FONT:		EQU	108
@@ -151,7 +151,7 @@ BGM_DRUM4_FONT:		EQU	110
 BGM_DRUM5_FONT:		EQU	111
 ; -----------------------------------------------------------------------------
 BGM_SE_FREQ:		EQU	0
-BGM_SE_VOL:			EQU	1
+BGM_SE_VOL:		EQU	1
 BGM_SE_NOISE_FREQ:	EQU	2
 BGM_SE_WAIT:		EQU	3
-BGM_SE_END:			EQU	4
+BGM_SE_END:		EQU	4

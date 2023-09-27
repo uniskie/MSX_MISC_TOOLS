@@ -1,14 +1,19 @@
 root = true
 
 [*]
-charset = utf-8
-end_of_line = lf
+charset = shift_jis
+end_of_line = crlf
 trim_trailing_whitespace = true
 insert_final_newline = true
 indent_style = tab
 indent_size = 4
 
+[*.txt]
+charset = utf-8
+trim_trailing_whitespace = false
+
 [*.md]
+charset = utf-8
 trim_trailing_whitespace = false
 
 [*.sh]
@@ -16,11 +21,11 @@ indent_style = tab
 
 [*.asm]
 indent_style = tab
-indent_size = 4
+indent_size = 8
 
 [*.mac]
 indent_style = tab
-indent_size = 4
+indent_size = 8
 
 [*.asf]
 indent_style = space

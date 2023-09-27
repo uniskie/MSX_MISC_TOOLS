@@ -1,3 +1,4 @@
+;-*- tab-width: 8 -*-
 RDSLT:	equ	000CH
 WRSLT:	equ	0014H
 CALSLT:	equ	001CH
@@ -11,22 +12,22 @@ RAMAD1:	equ	0F342H	;RAM SLOT page 1
 RAMAD2:	equ	0F343H	;RAM SLOT page 2
 RAMAD3:	equ	0F344H	;RAM SLOT page 3
 
-		fname	"RDRTYPE.BIN"
+	fname	"RDRTYPE.BIN"
 ;--> bin file header -->
-		db		$fe		;*binhead*
-		dw		orgadr	;*binhead*
-		dw		endfl-1	;*binhead*
-		dw		orgadr	;*binhead*
+	db	$fe	;*binhead*
+	dw	orgadr	;*binhead*
+	dw	endfl-1	;*binhead*
+	dw	orgadr	;*binhead*
 ;<-- bin file header <--
 
-orgadr:	equ		$c000
-		org		orgadr
+orgadr:	equ	$c000
+	org	orgadr
 
 ;--- jump table for usr()
-		jp		rom2vram
+	jp	rom2vram
 ;---
-rtype_slot:		db		1
-	
+rtype_slot:	db	1
+
 ;# RTYPEのBGMデータ
 ;
 ;FMBIOS(OPLDRV)を使用する
@@ -39,7 +40,7 @@ rtype_slot:		db		1
 ;BB B5 A3 B7 C9 B7 37 B8-DB B8 21 BA 4F BC F9 BC
 ;```
 ;
-;BGMデータの範囲は $9073- $BF5D  
+;BGMデータの範囲は $9073- $BF5D
 ; (ROMイメージ $25073 -$27F5D)
 ;
 ;1. $9073 (ROMイメージ $25073)
@@ -72,82 +73,82 @@ rtype_slot:		db		1
 ;
 ;## その他
 ;
-;■ R-Typeの特殊ROMバンクを変更してASCII 16KBバンクに変更するツール  
+;■ R-Typeの特殊ROMバンクを変更してASCII 16KBバンクに変更するツール
 ;[RType_MSXROM_To_Ascii16](https://github.com/uniskie/RType_MSXROM_To_Ascii16)
 
 rtype_bank_reg1:	equ	6000H
 rtype_bank_reg2:	equ	7000H
 
-rtype_bgm_bank:		equ	9
+rtype_bgm_bank:	equ	9
 ;BGMデータの範囲は $9073- $BF5D
 rtype_bgm_start:	equ	$9073
-rtype_bgm_size:		equ	$BF5D + 1 - rtype_bgm_start
+rtype_bgm_size:	equ	$BF5D + 1 - rtype_bgm_start
 
-use_page:			equ	$8000
-vram_dest:			equ	rtype_bgm_start; - use_page
+use_page:		equ	$8000
+vram_dest:		equ	rtype_bgm_start; - use_page
 
 ;================================
 ;  rom to vram
 ;	A=USR(0)
 ;================================
-		ds		orgadr + $100 - $
+	ds	orgadr + $100 - $
 rom2vram:
-		call	getint
-		ret		nz
-		push	ix
-		di
+	call	getint
+	ret	nz
+	push	ix
+	di
 ; change sp
-		ld		(sp_sav),sp
-		ld		sp,endfl
+	ld	(sp_sav),sp
+	ld	sp,endfl
 ; slot page1 = rtype
-		ld		a,(rtype_slot)
-		ld		hl,$4000
-		call	ENASLT
+	ld	a,(rtype_slot)
+	ld	hl,$4000
+	call	ENASLT
 ; slot page2 = rtype
-		ld		a,(rtype_slot)
-		ld		hl,use_page
-		call	ENASLT
+	ld	a,(rtype_slot)
+	ld	hl,use_page
+	call	ENASLT
 ; bank change
-		ld		a,rtype_bgm_bank
-		ld		(rtype_bank_reg2),a
+	ld	a,rtype_bgm_bank
+	ld	(rtype_bank_reg2),a
 ; write to vram
-		ld		de,vram_dest
-		call 	VSETWRT
-		dec		c
+	ld	de,vram_dest
+	call 	VSETWRT
+	dec	c
 
-		ld		hl,rtype_bgm_start
-		ld		de,rtype_bgm_size
-		ld		b,e
-		inc		d
+	ld	hl,rtype_bgm_start
+	ld	de,rtype_bgm_size
+	ld	b,e
+	inc	d
 wvram_l:
-		outi
-		jr		nz,wvram_l
-		dec		d
-		jr		nz,wvram_l
+	outi
+	jr	nz,wvram_l
+	dec	d
+	jr	nz,wvram_l
 ; slot page 1 = main rom
-		ld		a,(EXPTBL)
-		ld		hl,$4000
-		call	ENASLT
+	ld	a,(EXPTBL)
+	ld	hl,$4000
+	call	ENASLT
 ; slot page 2 = main ram
-		ld		a,(RAMAD2)
-		ld		hl,use_page
-		call	ENASLT
+	ld	a,(RAMAD2)
+	ld	hl,use_page
+	call	ENASLT
 ; restore sp
-		ld		sp,(sp_sav)
+	ld	sp,(sp_sav)
 ;
-		ei
-		pop		ix
-		ld		hl,vram_dest
-		ld		(ix+2),l
-		ld		(ix+3),h
-		ret
+	ei
+	pop	ix
+	ld	hl,vram_dest
+	ld	(ix+2),l
+	ld	(ix+3),h
+	ret
 
 ;================================
-		include	"USR_FUNC.ASM"
-		include	"VRAM.ASM"
+	include	"USR_FUNC.ASM"
+	include	"VRAM.ASM"
 ;================================
 
-sp_sav:		dw		0
-sp_space:	ds		$20
+sp_sav:	dw	0
+sp_space:	ds	$20
 
 endfl:

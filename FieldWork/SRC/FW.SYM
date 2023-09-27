@@ -1,580 +1,580 @@
-_FMAKE: equ 016h ; last def. pass 3
-JESET: equ 0B2C6h ; last def. pass 3
-MJ_BKS: equ 0BE68h ; last def. pass 3
-FNAMSET: equ 0C226h ; last def. pass 3
-RET_IN: equ 0B1BAh ; last def. pass 3
-SC2SET2: equ 0CD0Eh ; last def. pass 3
-E_RECNOF: equ 013h ; last def. pass 3
-F_READ: equ 0C775h ; last def. pass 3
-SJL_1: equ 0C80Dh ; last def. pass 3
-CK_HANK: equ 0C7D1h ; last def. pass 3
-TAB: equ 09h ; last def. pass 3
-L_JUMP: equ 0B093h ; last def. pass 3
-TX_SKPD: equ 0BB6Ch ; last def. pass 3
-F_DMA: equ 0C741h ; last def. pass 3
-FNMKR: equ 0C25Ah ; last def. pass 3
-F_DIR2: equ 0C784h ; last def. pass 3
-KJCL_F: equ 0C793h ; last def. pass 3
-LSC2S22: equ 0CD3Ah ; last def. pass 3
-TXTWKBE: equ 0B48Dh ; last def. pass 3
-DOWN: equ 01Fh ; last def. pass 3
-O_KEYI: equ 0CCC3h ; last def. pass 3
-CD_RET: equ 0CABCh ; last def. pass 3
-LREV0: equ 0CE7Dh ; last def. pass 3
-FCBDIR: equ 0BFC9h ; last def. pass 3
-SUBHLA: equ 0B4CCh ; last def. pass 3
-FCB2: equ 0BFA4h ; last def. pass 3
-COLFSAV: equ 0C206h ; last def. pass 3
-C_INF3: equ 010h ; last def. pass 3
-WIN_ON: equ 0CC50h ; last def. pass 3
-BACKGC: equ 01h ; last def. pass 3
-CL_XO_: equ 0Fh ; last def. pass 3
-VRAM1: equ 0C96Dh ; last def. pass 3
-E_TXLIN: equ 0BC17h ; last def. pass 3
-ESC: equ 01Bh ; last def. pass 3
-GYLIN__: equ 0B4B4h ; last def. pass 3
-BUF: equ 0F55Eh ; last def. pass 3
-FONT_CU: equ 0C99Ch ; last def. pass 3
-BK_YNOW: equ 0B485h ; last def. pass 3
-TA_HEAD: equ 08001h ; last def. pass 3
-FONTCOL: equ 0C98Bh ; last def. pass 3
-E_NODSK: equ 010h ; last def. pass 3
-E_WRFAIL: equ 015h ; last def. pass 3
-R_SPT: equ 086h ; last def. pass 3
-L_TXLIN: equ 0BC0Ch ; last def. pass 3
-WIN_OFF: equ 0CC7Bh ; last def. pass 3
-LINTES0: equ 0B866h ; last def. pass 3
-L_MEMS: equ 0B930h ; last def. pass 3
-KILL_F: equ 0C667h ; last def. pass 3
-DELETE: equ 0BF17h ; last def. pass 3
-E_FILENF: equ 08h ; last def. pass 3
-LINTES1: equ 0B88Ah ; last def. pass 3
-TX_LOAD: equ 0C3F4h ; last def. pass 3
-GETPNT: equ 0F3FAh ; last def. pass 3
-CUR_SV: equ 0B28Ch ; last def. pass 3
-LFTCNT: equ 0C9C5h ; last def. pass 3
-KANJI_F: equ 0C7C1h ; last def. pass 3
-CHSNS: equ 09Ch ; last def. pass 3
-DEL_QTA: equ 0C6F9h ; last def. pass 3
-CR_HEAD: equ 0B1C4h ; last def. pass 3
-STBFIL0: equ 0CED1h ; last def. pass 3
-LITS_Z: equ 0B839h ; last def. pass 3
-REP_SET: equ 0BCB2h ; last def. pass 3
-SETWIN: equ 0CBECh ; last def. pass 3
-_FCLOSE: equ 010h ; last def. pass 3
-GETYNOW: equ 0B4BAh ; last def. pass 3
-CUR_ON: equ 0B251h ; last def. pass 3
-M_LOAD: equ 0C1A3h ; last def. pass 3
-PUT_NV: equ 0B8D6h ; last def. pass 3
-ZENKA_X: equ 02h ; last def. pass 3
-C_STAT: equ 030h ; last def. pass 3
-LINREV2: equ 0B804h ; last def. pass 3
-M_JUMP: equ 0B09Fh ; last def. pass 3
-LF_CCK: equ 0CA23h ; last def. pass 3
-_COLSTB: equ 0CEC1h ; last def. pass 3
-M_KILLC: equ 0C050h ; last def. pass 3
-ERRORMC: equ 0B5F3h ; last def. pass 3
-_RDRND: equ 027h ; last def. pass 3
-CLS: equ 0Ch ; last def. pass 3
-_CD_LF: equ 0CACEh ; last def. pass 3
-PUTBCE: equ 0B90Fh ; last def. pass 3
-E_BSAVE: equ 0Bh ; last def. pass 3
-L_INKK: equ 0B119h ; last def. pass 3
-LITS_H: equ 0B840h ; last def. pass 3
-KANJI_CK: equ 0C7C0h ; last def. pass 3
-LNTES0W: equ 0B874h ; last def. pass 3
-CTEOF_: equ 0CA4Ah ; last def. pass 3
-SCR_TOP: equ 00h ; last def. pass 3
-C_KJOF: equ 051h ; last def. pass 3
-INP_RE0: equ 0B1ADh ; last def. pass 3
-ADDCURS: equ 0BDD4h ; last def. pass 3
-ENSTOP: equ 0FBB0h ; last def. pass 3
-LFRSET: equ 0CA80h ; last def. pass 3
-STBSET: equ 0CD95h ; last def. pass 3
-L_CLS: equ 0CAFBh ; last def. pass 3
-LFMAX: equ 0BE3Dh ; last def. pass 3
-F_DEL: equ 0C789h ; last def. pass 3
-FCB: equ 0BF7Fh ; last def. pass 3
-RAMAD0: equ 0F341h ; last def. pass 3
-LITS: equ 0B81Ch ; last def. pass 3
-N_INSTR: equ 0B9E5h ; last def. pass 3
-FNKSTR: equ 0F87Fh ; last def. pass 3
-L_MAKLN: equ 0B89Bh ; last def. pass 3
-_FILES: equ 0C33Dh ; last def. pass 3
-JEADR: equ 0B320h ; last def. pass 3
-RET_SP: equ 0B0C1h ; last def. pass 3
-TXCLEAR: equ 0BA3Ch ; last def. pass 3
-JE_GET: equ 0B06Bh ; last def. pass 3
-TXSAVE1: equ 0C525h ; last def. pass 3
-JEMODE_: equ 0B159h ; last def. pass 3
-E_BADDRV: equ 012h ; last def. pass 3
-JSETW: equ 0B308h ; last def. pass 3
-SCWIDTH: equ 020h ; last def. pass 3
-WINFLG: equ 0CCE2h ; last def. pass 3
-CR_RG: equ 0B1C9h ; last def. pass 3
-RAMAD3: equ 0F344h ; last def. pass 3
-MAKLINE: equ 0B896h ; last def. pass 3
-ADDHLA: equ 0B4C2h ; last def. pass 3
-TXSAVEC: equ 0C559h ; last def. pass 3
-MJWR_3: equ 0BD96h ; last def. pass 3
-BKLINEE: equ 0BE64h ; last def. pass 3
-L_TXSKU: equ 0BB48h ; last def. pass 3
-LSC2S21: equ 0CD19h ; last def. pass 3
-CR_WIN: equ 0CD93h ; last def. pass 3
-VOICCQ: equ 0FA75h ; last def. pass 3
-PUTM_M: equ 0B8E3h ; last def. pass 3
-L_CLRIF: equ 0B4EBh ; last def. pass 3
-TX_HEAD: equ 0BA4Eh ; last def. pass 3
-M_JECLR: equ 0B18Fh ; last def. pass 3
-LINREV_: equ 0B852h ; last def. pass 3
-WINY: equ 04h ; last def. pass 3
-TXTAIE_: equ 0BA94h ; last def. pass 3
-MAKDIRM: equ 0C2A3h ; last def. pass 3
-R_INSTR: equ 0BA1Fh ; last def. pass 3
-DSKERR: equ 0C4BDh ; last def. pass 3
-BK_EOFS: equ 0B48Bh ; last def. pass 3
-CR_LT: equ 0B1DBh ; last def. pass 3
-INKEYS: equ 0B100h ; last def. pass 3
-CALYNOW: equ 0B4BFh ; last def. pass 3
-DSKERRP: equ 0C4BBh ; last def. pass 3
-BINARYD: equ 0B5F7h ; last def. pass 3
-DISKVE: equ 0F323h ; last def. pass 3
-R_PAT: equ 084h ; last def. pass 3
-M_KILLQ: equ 0C02Eh ; last def. pass 3
-MBKS_S0: equ 0BEA7h ; last def. pass 3
-FSELCUR: equ 0C3B3h ; last def. pass 3
-D_INSTR: equ 0BA25h ; last def. pass 3
-L_FILES: equ 0C330h ; last def. pass 3
-TXTWORK: equ 0B454h ; last def. pass 3
-MWR_INS: equ 0BE01h ; last def. pass 3
-RMHAN: equ 0C7BBh ; last def. pass 3
-TXLINE1: equ 0BBF9h ; last def. pass 3
-GETADT_: equ 0B4D8h ; last def. pass 3
-PUTSTB: equ 0CDE0h ; last def. pass 3
-L_FILE1: equ 0C5E5h ; last def. pass 3
-CR_TAIL: equ 0B1BDh ; last def. pass 3
-FNMSPC: equ 0C28Eh ; last def. pass 3
-L_GERMA: equ 0B5ECh ; last def. pass 3
-SYNCDW: equ 0CCB4h ; last def. pass 3
-RG8SAV: equ 0FFE7h ; last def. pass 3
-LFSET: equ 0CA72h ; last def. pass 3
-HOKVLD: equ 0FB20h ; last def. pass 3
-KANJI_RM: equ 0C798h ; last def. pass 3
-ADDDEA: equ 0B4C7h ; last def. pass 3
-M_CRLF: equ 0C0E5h ; last def. pass 3
-L_CTES: equ 0B2A4h ; last def. pass 3
-LFMWR: equ 0BE3Eh ; last def. pass 3
-INSVNAM: equ 0C3E0h ; last def. pass 3
-C_EROR: equ 091h ; last def. pass 3
-INSTRLF: equ 0BA13h ; last def. pass 3
-PTINF_: equ 0B56Ch ; last def. pass 3
-HOME: equ 0Bh ; last def. pass 3
-L_TXSKD: equ 0BB99h ; last def. pass 3
-DSKER0: equ 0C4DAh ; last def. pass 3
-E_PROTEC: equ 0Fh ; last def. pass 3
-DELERR: equ 0BEDEh ; last def. pass 3
-CSLFILE: equ 0C61Bh ; last def. pass 3
-H_KEYI: equ 0FD9Ah ; last def. pass 3
-INP_RET: equ 0B193h ; last def. pass 3
-MJWR_2: equ 0BD56h ; last def. pass 3
-BK_MSIZ: equ 0B489h ; last def. pass 3
-MWR_YMX: equ 0BCFCh ; last def. pass 3
-CLRSTB: equ 0CE24h ; last def. pass 3
-TESLIN: equ 0B22Bh ; last def. pass 3
-BKSSTB: equ 0CE3Bh ; last def. pass 3
-LINFWD2: equ 0B7F7h ; last def. pass 3
-CD_RETC: equ 0CA98h ; last def. pass 3
-ESINSTR: equ 0BA0Ch ; last def. pass 3
-LSC2S24: equ 0CD6Fh ; last def. pass 3
-M_STR: equ 0C006h ; last def. pass 3
-L_TEST: equ 0B036h ; last def. pass 3
-SPCFLG: equ 0C9C4h ; last def. pass 3
-SCRL_F: equ 0C792h ; last def. pass 3
-FCURON: equ 0C3ACh ; last def. pass 3
-L_MJWR: equ 0BD6Ch ; last def. pass 3
-BDOS: equ 0F37Dh ; last def. pass 3
-F_DIR: equ 0C77Fh ; last def. pass 3
-PRINT_: equ 0C9ECh ; last def. pass 3
-CL_OO_: equ 0FFh ; last def. pass 3
-HS_CONT: equ 0CCCEh ; last def. pass 3
-PAGE0: equ 0CCF9h ; last def. pass 3
-LNREV1E: equ 0B7E2h ; last def. pass 3
-CD_CLS: equ 0CADBh ; last def. pass 3
-R_COL: equ 08Ah ; last def. pass 3
-MBKS: equ 0BEB9h ; last def. pass 3
-E_DSKFUL: equ 0Ah ; last def. pass 3
-MWR_ADR: equ 0BCFAh ; last def. pass 3
-PROHEAD: equ 0B000h ; last def. pass 3
-ORGADR: equ 0B000h ; last def. pass 3
-LSC2S23: equ 0CD5Ch ; last def. pass 3
-DEL: equ 07Fh ; last def. pass 3
-SETDERR: equ 0C4A5h ; last def. pass 3
-CSETTMP: equ 0CA5Fh ; last def. pass 3
-HSYNCON: equ 0CCE9h ; last def. pass 3
-FNM_END: equ 0C277h ; last def. pass 3
-JENOT: equ 0B2E8h ; last def. pass 3
-K_CT_SH: equ 0B232h ; last def. pass 3
-E_NOLINE: equ 00h ; last def. pass 3
-LLREV_: equ 0B859h ; last def. pass 3
-INPFILE: equ 0C3C7h ; last def. pass 3
-ESCRET: equ 0B0A7h ; last def. pass 3
-_FNMK: equ 0C274h ; last def. pass 3
-LMW_SCR: equ 0BDF5h ; last def. pass 3
-E_BIGSIZ: equ 0Dh ; last def. pass 3
-VSETW: equ 0CD84h ; last def. pass 3
-VOICAQ: equ 0F975h ; last def. pass 3
-MWR_DAT: equ 0BCF8h ; last def. pass 3
-R_SNM: equ 085h ; last def. pass 3
-TA_SIZE: equ 02FFDh ; last def. pass 3
-SPCLIN: equ 0CB12h ; last def. pass 3
-HANK: equ 0C7EDh ; last def. pass 3
-INCAXS: equ 0C9D7h ; last def. pass 3
-REP_Y: equ 0BE12h ; last def. pass 3
-FONTHK: equ 0C8FCh ; last def. pass 3
-JE_IN: equ 0B050h ; last def. pass 3
-BEEP: equ 0C0h ; last def. pass 3
-TITLE: equ 0B389h ; last def. pass 3
-MDEL_: equ 0BEF3h ; last def. pass 3
-PUT_INF: equ 0B509h ; last def. pass 3
-JECALL: equ 0B31Ch ; last def. pass 3
-TXLOAD_: equ 0C454h ; last def. pass 3
-L_SPCL0: equ 0CB36h ; last def. pass 3
-PUTD_: equ 0B906h ; last def. pass 3
-SCRL_L: equ 0C791h ; last def. pass 3
-_COLF0: equ 0C998h ; last def. pass 3
-F_WRITE: equ 0C77Ah ; last def. pass 3
-MODCHG: equ 0B134h ; last def. pass 3
-WINSCR: equ 0CCEDh ; last def. pass 3
-F_OPEN: equ 0C754h ; last def. pass 3
-FCBSAVE: equ 0C214h ; last def. pass 3
-LEMAKLN: equ 0B8B4h ; last def. pass 3
-UD_SCR: equ 016h ; last def. pass 3
-FCUROF: equ 0C3B1h ; last def. pass 3
-PUT_D2: equ 0B8FCh ; last def. pass 3
-INPUT: equ 09Fh ; last def. pass 3
-E_BADFMT: equ 014h ; last def. pass 3
-C_INF1: equ 0F0h ; last def. pass 3
-E_BADFAT: equ 0Eh ; last def. pass 3
-RAMP1: equ 0C1DEh ; last def. pass 3
-SJH_1: equ 0C7FDh ; last def. pass 3
-PUTM_V: equ 0B8DCh ; last def. pass 3
-WINX: equ 02h ; last def. pass 3
-FNM2: equ 0C254h ; last def. pass 3
-HS_STOP: equ 0CCC8h ; last def. pass 3
-PUT_MD: equ 0B8D3h ; last def. pass 3
-LF: equ 0Ah ; last def. pass 3
-_COLF1: equ 0C9BEh ; last def. pass 3
-M_KILL: equ 0C1CFh ; last def. pass 3
-LOADFNT: equ 0B36Eh ; last def. pass 3
-F_MAKE: equ 0C746h ; last def. pass 3
-E_BADFNM: equ 017h ; last def. pass 3
-M_QUES_: equ 0C03Fh ; last def. pass 3
-PUT_NM: equ 0B8D9h ; last def. pass 3
-R_NAM: equ 082h ; last def. pass 3
-INFO_MS: equ 0B5A3h ; last def. pass 3
-SJL_: equ 0C805h ; last def. pass 3
-STB_FLG: equ 0CDE1h ; last def. pass 3
-KJ_IO2: equ 0DAh ; last def. pass 3
-PUT_D5: equ 0B8EAh ; last def. pass 3
-LNTES0_: equ 0B86Ch ; last def. pass 3
-C_MEND: equ 0E1h ; last def. pass 3
-CR: equ 0Dh ; last def. pass 3
-LSC2S2F: equ 0CD24h ; last def. pass 3
-HSYNCOF: equ 0CCF7h ; last def. pass 3
-PRINT: equ 0C9E2h ; last def. pass 3
-ENASLT: equ 024h ; last def. pass 3
-BDISKVE: equ 0C4B9h ; last def. pass 3
-BK_LIND: equ 0B48Fh ; last def. pass 3
-SJH_2: equ 0C7FFh ; last def. pass 3
-CURTEST: equ 0B29Ah ; last def. pass 3
-SNSMAT: equ 0141h ; last def. pass 3
-JE_WORK: equ 0CEE3h ; last def. pass 3
-E_UNKNOW: equ 016h ; last def. pass 3
-INPSTR_: equ 0B99Eh ; last def. pass 3
-PUTN: equ 0B8D1h ; last def. pass 3
-STBFIL: equ 0CECCh ; last def. pass 3
-WINOF_: equ 0CC94h ; last def. pass 3
-INKEYK: equ 0B10Bh ; last def. pass 3
-STBRES: equ 0CDB8h ; last def. pass 3
-STR_INF: equ 0B4F2h ; last def. pass 3
-FONT_C: equ 0C98Ch ; last def. pass 3
-BFLNCHK: equ 0BCDDh ; last def. pass 3
-PTINF1: equ 0B562h ; last def. pass 3
-CL_OX_: equ 0F0h ; last def. pass 3
-L_INSTR: equ 0B9BAh ; last def. pass 3
-CR__DW: equ 0B20Dh ; last def. pass 3
-KJ_IO1: equ 0D8h ; last def. pass 3
-L_SC2ST: equ 0CBB9h ; last def. pass 3
-MJWRIT0: equ 0BD26h ; last def. pass 3
-_FOPEN: equ 0Fh ; last def. pass 3
-TD_YNOW: equ 0B454h ; last def. pass 3
-INI: equ 0B000h ; last def. pass 3
-TX_SCRU: equ 0BAAFh ; last def. pass 3
-L_QUES: equ 0C572h ; last def. pass 3
-L_STRIF: equ 0B4FDh ; last def. pass 3
-C_BKON: equ 01Ah ; last def. pass 3
-LINOVER: equ 0FFh ; last def. pass 3
-FNKSAVE: equ 0B331h ; last def. pass 3
-ZENKA_CK: equ 0C7C5h ; last def. pass 3
-C_INF2: equ 070h ; last def. pass 3
-PRTTAB: equ 0C9F5h ; last def. pass 3
-KJCODE: equ 0C818h ; last def. pass 3
-EXTBIO: equ 0FFCAh ; last def. pass 3
-FONT_CE: equ 0C9C2h ; last def. pass 3
-SCRL_LF: equ 0CB55h ; last def. pass 3
-L_FNM: equ 0C22Bh ; last def. pass 3
-LJSET: equ 0B2F5h ; last def. pass 3
-L_SC2S: equ 0CBCDh ; last def. pass 3
-C_BKOF: equ 01h ; last def. pass 3
-CUR_OF: equ 0B294h ; last def. pass 3
-KANJI_S: equ 0C7D6h ; last def. pass 3
-L_FILE2: equ 0C5EAh ; last def. pass 3
-CLR_INF: equ 0B4DDh ; last def. pass 3
-GET_ADT: equ 0B4D3h ; last def. pass 3
-MJ_WRIT: equ 0BCFFh ; last def. pass 3
-INPUT2: equ 0B499h ; last def. pass 3
-LTEST_: equ 0B07Eh ; last def. pass 3
-CT_EOF: equ 0CA2Eh ; last def. pass 3
-WINDON: equ 0CCEBh ; last def. pass 3
-FNM1: equ 0C24Ah ; last def. pass 3
-NOLINE: equ 0FFh ; last def. pass 3
-MW_NLF: equ 0BDDFh ; last def. pass 3
-WINDOW: equ 0CC39h ; last def. pass 3
-JESET_: equ 0B2F4h ; last def. pass 3
-RAMAD1: equ 0F342h ; last def. pass 3
-CRESTMP: equ 0CA6Bh ; last def. pass 3
-E_INSTR: equ 0BA05h ; last def. pass 3
-CD_LF: equ 0CAC1h ; last def. pass 3
-TXTAILE: equ 0BA84h ; last def. pass 3
-M_SAVEQ: equ 0C021h ; last def. pass 3
-INS: equ 012h ; last def. pass 3
-INPLINE: equ 0B97Fh ; last def. pass 3
-TX_SAVE: equ 0C4E1h ; last def. pass 3
-HS_: equ 0CCD1h ; last def. pass 3
-PUT_N: equ 0B8BBh ; last def. pass 3
-KEYDAT: equ 0FBE5h ; last def. pass 3
-F_CLOSE: equ 0C74Fh ; last def. pass 3
-E_MAKLN: equ 0B8B0h ; last def. pass 3
-AXXSTB: equ 0CEC5h ; last def. pass 3
-DAI1_K: equ 0C845h ; last def. pass 3
-_FFIRST: equ 011h ; last def. pass 3
-FILERRB: equ 0C46Ch ; last def. pass 3
-INSVNA_: equ 0C3F0h ; last def. pass 3
-CNRET_: equ 0CA88h ; last def. pass 3
-CD_RET_: equ 0CAB3h ; last def. pass 3
-M_FILEQ: equ 0C0E8h ; last def. pass 3
-M_QUES: equ 0C03Bh ; last def. pass 3
-MJ_DEL: equ 0BEE5h ; last def. pass 3
-E_BADSIZ: equ 09h ; last def. pass 3
-MWR_CHR: equ 0BCFEh ; last def. pass 3
-_SETDMA: equ 01Ah ; last def. pass 3
-PUTBCD: equ 0B907h ; last def. pass 3
-INPFIL_: equ 0C3DCh ; last def. pass 3
-TX_KILL: equ 0C62Bh ; last def. pass 3
-MIS_LEN: equ 0BC33h ; last def. pass 3
-MEMSAVE: equ 0B913h ; last def. pass 3
-SJL_2: equ 0C816h ; last def. pass 3
-STBED: equ 0CDDCh ; last def. pass 3
-KJ_PC_: equ 0C864h ; last def. pass 3
-JE_MODE: equ 0B0C3h ; last def. pass 3
-UP: equ 01Eh ; last def. pass 3
-CL_XX_: equ 00h ; last def. pass 3
-L_FNMK: equ 0C25Fh ; last def. pass 3
-GYLIN_: equ 0B4ABh ; last def. pass 3
-LREVSTB: equ 0CE5Ch ; last def. pass 3
-M_KILLN: equ 0C064h ; last def. pass 3
-PUT_D3: equ 0B8F6h ; last def. pass 3
-D_SC2I: equ 0CB98h ; last def. pass 3
-TXLINE0: equ 0BBDEh ; last def. pass 3
-CONRET: equ 0CA85h ; last def. pass 3
-TIMERC: equ 0CCE1h ; last def. pass 3
-E_FULTXT: equ 01h ; last def. pass 3
-FCBFNT: equ 0B349h ; last def. pass 3
-MWR_LEN: equ 0BCF6h ; last def. pass 3
-M_NAME: equ 0C1BFh ; last def. pass 3
-PUT_NB: equ 0B8C0h ; last def. pass 3
-TXSAVEM: equ 0C4ECh ; last def. pass 3
-SC2INI: equ 0CB70h ; last def. pass 3
-RETURN: equ 0B0B2h ; last def. pass 3
-MJD_XMX: equ 0B484h ; last def. pass 3
-LNREV1F: equ 0B7F1h ; last def. pass 3
-TD_MSIZ: equ 0B458h ; last def. pass 3
-TX_NAME: equ 0C61Fh ; last def. pass 3
-FLSESC: equ 0C385h ; last def. pass 3
-BK_COLF: equ 0B491h ; last def. pass 3
-FCBLOAD: equ 0C220h ; last def. pass 3
-TXTWKBK: equ 0B485h ; last def. pass 3
-ERROR_S: equ 0B5C4h ; last def. pass 3
-LINRV1C: equ 0B7F4h ; last def. pass 3
-HOF: equ 0FFh ; last def. pass 3
-MCLTAB: equ 0F956h ; last def. pass 3
-_FNEXT: equ 012h ; last def. pass 3
-PTINFX: equ 0B581h ; last def. pass 3
-WINDOF: equ 0CCE3h ; last def. pass 3
-RMZEN: equ 0C7B6h ; last def. pass 3
-SC2SET: equ 0CBA2h ; last def. pass 3
-GETYLIN: equ 0B4A5h ; last def. pass 3
-TXTWK_E: equ 0B45Ch ; last def. pass 3
-BKLINE: equ 0BE58h ; last def. pass 3
-RESWIN: equ 0CC10h ; last def. pass 3
-C_KJON: equ 0B1h ; last def. pass 3
-JPTABLE: equ 0B0C4h ; last def. pass 3
-M_INLIN: equ 0BFEEh ; last def. pass 3
-COLFLOD: equ 0C20Dh ; last def. pass 3
-C_FSOF: equ 071h ; last def. pass 3
-E_BASIC: equ 0Ch ; last def. pass 3
-LEFT: equ 01Dh ; last def. pass 3
-MJ_EROR: equ 0BCC7h ; last def. pass 3
-DSKER_: equ 0C4DEh ; last def. pass 3
-FNKLOAD: equ 0B33Dh ; last def. pass 3
-MIS_ADR: equ 0BC35h ; last def. pass 3
-MJ_INS: equ 0BC37h ; last def. pass 3
-CK_ZEN: equ 0C7D3h ; last def. pass 3
-INSTRMD: equ 0B97Eh ; last def. pass 3
-_FNMS: equ 0C29Bh ; last def. pass 3
-DIRM: equ 0C29Dh ; last def. pass 3
-PR_AXS: equ 0C78Eh ; last def. pass 3
-INSTRBS: equ 0BA19h ; last def. pass 3
-DSKER1: equ 0C4DCh ; last def. pass 3
-LINFWD: equ 0B7B8h ; last def. pass 3
-EOF: equ 01Ah ; last def. pass 3
-MBKS_S1: equ 0BEABh ; last def. pass 3
-LFCHCK_: equ 0C9C9h ; last def. pass 3
-BK_CAXS: equ 0B48Dh ; last def. pass 3
-SCRL_UP: equ 0CB58h ; last def. pass 3
-TXLINE2: equ 0BC04h ; last def. pass 3
-LMLID: equ 0BF0Bh ; last def. pass 3
-DEL_MP: equ 0C727h ; last def. pass 3
-GETERMA: equ 0B5E2h ; last def. pass 3
-_FKILL: equ 013h ; last def. pass 3
-JECHG: equ 0B13Eh ; last def. pass 3
-TD_EOFS: equ 0B45Ah ; last def. pass 3
-LIDSTB: equ 0CE29h ; last def. pass 3
-DEL_Q: equ 0C67Bh ; last def. pass 3
-LINTE_L: equ 0B814h ; last def. pass 3
-J_CTES: equ 0B2B4h ; last def. pass 3
-BK_YMAX: equ 0B487h ; last def. pass 3
-VRAM2: equ 0C978h ; last def. pass 3
-C_MENU: equ 071h ; last def. pass 3
-DEL_MBI: equ 0C0B1h ; last def. pass 3
-E_QUESN: equ 0C58Ch ; last def. pass 3
-C_STA2: equ 030h ; last def. pass 3
-EOFF: equ 0C1A2h ; last def. pass 3
-STR: equ 0C008h ; last def. pass 3
-_FSET: equ 0C75Ah ; last def. pass 3
-MEMLOAD: equ 0B93Ch ; last def. pass 3
-TD_LIN: equ 0B45Eh ; last def. pass 3
-FILES: equ 0C30Fh ; last def. pass 3
-CR__UP: equ 0B1F5h ; last def. pass 3
-L_MEML: equ 0B958h ; last def. pass 3
-L_SPCL1: equ 0CB44h ; last def. pass 3
-SCRL_DW: equ 0CB65h ; last def. pass 3
-CUR_AXS: equ 0B45Ch ; last def. pass 3
-TX_REP: equ 0C1E8h ; last def. pass 3
-QUES: equ 0C55Eh ; last def. pass 3
-LFCHCK: equ 0C9C6h ; last def. pass 3
-M_FILEN: equ 0C196h ; last def. pass 3
-FILNMK: equ 0C25Dh ; last def. pass 3
-_COLF1_: equ 0C9BCh ; last def. pass 3
-FILENAM: equ 0B17Ah ; last def. pass 3
-JERES: equ 0B325h ; last def. pass 3
-JE_WAIT: equ 0B042h ; last def. pass 3
-C_MJOF: equ 0F1h ; last def. pass 3
-DEL_QBI: equ 0C701h ; last def. pass 3
-L_FILE: equ 0C5DCh ; last def. pass 3
-REVSTB: equ 0CE4Eh ; last def. pass 3
-TX_SCRD: equ 0BAE7h ; last def. pass 3
-M_SAVE: equ 0C1B1h ; last def. pass 3
-ENDFL: equ 0DBE3h ; last def. pass 3
-CTRSTB: equ 0CDF9h ; last def. pass 3
-PTINF0: equ 0B55Fh ; last def. pass 3
-M_INSTR: equ 0BFFAh ; last def. pass 3
-TX_SKPU: equ 0BB2Ah ; last def. pass 3
-REP_FLG: equ 0BE0Eh ; last def. pass 3
-PAGE1: equ 0CD03h ; last def. pass 3
-STOI_L: equ 0B967h ; last def. pass 3
-CL_BACK: equ 0CD91h ; last def. pass 3
-BDOSC: equ 0C73Ch ; last def. pass 3
-M_JEOFF: equ 0B16Dh ; last def. pass 3
-E_IGNORE: equ 02h ; last def. pass 3
-INFOMES: equ 0B598h ; last def. pass 3
-STOI: equ 0B964h ; last def. pass 3
-CHGSCR: equ 05Fh ; last def. pass 3
-M_TITLE: equ 0B39Ch ; last def. pass 3
-CR_UP: equ 0B1EFh ; last def. pass 3
-ERROR_W: equ 0B5AEh ; last def. pass 3
-PUT_NH: equ 0B8C9h ; last def. pass 3
-I_INSTR: equ 0B9ECh ; last def. pass 3
-RYSCR: equ 097h ; last def. pass 3
-FIL_ERR: equ 0C48Fh ; last def. pass 3
-M_KILLM: equ 0C05Dh ; last def. pass 3
-E_FILE: equ 0C615h ; last def. pass 3
-TX_TAIL: equ 0BA6Fh ; last def. pass 3
-RESDERR: equ 0C4B2h ; last def. pass 3
-MJ_LID: equ 0BF00h ; last def. pass 3
-D_SC2K: equ 0CBE2h ; last def. pass 3
-SELECT: equ 018h ; last def. pass 3
-FONTCL: equ 0C984h ; last def. pass 3
-DEL_CK: equ 0BEC2h ; last def. pass 3
-LEINSTR: equ 0B9F3h ; last def. pass 3
-E_TEST: equ 0B0A6h ; last def. pass 3
-KILL_L: equ 0C638h ; last def. pass 3
-ZENHCHK: equ 0BCCEh ; last def. pass 3
-DEL_MTA: equ 0C09Ah ; last def. pass 3
-FSELECT: equ 0C38Ch ; last def. pass 3
-E_QUESY: equ 0C587h ; last def. pass 3
-FLSEND: equ 0C36Fh ; last def. pass 3
-TX_LINE: equ 0BBBEh ; last def. pass 3
-KANJI_PC: equ 0C838h ; last def. pass 3
-KEYCLR: equ 0B492h ; last def. pass 3
-_WRRND: equ 026h ; last def. pass 3
-_LMJWR: equ 0BD7Bh ; last def. pass 3
-INPSTR: equ 0B997h ; last def. pass 3
-REPRINT: equ 0BE0Fh ; last def. pass 3
-TXSKPD: equ 0BB86h ; last def. pass 3
-ERROR_M: equ 0B612h ; last def. pass 3
-JECALL_: equ 0B31Fh ; last def. pass 3
-MIS_FIL: equ 0BC87h ; last def. pass 3
-SC2INI1: equ 0CB8Fh ; last def. pass 3
-LNTES1_: equ 0B88Dh ; last def. pass 3
-CR_DW: equ 0B207h ; last def. pass 3
-VOICBQ: equ 0F9F5h ; last def. pass 3
-KANJI_C: equ 0C794h ; last def. pass 3
-MW_NSCR: equ 0BDFCh ; last def. pass 3
-FONT_CL: equ 0C98Ah ; last def. pass 3
-STRSIZ: equ 016h ; last def. pass 3
-C_MJON: equ 013h ; last def. pass 3
-TD_YMAX: equ 0B456h ; last def. pass 3
-RM60H: equ 0C7A6h ; last def. pass 3
-E_INKK: equ 0B12Fh ; last def. pass 3
-MMENU: equ 0B44Fh ; last def. pass 3
-L_FNMS: equ 0C290h ; last def. pass 3
-LREV1: equ 0CEA4h ; last def. pass 3
-TD_MODE: equ 0B452h ; last def. pass 3
-CUR_WR: equ 0B238h ; last def. pass 3
-MJWR_1: equ 0BD3Dh ; last def. pass 3
-TX_FILE: equ 0C591h ; last def. pass 3
-COLSTB: equ 0CEB2h ; last def. pass 3
-TXSAVE0: equ 0C500h ; last def. pass 3
-E_BADDAT: equ 011h ; last def. pass 3
-INP_RE1: equ 0B1B3h ; last def. pass 3
-CONTRL: equ 0CA06h ; last def. pass 3
-DEL_FLG: equ 0BF2Ch ; last def. pass 3
-MJD_HED: equ 0B482h ; last def. pass 3
-DELET_: equ 0BF38h ; last def. pass 3
-LITS_C: equ 0B850h ; last def. pass 3
-WLREV_: equ 0B863h ; last def. pass 3
-SCRL_OL: equ 0CCE0h ; last def. pass 3
-LSC2S25: equ 0CD7Bh ; last def. pass 3
-BS: equ 08h ; last def. pass 3
-STACKA: equ 0FAF3h ; last def. pass 3
-LINREV: equ 0B7C8h ; last def. pass 3
-RIGHT: equ 01Ch ; last def. pass 3
-LINTES_: equ 0B812h ; last def. pass 3
-DELCKE: equ 0BEDDh ; last def. pass 3
-RAMAD2: equ 0F343h ; last def. pass 3
-HANKA_X: equ 01h ; last def. pass 3
-STBFIL1: equ 0CEDAh ; last def. pass 3
-CTES2: equ 0B2C2h ; last def. pass 3
-LLNREVL: equ 0B7D0h ; last def. pass 3
-PUT_D4: equ 0B8F0h ; last def. pass 3
+STBFIL1: EQU 0x0000CEDA
+STBFIL0: EQU 0x0000CED1
+_COLSTB: EQU 0x0000CEC1
+LREV1: EQU 0x0000CEA4
+LREV0: EQU 0x0000CE7D
+LREVSTB: EQU 0x0000CE5C
+STBFIL: EQU 0x0000CECC
+AXXSTB: EQU 0x0000CEC5
+COLSTB: EQU 0x0000CEB2
+BKSSTB: EQU 0x0000CE3B
+LIDSTB: EQU 0x0000CE29
+CLRSTB: EQU 0x0000CE24
+CTRSTB: EQU 0x0000CDF9
+STBED: EQU 0x0000CDDC
+STBRES: EQU 0x0000CDB8
+PUTSTB: EQU 0x0000CDE0
+REVSTB: EQU 0x0000CE4E
+CR_WIN: EQU 0x0000CD93
+WINX: EQU 0x00000002
+WINY: EQU 0x00000004
+CL_BACK: EQU 0x0000CD91
+LSC2S25: EQU 0x0000CD7B
+LSC2S24: EQU 0x0000CD6F
+LSC2S23: EQU 0x0000CD5C
+LSC2S22: EQU 0x0000CD3A
+LSC2S2F: EQU 0x0000CD24
+LSC2S21: EQU 0x0000CD19
+WINSCR: EQU 0x0000CCED
+WINFLG: EQU 0x0000CCE2
+HS_: EQU 0x0000CCD1
+SYNCDW: EQU 0x0000CCB4
+WINDOF: EQU 0x0000CCE3
+WINOF_: EQU 0x0000CC94
+SCRL_OL: EQU 0x0000CCE0
+TIMERC: EQU 0x0000CCE1
+WINDON: EQU 0x0000CCEB
+WIN_ON: EQU 0x0000CC50
+WIN_OFF: EQU 0x0000CC7B
+WINDOW: EQU 0x0000CC39
+O_KEYI: EQU 0x0000CCC3
+HSYNCON: EQU 0x0000CCE9
+HSYNCOF: EQU 0x0000CCF7
+SETWIN: EQU 0x0000CBEC
+SC2SET2: EQU 0x0000CD0E
+L_SC2S: EQU 0x0000CBCD
+L_SC2ST: EQU 0x0000CBB9
+D_SC2K: EQU 0x0000CBE2
+SC2INI1: EQU 0x0000CB8F
+D_SC2I: EQU 0x0000CB98
+L_SPCL1: EQU 0x0000CB44
+L_SPCL0: EQU 0x0000CB36
+L_CLS: EQU 0x0000CAFB
+SCRL_LF: EQU 0x0000CB55
+_CD_LF: EQU 0x0000CACE
+CD_RET: EQU 0x0000CABC
+CONRET: EQU 0x0000CA85
+CNRET_: EQU 0x0000CA88
+CTEOF_: EQU 0x0000CA4A
+SPCLIN: EQU 0x0000CB12
+LF_CCK: EQU 0x0000CA23
+CD_RETC: EQU 0x0000CA98
+CT_EOF: EQU 0x0000CA2E
+CRESTMP: EQU 0x0000CA6B
+CSETTMP: EQU 0x0000CA5F
+PRINT_: EQU 0x0000C9EC
+CONTRL: EQU 0x0000CA06
+PRTTAB: EQU 0x0000C9F5
+INCAXS: EQU 0x0000C9D7
+CD_LF: EQU 0x0000CAC1
+CD_RET_: EQU 0x0000CAB3
+LFCHCK_: EQU 0x0000C9C9
+LFTCNT: EQU 0x0000C9C5
+SCR_TOP: EQU 0x00000000
+RG8SAV: EQU 0x0000FFE7
+H_KEYI: EQU 0x0000FD9A
+R_SNM: EQU 0x00000085
+R_SPT: EQU 0x00000086
+R_NAM: EQU 0x00000082
+R_COL: EQU 0x0000008A
+R_PAT: EQU 0x00000084
+RYSCR: EQU 0x00000097
+_COLF1: EQU 0x0000C9BE
+_COLF1_: EQU 0x0000C9BC
+_COLF0: EQU 0x0000C998
+FONT_CE: EQU 0x0000C9C2
+FONTCL: EQU 0x0000C984
+VRAM2: EQU 0x0000C978
+VRAM1: EQU 0x0000C96D
+FONTHK: EQU 0x0000C8FC
+KJ_PC_: EQU 0x0000C864
+DAI1_K: EQU 0x0000C845
+LFCHCK: EQU 0x0000C9C6
+KJCODE: EQU 0x0000C818
+SJL_2: EQU 0x0000C816
+SJL_1: EQU 0x0000C80D
+SJL_: EQU 0x0000C805
+SJH_2: EQU 0x0000C7FF
+SJH_1: EQU 0x0000C7FD
+HANK: EQU 0x0000C7ED
+CK_HANK: EQU 0x0000C7D1
+ZENKA_CK: EQU 0x0000C7C5
+CK_ZEN: EQU 0x0000C7D3
+KANJI_CK: EQU 0x0000C7C0
+KANJI_PC: EQU 0x0000C838
+RMZEN: EQU 0x0000C7B6
+RMHAN: EQU 0x0000C7BB
+RM60H: EQU 0x0000C7A6
+KANJI_RM: EQU 0x0000C798
+FONT_CL: EQU 0x0000C98A
+KJCL_F: EQU 0x0000C793
+SCRL_F: EQU 0x0000C792
+HANKA_X: EQU 0x00000001
+ZENKA_X: EQU 0x00000002
+CL_XX_: EQU 0x00000000
+CL_XO_: EQU 0x0000000F
+CL_OX_: EQU 0x000000F0
+CL_OO_: EQU 0x000000FF
+KJ_IO2: EQU 0x000000DA
+KJ_IO1: EQU 0x000000D8
+_FSET: EQU 0x0000C75A
+BDOSC: EQU 0x0000C73C
+_FNEXT: EQU 0x00000012
+_FFIRST: EQU 0x00000011
+_FKILL: EQU 0x00000013
+_FMAKE: EQU 0x00000016
+_FCLOSE: EQU 0x00000010
+_WRRND: EQU 0x00000026
+_RDRND: EQU 0x00000027
+_SETDMA: EQU 0x0000001A
+_FOPEN: EQU 0x0000000F
+BDOS: EQU 0x0000F37D
+DEL_MP: EQU 0x0000C727
+DEL_QTA: EQU 0x0000C6F9
+DEL_QBI: EQU 0x0000C701
+F_DEL: EQU 0x0000C789
+KILL_F: EQU 0x0000C667
+KILL_L: EQU 0x0000C638
+CSLFILE: EQU 0x0000C61B
+TX_KILL: EQU 0x0000C62B
+TX_NAME: EQU 0x0000C61F
+E_FILE: EQU 0x0000C615
+KANJI_S: EQU 0x0000C7D6
+L_FILE1: EQU 0x0000C5E5
+L_FILE2: EQU 0x0000C5EA
+L_FILE: EQU 0x0000C5DC
+E_QUESN: EQU 0x0000C58C
+E_QUESY: EQU 0x0000C587
+L_QUES: EQU 0x0000C572
+F_CLOSE: EQU 0x0000C74F
+F_WRITE: EQU 0x0000C77A
+F_MAKE: EQU 0x0000C746
+TXSAVEC: EQU 0x0000C559
+QUES: EQU 0x0000C55E
+DEL_Q: EQU 0x0000C67B
+TXSAVE1: EQU 0x0000C525
+TXSAVE0: EQU 0x0000C500
+TXSAVEM: EQU 0x0000C4EC
+TX_SAVE: EQU 0x0000C4E1
+DSKER_: EQU 0x0000C4DE
+DSKER1: EQU 0x0000C4DC
+DSKER0: EQU 0x0000C4DA
+DSKERR: EQU 0x0000C4BD
+RESDERR: EQU 0x0000C4B2
+DSKERRP: EQU 0x0000C4BB
+BDISKVE: EQU 0x0000C4B9
+DISKVE: EQU 0x0000F323
+SETDERR: EQU 0x0000C4A5
+FILERRB: EQU 0x0000C46C
+TXLOAD_: EQU 0x0000C454
+FIL_ERR: EQU 0x0000C48F
+TX_LOAD: EQU 0x0000C3F4
+INSVNA_: EQU 0x0000C3F0
+INSVNAM: EQU 0x0000C3E0
+INPFIL_: EQU 0x0000C3DC
+INPFILE: EQU 0x0000C3C7
+FSELCUR: EQU 0x0000C3B3
+FCUROF: EQU 0x0000C3B1
+FCURON: EQU 0x0000C3AC
+FLSEND: EQU 0x0000C36F
+FSELECT: EQU 0x0000C38C
+HS_CONT: EQU 0x0000CCCE
+_FILES: EQU 0x0000C33D
+F_DIR2: EQU 0x0000C784
+L_FILES: EQU 0x0000C330
+FLSESC: EQU 0x0000C385
+F_DIR: EQU 0x0000C77F
+HS_STOP: EQU 0x0000CCC8
+FILES: EQU 0x0000C30F
+MAKDIRM: EQU 0x0000C2A3
+DIRM: EQU 0x0000C29D
+_FNMS: EQU 0x0000C29B
+L_FNMS: EQU 0x0000C290
+_FNMK: EQU 0x0000C274
+L_FNMK: EQU 0x0000C25F
+FNMKR: EQU 0x0000C25A
+FNM_END: EQU 0x0000C277
+FNMSPC: EQU 0x0000C28E
+FILNMK: EQU 0x0000C25D
+FNM1: EQU 0x0000C24A
+FNM2: EQU 0x0000C254
+L_FNM: EQU 0x0000C22B
+FNAMSET: EQU 0x0000C226
+FCBLOAD: EQU 0x0000C220
+FCBSAVE: EQU 0x0000C214
+COLFLOD: EQU 0x0000C20D
+FONTCOL: EQU 0x0000C98B
+COLFSAV: EQU 0x0000C206
+TX_REP: EQU 0x0000C1E8
+RAMP1: EQU 0x0000C1DE
+M_KILL: EQU 0x0000C1CF
+M_NAME: EQU 0x0000C1BF
+M_SAVE: EQU 0x0000C1B1
+M_LOAD: EQU 0x0000C1A3
+M_FILEN: EQU 0x0000C196
+M_FILEQ: EQU 0x0000C0E8
+M_CRLF: EQU 0x0000C0E5
+DEL_MBI: EQU 0x0000C0B1
+DEL_MTA: EQU 0x0000C09A
+M_KILLN: EQU 0x0000C064
+M_KILLM: EQU 0x0000C05D
+M_KILLC: EQU 0x0000C050
+M_QUES_: EQU 0x0000C03F
+M_QUES: EQU 0x0000C03B
+M_KILLQ: EQU 0x0000C02E
+M_SAVEQ: EQU 0x0000C021
+FCBDIR: EQU 0x0000BFC9
+FCB2: EQU 0x0000BFA4
+FCB: EQU 0x0000BF7F
+DELET_: EQU 0x0000BF38
+LMLID: EQU 0x0000BF0B
+MDEL_: EQU 0x0000BEF3
+DELCKE: EQU 0x0000BEDD
+DEL_CK: EQU 0x0000BEC2
+DELETE: EQU 0x0000BF17
+MBKS: EQU 0x0000BEB9
+DEL_FLG: EQU 0x0000BF2C
+MBKS_S0: EQU 0x0000BEA7
+MBKS_S1: EQU 0x0000BEAB
+DELERR: EQU 0x0000BEDE
+BKLINEE: EQU 0x0000BE64
+LFMWR: EQU 0x0000BE3E
+LFMAX: EQU 0x0000BE3D
+LMW_SCR: EQU 0x0000BDF5
+MW_NSCR: EQU 0x0000BDFC
+MW_NLF: EQU 0x0000BDDF
+ADDCURS: EQU 0x0000BDD4
+REPRINT: EQU 0x0000BE0F
+MJWR_3: EQU 0x0000BD96
+_LMJWR: EQU 0x0000BD7B
+MWR_INS: EQU 0x0000BE01
+L_MJWR: EQU 0x0000BD6C
+MJWR_2: EQU 0x0000BD56
+MJWR_1: EQU 0x0000BD3D
+MJWRIT0: EQU 0x0000BD26
+MWR_CHR: EQU 0x0000BCFE
+MWR_ADR: EQU 0x0000BCFA
+MWR_DAT: EQU 0x0000BCF8
+MWR_LEN: EQU 0x0000BCF6
+BKLINE: EQU 0x0000BE58
+BFLNCHK: EQU 0x0000BCDD
+ZENHCHK: EQU 0x0000BCCE
+REP_Y: EQU 0x0000BE12
+REP_SET: EQU 0x0000BCB2
+MWR_YMX: EQU 0x0000BCFC
+MIS_FIL: EQU 0x0000BC87
+MJ_EROR: EQU 0x0000BCC7
+REP_FLG: EQU 0x0000BE0E
+MJ_INS: EQU 0x0000BC37
+MIS_ADR: EQU 0x0000BC35
+MIS_LEN: EQU 0x0000BC33
+DOWN: EQU 0x0000001F
+UP: EQU 0x0000001E
+SELECT: EQU 0x00000018
+INS: EQU 0x00000012
+CLS: EQU 0x0000000C
+HOME: EQU 0x0000000B
+E_TXLIN: EQU 0x0000BC17
+L_TXLIN: EQU 0x0000BC0C
+TXLINE1: EQU 0x0000BBF9
+TXLINE2: EQU 0x0000BC04
+TXLINE0: EQU 0x0000BBDE
+L_TXSKD: EQU 0x0000BB99
+TXSKPD: EQU 0x0000BB86
+L_TXSKU: EQU 0x0000BB48
+SCRL_UP: EQU 0x0000CB58
+PR_AXS: EQU 0x0000C78E
+SCRL_DW: EQU 0x0000CB65
+TXTAIE_: EQU 0x0000BA94
+TXTAILE: EQU 0x0000BA84
+LFRSET: EQU 0x0000CA80
+LFSET: EQU 0x0000CA72
+CD_CLS: EQU 0x0000CADB
+R_INSTR: EQU 0x0000BA1F
+EOFF: EQU 0x0000C1A2
+M_STR: EQU 0x0000C006
+N_INSTR: EQU 0x0000B9E5
+INSTRLF: EQU 0x0000BA13
+LEFT: EQU 0x0000001D
+I_INSTR: EQU 0x0000B9EC
+RIGHT: EQU 0x0000001C
+INSTRBS: EQU 0x0000BA19
+BS: EQU 0x00000008
+D_INSTR: EQU 0x0000BA25
+E_INSTR: EQU 0x0000BA05
+ESINSTR: EQU 0x0000BA0C
+ESC: EQU 0x0000001B
+L_INSTR: EQU 0x0000B9BA
+LEINSTR: EQU 0x0000B9F3
+STRSIZ: EQU 0x00000016
+STR: EQU 0x0000C008
+M_INSTR: EQU 0x0000BFFA
+INPSTR: EQU 0x0000B997
+INPSTR_: EQU 0x0000B99E
+M_INLIN: EQU 0x0000BFEE
+INSTRMD: EQU 0x0000B97E
+STOI_L: EQU 0x0000B967
+STOI: EQU 0x0000B964
+L_MEML: EQU 0x0000B958
+L_MEMS: EQU 0x0000B930
+PUTBCE: EQU 0x0000B90F
+PUTBCD: EQU 0x0000B907
+PUT_D3: EQU 0x0000B8F6
+PUT_D4: EQU 0x0000B8F0
+PUTD_: EQU 0x0000B906
+PUTM_M: EQU 0x0000B8E3
+PUTM_V: EQU 0x0000B8DC
+PUT_NM: EQU 0x0000B8D9
+PUT_MD: EQU 0x0000B8D3
+PUTN: EQU 0x0000B8D1
+PUT_N: EQU 0x0000B8BB
+LEMAKLN: EQU 0x0000B8B4
+E_MAKLN: EQU 0x0000B8B0
+L_MAKLN: EQU 0x0000B89B
+MAKLINE: EQU 0x0000B896
+LNTES1_: EQU 0x0000B88D
+LINTES1: EQU 0x0000B88A
+LNTES0W: EQU 0x0000B874
+LNTES0_: EQU 0x0000B86C
+LINTES0: EQU 0x0000B866
+WLREV_: EQU 0x0000B863
+LLREV_: EQU 0x0000B859
+HOF: EQU 0x000000FF
+SCWIDTH: EQU 0x00000020
+LITS_Z: EQU 0x0000B839
+LITS_H: EQU 0x0000B840
+DEL: EQU 0x0000007F
+LITS_C: EQU 0x0000B850
+LITS: EQU 0x0000B81C
+LINTE_L: EQU 0x0000B814
+LINREV2: EQU 0x0000B804
+LINFWD2: EQU 0x0000B7F7
+LNREV1F: EQU 0x0000B7F1
+LINRV1C: EQU 0x0000B7F4
+LNREV1E: EQU 0x0000B7E2
+LLNREVL: EQU 0x0000B7D0
+LINREV_: EQU 0x0000B852
+LINREV: EQU 0x0000B7C8
+LINTES_: EQU 0x0000B812
+EOF: EQU 0x0000001A
+LINFWD: EQU 0x0000B7B8
+E_BADFNM: EQU 0x00000017
+E_UNKNOW: EQU 0x00000016
+E_WRFAIL: EQU 0x00000015
+E_BADFMT: EQU 0x00000014
+E_RECNOF: EQU 0x00000013
+E_BADDRV: EQU 0x00000012
+E_BADDAT: EQU 0x00000011
+E_NODSK: EQU 0x00000010
+E_PROTEC: EQU 0x0000000F
+E_BADFAT: EQU 0x0000000E
+E_BIGSIZ: EQU 0x0000000D
+E_BASIC: EQU 0x0000000C
+E_BSAVE: EQU 0x0000000B
+E_DSKFUL: EQU 0x0000000A
+E_BADSIZ: EQU 0x00000009
+E_FILENF: EQU 0x00000008
+E_IGNORE: EQU 0x00000002
+E_FULTXT: EQU 0x00000001
+E_NOLINE: EQU 0x00000000
+L_GERMA: EQU 0x0000B5EC
+ERROR_M: EQU 0x0000B612
+STB_FLG: EQU 0x0000CDE1
+ERRORMC: EQU 0x0000B5F3
+BINARYD: EQU 0x0000B5F7
+ERROR_S: EQU 0x0000B5C4
+GETERMA: EQU 0x0000B5E2
+ERROR_W: EQU 0x0000B5AE
+PUT_NB: EQU 0x0000B8C0
+PTINFX: EQU 0x0000B581
+PTINF_: EQU 0x0000B56C
+PUT_D5: EQU 0x0000B8EA
+INFOMES: EQU 0x0000B598
+PTINF1: EQU 0x0000B562
+PTINF0: EQU 0x0000B55F
+PUT_D2: EQU 0x0000B8FC
+INFO_MS: EQU 0x0000B5A3
+L_STRIF: EQU 0x0000B4FD
+STR_INF: EQU 0x0000B4F2
+PAGE0: EQU 0x0000CCF9
+L_CLRIF: EQU 0x0000B4EB
+VSETW: EQU 0x0000CD84
+PAGE1: EQU 0x0000CD03
+CLR_INF: EQU 0x0000B4DD
+GETADT_: EQU 0x0000B4D8
+GET_ADT: EQU 0x0000B4D3
+SUBHLA: EQU 0x0000B4CC
+ADDDEA: EQU 0x0000B4C7
+ADDHLA: EQU 0x0000B4C2
+CALYNOW: EQU 0x0000B4BF
+GYLIN__: EQU 0x0000B4B4
+GYLIN_: EQU 0x0000B4AB
+INPUT2: EQU 0x0000B499
+BK_COLF: EQU 0x0000B491
+BK_LIND: EQU 0x0000B48F
+BK_CAXS: EQU 0x0000B48D
+TXTWKBE: EQU 0x0000B48D
+BK_EOFS: EQU 0x0000B48B
+BK_MSIZ: EQU 0x0000B489
+BK_YMAX: EQU 0x0000B487
+BK_YNOW: EQU 0x0000B485
+TXTWKBK: EQU 0x0000B485
+MJD_XMX: EQU 0x0000B484
+MJD_HED: EQU 0x0000B482
+TD_LIN: EQU 0x0000B45E
+TXTWK_E: EQU 0x0000B45C
+TD_EOFS: EQU 0x0000B45A
+TD_MSIZ: EQU 0x0000B458
+TD_YNOW: EQU 0x0000B454
+TXTWORK: EQU 0x0000B454
+NOLINE: EQU 0x000000FF
+LINOVER: EQU 0x000000FF
+TA_SIZE: EQU 0x00002FFD
+TX_FILE: EQU 0x0000C591
+LF: EQU 0x0000000A
+CR: EQU 0x0000000D
+PRINT: EQU 0x0000C9E2
+M_TITLE: EQU 0x0000B39C
+SPCFLG: EQU 0x0000C9C4
+F_READ: EQU 0x0000C775
+F_OPEN: EQU 0x0000C754
+F_DMA: EQU 0x0000C741
+TA_HEAD: EQU 0x00008001
+FCBFNT: EQU 0x0000B349
+JE_WORK: EQU 0x0000CEE3
+JEADR: EQU 0x0000B320
+JSETW: EQU 0x0000B308
+LJSET: EQU 0x0000B2F5
+JECALL_: EQU 0x0000B31F
+JESET_: EQU 0x0000B2F4
+JENOT: EQU 0x0000B2E8
+CTES2: EQU 0x0000B2C2
+J_CTES: EQU 0x0000B2B4
+TAB: EQU 0x00000009
+L_CTES: EQU 0x0000B2A4
+CUR_SV: EQU 0x0000B28C
+CURTEST: EQU 0x0000B29A
+FONT_C: EQU 0x0000C98C
+FONT_CU: EQU 0x0000C99C
+SCRL_L: EQU 0x0000C791
+CUR_WR: EQU 0x0000B238
+TX_LINE: EQU 0x0000BBBE
+INPLINE: EQU 0x0000B97F
+TX_SCRD: EQU 0x0000BAE7
+TX_SKPD: EQU 0x0000BB6C
+TX_SCRU: EQU 0x0000BAAF
+UD_SCR: EQU 0x00000016
+CR__UP: EQU 0x0000B1F5
+TX_SKPU: EQU 0x0000BB2A
+K_CT_SH: EQU 0x0000B232
+CR_HEAD: EQU 0x0000B1C4
+CR__DW: EQU 0x0000B20D
+RET_IN: EQU 0x0000B1BA
+PUT_NV: EQU 0x0000B8D6
+CUR_AXS: EQU 0x0000B45C
+GETYLIN: EQU 0x0000B4A5
+INP_RE1: EQU 0x0000B1B3
+TD_YMAX: EQU 0x0000B456
+GETYNOW: EQU 0x0000B4BA
+INP_RE0: EQU 0x0000B1AD
+FILENAM: EQU 0x0000B17A
+M_JECLR: EQU 0x0000B18F
+M_JEOFF: EQU 0x0000B16D
+FNKLOAD: EQU 0x0000B33D
+TD_MODE: EQU 0x0000B452
+E_INKK: EQU 0x0000B12F
+L_INKK: EQU 0x0000B119
+MJ_WRIT: EQU 0x0000BCFF
+TESLIN: EQU 0x0000B22B
+JECHG: EQU 0x0000B13E
+MJ_LID: EQU 0x0000BF00
+MJ_BKS: EQU 0x0000BE68
+MJ_DEL: EQU 0x0000BEE5
+MODCHG: EQU 0x0000B134
+CR_DW: EQU 0x0000B207
+CR_UP: EQU 0x0000B1EF
+CR_LT: EQU 0x0000B1DB
+CR_RG: EQU 0x0000B1C9
+TX_TAIL: EQU 0x0000BA6F
+TX_HEAD: EQU 0x0000BA4E
+INP_RET: EQU 0x0000B193
+MEMLOAD: EQU 0x0000B93C
+JERES: EQU 0x0000B325
+RESWIN: EQU 0x0000CC10
+MMENU: EQU 0x0000B44F
+RETURN: EQU 0x0000B0B2
+ESCRET: EQU 0x0000B0A7
+E_TEST: EQU 0x0000B0A6
+M_JUMP: EQU 0x0000B09F
+L_JUMP: EQU 0x0000B093
+INKEYS: EQU 0x0000B100
+KANJI_F: EQU 0x0000C7C1
+JPTABLE: EQU 0x0000B0C4
+CUR_OF: EQU 0x0000B294
+JE_GET: EQU 0x0000B06B
+INKEYK: EQU 0x0000B10B
+STBSET: EQU 0x0000CD95
+JECALL: EQU 0x0000B31C
+JE_IN: EQU 0x0000B050
+JE_WAIT: EQU 0x0000B042
+LTEST_: EQU 0x0000B07E
+JE_MODE: EQU 0x0000B0C3
+CUR_ON: EQU 0x0000B251
+PUT_INF: EQU 0x0000B509
+L_TEST: EQU 0x0000B036
+KEYCLR: EQU 0x0000B492
+JESET: EQU 0x0000B2C6
+PUT_NH: EQU 0x0000B8C9
+JEMODE_: EQU 0x0000B159
+FNKSAVE: EQU 0x0000B331
+KANJI_C: EQU 0x0000C794
+TXCLEAR: EQU 0x0000BA3C
+SC2SET: EQU 0x0000CBA2
+LOADFNT: EQU 0x0000B36E
+TITLE: EQU 0x0000B389
+SC2INI: EQU 0x0000CB70
+MEMSAVE: EQU 0x0000B913
+RET_SP: EQU 0x0000B0C1
+INI: EQU 0x0000B000
+C_INF3: EQU 0x00000010
+C_INF2: EQU 0x00000070
+C_INF1: EQU 0x000000F0
+C_STA2: EQU 0x00000030
+C_STAT: EQU 0x00000030
+C_MEND: EQU 0x000000E1
+C_MENU: EQU 0x00000071
+C_EROR: EQU 0x00000091
+C_FSOF: EQU 0x00000071
+C_KJON: EQU 0x000000B1
+C_KJOF: EQU 0x00000051
+C_MJON: EQU 0x00000013
+C_MJOF: EQU 0x000000F1
+C_BKON: EQU 0x0000001A
+C_BKOF: EQU 0x00000001
+BACKGC: EQU 0x00000001
+STACKA: EQU 0x0000FAF3
+VOICCQ: EQU 0x0000FA75
+VOICBQ: EQU 0x0000F9F5
+VOICAQ: EQU 0x0000F975
+MCLTAB: EQU 0x0000F956
+HOKVLD: EQU 0x0000FB20
+EXTBIO: EQU 0x0000FFCA
+RAMAD3: EQU 0x0000F344
+CR_TAIL: EQU 0x0000B1BD
+RAMAD2: EQU 0x0000F343
+RAMAD1: EQU 0x0000F342
+RAMAD0: EQU 0x0000F341
+ENSTOP: EQU 0x0000FBB0
+FNKSTR: EQU 0x0000F87F
+BUF: EQU 0x0000F55E
+KEYDAT: EQU 0x0000FBE5
+GETPNT: EQU 0x0000F3FA
+SNSMAT: EQU 0x00000141
+BEEP: EQU 0x000000C0
+INPUT: EQU 0x0000009F
+CHSNS: EQU 0x0000009C
+CHGSCR: EQU 0x0000005F
+ENASLT: EQU 0x00000024
+PROHEAD: EQU 0x0000B000
+ENDFL: EQU 0x0000DBE3
+ORGADR: EQU 0x0000B000

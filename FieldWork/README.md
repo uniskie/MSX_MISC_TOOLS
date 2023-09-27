@@ -119,36 +119,49 @@ STBはMSX-JEが入力処理中の表示をするために使用するテキス�
 
 # BUILD
 
-アセンブラはtniasmを使用しています。
-http://www.tni.nl/products/tniasm.html
+## アセンブラ
 
-自分の場合
+1. tniasm v0.45  
+	http://www.tni.nl/products/tniasm.html
+
+2. sjasmplus  
+	https://github.com/z00m128/sjasmplus  
+	sjasmplus v1.20.3  
+	https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3
+
+自分の場合、asMSX → tniasm → sjasmplusで移行しています。
+
+> sjasmplusは基本的にtniasmのコードが通りますが、ファイル系のディレクティブが3つほど違うので、そちらの互換のためのマクロ宣言が```sjasm_preamble.asm```です。
 
 ## 準備
 
-1. 作業フォルダに[tniasm.exe](http://www.tni.nl/products/tniasm.html)を配置
-2. 作業フォルダに [SETPATH.BAT](./bat/SETPATH.BAT) を配置
-3. 作業フォルダに [ASM.BAT](bat/./ASM.BAT) を配置
-4. 作業フォルダに ショートカットを作成 （asm_cmdline と命名)  
-   リンク先：C:\Windows\System32\cmd.exe /k setpath.bat  
-   作業フォルダ： 作業フォルダ
+1. SRCフォルダかパスの通ったフォルダに```tniasm.exe```または```sjamplus.exe```を配置
 
 ## アセンブル
 
-1. asm_cmdline を実行してコマンドライン開始
-2. コマンドラインに  
-   cd "ソースファイルのあるフォルダ"
-3. コマンドラインに  
-   ASM FW.ASM
+1. コマンドライン```cmd.exe```を起動
+2. （SRCフォルダにカレントパスを移動）  
+   コマンドラインに  
+   ```cd "ソースファイルのあるフォルダ"```
+3. tniasmの場合、コマンドラインに  
+   ```_tniasm FW.ASM```
+   
+   sjasmplusの場合、コマンドラインに  
+   ```_sjasm FW.ASM```
 
-で、ASM.BIN がアセンブルされます。
+で、ASM.BIN が出力されます。
 
 ## 利用について
 
 ソースコード含め、改変・再配布はご自由にどうぞ。
+
 ただし、サポート・保証などはございません。
 
 このプログラムを使用して起きた問題については補償いたしかねますので、
 ファイル・ディスクは常にバックアップを取って使用してください。
 
+## 参考
+
+sjamplusでtniasm向けのソースをビルドする  
+https://specnext.dev/blog/2020/11/13/migration-of-msx-project-from-tniasm-to-sjasmplus/
 
