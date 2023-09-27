@@ -1,32 +1,32 @@
-﻿#include <string>
+#include <string>
 #include <sstream>
 #include <stdio.h>
 #include <iostream>
 //#include <fstream>
 #include <filesystem>	// need c++17
 #include <algorithm>
-	
+
 // GRAPH SAURUS"S COMPRESSION (GS RLE)
 //
 
 #define DEFAULT_INPUTFILENAME ""
 #if defined(_DEBUG)
-	#undef DEFAULT_INPUTFILENAME 
+	#undef DEFAULT_INPUTFILENAME
 	//#define DEFAULT_INPUTFILENAME "../test/TEST.SC7"
 	#define DEFAULT_INPUTFILENAME "../test/RYUJO256.SC7"
 	//#define DEFAULT_INPUTFILENAME "../test/JTHUNDER.SRC"
 #endif
 
-// 
+//
 #define USE_OUT_FILE_NAME_OPTION	1
 
 // cheat
 #define countof(x) (sizeof(x)/sizeof(x[0]))
 namespace fs = std::filesystem;
-typedef std::string     string;
-typedef uint32_t        u32;
-typedef uint16_t        u16;
-typedef uint8_t         u8;
+typedef	std::string		string;
+typedef	uint32_t		u32;
+typedef	uint16_t		u16;
+typedef	uint8_t			u8;
 
 string hex(int i)
 {
@@ -605,7 +605,7 @@ int main(int argc, char *argv[])
 			// 開始アドレス, 終了アドレス, 0
 			// GSベタ形式は
 			// 開始アドレス, データサイズ, 0
-			// 
+			//
 			// 中身が判定できないので簡易的に偶数丸め込み。
 			//
 			// ※ GSベタの場合は開始0固定前提で処理するため、
@@ -745,7 +745,7 @@ int main(int argc, char *argv[])
 	if (!use_compressed)
 	{
 		// writeback original pixels
-		std::copy( 
+		std::copy(
 			data.begin() + gsrle::HEADER_SIZE,
 			data.begin() + std::min(data.size(), outdata.size()),
 			outdata.begin() + gsrle::HEADER_SIZE
@@ -801,7 +801,7 @@ int main(int argc, char *argv[])
 		print(string("output: ") + plt_outFileName);
 
 		int pal_ofs = pal_adr + gsrle::HEADER_SIZE;
-		
+
 		const int plt_entry = 2;
 		const int plt_num = 16;
 		const int plt_track_num = 8;
@@ -835,10 +835,10 @@ int main(int argc, char *argv[])
 	}
 	//// end
 	print(string("-- end --"));
-	if (!silent_mode) 
+	if (!silent_mode)
 	{
 		print(string("hit enter key"));
 		std::cin.get();
 	}
-	return 0;;
+	return 0;
 }
