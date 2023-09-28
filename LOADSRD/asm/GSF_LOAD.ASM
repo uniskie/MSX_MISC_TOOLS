@@ -31,7 +31,7 @@ FCB_BS:		EQU	16	;Ì§²Ù»²½Þ(32bit)É µÌ¾¯Ä
 
 SYSCALL:	EQU	0F37DH	;¼½ÃÑº°Ù
 
-;(VRAM.ASM)
+;(VRAMFUNC.ASM)
 ;SCRMOD:	EQU	0FCAFH	;½¸Ø°Ý Ó°ÄÞ
 ;VDPIOR:	EQU	0006H	;VDP I/O port m (READ)
 ;VDPIOW:	EQU	0007H	;VDP I/O port n (WRITE)
