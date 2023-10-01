@@ -28,9 +28,6 @@ usr_chgcpu:
 	or	a
 	jr	z,end_chgcpu
 
-	call	GETCPU
-
-	push	af		;現在のCPUモード
 	ld	a,(ix+2)	;get value(low)
 	cp	4		;範囲外は現在のモード取得のみ
 	jr	nc,end_chgcpu0
@@ -39,7 +36,7 @@ usr_chgcpu:
 	call	CHGCPU		;CPUモード変更
 
 end_chgcpu0:
-	pop	af
+	call	GETCPU		;現在のCPUモード
 
 end_chgcpu:
 	ld	(ix+2),a
