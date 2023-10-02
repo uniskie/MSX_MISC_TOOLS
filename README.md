@@ -37,6 +37,7 @@ HTML5+javascript ES6 で動作
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/SP-EDIT.png)|
 | [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル|
 | [CHGCPU.BAS         ](CHGCPU.BAS         ) |CPUモードを切り替える(ターボR以上向け)<BR>[CHGCPU.ASM](CHGCPU.ASM)...機械語部分のソースコード<BR>![](img/CHGCPU.png)|
+| [BLAUNCH.BAS        ](BLAUNCH.BAS        ) |BASICランチャー：ターボRではCPUモード切替可能<BR>[CHGCPU.ASM](CHGCPU.ASM)...機械語部分のソースコード<BR>![](img/BLAUNCH.png)|
 | [HIMEM.BAS          ](HIMEM.BAS          ) |フリーエリア先頭とスタックポインタのアドレスを表示<BR>![](img/HIMEM.png)|
 | [BINADR.BAS         ](BINADR.BAS         ) |BINファイルの先頭アドレスと終端アドレスを表示<BR>![](img/BINADR.png)|
 | [GETPALAD.BAS       ](GETPALAD.BAS       ) |現在の画面モードでのVRAMパレットテーブルを返す(サンプルコード)<BR>![](img/GETPALAD3.png)|
