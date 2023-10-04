@@ -4175,9 +4175,10 @@ function openGsFile( target_file )
 // ========================================================
 function openFiles( files )
 {
-    let main = null;
-    let sub = null;
-    let pal = null;
+    let config = [];
+    let main = [];
+    let sub = [];
+    let pal = [];
 
     for (var i = 0; i < files.length; ++i) {
 
@@ -4187,18 +4188,18 @@ function openFiles( files )
         let ext_info = getExtInfo(file_ext);
 
         if (is_config) {
-            file_load_que.push( files[i] );
+            config.push( files[i] );
         } else
         if (is_pal) {
-            pal = files[i];
+            pal.push( files[i] );
             need_save_all = true;
         } else
         if (ext_info) {
             if (ext_info.interlace && ext_info.page) {
-                sub = files[i];
+                sub.push( files[i] );
                 need_save_all = true;
             } else {
-                main = files[i];
+                main.push( files[i] );
                 need_save_all = true;
             }
         } else {
@@ -4210,9 +4211,7 @@ function openFiles( files )
     // 手抜き：
     // 待機チェーンで連続ロードする
     let result = true;
-    if (main != null)  file_load_que.push( main );
-    if (sub  != null)  file_load_que.push( sub  );
-    if (pal  != null)  file_load_que.push( pal  );
+    file_load_que = config.concat( main, sub, pal );
 
     if (file_load_que.length) {
         openGsFile( file_load_que.shift() );

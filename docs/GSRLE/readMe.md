@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_026.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_026.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_027.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_027.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -445,6 +445,9 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2023/10/05 [ver.0.27](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_027.7z)
+  - ファイルの複数ドラッグアンドドロップ改善
 
 - 2023/09/20 [ver.0.26](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_026.7z)
   - スプライト16x16x2の時にスプライトジェネレータのパターン一覧が2倍表示であふれるのを修正

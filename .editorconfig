@@ -3,21 +3,22 @@ root = true
 [*]
 charset = shift_jis
 end_of_line = crlf
-trim_trailing_whitespace = true
+trim_trailing_whitespace = false
 insert_final_newline = true
 indent_style = tab
 indent_size = 4
 
+[*.html]
+charset = utf-8
+
 [*.txt]
 charset = utf-8
-trim_trailing_whitespace = false
 
 [*.md]
 charset = utf-8
-trim_trailing_whitespace = false
 
-[*.sh]
-indent_style = tab
+[*.js]
+charset = utf-8
 
 [*.bas]
 charset = shift_jis

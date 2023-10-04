@@ -68,19 +68,6 @@ details.details {
     100% {
         background-color: #101;
     }
-  }
-/* アコーディオンラベル内のリンク */
-.tab_label a {
-    color:#Fdd;
-    text-decoration:underline;
-
-    /*transition: .5s;*/
-}
-.tab_label a:hover {
-    color:#f88;
-}
-.tab_label a:active {
-    color:#af8;
 }
 
 /* ==================================== */
@@ -106,6 +93,37 @@ details.details {
     background-color: #aaa;
     color: #eee;
 }
+
+/* ==================================== */
+/* リンク */
+/* ==================================== */
+a {
+    color:#Fdd;
+    text-decoration:underline;
+
+    /*transition: .5s;*/
+}
+a:hover {
+    /*color:#f88;*/
+    animation: 1s a_blink linear infinite;
+}
+a:active {
+    color:#af8;
+}
+@keyframes a_blink {
+    0% {
+        /*background-color: #101;*/
+        color: #f88;
+    }
+    50% {
+        color: #fe3;
+    }
+    100% {
+        /*background-color: #101;*/
+        color: #f88;
+    }
+}
+
 /* ==================================== */
 /*	情報ブロック */
 /* ==================================== */
