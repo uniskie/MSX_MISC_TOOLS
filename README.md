@@ -33,11 +33,10 @@ HTML5+javascript ES6 で動作
 | [FieldWork/          ](FieldWork          ) |高速な漢字テキストエディタ(SCREEN2とスクロール使用)<BR>![](FieldWork/img/FieldWork.png)|
 | [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示<BR>(グラフサウルス圧縮対応)<BR>圧縮は [GSRLE](GSRLE)<BR>![](img/MIKTEA0001.png)|
 | [SCC_WAVE_MODULATE<br>(他レポジトリ)](https://github.com/uniskie/msx_music_data/tree/master/etc) |SCC波形データのボリューム加工（n/256倍率をかけて出力）<BR> ![](SCC_WAVE_MODULATE/image/SCC_WAVE_VOLUME_1.png) |
-| [FILER.BAS          ](FILER.BAS          ) |ファイル一覧＆ファイル操作プログラム。<BR>ファイル名のひらがな→カタカナ変換も可能。<BR>(MSX以外での文字化け対策のため)<BR>![](img/FILER.png)|
+| [BLAUNCH.BAS        ](BLAUNCH.BAS        ) |BASICランチャー：ターボRではCPUモード切替可能<BR>[CPUMODE.ASM](CPU_MODE_FOR_BASIC/CPUMODE.ASM)...機械語部分のソースコード<BR>![](img/BLAUNCH.png)|
+| [FILER.BAS          ](FILER.BAS          ) |ファイル一覧＆ファイル操作プログラム。<BR>ファイル名のひらがな→カタカナ変換可能。<BR>(MSX以外での文字化け対策のため)<BR>![](img/FILER.png)|
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/SP-EDIT.png)|
-| [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル|
-| [CHGCPU.BAS         ](CHGCPU.BAS         ) |CPUモードを切り替える(ターボR以上向け)<BR>[CHGCPU.ASM](CHGCPU.ASM)...機械語部分のソースコード<BR>![](img/CHGCPU.png)|
-| [BLAUNCH.BAS        ](BLAUNCH.BAS        ) |BASICランチャー：ターボRではCPUモード切替可能<BR>[CHGCPU.ASM](CHGCPU.ASM)...機械語部分のソースコード<BR>![](img/BLAUNCH.png)|
+| [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル<br>![](img/CPUMODE.png)|
 | [HIMEM.BAS          ](HIMEM.BAS          ) |フリーエリア先頭とスタックポインタのアドレスを表示<BR>![](img/HIMEM.png)|
 | [BINADR.BAS         ](BINADR.BAS         ) |BINファイルの先頭アドレスと終端アドレスを表示<BR>![](img/BINADR.png)|
 | [GETPALAD.BAS       ](GETPALAD.BAS       ) |現在の画面モードでのVRAMパレットテーブルを返す(サンプルコード)<BR>![](img/GETPALAD3.png)|
