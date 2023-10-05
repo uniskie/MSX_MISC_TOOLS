@@ -1,4 +1,4 @@
-﻿# LOADSRD.BAS
+# LOADSRD.BAS
 
 ![](../img/MIKTEA0002.png)
 
@@ -152,10 +152,9 @@ MSX-JEがアクティブな時などもフリーエリアが小さくなりま�
 
 |ファイル     |説明|
 |-------------|---
-| [LOADER.BAS  ](LOADER.BAS ) |アスキーセーブされたLOADSRD.BAS
-| [LOADSRD.BAS ](LOADSRD.BAS) |グラフィックローダープログラム本体
+| [LOADSRD.BAS ](LOADSRD.BAS) |グラフィックローダープログラム本体(アスキーセーブ版)
 | [LOADSRD.BIN ](LOADSED.BIN) |グラフィックローダー機械語プログラムバイナリ
-
+| [LOADSRD.dsk ](LOADSRD.dsk) |グラフィックローダーセット（中間言語版）
 おまけ
 
 |ファイル     |説明|

@@ -45,6 +45,31 @@ HTML5+javascript ES6 で動作
 | [COLCOMB.BAS        ](COLCOMB.BAS        ) |簡易スプライトモード2重ね合わせカラーリスト<BR>![](img/COLCOMB.png)|
 | [COLCOMBG.BAS       ](COLCOMBG.BAS       ) |少しリッチなスプライトモード2重ね合わせカラーリスト<BR>![](img/COLCOMBG.png)|
 
+### DISKイメージ
+
+githubに直接置いてあるBASICプログラムファイルは、
+参照しやすいようにアスキー形式のファイルが殆どになっているため、
+MSXでロードする処理がとても遅くなります。
+
+ロードの早い中間言語形式でのBASICファイルはDISKイメージファイルに入っています。
+
+DISKイメージ：[misctool.dsk](misctool.dsk)
+
+内容：
+```
+BINADR.BAS
+BLAUNCH.BAS
+COLCOMB.BAS
+COLCOMBG.BAS
+FAMIMA.BAS
+FILER.BAS
+GETPALAD.BAS
+HIMEM.BAS
+KEYMTX.BAS
+KEYMTXB.BAS
+```
+
+
 ## ご利用について
 
 ソースコードやプログラムの、改変・再配布はご自由にどうぞ。

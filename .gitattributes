@@ -1,4 +1,11 @@
+# 改行コードの変換を禁止
+*.*			-text
+*.bin		binary
+*.dsk		binary
+
+# diff差分用
 *.bas		diff=sjis encoding=sjis eol=CRLF
+*.asc		diff=sjis encoding=sjis eol=CRLF
 *.asm		diff=sjis encoding=sjis eol=CRLF
 *.mac		diff=sjis encoding=sjis eol=CRLF
 *.inc		diff=sjis encoding=sjis eol=CRLF
@@ -6,3 +13,4 @@
 *.txt		diff=sjis encoding=sjis eol=CRLF
 *.c			diff=auto encoding=auto eol=CRLF
 *.h			diff=auto encoding=auto eol=CRLF
+*.md		diff=auto encoding=auto eol=auto
