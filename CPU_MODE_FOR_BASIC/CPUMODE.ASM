@@ -2,9 +2,20 @@
 CHGCPU:	equ	0180h
 GETCPU:	equ	0183h
 
+	fname	"CPUMODE.BIN"
+
+;======== Bsave Header ==========
+	db	0FEh
+	dw	start_of_program
+	dw	end_of_program-1
+	dw	start_of_program
+;================================
+
 	org	0c000h
 
+start_of_program:
 ;================================
+; CPUモードを変更・取得する
 ;  A=USR(n)
 ;  in:	n=0 : Z80
 ;	n=1 : R800(ROM)
@@ -42,4 +53,5 @@ end_chgcpu:
 	ld	(ix+2),a
 	ld	(ix+3),0
 	ret
+end_of_program:
 

@@ -12,7 +12,8 @@ BASICからCHGCPU/GETCPUを呼び出すサンプルです。
 * [Z80.BAS](Z80.BAS)     ... Z80モードに切り替え  
 * [R800.BAS](R800.BAS)   ... R800 ROMモードに切り替え（安全のためDRAMにはしません）  
 
-* [CPUMODE.ASM](CPUMODE.ASM) ... CPUMODE.BASの機械語部分アセンブラコード  
+* [CPUMODE.ASM](CPUMODE.ASM) ... CPUMODE.BASのCPU切り替え機械語部分アセンブラコード  
+* [CHKDOS.ASM](CHKDOS.ASM) ... CPUMODE.BASのDOSバージョンチェック機械語部分アセンブラコード  
 * [CHGCPU_FROM_BASIC.txt](CHGCPU_FROM_BASIC.txt) ... CHGCPU呼び出し処理のアセンブラコード  
 * [GETCPU_FROM_BASIC.txt](GETCPU_FROM_BASIC.txt) ... GETCPU呼び出し処理のアセンブラコード  
 
@@ -21,11 +22,19 @@ BASICからCHGCPU/GETCPUを呼び出すサンプルです。
 ### CPUMODE
 
 CPUモードの設定/取得を行います。
+
 BIOSのCHGCPUやGETCPUがない機種では何もしません。
 
-機械語コード宣言は10行でDEFUSR
+DOS1で起動している時は危険であることを通知します。
+```
+[CAUTION] MSX-DOS1 is not support R800.
+```
 
-使い方は
+機械語コード
+DEFUSR ... CPUモード切替＆取得
+DEFUSR1 ... MSX-DOSバージョンを調べる
+
+CPUモード切替の使い方は
 ```整数変数=USR(mode値)```
 
 例) ```A=USR(1)``` ... R800に変更する。実際に変更されたモードはAに入る
@@ -38,6 +47,18 @@ BIOSのCHGCPUやGETCPUがない機種では何もしません。
 | 1 | R800(ROM)  
 | 2 | R800(DRAM)  
 | それ以外 | =現在のモードを取得  
+
+MSX-DOSバージョン取得は
+
+```
+A=USR1(0)
+? "MSX-DOS ver.";A
+```
+
+MSX-DOS1では```0```か```1```が返ってきます。
+```2```の場合はMSX-DOS2です。
+
+※ 返り値を受け取る変数と引数(mode値)は整数である事
 
 ### CHGCPU / GETCPU
 

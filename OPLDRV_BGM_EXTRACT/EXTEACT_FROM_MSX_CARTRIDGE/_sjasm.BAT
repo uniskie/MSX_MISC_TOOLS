@@ -22,6 +22,8 @@ rem SET SJASMPLUSOPTS=--dirbol --longptr --fullpath
 SET SJASMPLUSOPTS=--longptr --fullpath
 
 %ASM% "%CURDIR%sjasm_preamble.asm" "%1" --sym="%~n1.SYM" --raw="%~n1.BIN"
+doskey
+
 IF ERRORLEVEL 1 GOTO ERR
 EXIT /B
 
@@ -34,6 +36,7 @@ IF NOT "%ERCHK%"=="1" GOTO ERREND
 PAUSE
 
 :ERREND
+doskey
 EXIT /B %ERRORLEVEL%
 
 rem Option flags as follows:
@@ -85,7 +88,7 @@ rem ƒIƒvƒVƒ‡ƒ“ --lstlab=sort ‚ğ•t‚¯‚é‚ÆA‘¼‚ÌƒVƒ“ƒ{ƒ‹Eƒ_ƒ“ƒv‚àiƒŠƒXƒg‚É‰ˆ‚Á‚Ä
 rem -msg=lstlab‚Íí‚Éƒ\[ƒg‚ğ "on "‚É‚µ‚Ü‚·i"unsorted "ƒIƒvƒVƒ‡ƒ“‚Í–³‚¢j
 rem
 rem syntaxƒIƒvƒVƒ‡ƒ“‚Ì’l‚Í•¡”‚Ì•¶š‚Å\¬‚³‚ê‚é‚±‚Æ‚ª‚ ‚èA“Á’è‚Ì‹@”\‚Ì•¶š‚ğÈ—ª‚·‚é‚ÆƒfƒtƒHƒ‹ƒg‚Ìİ’è‚ªg—p‚³‚ê‚Ü‚·F
-rem 
+rem
 rem	  a	•¡”ˆø”‚Ì‹æØ‚è•¶š ",," (ƒfƒtƒHƒ‹ƒg‚Í ",") (‚½‚¾‚µ dec|inc|pop|push ‚Í "," ‚àó‚¯•t‚¯‚é)
 rem	  b	®‘S‘Ì‚ÌŠ‡ŒÊ‚Íƒƒ‚ƒŠƒAƒNƒZƒX‚Å‚Ì‚İ—LŒø (ƒfƒtƒHƒ‹ƒg = ‘¦’l‚Ü‚½‚Íƒƒ‚ƒŠ)
 rem	  B	ƒƒ‚ƒŠƒAƒNƒZƒXŠ‡ŒÊ [] ‚Í•K{ (ƒfƒtƒHƒ‹ƒg = \•¶ŠÉ˜aA[] ‚Í’Ç‰Á‚Åg—p‰Â”\)
@@ -104,30 +107,30 @@ rem õ work in progress: ƒIƒvƒVƒ‡ƒ“ "l "‚Æ "L "‚Í‚Ü‚¾À‘•‚³‚ê‚Ä‚¢‚È‚¢B
 rem tniasmŒİŠ·—pƒ}ƒNƒ
 rem sjasm_preamble.asm
 rem	; tniASM compatibility macros defining unrecognized directives: rb, rw, fname
-rem	
+rem
 rem	rb      MACRO count?
 rem	            ds count?
 rem	            ; in tniASM the `rb/rw` does not emit bytes to output, so rewind the output
 rem	            FPOS -(count?)
 rem	        ENDM
-rem	
+rem
 rem	rw      MACRO count?
 rem	            ds 2 * count?
 rem	            ; in tniASM the `rb/rw` does not emit bytes to output, so rewind the output
 rem	            FPOS -(2 * count?)
 rem	        ENDM
-rem	
+rem
 rem	fname   MACRO name?
 rem	            DEFINE __CURRENT_OUTPUT_NAME__ name?
 rem	            OUTPUT name?,t      ; truncate the file first
 rem	            OUTPUT name?,r      ; reopen it to allow also position seeks (for rb/rw macros)
 rem	        ENDM
-rem	
+rem
 rem	; switch multiarg delimiter to ",," (to produce correct opcode for `sub a,7` ("a" option)
 rem	; treat "wholesome" round parentheses as memory access ("b" option)
 rem	; warn about any fake instruction ("f")
 rem	        OPT --syntax=abf
-rem	
+rem
 rem	; command line to build migrated sources with sjasmplus (inside the "engine" folder):
 rem	; sjasmplus --sym=theproject.sym --dirbol --fullpath --longptr ../sjasm_preamble.asm Main.asm
-rem	
+rem

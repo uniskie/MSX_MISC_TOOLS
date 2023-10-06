@@ -33,10 +33,10 @@ HTML5+javascript ES6 で動作
 | [FieldWork/          ](FieldWork          ) |高速な漢字テキストエディタ(SCREEN2とスクロール使用)<BR>![](FieldWork/img/FieldWork.png)|
 | [LOADSRD/           ](LOADSRD            ) |BSAVE画像とグラフサウルス画像を読み込み表示<BR>(グラフサウルス圧縮対応)<BR>圧縮は [GSRLE](GSRLE)<BR>![](img/MIKTEA0001.png)|
 | [MML加工用 テキストエディタマクロ集<br>(他レポジトリ)](https://github.com/uniskie/msx_music_data/blob/master/macro/) | <ol><li>SCC波形加工 for MGSDRV<li>MML整形 for MGSDRV<li>MML転調 for MGSDRV<li>MMLオクターブ検査 for MGSDRV</ol>![](https://github.com/uniskie/msx_music_data/raw/master/macro/image/SCC_WAVE_VOLUME_2.png) |
-| [BLAUNCH.BAS        ](BLAUNCH.BAS        ) |BASICランチャー：ターボRではCPUモード切替可能<BR>[CPUMODE.ASM](CPU_MODE_FOR_BASIC/CPUMODE.ASM)...機械語部分のソースコード<BR>![](img/BLAUNCH.png)|
+| [BLAUNCH.BAS        ](BLAUNCH.BAS        ) |BASICランチャー<BR>ターボR DOS2ではCPUモード切替可能 (DOS1では安全のためZ80のみ)<BR>スペースキー/リターンキー/Aボタンで決定。<BR>十字キー/'N'キー/Bボタンでキャンセル。<BR>'M'キー/BボタンでCPU変更。<BR>[CPUMODE.ASM](CPU_MODE_FOR_BASIC/CPUMODE.ASM)...械語部分(CPUモード操作)ソース<BR>  [CHKDOS.ASM](CPU_MODE_FOR_BASIC/CHKDOS.ASM)...機械語部分(DOSバージョン検査)ソースコード<BR>[CLRBLK.ASM](CLRBLK.ASM)...機械語部分(ブリンクテーブルクリア)ソースコード<BR>![](img/BLAUNCH.png)|
 | [FILER.BAS          ](FILER.BAS          ) |ファイル一覧＆ファイル操作プログラム。<BR>ファイル名のひらがな→カタカナ変換可能。<BR>(MSX以外での文字化け対策のため)<BR>![](img/FILER.png)|
 | [SP-EDIT/           ](SP-EDIT            ) |SCREEN5簡易スプライトエディタ(単色)<BR>![](img/SP-EDIT.png)|
-| [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |BASICからCPU MODE(Z80/R800)を切り替えるサンプル<br>![](img/CPUMODE.png)|
+| [CPU_MODE_FOR_BASIC/](CPU_MODE_FOR_BASIC ) |[CPUMODE.BAS](CPU_MODE_FOR_BASIC/CPUMODE.BAS) ... 比較的安全なCPU切替プログラム<BR>その他：BASICからCPU MODE(Z80/R800)を切り替えるサンプル<br>![](img/CPUMODE.png)|
 | [HIMEM.BAS          ](HIMEM.BAS          ) |フリーエリア先頭とスタックポインタのアドレスを表示<BR>![](img/HIMEM.png)|
 | [BINADR.BAS         ](BINADR.BAS         ) |BINファイルの先頭アドレスと終端アドレスを表示<BR>![](img/BINADR.png)|
 | [GETPALAD.BAS       ](GETPALAD.BAS       ) |現在の画面モードでのVRAMパレットテーブルを返す(サンプルコード)<BR>![](img/GETPALAD3.png)|
