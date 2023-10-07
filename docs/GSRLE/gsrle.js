@@ -3612,7 +3612,7 @@ function saveImage(file, page, commpress, with_pal)
                 let withpal_end = vdp.mode_info.palend + 1;
                 if (end < withpal_end) {
                     end = withpal_end;
-                    size = withpa_end - start + 1;
+                    size = withpal_end - start + 1;
                 }
                 if (withpal_end <= end) {
                     vdp.vram.set( vdp.getPalTbl(), vdp.mode_info.paltbl );
