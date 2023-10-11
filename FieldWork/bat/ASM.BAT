@@ -1,26 +1,4 @@
 @ECHO OFF
-IF "%2"=="/P" GOTO SETCHECK
-IF NOT "%1"=="/P" GOTO ASM
-
-:SHIFT
-	SHIFT /1
-:SETCHECK
-	SET ERCHK=1
-
-:ASM
-ECHO TNIASM "%1"
-TNIASM "%1"
-IF ERRORLEVEL 1 GOTO ERR
-
-:REN
-IF EXIST "%~n1.SYM" DEL "%~n1.SYM"
-ECHO REN TNIASM.SYM "%~n1.SYM"
-REN TNIASM.SYM "%~n1.SYM"
-EXIT /B
-
-:ERR
-IF NOT "%ERCHK%"=="1" GOTO ERREND
-PAUSE
-
-:ERREND
-EXIT /B %ERRORLEVEL%
+set asmbat=_sjasm
+REM set asmbat=_tniasm
+call %asmbat%.bat %1
