@@ -1,8 +1,14 @@
-USE_PSG_BIOS:	equ	1	;ジョイポートアクセスにI/Oポート直接アクセスを使用しない。互換性のため
+;-*- tab-width: 8 -*-
+; tniasm or sjasmplus
+USE_UIO_BIOS:	equ	1	;ジョイポートアクセスにI/Oポート直接アクセスを使用しない。互換性のため
+USE_ZX_BUTTON:	equ	1	;キーボードのZXをAボタンBボタンにする
+USE_SHIFTAS_B:	equ	1	;キーボードのシフトをBボタンにする
+
 USE_BINHEADER:	equ	1	;テスト用
 
- IF USE_PSG_BIOS
+ IF USE_UIO_BIOS
 
+SNSMAT:		equ	$0141	;in( a=keymtx row }, ret{ a=row data }
 WRTPSG:		equ	$0093	;in{ a=psg#n, e=dat }
 RDPSG:		equ	$0096	;in{ a=psg#n }, ret{ a=dat }
 
@@ -11,6 +17,8 @@ RDPSG:		equ	$0096	;in{ a=psg#n }, ret{ a=dat }
 start_adr:	equ	$d000
 
  IF USE_BINHEADER
+	fname	"JOYSTICK.BIN"
+
 	db	$fe
 	dw	start_adr
 	dw	end_adr-1
@@ -51,6 +59,97 @@ usr_func:
  ENDIF
 
 ;================================================
+;keyboard matrix
+; in: A=MATRIX row
+; out: data
+; use: af, c, ei
+; 0 |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+; 1 |   ;   |   [   |   @   |   \   |   ^   |   -   |   9   |   8   |
+; 2 |   B   |   A   |   _   |   /   |   .   |   ,   |   ]   |   :   |
+; 3 |   J   |   I   |   H   |   G   |   F   |   E   |   D   |   C   |
+; 4 |   R   |   Q   |   P   |   O   |   N   |   M   |   L   |   K   |
+; 5 |   Z   |   Y   |   X   |   W   |   V   |   U   |   T   |   S   |
+; 6 | F3/F8 | F2/F7 | F1/F6 | KANA  | CAPS  | GRAPH | CTRL  | SHIFT |
+; 7 | RETURN| SELECT|  BS   | STOP  |  TAB  |  ESC  | F5/F10| F9/F4 |
+; 8 | RIGHT | DOWN  |  UP   | LEFT  |  DEL  |  INS  | HOME  | SPACE |
+;================================================
+ IF USE_UIO_BIOS
+keymatd:	equ	SNSMAT
+ ELSE
+keymatd:
+	ld	c, a
+	and	$0f	;mask
+	di
+	in	a, ($aa)
+	and	$f0	;key click | caps LED | cas out | cas motor | 3-0 : keymtx row |
+	or	c	;row
+	out	($aa), a
+	in	a, ($a9)	;read keyboard
+	ei			;割り込みを解除：しないで返すのもアリ
+	ret
+ ENDIF
+
+;================================================
+; キーボードジョイスティック用情報取得
+; SPACE=TRIGA, 'M'=TRIGB, CURSOR=ARROW
+; out: a=data
+; use: af, bc, ei
+;	bit 0: U 上↑
+;	bit 1: D 下↓
+;	bit 2: L 左←
+;	bit 3: R 右→
+;	bit 4: A Aボタン
+;	bit 5: B Bボタン
+;================================================
+joykeygetd:
+	; 8 | RIGHT | DOWN  |  UP   | LEFT  |  DEL  |  INS  | HOME  | SPACE |
+	ld	a, 8
+	call	keymatd
+	cpl		;押していたら0なのでビット反転
+	ld	c, a
+	rlca		; ||||||| space | right |
+	rlc	c	; down | up | left | ...
+	rlc	c	; up | left | ...
+	rlc	c	; left | ...
+	rlc	c	; cy= left
+	rla		; ||||| space | right | left |
+	rla		; |||| space | right | left | down
+	rla		; ||| space | right | left | down | up
+	and	$1f
+	ld	b, a
+
+ IF USE_SHIFTAS_B
+	; 6 | F3/F8 | F2/F7 | F1/F6 | KANA  | CAPS  | GRAPH | CTRL  | SHIFT |
+	ld	a, 6
+	call	keymatd
+	bit	0, a	;z
+	jr	nz, joykeygetd_shift	;0なら押している
+	set	5, b	;TRIGB
+joykeygetd_shift:
+ ENDIF
+ IF USE_ZX_BUTTON
+	; 5 |   Z   |   Y   |   X   |   W   |   V   |   U   |   T   |   S   |
+	ld	a, 5
+	call	keymatd
+	bit	7, a	;z
+	jr	nz, joykeygetd_z	;0なら押している
+	set	4, b	;TRIGA
+joykeygetd_z:
+	bit	5, a	;x
+	jr	nz, joykeygetd_x	;0なら押している
+	set	5, b	;TRIGB
+joykeygetd_x:
+ ENDIF
+	; 4 |   R   |   Q   |   P   |   O   |   N   |   M   |   L   |   K   |
+	ld	a, 4
+	call	keymatd
+	and	$04	;M
+	ld	a, b
+	ret	nz	;0なら押している
+	or	$20	; || M | space | right | left | down | up
+	ret
+
+;================================================
 ; ジョイポート入力
 ; in:  a=ジョイポート0 or 1
 ; out: a=ビットが1ならそれぞれON
@@ -72,7 +171,7 @@ joygetd:			;a=ジョイポート番号
 	ld	b, $9f		;ジョイポート1の8番=bit5、PSG#14に接続するジョイポート選択=bit6
 	ld	c, $40		;PSG#14に接続するジョイポートが1 = bit6 = 1
 joygetd_sel:
- IF USE_PSG_BIOS
+ IF USE_UIO_BIOS
 	ld	a, 15
 	call	RDPSG
 	and	b		;ジョイポートaの8番へ0を出力。ジョイポート選択をクリア他は維持
@@ -95,8 +194,8 @@ joygetd_sel:
 	out	($A1), a
 	ld	a, 14
 	out	($A0), a
-	ei			;割り込みを解除：しないで返すのもアリ
 	in	a, ($A2)	;CKBARLDU
+	ei			;割り込みを解除：しないで返すのもアリ
 	cpl			;0ならONなのでビット反転
 	and	$3f		;ジョイスティック情報だけ返す
 	ret
@@ -123,15 +222,23 @@ proc_joy:
 	push	af
 	push	bc
 	push	de
-	ld	hl, w_joy0
-	or	a
-	jr	nz, proc_joy_s
+
 	ld	hl, w_joy1
+	dec	a
+	jr	z, proc_joy_stick
+	ld	hl, w_joy2
+	cp	1
+	jr	z, proc_joy_stick
+
+	ld	hl, w_joy0
+	call	joykeygetd
+	jr	proc_joy_s
+
+proc_joy_stick:
+	call	joygetd
 
 proc_joy_s:
 	push	hl	;格納先ワークエリア先頭を保存
-
-	call	joygetd
 	ld	b, a
 	ld	c, (hl)	;前回押されていたもの
 	ld	(hl), a	;press 現在押されているもの
@@ -225,6 +332,13 @@ w_joy1_release:	db	0
 w_joy1_repeat:	db	0
 w_joy1_repeat_start:	db	0
 w_joy1_repeat_interval:	db	0
+w_joy2:
+w_joy2_press:	db	0
+w_joy2_trig:	db	0
+w_joy2_release:	db	0
+w_joy2_repeat:	db	0
+w_joy2_repeat_start:	db	0
+w_joy2_repeat_interval:	db	0
 ;end dseg
 
  IF USE_BINHEADER
