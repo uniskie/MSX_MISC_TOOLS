@@ -110,11 +110,11 @@
 | DEFUSR1=&HC000| U$=USR1("FILENAME.EXT")|$C000| LOAD_SRD    | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
 | DEFUSR2=&HC003| U=USR2(VARPTR(PL(0)))  |$C003| SET_PLT     | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
 | DEFUSR3=&HC006| U=USR3(VARPTR(SR(0)))  |$C006| SPR_TIME    | SPRCLOC2.ASM | INTスプライト配列(8個)のパターン番号に時刻を反映。0=”"、1～10=数字の"0"～"9"、11=":"
-| DEFUSR4=&HC009| U=USR4(VARPTR(CM(0)))  |$D009| VDPCMD      | VDPCOMAN.ASM | VDPコマンドを実行。配列の中身はVDPコマンドリファレンス参照。（NX、NYがマイナスの場合や範囲外などの自動補正あり）
-| DEFUSR5=&HC00C| U=USR5(0)              |$D00C| WAITVDPC    | VDPCOMAN.ASM | VDPコマンドの実行終了まで待つ
-| DEFUSR6=&HC00F| U=USR6(VARPTR(SR(0)))  |$D00F| SPR_SET     | SPR_SET.ASM  | [スプライト管理配列](#srx2binスプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
-| DEFUSR7=&HC012| U=USR7(VARPTR(SC(0)))  |$D012| SPC_SET     | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
-| DEFUSR8=&HC015| U=USR8(-1)             |$D015| SPR_INT     | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
+| DEFUSR4=&HC009| U=USR4(VARPTR(CM(0)))  |$C009| VDPCMD      | VDPCOMAN.ASM | VDPコマンドを実行。配列の中身はVDPコマンドリファレンス参照。（NX、NYがマイナスの場合や範囲外などの自動補正あり）
+| DEFUSR5=&HC00C| U=USR5(0)              |$C00C| WAITVDPC    | VDPCOMAN.ASM | VDPコマンドの実行終了まで待つ
+| DEFUSR6=&HC00F| U=USR6(VARPTR(SR(0)))  |$C00F| SPR_SET     | SPR_SET.ASM  | [スプライト管理配列](#srx2binスプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
+| DEFUSR7=&HC012| U=USR7(VARPTR(SC(0)))  |$C012| SPC_SET     | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
+| DEFUSR8=&HC015| U=USR8(-1)             |$C015| SPR_INT     | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
 | DEFUSR9=&HC018| U=USR9(1)              |$C018| BGM_INIT    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 初期化/終了。パラメータが1なら開始（割り込み開始）、それ以外なら終了（割り込み開放）
 | DEFUSR9=&HC01B| U=USR9(&HB000)         |$C01B| BGM_PLAY    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] 指定したアドレスのBGMデータを演奏する
 | DEFUSR9=&HC01E| U=USR9(0)              |$C01E| BGM_STOP    | BGM.ASM      | [HRA BGM DRIVER][HRA_BGM_DRIVER] BGMの演奏を停止する
@@ -125,7 +125,7 @@
 [HRA_BGM_DRIVER]:https://github.com/hra1129/bgm_driver
 
 > **Warning**  
-> $D015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
+> $C015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
 > プログラム終了時に開放を忘れないでください。  
 > タイマーフック```H.TIMI```を使用しますので機械語領域が破損した場合に暴走します。
 
