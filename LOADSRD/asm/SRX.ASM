@@ -17,6 +17,7 @@
 ;<-- BIN FILE HEADER <--
 
 
+DMAADR:	EQU	0B000H
 ORGADR:	EQU	0D000H
 	ORG	ORGADR
 
@@ -32,9 +33,9 @@ ORGADR:	EQU	0D000H
 
 ;--- work area for LOAD_SRD
 LOADOFS:	DW	0	;LOAD_SRD VRAM offset
-; read buffer:	B000H-CFFFH
-DMA:	DW	0B000H		;Read buffer address
-DMASIZ:	DW	2000H		;Read buffer size
+; read buffer
+DMA:		DW	DMAADR		;Read buffer address
+DMASIZ:		DW	ORGADR-DMAADR	;Read buffer size
 
 	INCLUDE "GSF_LOAD.ASM"	;*FILE*
 	INCLUDE "VRAMFUNC.ASM"	;*FILE*

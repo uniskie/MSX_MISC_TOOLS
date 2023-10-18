@@ -3,7 +3,7 @@
 SET ASM=sjasmplus
 
 rem %ASM%.exe ÇÃë∂ç›ämîF
-where %ASM%.exe
+where /Q %ASM%.exe
 IF ERRORLEVEL 1 GOTO EXE_NOT_FOUND
 
 SET CURDIR=%~dp0

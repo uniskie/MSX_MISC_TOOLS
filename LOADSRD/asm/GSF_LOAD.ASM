@@ -27,7 +27,12 @@ FCB:		DB	0
 FCB_BS:		EQU	16	;ﾌｧｲﾙｻｲｽﾞ(32bit)ﾉ ｵﾌｾｯﾄ
 
 ;--- symbols
-;BUF:		EQU	0F55EH	;Type char buffer(258 bytes)
+DOSBUFFER:	EQU	0F34FH	;BUFFER DOS汎用セクタバッファアドレス
+SECBUFSIZE:	EQU	512	;セクタバッファサイズ
+;【HIMSAV(0F349H)】ディスクシステムの核(カーネル)が動作するのに最低限必要なエリアの底へのポインタ	
+;【$SECBUF(0F34DH)】ドライバ用セクタバッファ
+;【$BUFFER(0F34FH)】DOS汎用セクタバッファ
+;【$DIRBUF(0F351H)】DOSディレクトリ用セクタバッファ
 
 SYSCALL:	EQU	0F37DH	;ｼｽﾃﾑｺｰﾙ
 
@@ -197,10 +202,10 @@ GET_HEAD:
 
 ;--- calc. read size & rest size
 CALREC:	; RET HL:SIZE
-
 	LD	HL,(W_DSIZE)
 	LD	A,(W_DSIZH)
 	LD	DE,(DMASIZ)
+	OR	A
 	SBC	HL,DE
 	SBC	A,0
 	JR	NC,CALREC_
@@ -217,7 +222,7 @@ CALREC_:
 	RET
 
 ;--- read file
-FILEREAD:	; IN H:SIZE
+FILEREAD:	; IN HL:SIZE
 	LD	DE,FCB
 	LD	C,27H
 	CALL	SYSCALL

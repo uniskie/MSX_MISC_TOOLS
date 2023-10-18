@@ -1,3 +1,7 @@
 @set ERCHK=1
-_sjasm SRX.ASM
-_sjasm SRX2.ASM
+@rem set asm=_sjasm
+@set asm=_tniasm
+call %asm% LOADSRD.ASM
+call %asm% SRX.ASM
+call %asm% SRX2.ASM
+call %asm% SRX3.ASM

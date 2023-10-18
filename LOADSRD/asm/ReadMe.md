@@ -2,17 +2,25 @@
 
 [TNIASM](http://www.tni.nl/products/tniasm.html) を使用します。
 
-## LOADSRD.BIN の作成
+[SjASMPlus](https://github.com/z00m128/sjasmplus) も使用できます。
 
-```tniasm LOADSRD.ASM```
+exeファイルをasmファイルと同じパスに配置し
 
-## SRX.BIN の作成
+- TNIASMであれば ```_tniasm.bat ファイル名```
+- SjASMPlusであれば ```_sjasm.bat ファイル名```
 
-```tniasm SRX.ASM```
+でアセンブルします。
 
-## SRX2.BIN の作成
+```build.bat```でまとめてアセンブルできます。
 
-```tniasm SRX2.ASM```
+- LOADSRD.BIN の作成  
+  ```_tniasm.bat LOADSRD.ASM```
+- SRX.BIN の作成  
+  ```_tniasm.bat SRX.ASM```
+- SRX2.BIN の作成  
+  ```_tniasm.bat SRX2.ASM```
+- SRX3.BIN の作成  
+  ```_tniasm.bat SRX3.ASM```
 
 ## 各ファイル説明
 
@@ -23,6 +31,7 @@
 | [LOADSRD.ASM](LOADSRD.ASM) | LOADSRD.BINのソース
 | [SRX.ASM](SRX.ASM)         | SRX.BINのソース
 | [SRX2.ASM](SRX2.ASM)       | SRX2.BINのソース
+| [SRX3.ASM](SRX3.ASM)       | SRX2.BINのソース
 
 ### 機能別ファイル（INCLUDEされるもの）
 
@@ -59,7 +68,7 @@
 >
 > ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
 >
-> プログラム本体は&D000～&hDFFFを使用します。  
+> プログラム本体は&D000～&hD334を使用します。  
 > 環境によってはメモリが足りないケースが多いかもしれません。   
 > 漢字BASICモードではまず暴走すると思います。
 >
@@ -77,7 +86,7 @@
 >
 > ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
 >
-> プログラム本体は&D000～&hDFFFを使用します。  
+> プログラム本体は&D000～&hD4B5を使用します。  
 > 環境によってはメモリが足りないケースが多いかもしれません。   
 > 漢字BASICモードではまず暴走すると思います。
 >
@@ -92,13 +101,44 @@
 
 ## SRX2.BINエントリー
 
+簡易スプライトエンジンを組み込んであるため、サイズが大きくなっています。
+
+> **Warning** 使用上の注意
+>
+> ***&hB000～&hCFFFを画像ロード時のディスクバッファとして使用します。***  
+>
+> プログラム本体は&D000～&hDC39を使用します。  
+> 環境によってはメモリが足りないケースが多いかもしれません。   
+> 漢字BASICモードではまず暴走すると思います。
+>
+> 使用する際は、```CLEAR 100,&hC000``` 等で初期化をしてください。   
+> また、フリーエリアはリセット直後に```HIMEM.BAS```などで確認してください。   
+
+|宣言例 |呼び出し例 |アドレス | ラベル | ソースファイル | 内容 |
+|---|---|---|---|---|---|
+| DEFUSR1=&HC000| U$=USR1("FILENAME.EXT")|$C000| LOAD_SRD    | GSF_LOAD.ASM | GS/BSAVEファイルをロード。 ファイル名は```"8文字.3文字"```であること
+| DEFUSR2=&HC003| U=USR2(VARPTR(PL(0)))  |$C003| SET_PLT     | GSF_LOAD.ASM | PLT配列を使ってパレット反映。<BR>INT配列なら```DIM PL(15):COPY"PALETTE.PLT"TO PL```など
+| DEFUSR3=&HC006| U=USR3(VARPTR(SR(0)))  |$C006| SPR_TIME    | SPRCLOC2.ASM | INTスプライト配列(8個)のパターン番号に時刻を反映。0=”"、1～10=数字の"0"～"9"、11=":"
+| DEFUSR4=&HC009| U=USR4(VARPTR(CM(0)))  |$C009| VDPCMD      | VDPCOMAN.ASM | VDPコマンドを実行。配列の中身はVDPコマンドリファレンス参照。（NX、NYがマイナスの場合や範囲外などの自動補正あり）
+| DEFUSR5=&HC00C| U=USR5(0)              |$C00C| WAITVDPC    | VDPCOMAN.ASM | VDPコマンドの実行終了まで待つ
+| DEFUSR6=&HC00F| U=USR6(VARPTR(SR(0)))  |$C00F| SPR_SET     | SPR_SET.ASM  | [スプライト管理配列](#srx2binスプライト管理配列)を渡してスプライトを表示する。 (```PUT SPRITE```より便利な機能多数)
+| DEFUSR7=&HC012| U=USR7(VARPTR(SC(0)))  |$C012| SPC_SET     | SPR_SET.ASM  | スプライトパターン番号に対応するカラー配列を登録。(```16バイト*64個```の配列)
+| DEFUSR8=&HC015| U=USR8(-1)             |$C015| SPR_INT     | SPR_SET.ASM  | スプライト並び替えをVSYNC割り込みで実行。<BR>-1を指定すると解除。
+
+> **Warning**  
+> $C015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
+> プログラム終了時に開放```U=USR(-1)```を忘れないでください。  
+> タイマーフック```H.TIMI```を使用しますので機械語領域が破損した場合に暴走します。
+
+## SRX3.BINエントリー
+
 簡易スプライトエンジンやBGM DRIVERを組み込んであるため、機械語プログラムの先頭は$D000ではなく$COOOからになります。
 
 > **Warning** 使用上の注意
 >
 > ***&hB000～&hBFFFを画像ロード時のディスクバッファとして使用します。***  
 >
-> プログラム本体は&D000～&hDFFFを使用します。  
+> プログラム本体は&hC000～&hD36Cを使用します。  
 > 環境によってはメモリが足りないケースが多いかもしれません。   
 > 漢字BASICモードではまず暴走すると思います。
 >
@@ -126,11 +166,11 @@
 
 > **Warning**  
 > $C015(```U=USR8(1)```や```U=USR8(2)```)でVSYNCモードを使用した場合は、
-> プログラム終了時に開放を忘れないでください。  
+> プログラム終了時に開放```U=USR(-1)```を忘れないでください。  
 > タイマーフック```H.TIMI```を使用しますので機械語領域が破損した場合に暴走します。
 
 
-## ```SRX2.BIN```スプライト管理機能
+## ```SRX2.BIN```.```SRX2.BIN```スプライト管理機能
 
 1) 16x16サイズスプライトモード専用
 2) 実質2枚重ね合わせスプライト専用
