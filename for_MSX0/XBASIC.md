@@ -176,7 +176,7 @@ Sample3 グラフィック画面用文字出カルーチン
 100 '#I &H2A,C%,&H29,&H29,&H29,&H11,&HBF,&H1B,&H19
 110 '#I &H06,&H08,&H3A,&HB7,&HFC,&H32,X%,&H3A,&HB9,&HFC,&H32,Y%
 120 '#I &H7E,&H23,&HC5,&H06,&H08
-130 '#I &H17,&HF5,&HC5,&HE5,&HDC,●170,&HE1,&HC1,&H3A,X%,&H3C,&H32,X%,&HF1
+130 '#I &H17,&HF5,&HC5,&HE5,&HDC,@170,&HE1,&HC1,&H3A,X%,&H3C,&H32,X%,&HF1
 140 '#I &H10,&HED,&H3A,X%,&HD6,&H08,1H32,X%,&H3A,Y%,&H3C,&H32,Y%,&HC1,&H10,&HD6
 150 '#I &H3A,X%,&HC6,&H08,&H32,&HB7,&HFC,&H3A,Y%,&H38,2,&HD6,&H08
 160 '#I &H32,&HB9,&HFC,&HC9
@@ -391,7 +391,7 @@ GRPACY	EQU	0FCB9H
 C%	EQU	0	;Use C% to pass CHR code
 X%	EQU	0	;Used in 170
 Y%	EQU	0	;Used in 170
-●170	EQU	0	;PSET routine in BASIC
+@170	EQU	0	;PSET routine in BASIC
 ;
 	LD	HL,(C%)		;L100
 	ADD	HL,HL		;Get ROM font address
@@ -414,7 +414,7 @@ L130:
 	PUSH	AF		;8 times
 	PUSH	BC
 	PUSH	HL
-	CALL	C,●170		;Call a PSET routine in BASIC
+	CALL	C,@170		;Call a PSET routine in BASIC
 	POP	HL
 	POP	BC
 	LD	A,(X%)		;Adjust the coordinate X
