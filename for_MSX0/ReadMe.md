@@ -5,11 +5,33 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
 
 ---
 
+## 機械語からの MSX0 I/Oポート操作 ライブラリ
+
+[IOTCMD/](IOTCMD/) ... ソースファイルフォルダ
+
+[TEST.BAS](IOTCMD/TEST.BAS) ... XBASICからIOTCMD.BINを使用してI2Cノードツリー表示
+
+[IOTCMD.ASM](IOTCMD/IOTCMD.ASM) ... IOTCMD.INCをUSR関数から呼び出す部分
+
+[IOTCMD.INC](IOTCMD/IOTCMD.INC) ... IOT I/O操作の機械語ライブラリサンプル
+
+[IOTCMD.DSK](IOTCMD.DSK) ... ディスクイメージ
+
+---
+
 ## SAMPLE
 
 ![BIGAJUU.png](img/BIGAJUU.png)
-[BIGAJUU/](BIJAJUU/)  
-[BIGAJUU.DSK](BIGAJUU.DSK)  
+
+[BIGAJUU/](BIGAJUU/) ... ソースファイルフォルダ 
+
+[BB.BAS](BIGAJUU/BB.BAS) ... ターボONで加速度センサー対応
+
+[B.BAS](BIGAJUU/BB.BAS) ... べーしっ君を使用しない通常の加速度センサー対応
+
+[BIGAJUU.BAS](BIGAJUU/BIGAJUU.BAS) ... 加速度センサー無し
+
+[BIGAJUU.DSK](BIGAJUU.DSK) ... ディスクイメージ 
 
 ###
 
@@ -155,7 +177,6 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
   ```_TURBO OFF```より後の行番号がアクセスできる
 
 ---
-
 ## MSX0 I/Oポート
 - PORT 8 : IOT操作（入出力）
 - PORT 16: ターミナルコンソールへの出力（出力）
@@ -254,17 +275,23 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
 
 ### 文字列出力:
 ```
-	#c0, [データ長, 文字列], #00
+	#c0, データ長, 文字列[], #00
 ```
 
 ## (2-B)  #80: データ取得
 ```
-	(out)#80, (in)データ長n, データ*n
+	(out)#80 ... データ頭出し
+	(in)データ長n, データ*n
+	... 
+	(IOTFIND等、配列を返す場合)
+	(in)データ長n, データ*n
+	(in)データ長n, データ*n
 ```
 
 ### 数値取得
 ```
-	(out)#80, (in)データ長, (in)Low 1byte, (in) High 1byte
+	(out)#80 ... データ頭出し
+	(in)データ長, (in)Low 1byte, (in) High 1byte
 ```
 
 ※ 現在は2バイト整数しか返さない
@@ -272,5 +299,7 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
 
 ### 文字列取得
 ```
-	(out)#80, (in)データ長, (in)文字列データ*データ長分繰り返し
+	(out)#80 ... データ頭出し
+	(in)データ長, (in)文字列データ[データ長]
 ```
+
