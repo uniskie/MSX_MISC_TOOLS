@@ -1,4 +1,5 @@
-# MSX2,MSX MSXべーしっ君
+# MSXべーしっ君
+for MSX/MSX2
 
 ## 目次
 
