@@ -178,6 +178,7 @@ iotlib_set_node:
 ; iotfind (int)
 ; in:	iotlib_set_node で ノード指定
 ; out: 	hl = 見つかったサブノードの個数
+; use:	af, hl
 ;================================================================
 iotlib_find_int:
 	; get(int) cmd
@@ -200,6 +201,7 @@ iotlib_find_int:
 ;	   続いて次のサブノードを取得したい場合は
 ;	   新しい bufferとmax sizeを指定して
 ;	   iotlib_read_bufを呼び出す
+; use:	af, bc, hl
 ;================================================================
 iotlib_find_buf:
 	ld	c, a	;max size
@@ -219,6 +221,7 @@ iotlib_find_buf:
 ; iotget (int)
 ; in:	iotlib_set_node で ノード指定
 ; out: 	hl = data
+; use:	af, hl
 ;================================================================
 iotlib_get_int:
 	; get(int) cmd
@@ -237,6 +240,7 @@ iotlib_get_int:
 ;	a  = max size
 ; out: 	[hl] = data(byte配列)
 ;	a  = 受信した data size
+; use:	af, bc, hl
 ;================================================================
 iotlib_get_buf:
 	ld	c, a	;max size
@@ -256,6 +260,7 @@ iotlib_get_buf:
 ; iotput (int)
 ; in:	iotlib_set_node で ノード指定
 ;	hl = data
+; use:	af, hl
 ;================================================================
 iotlib_put_int:
 	; get(int) cmd
@@ -271,6 +276,7 @@ iotlib_put_int:
 ; in:	iotlib_set_node で ノード指定
 ;	hl = data address
 ;	a  = data size
+; use:	af, bc, hl
 ;================================================================
 iotlib_put_buf:
 	ld	c, a	;max size

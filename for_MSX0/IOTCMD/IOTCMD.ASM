@@ -8,8 +8,10 @@
 
 start_adr:	equ	$D000
 
-VALTYP:		equ	$F663
-DAC:		equ	$F7F6
+;==== system wor ====k
+;VALTYP:		equ	$F663
+;DAC:		equ	$F7F6
+
 	;======================
 	;BINHEADER
 	;======================
@@ -22,7 +24,10 @@ DAC:		equ	$F7F6
 	org	start_adr
 
 usr_tbl:
-	jp	set_xbasic	;+0	TURBOモードの時に A=USR(1)
+	jp	set_flag	;+0	a=user(flag)
+				;	べーしっ君モード:   flagにbit0=1(1)
+				;	疑似バーストリード: flagにbit1=1(2)
+				;	（レジスタアドレスを加算しながら連続読み込み）
 	jp	iot_node	;+3	A=USR1(VARPTR(ND$))	ノード名を設定する
 	jp	iot_put_i	;+6	A=USR2(D)		整数を送信
 	jp	iot_put_s	;+9	A=USR3(VARPTR(D$))	文字列を送信
@@ -34,25 +39,38 @@ usr_tbl:
 	jp	iot_read_i	;+24	A=USR8(0)		配列の次の整数を受信（整数配列用）
 	jp	iot_read_s	;+27	A=USR9(VARPTR(D$))	配列の次の文字列を受信（D$の文字長まで）
 
-is_xbasic:	db	0
+
+;==== 動作フラグ ===
+mode_flag_xbasic:	equ	$01	;bit0
+mode_flag_burst_read:	equ	$02	;bit1	for iot_get_s
+					;       疑似バーストリードモードにする
+					;	渡された文字長までレジスタアドレス加算しながら
+					;	連続読み込み
+mode_flag:	db	0
+
+no_reg:		equ	255		;レジスタ指定なし
+;i2c_i_flag:	db	0		;ノードが"device/i2c_i"かどうか
+i2c_i_reg:	db	no_reg		;最後に指定したi2c_i レジスタアドレス
+					;iot_nodeでno_regに初期化
+					;iot_nodeのあとの最初のiot_put_sの最初の1バイト
 
 ;================================================
 ; べーしっ君のTURBO ONを使用中なら1を指定
 ; ※ べーしっ君TURBOモードでは
 ;    通常と文字変数の扱いが異なる為
 ;    ここで指定して処理を変えないと大変な事になる。
-; in:	a=usr(0)
-;	または
-;	a=usr(1)
+; in:	a=usr(f)
+;	f ... bit0=xbasic
+;	  ... bit1=burst read (iot_get_sでアドレス加算しながら連続リード)
 ;================================================
-set_xbasic:
+set_flag:
 	cp	valtyp_int
 	ret	nz
 
 	inc	hl
 	inc	hl
 	ld	a, (hl)
-	ld	(is_xbasic), a
+	ld	(mode_flag), a
 	ret
 
 ;================================================
@@ -71,6 +89,10 @@ iot_node:
 	call	iotlib_set_node
 
 iot_node_end:
+
+	ld	a, no_reg
+	ld	(i2c_i_reg), a	;最終アクセスレジスタクリア
+	
 	pop	ix
 	ld	(ix+2), 0
 	ld	(ix+3), 0
@@ -104,7 +126,14 @@ iot_put_i:
 iot_put_s:
 	call	get_usr_string
 	ret	c	;引数の型が一致しない
+	jr	z, iot_put_s_1
 
+	ld	e, a	;長さ保存
+	ld	a, (hl)
+	ld	(i2c_i_reg), a	;最終アクセスレジスタに保存
+	ld	a, e	;長さ復帰
+
+iot_put_s_1:
 	call	iotlib_put_buf
 
 	ret
@@ -143,6 +172,11 @@ iot_get_s:
 	call	get_usr_string
 	jr	c, iot_get_s_end
 
+	ld	e, a	;長さ保存
+	ld	a, (mode_flag)
+	and	mode_flag_burst_read
+	jr	z, iot_get_s_burst
+
 	ld	a, b	;格納可能最大サイズ
 			;文字列領域に読み込む
 	or	a	;最大サイズが0なら実行不能
@@ -155,6 +189,41 @@ iot_get_s_end:
 	ld	(ix+2), a	;長さを返す
 	ld	(ix+3), 0
 	ret
+
+	;渡されたバッファ（文字列）長さの分だけ
+	;レジスタアドレスを加算しながら連続で読み込む
+iot_get_s_burst:
+	ld	b, e	;長さ復帰
+	ld	c, 0	;読み込んだサイズ合計
+
+iot_get_s_burst_loop:
+	ld	a, b
+	push	bc
+	call	iotlib_get_buf
+	pop	bc
+
+	ld	e, a	;e=読み込んだ長さ
+	add	c
+	ld	c, a	;読み込んだサイズ合計
+	ld	a, b	;残りの長さ OLD
+	sub	e	;残りの長さ-今回読み込んだ長さ
+	ld	b, a	;残りの長さ NEW
+
+	ld	a, c	;読み込んだサイズ合計(endへ飛ぶ準備)
+	jr	z, iot_get_s_end
+	jr	c, iot_get_s_end
+
+	; レジスタアドレス加算
+	push	bc
+	push	hl
+	ld	hl, i2c_i_reg
+	inc	(hl)
+	ld	a, 1
+	ld	hl, i2c_i_reg
+	call	iotlib_put_buf		;新しいレジスタを指定
+	pop	hl
+	pop	bc
+	jr	iot_get_s_burst_loop	;ループ
 
 ;================================================
 ; iotfind (int)
@@ -238,7 +307,7 @@ iot_read_s:
 	push	hl
 	call	get_usr_string
 	jr	c, iot_read_s_end
-
+	
 	ld	a, b	;格納可能最大サイズ
 			;文字列領域に読み込む
 	or	a	;最大サイズが0なら実行不能
@@ -277,17 +346,18 @@ get_usr_int:
 ; 文字列アドレスと長さを取得
 ; in:	a  ... vartyp
 ;	hl ... usr引数アドレス
-; out:	hl ... data address
-;	a  ... length
-;	b  ... max length
+; out:	hl ... データアドレス
+;	a  ... 長さ
+;	b  ... 文字列バッファに格納可能な最大の長さ
 ;	c  ... vartyp
+;	z  ... 長さが0ならz=1
 ;	cy ... 1 = error ... hl, a, cは無効
 ; use:	af, c, de, hl
 ;================================================
 get_usr_string:
 	ld	c, a	;a=valtype
-	ld	a, (is_xbasic)
-	or	a
+	ld	a, (mode_flag)
+	and	mode_flag_xbasic
 	ld	a, c
 	jr	nz, get_usr_string_xbasic	;べーしっ君用処理へ
 
@@ -374,5 +444,35 @@ get_usr_string_err:
 	include	"IOTCMD.INC"
 ;================================================
 
+ if 0
+;================================================
+; device/i2c_iチェック
+; in:	hl :string
+; out:  z  :0=OK
+;================================================
+is_device_ic2_i:
+	push	hl
+	push	de
+
+	ld	de, str_device_ic2_i
+
+is_device_ic2_i_loop:
+	ld	a, (de)
+	inc	de
+	or	a
+	jr	z, is_device_ic2_i_end	; match all
+	
+	cp	(hl)
+	inc	hl
+	jr	z, is_device_ic2_i_loop	; not match
+
+is_device_ic2_i_end:
+	pop	de
+	pop	hl
+	ret
+str_device_ic2_i:
+	db	"device/i2c_i"
+	db	0
+ endif
 
 end_adr:
