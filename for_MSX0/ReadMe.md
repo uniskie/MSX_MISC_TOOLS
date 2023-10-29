@@ -27,7 +27,9 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
 
 [BIGAJUU/](BIGAJUU/) ... ソースファイルフォルダ 
 
-[BB.BAS](BIGAJUU/BB.BAS) ... ターボONで加速度センサー対応
+[BB2.BAS](BIGAJUU/BB.BAS) ... べーしっ君で加速度センサー対応、加速度センサーが無ければランダムで目が変化
+
+[BB.BAS](BIGAJUU/BB.BAS) ... べーしっ君で加速度センサー対応
 
 [B.BAS](BIGAJUU/BB.BAS) ... べーしっ君を使用しない通常の加速度センサー対応
 
