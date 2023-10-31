@@ -6,6 +6,8 @@
 ;============================================
 	fname	"IOTCMD.BIN"
 
+include_datetime:	equ	1	;時刻日付取得ルーチンを組み込む
+
 start_adr:	equ	$D000
 
 ;==== system wor ====k
@@ -39,6 +41,11 @@ usr_tbl:
 	jp	iot_read_i	;+24	A=USR8(0)		配列の次の整数を受信（整数配列用）
 	jp	iot_read_s	;+27	A=USR9(VARPTR(D$))	配列の次の文字列を受信（D$の文字長まで）
 
+ if include_datetime
+	JP	read_datetime	;+30	A=USR10(VARPTR(D$))	クロックICを読み込む
+				;				"GET TIME" または
+				;				"GET DATE" を指定
+ endif ;include_datetime
 
 ;==== 動作フラグ ===
 mode_flag_xbasic:	equ	$01	;bit0
@@ -444,35 +451,214 @@ get_usr_string_err:
 	include	"IOTCMD.INC"
 ;================================================
 
- if 0
+;;================================================
+;; device/i2c_iチェック
+;; in:	hl :string
+;; out:  z  :0=OK
+;;================================================
+;is_device_ic2_i:
+;	push	hl
+;	push	de
+;
+;	ld	de, str_device_ic2_i
+;
+;is_device_ic2_i_loop:
+;	ld	a, (de)
+;	inc	de
+;	or	a
+;	jr	z, is_device_ic2_i_end	; match all
+;	
+;	cp	(hl)
+;	inc	hl
+;	jr	z, is_device_ic2_i_loop	; not match
+;
+;is_device_ic2_i_end:
+;	pop	de
+;	pop	hl
+;	ret
+;str_device_ic2_i:
+;	db	"device/i2c_i"
+;	db	0
+
+ if include_datetime ;---------------------------
 ;================================================
-; device/i2c_iチェック
-; in:	hl :string
-; out:  z  :0=OK
+; クロックICを読み込む
+; in:	A$="GET TIME":A=USR(VARPTR(A$)) または
+;	A$="GET DATE":A=USR(VARPTR(A$))
+; out:  "hh:mm:ss" または
+;	"yy/mm/dd" を返す
 ;================================================
-is_device_ic2_i:
+read_datetime:
+	cp	valtyp_int
+	ret	nz	;整数以外は無視
+
 	push	hl
-	push	de
+	call	get_usr_string
+	; a = length
+	; hl = address
+	push	af
 
-	ld	de, str_device_ic2_i
+	cp	8
+	jr	c, read_clock_end	;8文字未満は無視
+	
+	push	hl
+	ld	de, str_gettime
+	call	cmpstr
+	pop	hl
+	jr	z, read_gettime
+	
+	push	hl
+	ld	de, str_getdate
+	call	cmpstr
+	pop	hl
+	jr	z, read_getdate
 
-is_device_ic2_i_loop:
+read_clock_end:
+	pop	af
+	pop	ix
+	ld	(ix+2), a
+	ld	(ix+3), a
+	ret
+
+;------------------------------------------------
+REDCLK:	equ	01F5H	;(SUB-ROM) CLOCK-ICへデータを書き込みます
+			;in:	c: bit5-4:block, bit3-0:reg_id
+			;out:	a: データ(下位4bitのみ有効）
+			;use:	af
+;WRTCLK:	equ	01F9H	;(SUB-ROM) クロック・データを書き込む
+;			;in:	A に書き込むデータ。C にクロック RAM アドレス
+;			;out:	なし
+;			;use:	F
+SUBROM:	equ	015CH	;SUB-ROM をインタースロット・コール
+			;in:	IX をスタックに積んでからIX に呼び出すアドレスを入れてjp
+			;out:	呼び出すルーチンによる
+			;desc:	pop ixしてretするので
+			;	read_clockic:
+			;		push	ix
+			;		ld	ix, REDCLK
+			;		jp	SUBROM
+			;       の様にして call read_clockic で呼び出す
+			;use:	裏レジスタと IY はリザーブされる
+EXTROM:	equ	015FH	;SUB-ROM をインタースロット・コール
+			;in	IX に呼び出すアドレス
+			;out	呼び出すルーチンによる
+			;use:	裏レジスタと IY はリザーブされる
+;------------------------------------------------
+;in:	hl : データ格納先
+;use:	裏レジスタはリザーブされる
+;------------------------------------------------
+read_gettime:
+	ld	bc, 5
+	call	read_clockic_dec	;5:時(10の位)
+	call	read_clockic_dec	;4:時( 1の位)
+	ld	(hl), ':'
+	inc	hl
+	call	read_clockic_dec	;3:分(10の位)
+	call	read_clockic_dec	;2:分( 1の位)
+	ld	(hl), ':'
+	inc	hl
+	call	read_clockic_dec	;1:秒(10の位)
+	call	read_clockic_dec	;0:秒( 1の位)
+	jr	read_clock_end
+
+;------------------------------------------------
+read_getdate:
+	ld	bc, 12 + 8 * 100H	;年は80を足す
+	call	read_clockic_dec	;12:年(10の位)
+	ld	b, 0
+	call	read_clockic_dec	;11:年( 1の位)
+	ld	(hl), '/'
+	inc	hl
+	call	read_clockic_dec	;10:月(10の位)
+	call	read_clockic_dec	; 9:月( 1の位)
+	ld	(hl), '/'
+	inc	hl
+	call	read_clockic_dec	; 8:日(10の位)
+	call	read_clockic_dec	; 7:日( 1の位)
+	jr	read_clock_end
+
+;------------------------------------------------
+;in:	hl = address
+;	c = clock-ic reg id
+;	b = value offset
+;out:	(hl) = '0'+click-ic num(0-9)
+;	hl = hl + 1
+;	c = c - 1
+;use:	hl,cは継続する
+;------------------------------------------------
+read_clockic_dec:
+	push	bc
+	push	hl
+	ld	ix, REDCLK
+	call	EXTROM
+	pop	hl
+	pop	bc
+
+	add	b
+	daa
+	and	15
+
+	add	'0'
+
+	ld	(hl), a
+	inc	hl
+	dec	c
+	ret
+
+;================================================
+; 文字列比較
+cmpstr_ignoreLetterCase:	equ	1
+			; 1 = 大文字小文字区別なし
+; in:	hl:str address
+;	de: zero ended string
+; out:	z=一致/nz=不一致
+; use: af,hl,de,c
+;================================================
+cmpstr:
+cmpstr_l:
 	ld	a, (de)
 	inc	de
 	or	a
-	jr	z, is_device_ic2_i_end	; match all
-	
-	cp	(hl)
-	inc	hl
-	jr	z, is_device_ic2_i_loop	; not match
+	ret	z
 
-is_device_ic2_i_end:
-	pop	de
-	pop	hl
+	cp	(hl)
+
+ if cmpstr_ignoreLetterCase ;--------------------
+	jr	z, cmpstr_j	;完全一致
+
+	ld	c, #20		;大文字→小文字
+	cp	'A'
+	jr	c, cmpstr_e	;大文字ではない
+	cp	'Z'+1
+	jr	c, cmpstr_cp2	;大文字である
+
+	ld	c, -#20		;小文字→大文字
+	cp	'a'
+	jr	c, cmpstr_e	;大文字でもない
+	cp	'z'+1
+	jr	nc, cmpstr_e	;小文字でもない
+
+cmpstr_cp2:
+	add	c		;小→大/大→小文字変換
+	cp	(hl)
+ endif ; cmpstr_ignoreLetterCase ----------------
+
+cmpstr_j:
+	inc	hl
+	jr	z, cmpstr_l
+cmpstr_e:
+ if cmpstr_ignoreLetterCase ;--------------------
+	or	255	; non-zero
+ endif ; cmpstr_ignoreLetterCase ----------------
 	ret
-str_device_ic2_i:
-	db	"device/i2c_i"
+
+str_gettime:
+	db	"GET TIME"
 	db	0
- endif
+str_getdate:
+	db	"GET DATE"
+	db	0
+
+ endif ;include_datetime ;-----------------------
 
 end_adr:
