@@ -23,8 +23,8 @@
 // --------------------------------------------------------------------
 //	2021/Jul/25th	t.hara	1st release
 //	2022/Dec/03rd	t.hara	Modified for TinyUSB 0.14.0
-//  2023/Nov/6th  uniskie Modified for pico sdk 1.5.1
-//                        Modified joypad processing to use report descriptor
+//	2023/Nov/6th  uniskie Modified for pico sdk 1.5.1
+//	                      Modified joypad processing to use report descriptor
 
 #include <stdio.h>
 #include <string.h>
@@ -37,9 +37,15 @@
 #include <hardware/uart.h>
 
 // --------------------------------------------------------------------
-//	デバッグ：USBレポートデスクリプタ解析
+//	デバッグ：UUART(SERIAL)デバッグ文字列出力
 // --------------------------------------------------------------------
-//#define DEBUG_USE_ANALYSIS
+#define DEBUG_UART_ON 1
+
+// --------------------------------------------------------------------
+//	デバッグ：USBレポート解析
+//  0:なし / 1:接続時情報 / 2:接続&データ取得情報 / 3:データ解析
+// --------------------------------------------------------------------
+#define DEBUG_USE_ANALYSIS  0
 
 // --------------------------------------------------------------------
 //	TinyUSBの問題回避：
@@ -93,8 +99,12 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 //	Logic of SEL signal
 //		0: negative logic (MSX Joymega)
 //		1: positive logic (MegaDrive)
-//
 #define MSX_SEL_LOGIC 0
+
+// --------------------------------------------------------------------
+//	SEL信号の論理反転ジャンパ
+#define MD_SEL_PIN_O  14  // +3.3V -> 
+#define MD_SEL_PIN_I  15  // <- +3.3V
 
 // --------------------------------------------------------------------
 //	X,Y軸感度
@@ -124,16 +134,15 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 #define MODE_BUTTON		(9) 
 
 // --------------------------------------------------------------------
-#define DEBUG_UART_ON 1
-
-// --------------------------------------------------------------------
 #if MSX_SEL_LOGIC == 0
-  #define MSX_SEL_H true
-  #define MSX_SEL_L false
+  #define MSX_SEL_H_def true
+  #define MSX_SEL_L_def false
 #else
-  #define MSX_SEL_H false
-  #define MSX_SEL_L true
+  #define MSX_SEL_H_def false
+  #define MSX_SEL_L_def true
 #endif
+bool MSX_SEL_H = MSX_SEL_H_def;
+bool MSX_SEL_L = MSX_SEL_L_def;
 
 // --------------------------------------------------------------------
 // Report Descriptaor Global Item Table
@@ -458,6 +467,14 @@ static void initialization( void ) {
   gpio_init( MSX_SEL_PIN );
   gpio_set_dir( MSX_SEL_PIN, GPIO_IN );
   gpio_pull_up( MSX_SEL_PIN );
+
+  // GPIO ジャンパ 14(+3.3V) -> 15(pull up) 検査準備
+  gpio_init( MD_SEL_PIN_O );
+  gpio_set_dir( MD_SEL_PIN_O, GPIO_OUT );
+  gpio_put( MD_SEL_PIN_O, true );
+  gpio_init( MD_SEL_PIN_I );
+  gpio_set_dir( MD_SEL_PIN_I, GPIO_IN );
+  gpio_pull_down( MD_SEL_PIN_I );
 }
 
 // --------------------------------------------------------------------
@@ -466,11 +483,35 @@ static uint64_t inline my_get_us( void ) {
 }
 
 // --------------------------------------------------------------------
+//static bool md_mode = MSX_SEL_LOGIC;
+static void check_logic()
+{
+  bool rev = gpio_get( MD_SEL_PIN_I );
+  //md_mode = MSX_SEL_LOGIC ^ rev;
+  if (rev) {
+    MSX_SEL_L = !MSX_SEL_L_def;
+    MSX_SEL_H = !MSX_SEL_H_def;
+  } else {
+    MSX_SEL_L = MSX_SEL_L_def;
+    MSX_SEL_H = MSX_SEL_H_def;
+  }
+}
+
+// --------------------------------------------------------------------
 static void joypad_mode( void ) {
   static const uint32_t mask = 0x3F << MSX_BUTTON_PIN;
   static const uint64_t sequence_trigger_us = 1100;		//	1100[usec]
   static const uint64_t sequence_finish_us = 1600;		//	1600[usec]
   static uint64_t start_time;
+
+  //	            b5,b4,b3,b2,b1,b0
+  //	matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
+  //	matrix[1] = 上 下 左 右 Ｂ Ｃ
+  //	matrix[2] = Ｌ Ｌ Ｌ Ｌ Ａ Ｓ
+  //	matrix[3] = Ｚ Ｙ Ｘ Ｍ Ｈ Ｈ
+  //	matrix[4] = Ｈ Ｈ Ｈ Ｈ Ａ Ｓ
+
+  check_logic();
 
   //	state 0
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
@@ -688,7 +729,9 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   uint8_t matrix[5];
 
   #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS > 1
     printf( "process_gamepad_report()\n" );
+   #endif
   #endif
 
   //	            b5,b4,b3,b2,b1,b0
@@ -813,6 +856,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   memcpy( (void*) joymega_matrix, matrix, sizeof(matrix) );
 
   #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS > 1
     if (x_item) printf( "pos_x = %d\r\n", (int)x );
     if (y_item) printf( "pos_y = %d\r\n", (int)y );
     if (hat_item) printf( "hat = %d\r\n", (int)hat );
@@ -830,6 +874,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
       }
     }
     printf( "\r\n" );
+   #endif
   #endif
 }
 
@@ -924,7 +969,7 @@ int main(void) {
 // --------------------------------------------------------------------
 //	[DEBUG]
 // --------------------------------------------------------------------
-#if defined(DEBUG_USE_ANALYSIS)
+#if DEBUG_USE_ANALYSIS
 void debug_dump_hex( uint8_t const* dat, uint16_t dat_len )
 {
   #if DEBUG_UART_ON
@@ -941,7 +986,7 @@ void debug_dump_hex( uint8_t const* dat, uint16_t dat_len )
   return;
   #endif//#if DEBUG_UART_ON
 }
-#endif//#if defined(DEBUG_USE_ANALYSIS)
+#endif//#if DEBUG_USE_ANALYSIS
 
 //--------------------------------------------------------------------+
 // Report Item Types 不足分の対応
@@ -959,6 +1004,11 @@ enum {
 //--------------------------------------------------------------------+
 uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr, uint8_t arr_count, uint8_t const* desc_report, uint16_t desc_len)
 {
+  #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS 
+    printf("joypad_hid_parse_report_descriptor();\r\n");
+   #endif
+  #endif
   // ビットフィールドは移植性が低いのでバイナリ解析に使用する事は推奨されない
   // どうしても使いたいならコンパイラ依存のpackedオプションを使用する
   // Report Item 6.2.2.2 USB HID 1.11
@@ -1016,9 +1066,16 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
     if (size > 2 ) u32data |= (desc_report[2] << 16) | (desc_report[3] << 24);
     int32_t s32data = *(int32_t*)&u32data;
 
-    TU_LOG(3, "tag = %d, type = %d, size = %d, data = ", tag, type, size);
-    for(uint32_t i=0; i<size; i++) TU_LOG(3, "%02X ", desc_report[i]);
-    TU_LOG(3, "\r\n");
+  #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS > 2
+    printf( "tag = %d, type = %d, size = %d", tag, type, size);
+    if( size ) {
+      printf(", data = ");
+      for(uint32_t i=0; i<size; i++) printf("%02X ", desc_report[i]);
+    }
+    printf("\r\n");
+   #endif
+  #endif
 
     switch(type)
     {
@@ -1184,9 +1241,16 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
     case RI_TYPE_LONGITEM: {
       assert( size == 2 );
       uint8_t const longitem_size = desc_report[ 0 ];
-      TU_LOG(3, "long_item_tag = %d, long_item_size = %d, data = ", desc_report[ 1 ], longitem_size);
-      for(uint32_t i=0; i<longitem_size; i++) TU_LOG(3, "%02X ", desc_report[ size + i ]);
-      TU_LOG(3, "\r\n");
+      #if DEBUG_UART_ON
+       #if DEBUG_USE_ANALYSIS > 2
+        printf("long_item_tag = %d, long_item_size = %d", desc_report[ 1 ], longitem_size);
+        if( longitem_size ) {
+          printf(", data = ");
+          for(uint32_t i=0; i<longitem_size; i++) printf("%02X ", desc_report[ size + i ]);
+        }
+        printf("\r\n");
+       #endif
+      #endif
 
       // 単純にスキップする
       size += longitem_size;
@@ -1201,11 +1265,17 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
     desc_len    -= size;
   }
 
-  for ( uint8_t i = 0; i < report_num; i++ )
-  {
-    info = report_info_arr+i;
-    printf("%u: id = %u, usage_page = %u, usage = %u\r\n", i, info->report_id, info->usage_page, info->usage);
-  }
+  #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS
+    printf("---- Reports ----\r\n");
+    for ( uint8_t i = 0; i < report_num; i++ )
+    {
+      info = report_info_arr+i;
+      printf("%u: id = %u, usage_page = %u, usage = %u\r\n", i, info->report_id, info->usage_page, info->usage);
+    }
+    printf("-----------------\r\n");
+   #endif
+  #endif
 
   return report_num;
 }
@@ -1221,12 +1291,12 @@ void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_r
   uint8_t const itf_protocol = tuh_hid_interface_protocol( dev_addr, instance );
   #if DEBUG_UART_ON
     printf( "tuh_hid_mount_cb( %d, %d, %p, %d );\n", dev_addr, instance, desc_report, desc_len );
-  #if defined(DEBUG_USE_ANALYSIS)
+   #if DEBUG_USE_ANALYSIS > 2
     printf("USB report descriptor: \n");
     printf("------------------------------------------------\n");
     debug_dump_hex( desc_report, desc_len );
     printf("------------------------------------------------\n");
-  #endif//#if defined(DEBUG_USE_ANALYSIS)
+   #endif
   #endif
 
   // By default host stack will use activate boot protocol on supported interface.
@@ -1275,12 +1345,12 @@ void tuh_hid_umount_cb( uint8_t dev_addr, uint8_t instance ) {
 void process_generic_report( uint8_t instance, uint8_t const* report, uint16_t len ) {
 
   #if DEBUG_UART_ON
-  #if defined(DEBUG_USE_ANALYSIS)
+   #if DEBUG_USE_ANALYSIS > 2
     printf("USB report: \n");
     printf("------------------------------------------------\n");
     debug_dump_hex( report, len );
     printf("------------------------------------------------\n");
-  #endif//#if defined(DEBUG_USE_ANALYSIS)
+   #endif
   #endif
   uint8_t const rpt_count = hid_info[instance].report_count;
   report_info_t* rpt_info_arr = hid_info[instance].report_info;
@@ -1331,7 +1401,9 @@ void tuh_hid_report_received_cb( uint8_t dev_addr, uint8_t instance, uint8_t con
   uint8_t const itf_protocol = tuh_hid_interface_protocol( dev_addr, instance );
 
   #if DEBUG_UART_ON
+   #if DEBUG_USE_ANALYSIS > 1
     printf( "tuh_hid_report_received_cb( %d, %d, %p, %d )\n", dev_addr, instance, report, len );
+   #endif
   #endif
 
   if( itf_protocol == HID_ITF_PROTOCOL_KEYBOARD ) {
