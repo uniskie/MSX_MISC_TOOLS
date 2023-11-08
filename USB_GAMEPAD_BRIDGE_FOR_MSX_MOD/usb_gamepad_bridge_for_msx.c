@@ -61,7 +61,9 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 
 // --------------------------------------------------------------------
 //	TinyUSBの問題回避：
-// * 8BITDO M30 のマウントに失敗する問題の対策 *
+// * マウントが不安定なデバイス向けの対策 *
+// * 8BITDO M30 は TinyUSB側の問題があるのでマウントには成功してもreport受信できない *
+// * 恐らく XINPUTデバイス全般に非対応 *
 // --------------------------------------------------------------------
 // Pico SDK v1.5.1\pico-sdk\lib\tinyusb\src\portable\raspberrypi\rp2040\hcd_rp2040.c
 // 591行付近
@@ -122,16 +124,43 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 #define	BOTTOM_THRESHOLD_JOYSTICK	(BOTTOM_THRESHOLD + 128)
 
 // --------------------------------------------------------------------
-//	BUTTON MAP (MD MINI PAD)
-//
-#define A_BUTTON      (3)
-#define B_BUTTON      (2)
-#define C_BUTTON      (6)
-#define X_BUTTON			(4)
-#define Y_BUTTON			(1)
-#define Z_BUTTON			(5)
-#define START_BUTTON	(10)
-#define MODE_BUTTON		(9) 
+//	BUTTON MAP for Megadrive 6B Type
+//    * VID 0CA3 / PID 0024 : MD MINI PAD (10 buttons)
+//    * VID 054C / PID 05C4 : PS4 PAD (14 buttons)
+// 
+#define MD_A_BUTTON     (3)   // [PS4] CIRCLE
+#define MD_B_BUTTON     (2)   // [PS4] CROSS
+#define MD_C_BUTTON     (6)   // [PS4] R1
+#define MD_X_BUTTON     (4)   // [PS4] TRIANBLE
+#define MD_Y_BUTTON     (1)   // [PS4] SQUARE
+#define MD_Z_BUTTON     (5)   // [PS4] L1
+#define MD_START_BUTTON (10)  // [PS4] START
+#define MD_MODE_BUTTON  (9)   // [PS4] SELECT
+// --------------------------------------------------------------------
+//	BUTTON MAP for SFC Type 
+//    * VID 1345 / PID 1030 : RETROFREAK PAD (10 buttons)
+//    * VID ???? / PID ???? : BUFFALO BSGP815GY (10 buttons)
+// 
+#define SFC_A_BUTTON     (2)     // [SFC] B
+#define SFC_B_BUTTON     (1)     // [SFC] A
+#define SFC_C_BUTTON     (5)     // [SFC] L
+#define SFC_X_BUTTON     (4)     // [SFC] Y
+#define SFC_Y_BUTTON     (3)     // [SFC] X
+#define SFC_Z_BUTTON     (6)     // [SFC] R
+#define SFC_START_BUTTON (8)     // [SFC] 
+#define SFC_MODE_BUTTON  (7)     // [SFC] 
+
+// --------------------------------------------------------------------
+//  BUTTON MAP (VARIABLE)
+//  一旦、初期値はSFCタイプにする
+static uint8_t volatile A_BUTTON     = SFC_A_BUTTON;
+static uint8_t volatile B_BUTTON     = SFC_B_BUTTON;
+static uint8_t volatile C_BUTTON     = SFC_C_BUTTON;
+static uint8_t volatile X_BUTTON     = SFC_X_BUTTON;
+static uint8_t volatile Y_BUTTON     = SFC_Y_BUTTON;
+static uint8_t volatile Z_BUTTON     = SFC_Z_BUTTON;
+static uint8_t volatile START_BUTTON = SFC_START_BUTTON;
+static uint8_t volatile MODE_BUTTON  = SFC_MODE_BUTTON;
 
 // --------------------------------------------------------------------
 #if MSX_SEL_LOGIC == 0
@@ -141,8 +170,13 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
   #define MSX_SEL_H_def false
   #define MSX_SEL_L_def true
 #endif
-bool MSX_SEL_H = MSX_SEL_H_def;
-bool MSX_SEL_L = MSX_SEL_L_def;
+static bool volatile MSX_SEL_H = MSX_SEL_H_def;
+static bool volatile MSX_SEL_L = MSX_SEL_L_def;
+
+// --------------------------------------------------------------------
+// HID Device ID
+uint16_t device_vid = -1;
+uint16_t device_pid = -1;
 
 // --------------------------------------------------------------------
 // Report Descriptaor Global Item Table
@@ -212,7 +246,7 @@ enum JOYPAD_ITEM_ID {
 
 // レポートアイテムの構成情報
 typedef struct JOYPAD_REPORT_ITEM
- {
+{
   enum JOYPAD_ITEM_ID item_id;
   uint8_t  byte_index;
   uint8_t  bit_shift;
@@ -498,6 +532,72 @@ static void check_logic()
 }
 
 // --------------------------------------------------------------------
+//	BUTTON MAP (VARIABLE)
+// 
+enum PAD_TYPE {
+  PAD_TYPE_UNKNOWN = 0,
+  PAD_TYPE_MD,
+  PAD_TYPE_SFC,
+};
+
+static bool volatile need_check_button_config = true;
+
+
+// VID/PIDから設定を判定するリスト
+typedef struct PAD_CONFIG_DEF {
+  uint16_t vid;
+  uint16_t pid;
+  enum PAD_TYPE pad_type;
+} pad_foncig_def_t;
+const pad_foncig_def_t pad_config_list[] = {
+  { 0x0CA3, 0x0024, PAD_TYPE_MD },  // VID 0CA3 / PID 0024 : MD MINI PAD (10 buttons)
+  { 0x054C, 0x05C4, PAD_TYPE_MD },  // VID 054C / PID 05C4 : PS4 PAD (14 buttons)
+  { 0x1345, 0x1030, PAD_TYPE_MD },  // VID 1345 / PID 1030 : RETROFREAK PAD (10 buttons)
+  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN }, // end
+};
+
+static void change_button_config( enum PAD_TYPE pad_type)
+{
+  switch (pad_type) {
+  case PAD_TYPE_MD:
+    #if DEBUG_UART_ON
+      printf("Gamepad type: PAD_TYPE_MD\r\n");
+    #endif
+    A_BUTTON     = MD_A_BUTTON;
+    B_BUTTON     = MD_B_BUTTON;
+    C_BUTTON     = MD_C_BUTTON;
+    X_BUTTON     = MD_X_BUTTON;
+    Y_BUTTON     = MD_Y_BUTTON;
+    Z_BUTTON     = MD_Z_BUTTON;
+    START_BUTTON = MD_START_BUTTON;
+    MODE_BUTTON  = MD_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_SFC:
+    #if DEBUG_UART_ON
+      printf("Gamepad type: PAD_TYPE_SFC\r\n");
+    #endif
+    A_BUTTON     = SFC_A_BUTTON;
+    B_BUTTON     = SFC_B_BUTTON;
+    C_BUTTON     = SFC_C_BUTTON;
+    X_BUTTON     = SFC_X_BUTTON;
+    Y_BUTTON     = SFC_Y_BUTTON;
+    Z_BUTTON     = SFC_Z_BUTTON;
+    START_BUTTON = SFC_START_BUTTON;
+    MODE_BUTTON  = SFC_MODE_BUTTON;
+  break;
+
+  default: 
+    #if DEBUG_UART_ON
+      printf("Unknown gamepad type\r\n");
+    #endif
+  break;
+  }
+
+  need_check_button_config = false;
+}
+
+// --------------------------------------------------------------------
 static void joypad_mode( void ) {
   static const uint32_t mask = 0x3F << MSX_BUTTON_PIN;
   static const uint64_t sequence_trigger_us = 1100;		//	1100[usec]
@@ -729,10 +829,62 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   uint8_t matrix[5];
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS > 1
+  #if DEBUG_USE_ANALYSIS > 1
     printf( "process_gamepad_report()\n" );
-   #endif
   #endif
+  #endif
+
+  // ボタンコンフィグ判定が必要なら呼び出す
+  // 初回のレポートのみ実行
+  if (need_check_button_config) {
+    need_check_button_config = false;
+
+    enum PAD_TYPE pad_type = PAD_TYPE_UNKNOWN;
+
+    #if 1
+      // VID/PIDでの判定
+      // 対応を増やしたい場合、
+      // pad_config_list に追加する
+      const pad_foncig_def_t* l = pad_config_list;
+      while( (l->vid != 0xFFFF) && (l->pid != 0xFFFF) ) {
+        if( (l->vid == device_vid) && (l->pid == device_pid) ) {
+          pad_type = l->pad_type;
+          #if DEBUG_UART_ON
+            printf("Detect gamepad type from VID/PID\r\n");
+          #endif
+          break;
+        }
+        ++l;
+      }
+    #endif
+
+    #if 0 
+      // 不明な場合、押してあるボタンで判定
+      // （メガドラ配置で言うAボタンを押してUSBに差し込む）
+
+      // **** 廃止 ****
+      // ボタンを押したままだと初期化が進行しないため
+      // 一瞬だけボタンを離してから押すと言う確実性の低い操作が必要
+      // そのため、この方法は一旦廃止
+
+      if( pad_type == PAD_TYPE_UNKNOWN ) {
+        if( check_report_button( report, len, info, MD_A_BUTTON) ) {
+          pad_type = PAD_TYPE_MD;
+          #if DEBUG_UART_ON
+            printf("Detect gamepad from pressed A button \r\n");
+          #endif
+        } else
+        if( check_report_button( report, len, info, SFC_A_BUTTON) ) {
+          #if DEBUG_UART_ON
+            printf("Detect gamepad from pressed A button \r\n");
+          #endif
+          pad_type = PAD_TYPE_SFC;
+        }
+      }
+    #endif
+
+    change_button_config(pad_type);
+  }
 
   //	            b5,b4,b3,b2,b1,b0
   //	matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
@@ -761,7 +913,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     // 右
     if ( v >= (center + threshold) ) {
       matrix[1] &= 0x3B;
-   }
+  }
   }
 
   // y-axis
@@ -782,7 +934,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     if ( v >= (center + threshold) ) {
       matrix[0] &= 0x2F;
       matrix[1] &= 0x2F;
-   }
+  }
   }
 
   // hat-switch
@@ -856,7 +1008,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   memcpy( (void*) joymega_matrix, matrix, sizeof(matrix) );
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS > 1
+  #if DEBUG_USE_ANALYSIS > 1
     if (x_item) printf( "pos_x = %d\r\n", (int)x );
     if (y_item) printf( "pos_y = %d\r\n", (int)y );
     if (hat_item) printf( "hat = %d\r\n", (int)hat );
@@ -874,7 +1026,7 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
       }
     }
     printf( "\r\n" );
-   #endif
+  #endif
   #endif
 }
 
@@ -1005,9 +1157,9 @@ enum {
 uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr, uint8_t arr_count, uint8_t const* desc_report, uint16_t desc_len)
 {
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS 
+  #if DEBUG_USE_ANALYSIS 
     printf("joypad_hid_parse_report_descriptor();\r\n");
-   #endif
+  #endif
   #endif
   // ビットフィールドは移植性が低いのでバイナリ解析に使用する事は推奨されない
   // どうしても使いたいならコンパイラ依存のpackedオプションを使用する
@@ -1067,14 +1219,14 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
     int32_t s32data = *(int32_t*)&u32data;
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS > 2
+  #if DEBUG_USE_ANALYSIS > 2
     printf( "tag = %d, type = %d, size = %d", tag, type, size);
     if( size ) {
       printf(", data = ");
       for(uint32_t i=0; i<size; i++) printf("%02X ", desc_report[i]);
     }
     printf("\r\n");
-   #endif
+  #endif
   #endif
 
     switch(type)
@@ -1242,14 +1394,14 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
       assert( size == 2 );
       uint8_t const longitem_size = desc_report[ 0 ];
       #if DEBUG_UART_ON
-       #if DEBUG_USE_ANALYSIS > 2
+      #if DEBUG_USE_ANALYSIS > 2
         printf("long_item_tag = %d, long_item_size = %d", desc_report[ 1 ], longitem_size);
         if( longitem_size ) {
           printf(", data = ");
           for(uint32_t i=0; i<longitem_size; i++) printf("%02X ", desc_report[ size + i ]);
         }
         printf("\r\n");
-       #endif
+      #endif
       #endif
 
       // 単純にスキップする
@@ -1266,15 +1418,13 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
   }
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS
-    printf("---- Reports ----\r\n");
+  #if 1//DEBUG_USE_ANALYSIS
     for ( uint8_t i = 0; i < report_num; i++ )
     {
       info = report_info_arr+i;
-      printf("%u: id = %u, usage_page = %u, usage = %u\r\n", i, info->report_id, info->usage_page, info->usage);
+      printf("report %u: id = %u, usage_page = %u, usage = %u\r\n", i, info->report_id, info->usage_page, info->usage);
     }
-    printf("-----------------\r\n");
-   #endif
+  #endif
   #endif
 
   return report_num;
@@ -1287,25 +1437,38 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
 //
 void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_report, uint16_t desc_len ) {
 
+  // ボタンコンフィグ判定が必要
+  need_check_button_config = true;
+
   // Interface protocol (hid_interface_protocol_enum_t)
   uint8_t const itf_protocol = tuh_hid_interface_protocol( dev_addr, instance );
   #if DEBUG_UART_ON
-    printf( "tuh_hid_mount_cb( %d, %d, %p, %d );\n", dev_addr, instance, desc_report, desc_len );
-   #if DEBUG_USE_ANALYSIS > 2
+    printf( "tuh_hid_mount_cb( %d, %d, %p, %d );\r\n", dev_addr, instance, desc_report, desc_len );
+  #if DEBUG_USE_ANALYSIS > 2
     printf("USB report descriptor: \n");
     printf("------------------------------------------------\n");
     debug_dump_hex( desc_report, desc_len );
     printf("------------------------------------------------\n");
-   #endif
+  #endif
+
+    // デバイス固有ID
+    tuh_vid_pid_get(dev_addr, &device_vid, &device_pid);
+    printf("VID = %04x, PID = %04x\r\n", device_vid, device_pid );
   #endif
 
   // By default host stack will use activate boot protocol on supported interface.
   // Therefore for this simple example, we only need to parse generic report descriptor (with built-in parser)
   if( itf_protocol == HID_ITF_PROTOCOL_NONE ) {
+    #if DEBUG_UART_ON
+      printf("HID_ITF_PROTOCOL_NONE\r\n");
+    #endif
     hid_info[instance].report_count = joypad_hid_parse_report_descriptor(hid_info[instance].report_info, MAX_REPORT, desc_report, desc_len);
     process_mode = 0;	//	joypad_mode
   }
   else if( itf_protocol == HID_ITF_PROTOCOL_MOUSE ) {
+    #if DEBUG_UART_ON
+      printf("HID_ITF_PROTOCOL_MOUSE\r\n");
+    #endif
     process_mode = 1;	//	mouse_mode
     mouse_delta_x = 0;
     mouse_delta_y = 0;
@@ -1345,12 +1508,12 @@ void tuh_hid_umount_cb( uint8_t dev_addr, uint8_t instance ) {
 void process_generic_report( uint8_t instance, uint8_t const* report, uint16_t len ) {
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS > 2
+  #if DEBUG_USE_ANALYSIS > 2
     printf("USB report: \n");
     printf("------------------------------------------------\n");
     debug_dump_hex( report, len );
     printf("------------------------------------------------\n");
-   #endif
+  #endif
   #endif
   uint8_t const rpt_count = hid_info[instance].report_count;
   report_info_t* rpt_info_arr = hid_info[instance].report_info;
@@ -1401,9 +1564,9 @@ void tuh_hid_report_received_cb( uint8_t dev_addr, uint8_t instance, uint8_t con
   uint8_t const itf_protocol = tuh_hid_interface_protocol( dev_addr, instance );
 
   #if DEBUG_UART_ON
-   #if DEBUG_USE_ANALYSIS > 1
+  #if DEBUG_USE_ANALYSIS > 1
     printf( "tuh_hid_report_received_cb( %d, %d, %p, %d )\n", dev_addr, instance, report, len );
-   #endif
+  #endif
   #endif
 
   if( itf_protocol == HID_ITF_PROTOCOL_KEYBOARD ) {
