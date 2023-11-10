@@ -50,7 +50,16 @@
 #endif
 
 // CFG_TUSB_DEBUG is defined by compiler in DEBUG build
-// #define CFG_TUSB_DEBUG           0
+// #define CFG_TUSB_DEBUG           0 // 通常
+
+#if 0
+ // 調査用 ： 強制的にデバッグレポートレベルを変える
+ //           （デバッグビルド時にコンパイルオプションで指定される値も上書き）
+ #ifdef CFG_TUSB_DEBUG
+  #undef CFG_TUSB_DEBUG
+  #define CFG_TUSB_DEBUG           3
+ #endif
+#endif
 
 /* USB DMA on some MCUs can only access a specific SRAM region with restriction on alignment.
  * Tinyusb use follows macros to declare transferring memory so that they can be put
@@ -85,6 +94,15 @@
 //------------- HID -------------//
 
 #define CFG_TUH_HID_EP_BUFSIZE      64
+	
+//------------- Host Options -------------
+#if CFG_TUH_ENABLED
+  // --------------------------------------------------------------------
+  //	TinyUSBの問題回避：
+  // * PS4コントローラーのマウントに失敗する問題の対策 *
+  // --------------------------------------------------------------------
+  #define CFG_TUH_ENUMERATION_BUFSIZE 512 // default:256 ... not enough
+#endif
 
 #ifdef __cplusplus
  }

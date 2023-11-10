@@ -31,8 +31,11 @@
 #include <pico/stdlib.h>
 #include <pico/multicore.h>
 #include <pico/time.h>
-//#include <bsp/board_api.h>
+#if 0
+#include <bsp/board_api.h> // 最新レポジトリの場合 2023/11/10
+#else
 #include <bsp/board.h>
+#endif
 #include <tusb.h>
 #include <hardware/uart.h>
 
@@ -45,18 +48,13 @@
 //	デバッグ：USBレポート解析
 //  0:なし / 1:接続時情報 / 2:接続&データ取得情報 / 3:データ解析
 // --------------------------------------------------------------------
-#define DEBUG_USE_ANALYSIS  0
+#define DEBUG_USE_ANALYSIS  1
 
 // --------------------------------------------------------------------
 //	TinyUSBの問題回避：
 // * PS4コントローラーのマウントに失敗する問題の対策 *
 // --------------------------------------------------------------------
-// Pico SDK v1.5.1\pico-sdk\lib\tinyusb\src\tusb_option.h
-// 384行付近
-// #define CFG_TUH_ENUMERATION_BUFSIZE 256
-// から
-// #define CFG_TUH_ENUMERATION_BUFSIZE 512 //**customize** 256
-// に変更する
+// tusb_config.hで宣言しておく
 static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 
 // --------------------------------------------------------------------
@@ -109,6 +107,11 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 #define MD_SEL_PIN_I  15  // <- +3.3V
 
 // --------------------------------------------------------------------
+// HID Device ID
+uint16_t device_vid = -1;
+uint16_t device_pid = -1;
+
+// --------------------------------------------------------------------
 //	X,Y軸感度
 //
 //	X,Y axis sensitivity
@@ -125,30 +128,34 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 
 // --------------------------------------------------------------------
 //	BUTTON MAP for Megadrive 6B Type
-//    * VID 0CA3 / PID 0024 : MD MINI PAD (10 buttons)
-//    * VID 054C / PID 05C4 : PS4 PAD (14 buttons)
-// 
-#define MD_A_BUTTON     (3)   // [PS4] CIRCLE
-#define MD_B_BUTTON     (2)   // [PS4] CROSS
-#define MD_C_BUTTON     (6)   // [PS4] R1
-#define MD_X_BUTTON     (4)   // [PS4] TRIANBLE
-#define MD_Y_BUTTON     (1)   // [PS4] SQUARE
-#define MD_Z_BUTTON     (5)   // [PS4] L1
-#define MD_START_BUTTON (10)  // [PS4] START
-#define MD_MODE_BUTTON  (9)   // [PS4] SELECT
+#define MD_A_BUTTON     (3)   // [MD mini] A
+#define MD_B_BUTTON     (2)   // [MD mini] B
+#define MD_C_BUTTON     (6)   // [MD mini] C
+#define MD_X_BUTTON     (4)   // [MD mini] X
+#define MD_Y_BUTTON     (1)   // [MD mini] Y
+#define MD_Z_BUTTON     (5)   // [MD mini] Z
+#define MD_START_BUTTON (10)  // [MD mini] START
+#define MD_MODE_BUTTON  (9)   // [MD mini] MODE
 // --------------------------------------------------------------------
-//	BUTTON MAP for SFC Type 
-//    * VID 1345 / PID 1030 : RETROFREAK PAD (10 buttons)
-//    * VID ???? / PID ???? : BUFFALO BSGP815GY (10 buttons)
-// 
+//	BUTTON MAP for SFC/Nintendo SWITCH Type 
 #define SFC_A_BUTTON     (2)     // [SFC] B
 #define SFC_B_BUTTON     (1)     // [SFC] A
 #define SFC_C_BUTTON     (5)     // [SFC] L
 #define SFC_X_BUTTON     (4)     // [SFC] Y
 #define SFC_Y_BUTTON     (3)     // [SFC] X
 #define SFC_Z_BUTTON     (6)     // [SFC] R
-#define SFC_START_BUTTON (8)     // [SFC] 
-#define SFC_MODE_BUTTON  (7)     // [SFC] 
+#define SFC_START_BUTTON (8)     // [SFC] START
+#define SFC_MODE_BUTTON  (7)     // [SFC] SELECT
+// --------------------------------------------------------------------
+//	BUTTON MAP for PS4 Type
+#define PS4_A_BUTTON     (2)   // [PS4] CROSS
+#define PS4_B_BUTTON     (3)   // [PS4] CIRCLE
+#define PS4_C_BUTTON     (5)   // [PS4] L1
+#define PS4_X_BUTTON     (1)   // [PS4] SQUARE
+#define PS4_Y_BUTTON     (4)   // [PS4] TRIANBLE
+#define PS4_Z_BUTTON     (6)   // [PS4] R1
+#define PS4_START_BUTTON (10)  // [PS4] START
+#define PS4_MODE_BUTTON  (9)   // [PS4] SELECT
 
 // --------------------------------------------------------------------
 //  BUTTON MAP (VARIABLE)
@@ -163,6 +170,133 @@ static uint8_t volatile START_BUTTON = SFC_START_BUTTON;
 static uint8_t volatile MODE_BUTTON  = SFC_MODE_BUTTON;
 
 // --------------------------------------------------------------------
+//	BUTTON MAP (VARIABLE)
+// 
+enum PAD_TYPE {
+  PAD_TYPE_UNKNOWN = 0,
+  PAD_TYPE_MD,
+  PAD_TYPE_SFC,
+  PAD_TYPE_PS4,
+};
+
+static bool volatile need_detect_button_config = true;
+
+#define ENABLE_PAD_NAME   1
+
+#if ENABLE_PAD_NAME
+  #define PAD_NAME(c) (c)
+#else
+  #define PAD_NAME(...)
+#endif
+
+// VID/PIDから設定を判定するリスト
+typedef struct PAD_CONFIG_DEF {
+  uint16_t vid;
+  uint16_t pid;
+  enum PAD_TYPE pad_type;
+#if ENABLE_PAD_NAME
+  char *pad_name;
+#endif
+} pad_foncig_def_t;
+const pad_foncig_def_t pad_config_list[] = {
+  // VID     HID     PAD_TYPE
+  { 0x0CA3, 0x0024, PAD_TYPE_MD,  PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
+  { 0x054C, 0x05C4, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+  { 0x054C, 0x09CC, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+  { 0x0F0D, 0x00EE, PAD_TYPE_PS4, PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
+  { 0x1345, 0x1030, PAD_TYPE_SFC, PAD_NAME("RETROFREAK Controller (10 buttons)") },
+  { 0x045E, 0x028E, PAD_TYPE_SFC, PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (10 buttons)") },
+  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
+};
+
+// ボタン配置の切替
+static void change_button_config( enum PAD_TYPE pad_type)
+{
+  switch (pad_type) {
+  case PAD_TYPE_MD:
+    #if DEBUG_UART_ON
+      printf("Gamepad type: PAD_TYPE_MD\r\n");
+    #endif
+    A_BUTTON     = MD_A_BUTTON;
+    B_BUTTON     = MD_B_BUTTON;
+    C_BUTTON     = MD_C_BUTTON;
+    X_BUTTON     = MD_X_BUTTON;
+    Y_BUTTON     = MD_Y_BUTTON;
+    Z_BUTTON     = MD_Z_BUTTON;
+    START_BUTTON = MD_START_BUTTON;
+    MODE_BUTTON  = MD_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_SFC:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE_SFC\r\n");
+    #endif
+    A_BUTTON     = SFC_A_BUTTON;
+    B_BUTTON     = SFC_B_BUTTON;
+    C_BUTTON     = SFC_C_BUTTON;
+    X_BUTTON     = SFC_X_BUTTON;
+    Y_BUTTON     = SFC_Y_BUTTON;
+    Z_BUTTON     = SFC_Z_BUTTON;
+    START_BUTTON = SFC_START_BUTTON;
+    MODE_BUTTON  = SFC_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_PS4:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE_PS4\r\n");
+    #endif
+    A_BUTTON     = PS4_A_BUTTON;
+    B_BUTTON     = PS4_B_BUTTON;
+    C_BUTTON     = PS4_C_BUTTON;
+    X_BUTTON     = PS4_X_BUTTON;
+    Y_BUTTON     = PS4_Y_BUTTON;
+    Z_BUTTON     = PS4_Z_BUTTON;
+    START_BUTTON = PS4_START_BUTTON;
+    MODE_BUTTON  = PS4_MODE_BUTTON;
+  break;
+
+  default: 
+    #if DEBUG_UART_ON
+      printf("Unknown\r\n");
+    #endif
+  break;
+  }
+}
+
+// ボタン配置の自動判定
+void detect_button_config()
+{
+  // ボタンコンフィグ判定が必要なら呼び出す
+  // 初回のレポートのみ実行
+  if (need_detect_button_config) {
+
+    enum PAD_TYPE pad_type = PAD_TYPE_UNKNOWN;
+
+    // VID/PIDでの判定
+    // 対応を増やしたい場合、
+    // pad_config_list に追加する
+    const pad_foncig_def_t* l = pad_config_list;
+    while( (l->vid != 0xFFFF) && (l->pid != 0xFFFF) ) {
+      if( (l->vid == device_vid) && (l->pid == device_pid) ) {
+        pad_type = l->pad_type;
+        #if DEBUG_UART_ON
+          #if ENABLE_PAD_NAME
+            printf("Detect Gamepad : VID = %04X, PID = %04X \"%s\"\n", device_vid, device_pid, l->pad_name );
+          #else
+            printf("Detect Gamepad : VID = %04X, PID = %04X\n", device_vid, device_pid);
+          #endif
+        #endif
+        break;
+      }
+      ++l;
+    }
+
+    need_detect_button_config = false;
+    change_button_config(pad_type);
+  }
+}
+
+// --------------------------------------------------------------------
 #if MSX_SEL_LOGIC == 0
   #define MSX_SEL_H_def true
   #define MSX_SEL_L_def false
@@ -172,11 +306,6 @@ static uint8_t volatile MODE_BUTTON  = SFC_MODE_BUTTON;
 #endif
 static bool volatile MSX_SEL_H = MSX_SEL_H_def;
 static bool volatile MSX_SEL_L = MSX_SEL_L_def;
-
-// --------------------------------------------------------------------
-// HID Device ID
-uint16_t device_vid = -1;
-uint16_t device_pid = -1;
 
 // --------------------------------------------------------------------
 // Report Descriptaor Global Item Table
@@ -531,71 +660,6 @@ static void check_logic()
   }
 }
 
-// --------------------------------------------------------------------
-//	BUTTON MAP (VARIABLE)
-// 
-enum PAD_TYPE {
-  PAD_TYPE_UNKNOWN = 0,
-  PAD_TYPE_MD,
-  PAD_TYPE_SFC,
-};
-
-static bool volatile need_check_button_config = true;
-
-
-// VID/PIDから設定を判定するリスト
-typedef struct PAD_CONFIG_DEF {
-  uint16_t vid;
-  uint16_t pid;
-  enum PAD_TYPE pad_type;
-} pad_foncig_def_t;
-const pad_foncig_def_t pad_config_list[] = {
-  { 0x0CA3, 0x0024, PAD_TYPE_MD },  // VID 0CA3 / PID 0024 : MD MINI PAD (10 buttons)
-  { 0x054C, 0x05C4, PAD_TYPE_MD },  // VID 054C / PID 05C4 : PS4 PAD (14 buttons)
-  { 0x1345, 0x1030, PAD_TYPE_MD },  // VID 1345 / PID 1030 : RETROFREAK PAD (10 buttons)
-  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN }, // end
-};
-
-static void change_button_config( enum PAD_TYPE pad_type)
-{
-  switch (pad_type) {
-  case PAD_TYPE_MD:
-    #if DEBUG_UART_ON
-      printf("Gamepad type: PAD_TYPE_MD\r\n");
-    #endif
-    A_BUTTON     = MD_A_BUTTON;
-    B_BUTTON     = MD_B_BUTTON;
-    C_BUTTON     = MD_C_BUTTON;
-    X_BUTTON     = MD_X_BUTTON;
-    Y_BUTTON     = MD_Y_BUTTON;
-    Z_BUTTON     = MD_Z_BUTTON;
-    START_BUTTON = MD_START_BUTTON;
-    MODE_BUTTON  = MD_MODE_BUTTON;
-  break;
-
-  case PAD_TYPE_SFC:
-    #if DEBUG_UART_ON
-      printf("Gamepad type: PAD_TYPE_SFC\r\n");
-    #endif
-    A_BUTTON     = SFC_A_BUTTON;
-    B_BUTTON     = SFC_B_BUTTON;
-    C_BUTTON     = SFC_C_BUTTON;
-    X_BUTTON     = SFC_X_BUTTON;
-    Y_BUTTON     = SFC_Y_BUTTON;
-    Z_BUTTON     = SFC_Z_BUTTON;
-    START_BUTTON = SFC_START_BUTTON;
-    MODE_BUTTON  = SFC_MODE_BUTTON;
-  break;
-
-  default: 
-    #if DEBUG_UART_ON
-      printf("Unknown gamepad type\r\n");
-    #endif
-  break;
-  }
-
-  need_check_button_config = false;
-}
 
 // --------------------------------------------------------------------
 static void joypad_mode( void ) {
@@ -834,56 +898,9 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   #endif
   #endif
 
-  // ボタンコンフィグ判定が必要なら呼び出す
-  // 初回のレポートのみ実行
-  if (need_check_button_config) {
-    need_check_button_config = false;
-
-    enum PAD_TYPE pad_type = PAD_TYPE_UNKNOWN;
-
-    #if 1
-      // VID/PIDでの判定
-      // 対応を増やしたい場合、
-      // pad_config_list に追加する
-      const pad_foncig_def_t* l = pad_config_list;
-      while( (l->vid != 0xFFFF) && (l->pid != 0xFFFF) ) {
-        if( (l->vid == device_vid) && (l->pid == device_pid) ) {
-          pad_type = l->pad_type;
-          #if DEBUG_UART_ON
-            printf("Detect gamepad type from VID/PID\r\n");
-          #endif
-          break;
-        }
-        ++l;
-      }
-    #endif
-
-    #if 0 
-      // 不明な場合、押してあるボタンで判定
-      // （メガドラ配置で言うAボタンを押してUSBに差し込む）
-
-      // **** 廃止 ****
-      // ボタンを押したままだと初期化が進行しないため
-      // 一瞬だけボタンを離してから押すと言う確実性の低い操作が必要
-      // そのため、この方法は一旦廃止
-
-      if( pad_type == PAD_TYPE_UNKNOWN ) {
-        if( check_report_button( report, len, info, MD_A_BUTTON) ) {
-          pad_type = PAD_TYPE_MD;
-          #if DEBUG_UART_ON
-            printf("Detect gamepad from pressed A button \r\n");
-          #endif
-        } else
-        if( check_report_button( report, len, info, SFC_A_BUTTON) ) {
-          #if DEBUG_UART_ON
-            printf("Detect gamepad from pressed A button \r\n");
-          #endif
-          pad_type = PAD_TYPE_SFC;
-        }
-      }
-    #endif
-
-    change_button_config(pad_type);
+  // 必要ならボタン配置調整
+  if (need_detect_button_config) {
+    detect_button_config();
   }
 
   //	            b5,b4,b3,b2,b1,b0
@@ -1438,7 +1455,7 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
 void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_report, uint16_t desc_len ) {
 
   // ボタンコンフィグ判定が必要
-  need_check_button_config = true;
+  need_detect_button_config = true;
 
   // Interface protocol (hid_interface_protocol_enum_t)
   uint8_t const itf_protocol = tuh_hid_interface_protocol( dev_addr, instance );

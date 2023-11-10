@@ -154,5 +154,28 @@ original ver: by hra!
 	・2番ボタン(SFC風パッドのBボタン)を押しながら差し込むとSFCタイプ配置
 	・3番ボタン(MD風パッドのAボタン)を押しながら差し込むとMDタイプ配置
 	があったが、ボタンを押したままだと初期化が進行しないため、廃案。
-	代替案としてジャンパを増やすなどで対応が考えられるが、
-	もっと良い案が浮かぶまで保留。
+
+	(代替案としてジャンパを増やすなどで対応が考えられるが保留)
+
+2023年11月11日 ver2.4a2 uniskie
+	PS4タイプ、SFCタイプ、MDタイプの3種類の配置を用意。
+	自動判定リストは以下の通り
+	const pad_foncig_def_t pad_config_list[] = {
+	  // VID     HID     PAD_TYPE
+	  { 0x0CA3, 0x0024, PAD_TYPE_MD,  PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
+	  { 0x054C, 0x05C4, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+	  { 0x054C, 0x09CC, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+	  { 0x0F0D, 0x00EE, PAD_TYPE_PS4, PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
+	  { 0x1345, 0x1030, PAD_TYPE_SFC, PAD_NAME("RETROFREAK Controller (10 buttons)") },
+	  { 0x045E, 0x028E, PAD_TYPE_SFC, PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (10 buttons)") },
+	  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
+	};
+	必要であればVIDとPIDを調べてリストに追加してみてください。
+	
+	PS4パッドで不足するバッファサイズはtinyUSB修正なしで指定する方法に変更。
+	(tusb_config.h 98行)
+
+	TinyUSBデバッグログ出力レベル指定を可能に。(tusb_config.h 55行)
+
+	XINPUTの対応は見送り。
+	(異なるプロトコルの低レベルサポートが必要らしい)
