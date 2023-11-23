@@ -20,12 +20,16 @@ original ver: by hra!
 	ゲームパッド
 		BUFFALO BSGP815GY : スーファミタイプ。連射機能付き。利用できました。
 		ELECOM JC-U1608TBK: スーファミタイプ。連射機能付き。利用できました。
-		SEGA メガドラミニ付属コントローラー: 【改造版のみ】改造版では利用できます。
-		SONY PS4純正コントローラー: 【改造版のみ】改造版では利用できます。
 
 	マウス
 		HP USB光学マウス (型番不明, HP製パソコンの付属品)
 		ELECOM M-BL27UB
+
+	ゲームパッド（MOD版追加）
+		SEGA メガドラミニ用コントローラー: 対応しました。
+		SONY PS4純正コントローラー       : 対応しました。
+		HORI HORIPAD mini4               : 対応しました。
+		HORI FIGHTING COMMANDER for PS4  : PS3/PS4モードのみ対応しました。
 
 	また、下記は認識されないことを確認済みです。
 
@@ -179,3 +183,26 @@ original ver: by hra!
 
 	XINPUTの対応は見送り。
 	(異なるプロトコルの低レベルサポートが必要らしい)
+
+
+2023年11月24日 ver2.5 uniskie
+	HORI FIGHTING COMMANDER for PS4、HORI HORIPAD MINI4（有線タイプ）を自動認識に追加。
+	HORI FIGHTING COMMANDER for PS4 が認識しない問題に対応。
+	専用ボタン配置を追加。
+	※ モードスイッチをPS3かPS4に指定してください。PCスイッチはXINPUTなので非対応です。
+
+	const pad_foncig_def_t pad_config_list[] = {
+	  // VID     HID     PAD_TYPE
+	  { 0x0CA3, 0x0024, PAD_TYPE_MD,      PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
+	  { 0x054C, 0x05C4, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+	  { 0x054C, 0x09CC, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+	  { 0x0F0D, 0x00EE, PAD_TYPE_PS4,     PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
+	  { 0x1345, 0x1030, PAD_TYPE_SFC,     PAD_NAME("RETROFREAK Controller (10 buttons)") },
+	  { 0x045E, 0x028E, PAD_TYPE_SFC,     PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (12 buttons)") },
+	  { 0x045E, 0x028E, PAD_TYPE_XBOX,    PAD_NAME("Microsoft XBOX 360 Controller (10 buttons)") },
+	  { 0x0F0D, 0x0086, PAD_TYPE_XBOXFC,  PAD_NAME("HORI FIGHTING COMMANDER PS4 [PC Mode] (10 buttons)") },
+	  { 0x0F0D, 0x0085, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS3 Mode] (13 buttons)") },
+	  { 0x0F0D, 0x0084, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS4 Mode] (14 buttons)") },
+	  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
+	};
+	※ XINPUTは未対応です。

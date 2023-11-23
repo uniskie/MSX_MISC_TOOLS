@@ -57,8 +57,8 @@
  //           （デバッグビルド時にコンパイルオプションで指定される値も上書き）
  #ifdef CFG_TUSB_DEBUG
   #undef CFG_TUSB_DEBUG
-  #define CFG_TUSB_DEBUG           3
  #endif
+  #define CFG_TUSB_DEBUG           4
 #endif
 
 /* USB DMA on some MCUs can only access a specific SRAM region with restriction on alignment.

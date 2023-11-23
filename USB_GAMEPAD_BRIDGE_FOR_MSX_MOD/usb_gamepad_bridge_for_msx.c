@@ -1,30 +1,30 @@
 // --------------------------------------------------------------------
-//	The MIT License (MIT)
-//	
-//	Copyright (c) 2021-2022 HRA! (t.hara)
-//	
-//	Permission is hereby granted, free of charge, to any person obtaining a copy
-//	of this software and associated documentation files (the "Software"), to deal
-//	in the Software without restriction, including without limitation the rights
-//	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//	copies of the Software, and to permit persons to whom the Software is
-//	furnished to do so, subject to the following conditions:
-//	
-//	The above copyright notice and this permission notice shall be included in
-//	all copies or substantial portions of the Software.
-//	
-//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//	THE SOFTWARE.
+//      The MIT License (MIT)
+//      
+//      Copyright (c) 2021-2022 HRA! (t.hara)
+//      
+//      Permission is hereby granted, free of charge, to any person obtaining a copy
+//      of this software and associated documentation files (the "Software"), to deal
+//      in the Software without restriction, including without limitation the rights
+//      to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//      copies of the Software, and to permit persons to whom the Software is
+//      furnished to do so, subject to the following conditions:
+//      
+//      The above copyright notice and this permission notice shall be included in
+//      all copies or substantial portions of the Software.
+//      
+//      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//      THE SOFTWARE.
 // --------------------------------------------------------------------
-//	2021/Jul/25th	t.hara	1st release
-//	2022/Dec/03rd	t.hara	Modified for TinyUSB 0.14.0
-//	2023/Nov/6th  uniskie Modified for pico sdk 1.5.1
-//	                      Modified joypad processing to use report descriptor
+//      2021/Jul/25th   t.hara  1st release
+//      2022/Dec/03rd   t.hara  Modified for TinyUSB 0.14.0
+//      2023/Nov/6th  uniskie Modified for pico sdk 1.5.1
+//                            Modified joypad processing to use report descriptor
 
 #include <stdio.h>
 #include <string.h>
@@ -40,25 +40,30 @@
 #include <hardware/uart.h>
 
 // --------------------------------------------------------------------
-//	デバッグ：UUART(SERIAL)デバッグ文字列出力
+//      バージョン
+// --------------------------------------------------------------------
+#define USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION "mod 2.5 / 24 Nov. 2023"
+
+// --------------------------------------------------------------------
+//      デバッグ：UUART(SERIAL)デバッグ文字列出力
 // --------------------------------------------------------------------
 #define DEBUG_UART_ON 1
 
 // --------------------------------------------------------------------
-//	デバッグ：USBレポート解析
+//      デバッグ：USBレポート解析
 //  0:なし / 1:接続時情報 / 2:接続&データ取得情報 / 3:データ解析
 // --------------------------------------------------------------------
 #define DEBUG_USE_ANALYSIS  1
 
 // --------------------------------------------------------------------
-//	TinyUSBの問題回避：
+//      TinyUSBの問題回避：
 // * PS4コントローラーのマウントに失敗する問題の対策 *
 // --------------------------------------------------------------------
 // tusb_config.hで宣言しておく
 static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 
 // --------------------------------------------------------------------
-//	TinyUSBの問題回避：
+//      TinyUSBの問題回避：
 // * マウントが不安定なデバイス向けの対策 *
 // * 8BITDO M30 は TinyUSB側の問題があるのでマウントには成功してもreport受信できない *
 // * 恐らく XINPUTデバイス全般に非対応 *
@@ -77,32 +82,32 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 
 
 // --------------------------------------------------------------------
-//	MSX の 上、下、左、右、A、B のボタンに対応する GPIOピンの開始番号
+//      MSX の 上、下、左、右、A、B のボタンに対応する GPIOピンの開始番号
 //
-//	Start number of the GPIO pin corresponding to the Up, Down, Left, 
-//	Right, A, and B buttons on the MSX.
+//      Start number of the GPIO pin corresponding to the Up, Down, Left, 
+//      Right, A, and B buttons on the MSX.
 //
 #define MSX_BUTTON_PIN 2
 
 // --------------------------------------------------------------------
-//	MSX から来る SEL信号の GPIOピン番号
+//      MSX から来る SEL信号の GPIOピン番号
 //
-//	GPIO pin number of the SEL signal coming from the MSX
+//      GPIO pin number of the SEL signal coming from the MSX
 //
 #define MSX_SEL_PIN 8
 
 // --------------------------------------------------------------------
-//	SEL信号の論理
-//		0: 負論理 (MSX Joymega)
-//		1: 正論理 (MegaDrive)
+//      SEL信号の論理
+//              0: 負論理 (MSX Joymega)
+//              1: 正論理 (MegaDrive)
 //
-//	Logic of SEL signal
-//		0: negative logic (MSX Joymega)
-//		1: positive logic (MegaDrive)
+//      Logic of SEL signal
+//              0: negative logic (MSX Joymega)
+//              1: positive logic (MegaDrive)
 #define MSX_SEL_LOGIC 0
 
 // --------------------------------------------------------------------
-//	SEL信号の論理反転ジャンパ
+//      SEL信号の論理反転ジャンパ
 #define MD_SEL_PIN_O  14  // +3.3V -> 
 #define MD_SEL_PIN_I  15  // <- +3.3V
 
@@ -110,234 +115,6 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 // HID Device ID
 uint16_t device_vid = -1;
 uint16_t device_pid = -1;
-
-// --------------------------------------------------------------------
-//	X,Y軸感度
-//
-//	X,Y axis sensitivity
-//
-#define	LEFT_THRESHOLD		-64
-#define	RIGHT_THRESHOLD		64
-#define	TOP_THRESHOLD		-64
-#define	BOTTOM_THRESHOLD	64
-
-#define	LEFT_THRESHOLD_JOYSTICK		(LEFT_THRESHOLD + 128)
-#define	RIGHT_THRESHOLD_JOYSTICK	(RIGHT_THRESHOLD + 128)
-#define	TOP_THRESHOLD_JOYSTICK		(TOP_THRESHOLD + 128)
-#define	BOTTOM_THRESHOLD_JOYSTICK	(BOTTOM_THRESHOLD + 128)
-
-// --------------------------------------------------------------------
-//	BUTTON MAP for Megadrive 6B Type
-#define MD_A_BUTTON     (3)   // [MD mini] A
-#define MD_B_BUTTON     (2)   // [MD mini] B
-#define MD_C_BUTTON     (6)   // [MD mini] C
-#define MD_X_BUTTON     (4)   // [MD mini] X
-#define MD_Y_BUTTON     (1)   // [MD mini] Y
-#define MD_Z_BUTTON     (5)   // [MD mini] Z
-#define MD_START_BUTTON (10)  // [MD mini] START
-#define MD_MODE_BUTTON  (9)   // [MD mini] MODE
-// --------------------------------------------------------------------
-//	BUTTON MAP for SFC/Nintendo SWITCH Type 
-#define SFC_A_BUTTON     (2)     // [SFC] B
-#define SFC_B_BUTTON     (1)     // [SFC] A
-#define SFC_C_BUTTON     (5)     // [SFC] L
-#define SFC_X_BUTTON     (4)     // [SFC] Y
-#define SFC_Y_BUTTON     (3)     // [SFC] X
-#define SFC_Z_BUTTON     (6)     // [SFC] R
-#define SFC_START_BUTTON (8)     // [SFC] START
-#define SFC_MODE_BUTTON  (7)     // [SFC] SELECT
-// --------------------------------------------------------------------
-//	BUTTON MAP for PS4 Type
-#define PS4_A_BUTTON     (2)   // [PS4] CROSS
-#define PS4_B_BUTTON     (3)   // [PS4] CIRCLE
-#define PS4_C_BUTTON     (5)   // [PS4] L1
-#define PS4_X_BUTTON     (1)   // [PS4] SQUARE
-#define PS4_Y_BUTTON     (4)   // [PS4] TRIANBLE
-#define PS4_Z_BUTTON     (6)   // [PS4] R1
-#define PS4_START_BUTTON (10)  // [PS4] START
-#define PS4_MODE_BUTTON  (9)   // [PS4] SELECT
-
-// --------------------------------------------------------------------
-//  BUTTON MAP (VARIABLE)
-//  一旦、初期値はSFCタイプにする
-static uint8_t volatile A_BUTTON     = SFC_A_BUTTON;
-static uint8_t volatile B_BUTTON     = SFC_B_BUTTON;
-static uint8_t volatile C_BUTTON     = SFC_C_BUTTON;
-static uint8_t volatile X_BUTTON     = SFC_X_BUTTON;
-static uint8_t volatile Y_BUTTON     = SFC_Y_BUTTON;
-static uint8_t volatile Z_BUTTON     = SFC_Z_BUTTON;
-static uint8_t volatile START_BUTTON = SFC_START_BUTTON;
-static uint8_t volatile MODE_BUTTON  = SFC_MODE_BUTTON;
-
-// --------------------------------------------------------------------
-//	BUTTON MAP (VARIABLE)
-// 
-enum PAD_TYPE {
-  PAD_TYPE_UNKNOWN = 0,
-  PAD_TYPE_MD,
-  PAD_TYPE_SFC,
-  PAD_TYPE_PS4,
-};
-
-static bool volatile need_detect_button_config = true;
-
-#define ENABLE_PAD_NAME   1
-
-#if ENABLE_PAD_NAME
-  #define PAD_NAME(c) (c)
-#else
-  #define PAD_NAME(...)
-#endif
-
-// VID/PIDから設定を判定するリスト
-typedef struct PAD_CONFIG_DEF {
-  uint16_t vid;
-  uint16_t pid;
-  enum PAD_TYPE pad_type;
-#if ENABLE_PAD_NAME
-  char *pad_name;
-#endif
-} pad_foncig_def_t;
-const pad_foncig_def_t pad_config_list[] = {
-  // VID     HID     PAD_TYPE
-  { 0x0CA3, 0x0024, PAD_TYPE_MD,  PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
-  { 0x054C, 0x05C4, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-  { 0x054C, 0x09CC, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-  { 0x0F0D, 0x00EE, PAD_TYPE_PS4, PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
-  { 0x1345, 0x1030, PAD_TYPE_SFC, PAD_NAME("RETROFREAK Controller (10 buttons)") },
-  { 0x045E, 0x028E, PAD_TYPE_SFC, PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (10 buttons)") },
-  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
-};
-
-// ボタン配置の切替
-static void change_button_config( enum PAD_TYPE pad_type)
-{
-  switch (pad_type) {
-  case PAD_TYPE_MD:
-    #if DEBUG_UART_ON
-      printf("Gamepad type: PAD_TYPE_MD\r\n");
-    #endif
-    A_BUTTON     = MD_A_BUTTON;
-    B_BUTTON     = MD_B_BUTTON;
-    C_BUTTON     = MD_C_BUTTON;
-    X_BUTTON     = MD_X_BUTTON;
-    Y_BUTTON     = MD_Y_BUTTON;
-    Z_BUTTON     = MD_Z_BUTTON;
-    START_BUTTON = MD_START_BUTTON;
-    MODE_BUTTON  = MD_MODE_BUTTON;
-  break;
-
-  case PAD_TYPE_SFC:
-    #if DEBUG_UART_ON
-      printf("PAD_TYPE_SFC\r\n");
-    #endif
-    A_BUTTON     = SFC_A_BUTTON;
-    B_BUTTON     = SFC_B_BUTTON;
-    C_BUTTON     = SFC_C_BUTTON;
-    X_BUTTON     = SFC_X_BUTTON;
-    Y_BUTTON     = SFC_Y_BUTTON;
-    Z_BUTTON     = SFC_Z_BUTTON;
-    START_BUTTON = SFC_START_BUTTON;
-    MODE_BUTTON  = SFC_MODE_BUTTON;
-  break;
-
-  case PAD_TYPE_PS4:
-    #if DEBUG_UART_ON
-      printf("PAD_TYPE_PS4\r\n");
-    #endif
-    A_BUTTON     = PS4_A_BUTTON;
-    B_BUTTON     = PS4_B_BUTTON;
-    C_BUTTON     = PS4_C_BUTTON;
-    X_BUTTON     = PS4_X_BUTTON;
-    Y_BUTTON     = PS4_Y_BUTTON;
-    Z_BUTTON     = PS4_Z_BUTTON;
-    START_BUTTON = PS4_START_BUTTON;
-    MODE_BUTTON  = PS4_MODE_BUTTON;
-  break;
-
-  default: 
-    #if DEBUG_UART_ON
-      printf("Unknown\r\n");
-    #endif
-  break;
-  }
-}
-
-// ボタン配置の自動判定
-void detect_button_config()
-{
-  // ボタンコンフィグ判定が必要なら呼び出す
-  // 初回のレポートのみ実行
-  if (need_detect_button_config) {
-
-    enum PAD_TYPE pad_type = PAD_TYPE_UNKNOWN;
-
-    // VID/PIDでの判定
-    // 対応を増やしたい場合、
-    // pad_config_list に追加する
-    const pad_foncig_def_t* l = pad_config_list;
-    while( (l->vid != 0xFFFF) && (l->pid != 0xFFFF) ) {
-      if( (l->vid == device_vid) && (l->pid == device_pid) ) {
-        pad_type = l->pad_type;
-        #if DEBUG_UART_ON
-          #if ENABLE_PAD_NAME
-            printf("Detect Gamepad : VID = %04X, PID = %04X \"%s\"\n", device_vid, device_pid, l->pad_name );
-          #else
-            printf("Detect Gamepad : VID = %04X, PID = %04X\n", device_vid, device_pid);
-          #endif
-        #endif
-        break;
-      }
-      ++l;
-    }
-
-    need_detect_button_config = false;
-    change_button_config(pad_type);
-  }
-}
-
-// --------------------------------------------------------------------
-#if MSX_SEL_LOGIC == 0
-  #define MSX_SEL_H_def true
-  #define MSX_SEL_L_def false
-#else
-  #define MSX_SEL_H_def false
-  #define MSX_SEL_L_def true
-#endif
-static bool volatile MSX_SEL_H = MSX_SEL_H_def;
-static bool volatile MSX_SEL_L = MSX_SEL_L_def;
-
-// --------------------------------------------------------------------
-// Report Descriptaor Global Item Table
-typedef struct RD_GLOBAL_TABLE {
-  uint16_t	usage_page;		//*need*
-  uint8_t		report_size;	//*need*
-  uint8_t		report_count;	//*need*
-  int32_t		logical_min;	//*need*
-  int32_t		logical_max;	//*need*
-//	int32_t		physical_min;
-//	int32_t		physical_max;
-  int8_t		unit_exponent;	// for 物理単位の指数 (-8 ~ 7)
-  uint8_t		unit;			// for 物理単位 (0 ~ 7)
-  uint8_t		report_id;
-} rd_global_table_t;
-
-// report count = usage array count
-enum { rdl_usage_count_max = 32 };
-
-// Report Descriptaor Local Item Table
-typedef struct RD_LOCAL_TABLE {
-  uint16_t	usage[rdl_usage_count_max];
-  uint16_t	usage_count;
-  uint16_t	usage_min;
-  uint16_t	usage_max;
-//	uint16_t	designator_index;
-//	uint16_t	designator_min;
-//	uint16_t	designator_max;
-//	uint16_t	string_index;
-//	uint16_t	string_min;
-//	uint16_t	string_max;
-} rd_local_table_t;
 
 // --------------------------------------------------------------------
 // レポート：アイテム用途ID
@@ -348,7 +125,7 @@ enum JOYPAD_ITEM_ID {
   joyitem_axis_Rx,
   joyitem_axis_Ry,
   joyitem_axis_Rz,
-  joyitem_hat_sw,		// 方向キー 0~7,null
+  joyitem_hat_sw,               // 方向キー 0~7,null
   joyitem_button_1,
   joyitem_button_2,
   joyitem_button_3,
@@ -373,25 +150,347 @@ enum JOYPAD_ITEM_ID {
   joyitem_button_count = joyitem_count - joyitem_button_1,
 };
 
+// --------------------------------------------------------------------
+//      X,Y軸感度
+//
+//      X,Y axis sensitivity
+//
+#define LEFT_THRESHOLD          -64
+#define RIGHT_THRESHOLD         64
+#define TOP_THRESHOLD           -64
+#define BOTTOM_THRESHOLD        64
+
+#define LEFT_THRESHOLD_JOYSTICK         (LEFT_THRESHOLD + 128)
+#define RIGHT_THRESHOLD_JOYSTICK        (RIGHT_THRESHOLD + 128)
+#define TOP_THRESHOLD_JOYSTICK          (TOP_THRESHOLD + 128)
+#define BOTTOM_THRESHOLD_JOYSTICK       (BOTTOM_THRESHOLD + 128)
+
+// --------------------------------------------------------------------
+//      BUTTON MAP for Megadrive 6B Type
+#define MD_A_BUTTON     (joyitem_button_3)   // [MD mini] A
+#define MD_B_BUTTON     (joyitem_button_2)   // [MD mini] B
+#define MD_C_BUTTON     (joyitem_button_6)   // [MD mini] C
+#define MD_X_BUTTON     (joyitem_button_4)   // [MD mini] X
+#define MD_Y_BUTTON     (joyitem_button_1)   // [MD mini] Y
+#define MD_Z_BUTTON     (joyitem_button_5)   // [MD mini] Z
+#define MD_START_BUTTON (joyitem_button_10)  // [MD mini] START
+#define MD_MODE_BUTTON  (joyitem_button_9)   // [MD mini] MODE
+// --------------------------------------------------------------------
+//      BUTTON MAP for SFC/Nintendo SWITCH Type 
+#define SFC_A_BUTTON     (joyitem_button_2)     // [SFC] B
+#define SFC_B_BUTTON     (joyitem_button_1)     // [SFC] A
+#define SFC_C_BUTTON     (joyitem_button_5)     // [SFC] L
+#define SFC_X_BUTTON     (joyitem_button_4)     // [SFC] Y
+#define SFC_Y_BUTTON     (joyitem_button_3)     // [SFC] X
+#define SFC_Z_BUTTON     (joyitem_button_6)     // [SFC] R
+#define SFC_START_BUTTON (joyitem_button_8)     // [SFC] START
+#define SFC_MODE_BUTTON  (joyitem_button_7)     // [SFC] SELECT
+// --------------------------------------------------------------------
+//      BUTTON MAP for PS4 Type
+#define PS4_A_BUTTON     (joyitem_button_2)   // [PS4] CROSS
+#define PS4_B_BUTTON     (joyitem_button_3)   // [PS4] CIRCLE
+#define PS4_C_BUTTON     (joyitem_button_5)   // [PS4] L1
+#define PS4_X_BUTTON     (joyitem_button_1)   // [PS4] SQUARE
+#define PS4_Y_BUTTON     (joyitem_button_4)   // [PS4] TRIANBLE
+#define PS4_Z_BUTTON     (joyitem_button_6)   // [PS4] R1
+#define PS4_START_BUTTON (joyitem_button_10)  // [PS4] START
+#define PS4_MODE_BUTTON  (joyitem_button_9)   // [PS4] SELECT
+// --------------------------------------------------------------------
+//      BUTTON MAP for PS4 Fighting Commander Type
+#define PS4FC_A_BUTTON     (joyitem_button_2)   // [PS4] CROSS
+#define PS4FC_B_BUTTON     (joyitem_button_3)   // [PS4] CIRCLE
+#define PS4FC_C_BUTTON     (joyitem_button_6)   // [PS4] R1
+#define PS4FC_X_BUTTON     (joyitem_button_1)   // [PS4] SQUARE
+#define PS4FC_Y_BUTTON     (joyitem_button_4)   // [PS4] TRIANBLE
+#define PS4FC_Z_BUTTON     (joyitem_button_8)   // [PS4] R2 ※ PS4ではアナログ値だがボタンとしてもデータを返すので使える
+#define PS4FC_START_BUTTON (joyitem_button_10)  // [PS4] START
+#define PS4FC_MODE_BUTTON  (joyitem_button_9)   // [PS4] SELECT
+// --------------------------------------------------------------------
+//      BUTTON MAP for XBOX360 Type
+#define XBOX_A_BUTTON     (joyitem_button_1)   // [XINPUT] A
+#define XBOX_B_BUTTON     (joyitem_button_2)   // [XINPUT] B
+#define XBOX_C_BUTTON     (joyitem_button_5)   // [XINPUT] LB
+#define XBOX_X_BUTTON     (joyitem_button_3)   // [XINPUT] X
+#define XBOX_Y_BUTTON     (joyitem_button_4)   // [XINPUT] Y
+#define XBOX_Z_BUTTON     (joyitem_button_6)   // [XINPUT] RB
+#define XBOX_START_BUTTON (joyitem_button_8)   // [XINPUT] START
+#define XBOX_MODE_BUTTON  (joyitem_button_7)   // [XINPUT] BACK
+// --------------------------------------------------------------------
+//      BUTTON MAP for XBOX360 FIGHTING COMMANDER Type
+#define XBOXFC_A_BUTTON     (joyitem_button_1)   // [XINPUT] A
+#define XBOXFC_B_BUTTON     (joyitem_button_2)   // [XINPUT] B
+#define XBOXFC_C_BUTTON     (joyitem_button_6)   // [XINPUT] RB
+#define XBOXFC_X_BUTTON     (joyitem_button_3)   // [XINPUT] X
+#define XBOXFC_Y_BUTTON     (joyitem_button_4)   // [XINPUT] Y
+#define XBOXFC_Z_BUTTON     (joyitem_axis_Rz)    // [XINPUT] RT ※ 未検証かつXINPUTなので定義そのものが異なる
+#define XBOXFC_START_BUTTON (joyitem_button_8)   // [XINPUT] START
+#define XBOXFC_MODE_BUTTON  (joyitem_button_7)   // [XINPUT] BACK
+
+// --------------------------------------------------------------------
+//  BUTTON MAP (VARIABLE)
+//  一旦、初期値はSFCタイプにする
+static uint8_t volatile A_BUTTON     = SFC_A_BUTTON;
+static uint8_t volatile B_BUTTON     = SFC_B_BUTTON;
+static uint8_t volatile C_BUTTON     = SFC_C_BUTTON;
+static uint8_t volatile X_BUTTON     = SFC_X_BUTTON;
+static uint8_t volatile Y_BUTTON     = SFC_Y_BUTTON;
+static uint8_t volatile Z_BUTTON     = SFC_Z_BUTTON;
+static uint8_t volatile START_BUTTON = SFC_START_BUTTON;
+static uint8_t volatile MODE_BUTTON  = SFC_MODE_BUTTON;
+
+// --------------------------------------------------------------------
+//      BUTTON MAP (VARIABLE)
+// 
+enum PAD_TYPE {
+  PAD_TYPE_UNKNOWN = 0,
+  PAD_TYPE_MD,      // MegaDrive Fighting6B (8 buttons )
+  PAD_TYPE_SFC,     // SFC (8 buttons) / SWITCH (12 buttons)
+  PAD_TYPE_PS4,     // PS4 (14 buttons) / PS3 (13 buttons)
+  PAD_TYPE_PS4FC,   // FIGHTING COMMANDER PS4 (14 buttons) / PS3 (13 buttons)
+  PAD_TYPE_XBOX,    // XBOX 360 Controller (XINPUT 13 buttons)
+  PAD_TYPE_XBOXFC,  // FIGHTING COMMANDER XBOX 360 Controller (XINPUT 13 buttons)
+};
+
+static bool volatile need_detect_button_config = true;
+
+#define ENABLE_PAD_NAME   1
+
+#if ENABLE_PAD_NAME
+  #define PAD_NAME(c) (c)
+#else
+  #define PAD_NAME(...)
+#endif
+
+// VID/PIDから設定を判定するリスト
+typedef struct PAD_CONFIG_DEF {
+  uint16_t vid;
+  uint16_t pid;
+  enum PAD_TYPE pad_type;
+#if ENABLE_PAD_NAME
+  char *pad_name;
+#endif
+} pad_foncig_def_t;
+const pad_foncig_def_t pad_config_list[] = {
+  // VID     HID     PAD_TYPE
+  { 0x0CA3, 0x0024, PAD_TYPE_MD,      PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
+  { 0x054C, 0x05C4, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+  { 0x054C, 0x09CC, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
+  { 0x0F0D, 0x00EE, PAD_TYPE_PS4,     PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
+  { 0x1345, 0x1030, PAD_TYPE_SFC,     PAD_NAME("RETROFREAK Controller (10 buttons)") },
+  { 0x0F0D, 0x0085, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS3 Mode] (13 buttons)") },
+  { 0x0F0D, 0x0084, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS4 Mode] (14 buttons)") },
+
+  // 未対応のXINPUTデバイス
+  { 0x045E, 0x028E, PAD_TYPE_XBOX,    PAD_NAME("Microsoft XBOX 360 Controller (10 buttons)") },
+  { 0x0F0D, 0x0086, PAD_TYPE_XBOXFC,  PAD_NAME("HORI FIGHTING COMMANDER PS4 [PC Mode] (10 buttons)") },
+  { 0x045E, 0x028E, PAD_TYPE_SFC,     PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (12 buttons)") },
+  { 0x045E, 0x028E, PAD_TYPE_XBOXFC,  PAD_NAME("8BITDO M30 2.4g (10 buttons)") },
+
+  // リスト終端
+  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
+};
+enum { pad_config_list_count = sizeof(pad_config_list) / sizeof(pad_config_list[0]) };
+
+// ボタン配置の切替
+static void change_button_config( enum PAD_TYPE pad_type)
+{
+  switch (pad_type) {
+  case PAD_TYPE_MD:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:MegaDrive\r\n");
+    #endif
+    A_BUTTON     = MD_A_BUTTON;
+    B_BUTTON     = MD_B_BUTTON;
+    C_BUTTON     = MD_C_BUTTON;
+    X_BUTTON     = MD_X_BUTTON;
+    Y_BUTTON     = MD_Y_BUTTON;
+    Z_BUTTON     = MD_Z_BUTTON;
+    START_BUTTON = MD_START_BUTTON;
+    MODE_BUTTON  = MD_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_SFC:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:SFC\r\n");
+    #endif
+    A_BUTTON     = SFC_A_BUTTON;
+    B_BUTTON     = SFC_B_BUTTON;
+    C_BUTTON     = SFC_C_BUTTON;
+    X_BUTTON     = SFC_X_BUTTON;
+    Y_BUTTON     = SFC_Y_BUTTON;
+    Z_BUTTON     = SFC_Z_BUTTON;
+    START_BUTTON = SFC_START_BUTTON;
+    MODE_BUTTON  = SFC_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_PS4:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:PS4\r\n");
+    #endif
+    A_BUTTON     = PS4_A_BUTTON;
+    B_BUTTON     = PS4_B_BUTTON;
+    C_BUTTON     = PS4_C_BUTTON;
+    X_BUTTON     = PS4_X_BUTTON;
+    Y_BUTTON     = PS4_Y_BUTTON;
+    Z_BUTTON     = PS4_Z_BUTTON;
+    START_BUTTON = PS4_START_BUTTON;
+    MODE_BUTTON  = PS4_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_PS4FC:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:PS4 FIGHTING COMMANDER\r\n");
+    #endif
+    A_BUTTON     = PS4FC_A_BUTTON;
+    B_BUTTON     = PS4FC_B_BUTTON;
+    C_BUTTON     = PS4FC_C_BUTTON;
+    X_BUTTON     = PS4FC_X_BUTTON;
+    Y_BUTTON     = PS4FC_Y_BUTTON;
+    Z_BUTTON     = PS4FC_Z_BUTTON;
+    START_BUTTON = PS4FC_START_BUTTON;
+    MODE_BUTTON  = PS4FC_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_XBOX:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:XBOX360\r\n");
+    #endif
+    A_BUTTON     = XBOX_A_BUTTON;
+    B_BUTTON     = XBOX_B_BUTTON;
+    C_BUTTON     = XBOX_C_BUTTON;
+    X_BUTTON     = XBOX_X_BUTTON;
+    Y_BUTTON     = XBOX_Y_BUTTON;
+    Z_BUTTON     = XBOX_Z_BUTTON;
+    START_BUTTON = XBOX_START_BUTTON;
+    MODE_BUTTON  = XBOX_MODE_BUTTON;
+  break;
+
+  case PAD_TYPE_XBOXFC:
+    #if DEBUG_UART_ON
+      printf("PAD_TYPE:XBOX360 FIGHTING COMMANDER\r\n");
+    #endif
+    A_BUTTON     = XBOXFC_A_BUTTON;
+    B_BUTTON     = XBOXFC_B_BUTTON;
+    C_BUTTON     = XBOXFC_C_BUTTON;
+    X_BUTTON     = XBOXFC_X_BUTTON;
+    Y_BUTTON     = XBOXFC_Y_BUTTON;
+    Z_BUTTON     = XBOXFC_Z_BUTTON;
+    START_BUTTON = XBOXFC_START_BUTTON;
+    MODE_BUTTON  = XBOXFC_MODE_BUTTON;
+  break;
+
+  default: 
+    #if DEBUG_UART_ON
+      printf("Unknown\r\n");
+    #endif
+  break;
+  }
+}
+
+// ボタン配置の自動判定
+void detect_button_config()
+{
+  // ボタンコンフィグ判定が必要なら呼び出す
+  // 初回のレポートのみ実行
+  if (need_detect_button_config) {
+
+    enum PAD_TYPE pad_type = PAD_TYPE_UNKNOWN;
+
+    // VID/PIDでの判定
+    // 対応を増やしたい場合、
+    // pad_config_list に追加する
+    const pad_foncig_def_t* l = pad_config_list;
+    for( int i=0; i < pad_config_list_count; ++i,++l ) {
+      if( (l->vid == device_vid) && (l->pid == device_pid) ) {
+        pad_type = l->pad_type;
+        #if DEBUG_UART_ON
+          #if ENABLE_PAD_NAME
+            printf("Detect Gamepad : VID = %04X, PID = %04X \"%s\"\n", device_vid, device_pid, l->pad_name );
+          #else
+            printf("Detect Gamepad : VID = %04X, PID = %04X\n", device_vid, device_pid);
+          #endif
+        #endif
+        break;
+      }
+    }
+
+    need_detect_button_config = false;
+    change_button_config(pad_type);
+  }
+}
+
+// --------------------------------------------------------------------
+#if MSX_SEL_LOGIC == 0
+  #define MSX_SEL_H_def true
+  #define MSX_SEL_L_def false
+#else
+  #define MSX_SEL_H_def false
+  #define MSX_SEL_L_def true
+#endif
+static bool volatile MSX_SEL_H = MSX_SEL_H_def;
+static bool volatile MSX_SEL_L = MSX_SEL_L_def;
+
+// --------------------------------------------------------------------
+// Report Descriptaor Global Collection Table
+typedef struct RD_COLLECTION_TABLE {
+  uint8_t   type_id;
+  uint16_t  usage_page; // コレクション開始時の値
+  uint16_t  usage;      // コレクション開始時の値
+  // 他のグループ情報は一旦管理しない
+} rd_collection_table;
+
+// Report Descriptaor Global Item Table
+typedef struct RD_GLOBAL_TABLE {
+  uint16_t  usage_page;     //*need*
+  uint8_t   report_size;    //*need*
+  uint8_t   report_count;   //*need*
+  int32_t   logical_min;    //*need*
+  int32_t   logical_max;    //*need*
+//int32_t     physical_min;
+//int32_t     physical_max;
+  int8_t    unit_exponent;  // for 物理単位の指数 (-8 ~ 7)
+  uint8_t   unit;           // for 物理単位 (0 ~ 7)
+  uint8_t   report_id;
+} rd_global_table_t;
+
+// report count = usage array count
+enum { rdl_usage_count_max = 32 };
+
+// Report Descriptaor Local Item Table
+typedef struct RD_LOCAL_TABLE {
+  uint16_t  usage[rdl_usage_count_max];
+  uint16_t  usage_count;
+  uint16_t  usage_min;
+  uint16_t  usage_max;
+//uint16_t    designator_index;
+//uint16_t    designator_min;
+//uint16_t    designator_max;
+//uint16_t    string_index;
+//uint16_t    string_min;
+//uint16_t    string_max;
+} rd_local_table_t;
+
+
 // レポートアイテムの構成情報
 typedef struct JOYPAD_REPORT_ITEM
 {
-  enum JOYPAD_ITEM_ID item_id;
-  uint8_t  byte_index;
-  uint8_t  bit_shift;
-  uint16_t bit_mask;
-  int16_t  logical_min;
-  int16_t  logical_max;
+  enum JOYPAD_ITEM_ID item_id;  // データ要素の種類
+  uint8_t  byte_index;          // レポートバイトストリーム中の該当データ出現位置
+  uint8_t  bit_shift;           // MSBからビット出現位置に戻すためのビットシフト
+  uint16_t bit_mask;            // MSBにシフトしたビットマスク
+  int16_t  logical_min;         // 論理値(RAW値)最小値
+  int16_t  logical_max;         // 論理値(RAW値)最大値
 } joypad_report_item_t;
 
 // レポート単位の情報
 typedef struct JOYPAD_REPORT_INFO
 {
-  uint8_t  report_id;
-  uint8_t  usage;
-  uint16_t usage_page;
+  uint8_t  report_id;   // レポートID
+  uint8_t  usage;       // Usage ID
+  uint16_t usage_page;  // Usage Page ID
+  hid_report_type_t report_type; // HID_REPORT_TYPE_???
 
-  joypad_report_item_t items[joyitem_count];
+  joypad_report_item_t items[joyitem_count];  // レポートアイテムの構成情報
 
   // TODO still use the endpoint size for now
 //  uint8_t in_len;      // length of IN report
@@ -405,7 +504,7 @@ int joypad_add_report_item(
   joypad_report_info_t* info,
   rd_global_table_t const* gtable,
   rd_local_table_t const* ltable,
-  uint8_t input_flags,	// RI_MAIN_INPUT に付随するビットフラグ
+  uint8_t input_flags,  // RI_MAIN_INPUT に付随するビットフラグ
   uint16_t* p_bit_index
 )
 {
@@ -427,10 +526,15 @@ int joypad_add_report_item(
       // 出現順にusageを処理する
       if (ltable->usage_count <= i) break;
       usage = ltable->usage[i];
-    } else {
-      // usageが0の場合、usage_min ~ usage_max を使用する
-      usage = ltable->usage_min + i;
-      if (ltable->usage_max < usage) break;
+    } else 
+    if (i < gtable->report_count)
+    {
+      // usage_countが0の場合、usage_min ~ usage_max を使用する
+      usage = MIN( ltable->usage_min + i, ltable->usage_max);
+    }
+    else
+    {
+      break;
     }
     
     switch (gtable->usage_page) {
@@ -459,16 +563,16 @@ int joypad_add_report_item(
 
     // 該当アイテムなら解析結果テーブルに追加
     if (item) {
-      //	input_flags ... 一旦決め打ち                決め打ち設定
-      //	*HID_DATA              HID_CONSTANT         データ
-      //	 HID_ARRAY            *HID_VARIABLE         値
-      //	*HID_ABSOLUTE          HID_RELATIVE         絶対値
-      //	*HID_WRAP_NO           HID_WRAP             範囲内に丸め込まない
-      //	*HID_LINEAR            HID_NONLINEAR        線形
-      //	*HID_PREFERRED_STATE   HID_PREFERRED_NO     優先
-      //	 HID_NO_NULL_POSITION  HID_NULL_STATE        *hat_switchはNULLがある（NULL=範囲外の値）
-      //	*HID_NON_VOLATILE      HID_VOLATILE         NONVOLATILE
-      //	*HID_BITFIELD          HID_BUFFERED_BYTES   ビット単位フィールド
+      //        input_flags ... 一旦決め打ち                決め打ち設定
+      //        *HID_DATA              HID_CONSTANT         データ
+      //         HID_ARRAY            *HID_VARIABLE         値
+      //        *HID_ABSOLUTE          HID_RELATIVE         絶対値
+      //        *HID_WRAP_NO           HID_WRAP             範囲内に丸め込まない
+      //        *HID_LINEAR            HID_NONLINEAR        線形
+      //        *HID_PREFERRED_STATE   HID_PREFERRED_NO     優先
+      //         HID_NO_NULL_POSITION  HID_NULL_STATE        *hat_switchはNULLがある（NULL=範囲外の値）
+      //        *HID_NON_VOLATILE      HID_VOLATILE         NONVOLATILE
+      //        *HID_BITFIELD          HID_BUFFERED_BYTES   ビット単位フィールド
 
       item->byte_index = bit_index >> 3; // bit_index /8;
       item->bit_shift = bit_index & 7;
@@ -494,9 +598,9 @@ uint32_t get_report_item_value_( uint8_t const* report, uint16_t report_len, joy
   if ( !item->bit_mask ) return 0;
 
   uint32_t const mask = item->bit_mask << item->bit_shift;
-  int const bytes = //( mask > 0xffffff ) ? 4 :	// 24bit境界を越える item->bit_maskが16bitの場合は不要
-                    ( mask > 0xffff   ) ? 3 :	// 16bit境界を越える
-                    ( mask > 0xff     ) ? 2 :	// 8bit境界を越える
+  int const bytes = //( mask > 0xffffff ) ? 4 : // 24bit境界を越える item->bit_maskが16bitの場合は不要
+                    ( mask > 0xffff   ) ? 3 :   // 16bit境界を越える
+                    ( mask > 0xff     ) ? 2 :   // 8bit境界を越える
                     1;
   int index = item->byte_index;
   uint32_t dat = 0;
@@ -536,15 +640,18 @@ uint32_t get_report_item_value( uint8_t const* report, uint16_t report_len, joyp
   return get_report_item_value_( report, report_len, item );
 }
 
-// reportデータからボタンチェック
-// button_no = 1 ~ 16
-bool check_report_button( uint8_t const* report, uint16_t report_len, joypad_report_info_t* info, uint8_t button_no )
+// reportデータを2値ボタンとしてチェック（trueかfalseで返す）
+bool check_report_button( uint8_t const* report, uint16_t report_len, joypad_report_info_t* info, enum JOYPAD_ITEM_ID const item_num )
 {
-  joypad_report_item_t* item = get_report_button_info( info, button_no );
+  joypad_report_item_t* item = get_report_button_info( info, item_num );
   if ( !item ) return false;
 
   uint16_t v = get_report_item_value_( report, report_len, item );
-  return (v == item->bit_mask);
+  if( 1 == item->bit_mask ) return (v == item->bit_mask);
+
+  const uint16_t threshold = (item->logical_max - item->logical_min) / 2; // 一旦半分以上かで判断
+  const int16_t diff = v - item->logical_min;
+  return (threshold <= diff);
 }
 
 // --------------------------------------------------------------------
@@ -552,22 +659,22 @@ bool check_report_button( uint8_t const* report, uint16_t report_len, joypad_rep
 #if 0
 // --------------------------------------------------------------------
 typedef struct TU_ATTR_PACKED {
-  uint8_t		x;			//< X position of the gamepad. LEFT:0 ... CENTER:128 ... RIGHT:255
-  uint8_t		y;			//< Y position of the gamepad. TOP:0 .... CENTER:128 ... BOTTOM:255
-  uint32_t	buttons;	//< Buttons of the gamepad.
-  int8_t		reserved1;
-  int8_t		reserved2;
+  uint8_t               x;                      //< X position of the gamepad. LEFT:0 ... CENTER:128 ... RIGHT:255
+  uint8_t               y;                      //< Y position of the gamepad. TOP:0 .... CENTER:128 ... BOTTOM:255
+  uint32_t      buttons;        //< Buttons of the gamepad.
+  int8_t                reserved1;
+  int8_t                reserved2;
 } my_hid_joystick_report_t;
 
 typedef struct {
-  uint8_t		id;			//	0x01
-  uint8_t		notuse_1;	//	0x7F
-  uint8_t		notuse_2;	//	0x7F
-  uint8_t		x;			//< X position of the gamepad. LEFT:0 ... CENTER:128 ... RIGHT:255
-  uint8_t		y;			//< Y position of the gamepad. TOP:0 .... CENTER:128 ... BOTTOM:255	
-  uint8_t		buttons0;	//< Buttons of the gamepad. : XABY1111
-  uint8_t		buttons1;	//< Buttons of the gamepad. : 00SM00CZ
-  uint8_t		notuse_7;	//	0x00
+  uint8_t               id;                     //      0x01
+  uint8_t               notuse_1;       //      0x7F
+  uint8_t               notuse_2;       //      0x7F
+  uint8_t               x;                      //< X position of the gamepad. LEFT:0 ... CENTER:128 ... RIGHT:255
+  uint8_t               y;                      //< Y position of the gamepad. TOP:0 .... CENTER:128 ... BOTTOM:255     
+  uint8_t               buttons0;       //< Buttons of the gamepad. : XABY1111
+  uint8_t               buttons1;       //< Buttons of the gamepad. : 00SM00CZ
+  uint8_t               notuse_7;       //      0x00
 } my_hid_megadrive_mini_pad_report_t;
 #endif
 
@@ -587,32 +694,32 @@ static struct {
   report_info_t report_info[MAX_REPORT];
 } hid_info[ CFG_TUH_HID ];
 
-static int process_mode = 0;	//	0: joypad_mode, 1: mouse_mode
+static int process_mode = 0;    //      0: joypad_mode, 1: mouse_mode
 
 // --------------------------------------------------------------------
-//	Mouse information
+//      Mouse information
 
-//	USBマウスから送られてくる情報を収集するための変数
-static volatile int16_t	mouse_delta_x = 0;
-static volatile int16_t	mouse_delta_y = 0;
-static volatile int		mouse_resolution = 0;
-static int32_t	mouse_button = 0;
+//      USBマウスから送られてくる情報を収集するための変数
+static volatile int16_t mouse_delta_x = 0;
+static volatile int16_t mouse_delta_y = 0;
+static volatile int             mouse_resolution = 0;
+static int32_t  mouse_button = 0;
 
-//	USBマウスから送られてきた情報を元に「送信用」に加工した値を格納する変数
-static volatile int32_t	mouse_current_data = 3;
+//      USBマウスから送られてきた情報を元に「送信用」に加工した値を格納する変数
+static volatile int32_t mouse_current_data = 3;
 static volatile bool mouse_consume_data = false;
 
-//	現在MSXへ送信している内容を保持する変数
-static int32_t	mouse_sending_data = 0;
+//      現在MSXへ送信している内容を保持する変数
+static int32_t  mouse_sending_data = 0;
 
-//	LED Pattern
+//      LED Pattern
 static int led_state = 0;
 static const int led_pattern[5][8] = {
-  { 1, 0, 0, 0, 0, 0, 0, 0 },			//	Joypad mode
-  { 1, 0, 1, 0, 0, 0, 0, 0 },			//	Mouse mode (normal)
-  { 1, 0, 1, 0, 1, 0, 0, 0 },			//	Mouse mode (V half)
-  { 1, 0, 1, 0, 0, 0, 1, 0 },			//	Mouse mode (normal2)
-  { 1, 1, 0, 1, 0, 1, 0, 0 },			//	Mouse mode (V half2)
+  { 1, 0, 0, 0, 0, 0, 0, 0 },                   //      Joypad mode
+  { 1, 0, 1, 0, 0, 0, 0, 0 },                   //      Mouse mode (normal)
+  { 1, 0, 1, 0, 1, 0, 0, 0 },                   //      Mouse mode (V half)
+  { 1, 0, 1, 0, 0, 0, 1, 0 },                   //      Mouse mode (normal2)
+  { 1, 1, 0, 1, 0, 1, 0, 0 },                   //      Mouse mode (V half2)
 };
 
 // --------------------------------------------------------------------
@@ -622,7 +729,7 @@ static void initialization( void ) {
   board_init();
   tusb_init();
 
-  //	GPIOの信号の向きを設定
+  //    GPIOの信号の向きを設定
   for( i = 0; i < 6; i++ ) {
     gpio_init( MSX_BUTTON_PIN + i );
     gpio_set_dir( MSX_BUTTON_PIN + i, GPIO_OUT );
@@ -664,26 +771,26 @@ static void check_logic()
 // --------------------------------------------------------------------
 static void joypad_mode( void ) {
   static const uint32_t mask = 0x3F << MSX_BUTTON_PIN;
-  static const uint64_t sequence_trigger_us = 1100;		//	1100[usec]
-  static const uint64_t sequence_finish_us = 1600;		//	1600[usec]
+  static const uint64_t sequence_trigger_us = 1100;             //      1100[usec]
+  static const uint64_t sequence_finish_us = 1600;              //      1600[usec]
   static uint64_t start_time;
 
-  //	            b5,b4,b3,b2,b1,b0
-  //	matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
-  //	matrix[1] = 上 下 左 右 Ｂ Ｃ
-  //	matrix[2] = Ｌ Ｌ Ｌ Ｌ Ａ Ｓ
-  //	matrix[3] = Ｚ Ｙ Ｘ Ｍ Ｈ Ｈ
-  //	matrix[4] = Ｈ Ｈ Ｈ Ｈ Ａ Ｓ
+  //                b5,b4,b3,b2,b1,b0
+  //    matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
+  //    matrix[1] = 上 下 左 右 Ｂ Ｃ
+  //    matrix[2] = Ｌ Ｌ Ｌ Ｌ Ａ Ｓ
+  //    matrix[3] = Ｚ Ｙ Ｘ Ｍ Ｈ Ｈ
+  //    matrix[4] = Ｈ Ｈ Ｈ Ｈ Ａ Ｓ
 
   check_logic();
 
-  //	state 0
+  //    state 0
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[1] << MSX_BUTTON_PIN );
   }
   start_time = my_get_us();
 
-  //	state 1
+  //    state 1
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[0] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_trigger_us ) {
@@ -694,7 +801,7 @@ static void joypad_mode( void ) {
     return;
   }
 
-  //	state 2
+  //    state 2
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[1] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_trigger_us ) {
@@ -704,7 +811,7 @@ static void joypad_mode( void ) {
   if( (my_get_us() - start_time) > sequence_trigger_us ) {
     return;
   }
-  //	state 3
+  //    state 3
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[0] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_trigger_us ) {
@@ -714,7 +821,7 @@ static void joypad_mode( void ) {
   if( (my_get_us() - start_time) > sequence_trigger_us ) {
     return;
   }
-  //	state 4
+  //    state 4
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[1] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_trigger_us ) {
@@ -724,7 +831,7 @@ static void joypad_mode( void ) {
   if( (my_get_us() - start_time) > sequence_trigger_us ) {
     return;
   }
-  //	state 5
+  //    state 5
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[2] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_finish_us ) {
@@ -734,7 +841,7 @@ static void joypad_mode( void ) {
   if( (my_get_us() - start_time) > sequence_finish_us ) {
     return;
   }
-  //	state 6
+  //    state 6
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[3] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_finish_us ) {
@@ -744,7 +851,7 @@ static void joypad_mode( void ) {
   if( (my_get_us() - start_time) > sequence_finish_us ) {
     return;
   }
-  //	state 7
+  //    state 7
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[4] << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > sequence_finish_us ) {
@@ -761,10 +868,10 @@ static uint32_t inline get_mouse_button_bits( void ) {
 // --------------------------------------------------------------------
 static uint32_t inline get_mouse_nibble_bits_1st( void ) {
 
-  //	MSXへ送っている最中に更新されないようにコピーする
+  //    MSXへ送っている最中に更新されないようにコピーする
   mouse_sending_data = mouse_current_data;
 
-  //	1個目のデータは無意味 (ボタンのみ)
+  //    1個目のデータは無意味 (ボタンのみ)
   return get_mouse_button_bits();
 }
 
@@ -801,10 +908,10 @@ static uint32_t inline get_mouse_nibble_bits_6th( void ) {
 // --------------------------------------------------------------------
 static void mouse_mode( void ) {
   static const uint32_t mask = 0x3F << MSX_BUTTON_PIN;
-  static const uint64_t timeout_us = 500;		//	500[usec]
+  static const uint64_t timeout_us = 500;               //      500[usec]
   static uint64_t start_time;
 
-  //	idle
+  //    idle
   gpio_put_masked( mask, get_mouse_nibble_bits_1st() << MSX_BUTTON_PIN );
   if( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     return;
@@ -814,7 +921,7 @@ static void mouse_mode( void ) {
   mouse_current_data &= 0xF;
   start_time = my_get_us();
 
-  //	state 1
+  //    state 1
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, get_mouse_nibble_bits_2nd() << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > timeout_us ) {
@@ -822,7 +929,7 @@ static void mouse_mode( void ) {
     }
   }
 
-  //	state 2
+  //    state 2
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, get_mouse_nibble_bits_3rd() << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > timeout_us ) {
@@ -830,7 +937,7 @@ static void mouse_mode( void ) {
     }
   }
 
-  //	state 3
+  //    state 3
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, get_mouse_nibble_bits_4th() << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > timeout_us ) {
@@ -838,7 +945,7 @@ static void mouse_mode( void ) {
     }
   }
 
-  //	state 4
+  //    state 4
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, get_mouse_nibble_bits_5th() << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > timeout_us ) {
@@ -846,7 +953,7 @@ static void mouse_mode( void ) {
     }
   }
 
-  //	state 5
+  //    state 5
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_H ) {
     gpio_put_masked( mask, get_mouse_nibble_bits_6th() << MSX_BUTTON_PIN );
     if( (my_get_us() - start_time) > timeout_us ) {
@@ -903,12 +1010,12 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     detect_button_config();
   }
 
-  //	            b5,b4,b3,b2,b1,b0
-  //	matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
-  //	matrix[1] = 上 下 左 右 Ｂ Ｃ
-  //	matrix[2] = Ｌ Ｌ Ｌ Ｌ Ａ Ｓ
-  //	matrix[3] = Ｚ Ｙ Ｘ Ｍ Ｈ Ｈ
-  //	matrix[4] = Ｈ Ｈ Ｈ Ｈ Ａ Ｓ
+  //                b5,b4,b3,b2,b1,b0
+  //    matrix[0] = 上 下 Ｌ Ｌ Ａ Ｓ
+  //    matrix[1] = 上 下 左 右 Ｂ Ｃ
+  //    matrix[2] = Ｌ Ｌ Ｌ Ｌ Ａ Ｓ
+  //    matrix[3] = Ｚ Ｙ Ｘ Ｍ Ｈ Ｈ
+  //    matrix[4] = Ｈ Ｈ Ｈ Ｈ Ａ Ｓ
 
   memcpy( matrix, default_matrix, sizeof(matrix) );
 
@@ -1080,12 +1187,12 @@ static void process_mouse_report( hid_mouse_report_t const * report ) {
   last_mouse_button = mouse_button;
   mouse_button = (report->buttons & (MOUSE_BUTTON_RIGHT | MOUSE_BUTTON_LEFT | MOUSE_BUTTON_MIDDLE));
 
-  //	中ボタンが押されたら解像度を変える
+  //    中ボタンが押されたら解像度を変える
   if( !(last_mouse_button & MOUSE_BUTTON_MIDDLE) && (mouse_button & MOUSE_BUTTON_MIDDLE) ) {
     mouse_resolution = (mouse_resolution + 1) & 3;
   }
 
-  //	送信用データを作る
+  //    送信用データを作る
   send_data = reverse_inv4[ mouse_button & 3 ];
   switch( mouse_resolution ) {
   default:
@@ -1116,7 +1223,7 @@ static void process_mouse_report( hid_mouse_report_t const * report ) {
   }
   send_data = send_data | (d1 << 4) | (d2 << 8) | (d3 << 12) | (d4 << 16);
 
-  //	排他制御は面倒なので省略 (^^;
+  //    排他制御は面倒なので省略 (^^;
   mouse_delta_x = delta_x;
   mouse_delta_y = delta_y;
   mouse_current_data = send_data;
@@ -1128,6 +1235,10 @@ int main(void) {
   initialization();
   multicore_launch_core1( response_core );
 
+  #if DEBUG_UART_ON
+    printf("USB Gamepad bridge for MSX ver.%s\r\n", USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION);
+  #endif
+
   for( ;; ) {
     tuh_task();
     led_blinking_task();
@@ -1136,7 +1247,7 @@ int main(void) {
 }
 
 // --------------------------------------------------------------------
-//	[DEBUG]
+//      [DEBUG]
 // --------------------------------------------------------------------
 #if DEBUG_USE_ANALYSIS
 void debug_dump_hex( uint8_t const* dat, uint16_t dat_len )
@@ -1184,7 +1295,7 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
   union TU_ATTR_PACKED
   {
     uint8_t byte;
-    struct __attribute__((packed)) TU_ATTR_PACKED
+    struct TU_ATTR_PACKED
     {
     uint8_t size : 2;
     uint8_t type : 2;
@@ -1193,7 +1304,7 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
   } header;
 
   // Global Item
-  enum { ri_global_stack_size = 8	};
+  enum { ri_global_stack_size = 8       };
   uint8_t ri_global_stack_depth = 0;
   rd_global_table_t ri_global_stack[ ri_global_stack_size ];
   rd_global_table_t ri_global;
@@ -1216,8 +1327,10 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
 
   enum { ri_collection_depth_max = 8 };
   uint8_t ri_collection_depth = 0;
-  uint8_t ri_collection[ ri_collection_depth_max ];
-  ri_collection[0] = 0;
+  rd_collection_table ri_collection[ ri_collection_depth_max ];
+  tu_memclr(ri_collection, sizeof(ri_collection));
+  
+  uint8_t rd_collection_idx_apprication = 0;  //HID_COLLECTION_APPLICATIONがあるコレクション階層
 
   uint16_t bit_index = 0;
 
@@ -1235,21 +1348,21 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
     if (size > 2 ) u32data |= (desc_report[2] << 16) | (desc_report[3] << 24);
     int32_t s32data = *(int32_t*)&u32data;
 
-  #if DEBUG_UART_ON
-  #if DEBUG_USE_ANALYSIS > 2
-    printf( "tag = %d, type = %d, size = %d", tag, type, size);
-    if( size ) {
-      printf(", data = ");
-      for(uint32_t i=0; i<size; i++) printf("%02X ", desc_report[i]);
-    }
-    printf("\r\n");
-  #endif
-  #endif
+    #if DEBUG_UART_ON
+    #if DEBUG_USE_ANALYSIS > 2
+      printf( "tag = %d, type = %d, size = %d", tag, type, size);
+      if( size ) {
+        printf(", data = ");
+        for(uint32_t i=0; i<size; i++) printf("%02X ", desc_report[i]);
+      }
+      printf("\r\n");
+    #endif
+    #endif
 
     switch(type)
     {
       case RI_TYPE_MAIN: {
-    bool need_clear_local = true;
+        bool need_clear_local = true;
         switch (tag)
         {
           case RI_MAIN_INPUT:
@@ -1259,9 +1372,18 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
               info++;
               report_num++;
               bit_index = 0;
-              info->usage_page = ri_global.usage_page;
-              info->usage = ri_local.usage[ri_local.usage_count - 1];
             }
+
+            if (!info->usage_page) // 0 == UNKNOWN
+            {
+              assert(rd_collection_idx_apprication);
+              info->usage_page = ri_collection[rd_collection_idx_apprication].usage_page;
+            }
+            if (!info->usage) // 0 == UNKNOWN
+            {
+              info->usage = ri_collection[rd_collection_idx_apprication].usage;
+            }
+
             info->report_id = ri_global.report_id;
             joypad_add_report_item( info, &ri_global, &ri_local, u32data, &bit_index );
           break;
@@ -1272,7 +1394,14 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
             if (ri_collection_depth < ri_collection_depth_max) 
             {
               ri_collection_depth++;
-              ri_collection[ ri_collection_depth ] = u32data;
+              ri_collection[ ri_collection_depth ].type_id = u32data;
+              ri_collection[ ri_collection_depth ].usage_page = ri_global.usage_page;
+              ri_collection[ ri_collection_depth ].usage = ri_local.usage[ri_local.usage_count ? ri_local.usage_count - 1 : 0];
+
+              if (u32data == HID_COLLECTION_APPLICATION) 
+              {
+                rd_collection_idx_apprication = ri_collection_depth;
+              }
             }
           break;
 
@@ -1280,6 +1409,10 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
             if (ri_collection_depth)
             {
               ri_collection_depth--;
+              if (ri_collection_depth < rd_collection_idx_apprication)
+              {
+                rd_collection_idx_apprication = 0;
+              }
             }
           break;
 
@@ -1287,18 +1420,16 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
             need_clear_local = false;
           break;
         }
-      if (need_clear_local) {
-        tu_memclr(&ri_local, sizeof(ri_local));
+        if (need_clear_local) {
+          tu_memclr(&ri_local, sizeof(ri_local));
+        }
       }
-    }
       break;
 
       case RI_TYPE_GLOBAL:
         switch(tag)
         {
           case RI_GLOBAL_USAGE_PAGE:
-            // only take in account the "usage page" before REPORT ID
-            if ( ri_collection_depth == 0 ) info->usage_page = u32data;
             ri_global.usage_page = u32data;
           break;
 
@@ -1311,11 +1442,11 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
           break;
 
           case RI_GLOBAL_PHYSICAL_MIN  : 
-          //	ri_global.physical_min = s32data;
+          //    ri_global.physical_min = s32data;
           break;
 
           case RI_GLOBAL_PHYSICAL_MAX  : 
-          //	ri_global.physical_max = s32data;
+          //    ri_global.physical_max = s32data;
           break;
 
           case RI_GLOBAL_REPORT_ID:
@@ -1358,8 +1489,6 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
         switch(tag)
         {
           case RI_LOCAL_USAGE:
-            // only take in account the "usage" before starting REPORT ID
-            if ( ri_collection_depth == 0 ) info->usage = u32data;
             if (ri_local.usage_count < rdl_usage_count_max) {
               ri_local.usage[ri_local.usage_count++] = u32data;
             }
@@ -1374,27 +1503,27 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
       break;
 
           case RI_LOCAL_DESIGNATOR_INDEX :
-      //	ri_local.designator_index = u32data;
+      //        ri_local.designator_index = u32data;
       break;
 
           case RI_LOCAL_DESIGNATOR_MIN   :
-      //	ri_local.designator_min = u32data;
+      //        ri_local.designator_min = u32data;
       break;
 
           case RI_LOCAL_DESIGNATOR_MAX   :
-      //	ri_local.designator_max = u32data;
+      //        ri_local.designator_max = u32data;
       break;
 
           case RI_LOCAL_STRING_INDEX     :
-      //	ri_local.string_index = u32data;
+      //        ri_local.string_index = u32data;
       break;
 
           case RI_LOCAL_STRING_MIN       :
-      //	ri_local.string_min = u32data;
+      //        ri_local.string_min = u32data;
       break;
 
           case RI_LOCAL_STRING_MAX       :
-      //	ri_local.string_max = u32data;
+      //        ri_local.string_max = u32data;
       break;
 
           case RI_LOCAL_DELIMITER        :
@@ -1448,9 +1577,9 @@ uint8_t joypad_hid_parse_report_descriptor(joypad_report_info_t* report_info_arr
 }
 
 // --------------------------------------------------------------------
-//	HIDが接続されたときに呼び出されるコールバック
+//      HIDが接続されたときに呼び出されるコールバック
 //
-//	Callback to be called when a gamepad is connected.
+//      Callback to be called when a gamepad is connected.
 //
 void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_report, uint16_t desc_len ) {
 
@@ -1480,20 +1609,20 @@ void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_r
       printf("HID_ITF_PROTOCOL_NONE\r\n");
     #endif
     hid_info[instance].report_count = joypad_hid_parse_report_descriptor(hid_info[instance].report_info, MAX_REPORT, desc_report, desc_len);
-    process_mode = 0;	//	joypad_mode
+    process_mode = 0;   //      joypad_mode
   }
   else if( itf_protocol == HID_ITF_PROTOCOL_MOUSE ) {
     #if DEBUG_UART_ON
       printf("HID_ITF_PROTOCOL_MOUSE\r\n");
     #endif
-    process_mode = 1;	//	mouse_mode
+    process_mode = 1;   //      mouse_mode
     mouse_delta_x = 0;
     mouse_delta_y = 0;
     mouse_button = 0;
     mouse_resolution = 0;
   }
   else {
-    process_mode = 0;	//	joypad_mode
+    process_mode = 0;   //      joypad_mode
   }
 
   // request to receive report
@@ -1506,9 +1635,9 @@ void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_r
 }
 
 // --------------------------------------------------------------------
-//	HIDが切断されたときに呼び出されるコールバック
+//      HIDが切断されたときに呼び出されるコールバック
 //
-//	Callback to be called when the gamepad is disconnected.
+//      Callback to be called when the gamepad is disconnected.
 //
 void tuh_hid_umount_cb( uint8_t dev_addr, uint8_t instance ) {
 
@@ -1518,7 +1647,7 @@ void tuh_hid_umount_cb( uint8_t dev_addr, uint8_t instance ) {
     printf( "tuh_hid_umount_cb( %d, %d );\n", dev_addr, instance );
   #endif
 
-  process_mode = 0;	//	joypad_mode
+  process_mode = 0;     //      joypad_mode
 }
 
 // --------------------------------------------------------------------
@@ -1587,7 +1716,7 @@ void tuh_hid_report_received_cb( uint8_t dev_addr, uint8_t instance, uint8_t con
   #endif
 
   if( itf_protocol == HID_ITF_PROTOCOL_KEYBOARD ) {
-    //	none
+    //  none
   }
   else if( itf_protocol == HID_ITF_PROTOCOL_MOUSE ) {
     process_mouse_report( (hid_mouse_report_t const*) report );
