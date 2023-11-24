@@ -476,8 +476,8 @@ typedef struct JOYPAD_REPORT_ITEM
 {
   enum JOYPAD_ITEM_ID item_id;  // データ要素の種類
   uint8_t  byte_index;          // レポートバイトストリーム中の該当データ出現位置
-  uint8_t  bit_shift;           // MSBからビット出現位置に戻すためのビットシフト
-  uint16_t bit_mask;            // MSBにシフトしたビットマスク
+  uint8_t  bit_shift;           // LSBからビット出現位置に戻すためのビットシフト
+  uint16_t bit_mask;            // LSBにシフトしたビットマスク
   int16_t  logical_min;         // 論理値(RAW値)最小値
   int16_t  logical_max;         // 論理値(RAW値)最大値
 } joypad_report_item_t;
@@ -641,6 +641,7 @@ uint32_t get_report_item_value( uint8_t const* report, uint16_t report_len, joyp
 }
 
 // reportデータを2値ボタンとしてチェック（trueかfalseで返す）
+// 符号付データの場合マイナスでもプラスでもtrueを返す（符号なしにダイナミックキャストして扱うので）
 bool check_report_button( uint8_t const* report, uint16_t report_len, joypad_report_info_t* info, enum JOYPAD_ITEM_ID const item_num )
 {
   joypad_report_item_t* item = get_report_button_info( info, item_num );
@@ -1062,6 +1063,8 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   }
 
   // hat-switch
+  // （上を0度とした時計回りの角度）
+  // （論理デジタル値の角度分解能はデバイスにより異なるので対応する）
   joypad_report_item_t* hat_item =
   item = get_report_item_info( info, joyitem_hat_sw );
   uint32_t hat = get_report_item_value_( report, len, item );
@@ -1101,6 +1104,8 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     }
   }
 
+  // check_report_buttonは入力をONかOFFで
+  // 符号付データの場合マイナスでもプラスでもONを返す
   if( check_report_button( report, len, info, A_BUTTON) ) {
     matrix[0] &= 0x3D;
     matrix[2] &= 0x3D;

@@ -1,0 +1,9 @@
+# 改行コードの変換を禁止
+*.*			-text
+*.bin		binary
+*.dsk		binary
+
+# diff差分用
+*.c			diff=sjis encoding=auto eol=CRLF
+*.h			diff=sjis encoding=auto eol=CRLF
+*.md		diff=auto encoding=auto eol=auto
