@@ -42,7 +42,7 @@
 // --------------------------------------------------------------------
 //      バージョン
 // --------------------------------------------------------------------
-#define USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION "mod 2.5 / 24 Nov. 2023"
+#define USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION "mod 2.5b / 24 Nov. 2023"
 
 // --------------------------------------------------------------------
 //      デバッグ：UUART(SERIAL)デバッグ文字列出力
@@ -115,6 +115,10 @@ static_assert( CFG_TUH_ENUMERATION_BUFSIZE > 499 );
 // HID Device ID
 uint16_t device_vid = -1;
 uint16_t device_pid = -1;
+
+// --------------------------------------------------------------------
+// ゲームパッド認識状況
+volatile uint8_t gamepad_poc_step = 0;
 
 // --------------------------------------------------------------------
 // レポート：アイテム用途ID
@@ -246,9 +250,9 @@ enum PAD_TYPE {
   PAD_TYPE_MD,      // MegaDrive Fighting6B (8 buttons )
   PAD_TYPE_SFC,     // SFC (8 buttons) / SWITCH (12 buttons)
   PAD_TYPE_PS4,     // PS4 (14 buttons) / PS3 (13 buttons)
-  PAD_TYPE_PS4FC,   // FIGHTING COMMANDER PS4 (14 buttons) / PS3 (13 buttons)
+  PAD_TYPE_PS4FG,   // FIGHTING COMMANDER PS4 (14 buttons) / PS3 (13 buttons)
   PAD_TYPE_XBOX,    // XBOX 360 Controller (XINPUT 13 buttons)
-  PAD_TYPE_XBOXFC,  // FIGHTING COMMANDER XBOX 360 Controller (XINPUT 13 buttons)
+  PAD_TYPE_XBOXFG,  // FIGHTING COMMANDER XBOX 360 Controller (XINPUT 13 buttons)
 };
 
 static bool volatile need_detect_button_config = true;
@@ -277,14 +281,17 @@ const pad_foncig_def_t pad_config_list[] = {
   { 0x054C, 0x09CC, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
   { 0x0F0D, 0x00EE, PAD_TYPE_PS4,     PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
   { 0x1345, 0x1030, PAD_TYPE_SFC,     PAD_NAME("RETROFREAK Controller (10 buttons)") },
-  { 0x0F0D, 0x0085, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS3 Mode] (13 buttons)") },
-  { 0x0F0D, 0x0084, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS4 Mode] (14 buttons)") },
+  { 0x0F0D, 0x0085, PAD_TYPE_PS4FG,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS3 Mode] (13 buttons)") },
+  { 0x0F0D, 0x0084, PAD_TYPE_PS4FG,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS4 Mode] (14 buttons)") },
+  { 0x0F0D, 0x008B, PAD_TYPE_PS4FG,   PAD_NAME("HORI RAP V HAYABUSA SILENT [PS3 Mode] (13 buttons)") },
+  { 0x0F0D, 0x008A, PAD_TYPE_PS4FG,   PAD_NAME("HORI RAP V HAYABUSA SILENT [PS4 Mode] (14 buttons)") },
 
-  // 未対応のXINPUTデバイス
+  // [未対応] XINPUTデバイス
   { 0x045E, 0x028E, PAD_TYPE_XBOX,    PAD_NAME("Microsoft XBOX 360 Controller (10 buttons)") },
-  { 0x0F0D, 0x0086, PAD_TYPE_XBOXFC,  PAD_NAME("HORI FIGHTING COMMANDER PS4 [PC Mode] (10 buttons)") },
+  { 0x0F0D, 0x0086, PAD_TYPE_XBOXFG,  PAD_NAME("HORI FIGHTING COMMANDER PS4 [PC Mode] (10 buttons)") },
+  { 0x0F0D, 0x008C, PAD_TYPE_XBOXFG,  PAD_NAME("HORI RAP V HAYABUSA SILENT [PC Mode] (10 buttons)") },
+  { 0x045E, 0x028E, PAD_TYPE_XBOXFG,  PAD_NAME("8BITDO M30 2.4g (10 buttons)") },
   { 0x045E, 0x028E, PAD_TYPE_SFC,     PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (12 buttons)") },
-  { 0x045E, 0x028E, PAD_TYPE_XBOXFC,  PAD_NAME("8BITDO M30 2.4g (10 buttons)") },
 
   // リスト終端
   { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
@@ -337,7 +344,7 @@ static void change_button_config( enum PAD_TYPE pad_type)
     MODE_BUTTON  = PS4_MODE_BUTTON;
   break;
 
-  case PAD_TYPE_PS4FC:
+  case PAD_TYPE_PS4FG:
     #if DEBUG_UART_ON
       printf("PAD_TYPE:PS4 FIGHTING COMMANDER\r\n");
     #endif
@@ -365,7 +372,7 @@ static void change_button_config( enum PAD_TYPE pad_type)
     MODE_BUTTON  = XBOX_MODE_BUTTON;
   break;
 
-  case PAD_TYPE_XBOXFC:
+  case PAD_TYPE_XBOXFG:
     #if DEBUG_UART_ON
       printf("PAD_TYPE:XBOX360 FIGHTING COMMANDER\r\n");
     #endif
@@ -703,7 +710,7 @@ static int process_mode = 0;    //      0: joypad_mode, 1: mouse_mode
 //      USBマウスから送られてくる情報を収集するための変数
 static volatile int16_t mouse_delta_x = 0;
 static volatile int16_t mouse_delta_y = 0;
-static volatile int             mouse_resolution = 0;
+static volatile int     mouse_resolution = 0;
 static int32_t  mouse_button = 0;
 
 //      USBマウスから送られてきた情報を元に「送信用」に加工した値を格納する変数
@@ -715,8 +722,10 @@ static int32_t  mouse_sending_data = 0;
 
 //      LED Pattern
 static int led_state = 0;
-static const int led_pattern[5][8] = {
-  { 1, 0, 0, 0, 0, 0, 0, 0 },                   //      Joypad mode
+static const int led_pattern[7][8] = {
+  { 1, 0, 0, 0, 0, 0, 0, 0 },                   //      Joypad mode(wait)
+  { 1, 0, 1, 0, 1, 0, 1, 0 },                   //      Joypad mode(detecting)
+  { 1, 1, 1, 1, 1, 1, 1, 0 },                   //      Joypad mode(on use)
   { 1, 0, 1, 0, 0, 0, 0, 0 },                   //      Mouse mode (normal)
   { 1, 0, 1, 0, 1, 0, 0, 0 },                   //      Mouse mode (V half)
   { 1, 0, 1, 0, 0, 0, 1, 0 },                   //      Mouse mode (normal2)
@@ -985,10 +994,10 @@ void led_blinking_task(void) {
   if (board_millis() - start_ms < interval_ms) return; // not enough time
   start_ms += interval_ms;
   if( process_mode == 0 ) {
-    board_led_write( led_pattern[ 0 ][ led_state ] );
+    board_led_write( led_pattern[ gamepad_poc_step + 0 ][ led_state ] );
   }
   else {
-    board_led_write( led_pattern[ mouse_resolution + 1 ][ led_state ] );
+    board_led_write( led_pattern[ mouse_resolution + 3 ][ led_state ] );
   }
   led_state = (led_state + 1) & 7;
 }
@@ -1005,6 +1014,9 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     printf( "process_gamepad_report()\n" );
   #endif
   #endif
+
+  // ゲームパッド認識状況を「動作中」にセット
+  if (gamepad_poc_step == 1) gamepad_poc_step = 2;
 
   // 必要ならボタン配置調整
   if (need_detect_button_config) {
@@ -1615,6 +1627,8 @@ void tuh_hid_mount_cb( uint8_t dev_addr, uint8_t instance, uint8_t const* desc_r
     #endif
     hid_info[instance].report_count = joypad_hid_parse_report_descriptor(hid_info[instance].report_info, MAX_REPORT, desc_report, desc_len);
     process_mode = 0;   //      joypad_mode
+    // ゲームパッド認識状況を「認識中」にセット
+    if (gamepad_poc_step == 0) gamepad_poc_step = 1;
   }
   else if( itf_protocol == HID_ITF_PROTOCOL_MOUSE ) {
     #if DEBUG_UART_ON
@@ -1653,6 +1667,12 @@ void tuh_hid_umount_cb( uint8_t dev_addr, uint8_t instance ) {
   #endif
 
   process_mode = 0;     //      joypad_mode
+
+  device_vid = -1;
+  device_pid = -1;
+  // ゲームパッド認識状況を「なし」にセット
+  gamepad_poc_step = 0;
+
 }
 
 // --------------------------------------------------------------------

@@ -4,6 +4,6 @@
 *.dsk		binary
 
 # diff差分用
-*.c			diff=sjis encoding=auto eol=CRLF
-*.h			diff=sjis encoding=auto eol=CRLF
-*.md		diff=auto encoding=auto eol=auto
+*.c			diff=sjis encoding=sjis eol=CRLF
+*.h			diff=sjis encoding=sjis eol=CRLF
+*.txt		diff=utf8 encoding=utf8 eol=auto

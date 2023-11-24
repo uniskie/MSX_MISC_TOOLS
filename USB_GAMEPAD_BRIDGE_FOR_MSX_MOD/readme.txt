@@ -63,6 +63,8 @@ original ver: by hra!
 
 	LEDの点滅パターンで動作モードを示します。
 		1回ゆっくり点滅       ： 初期状態、ゲームパッドモード。
+		高速点滅              ： 【改造版】ゲームパッド認識処理中。
+		長く点灯、一瞬だけ消灯： 【改造版】ゲームパッド動作中。
 		2回点滅               ： マウス（初期状態）モード。
 		3回点滅               ： マウス（1回押す）モード。
 		4回点滅               ： マウス（2回押す）モード。
@@ -163,18 +165,7 @@ original ver: by hra!
 
 2023年11月11日 ver2.4a2 uniskie
 	PS4タイプ、SFCタイプ、MDタイプの3種類の配置を用意。
-	自動判定リストは以下の通り
-	const pad_foncig_def_t pad_config_list[] = {
-	  // VID     HID     PAD_TYPE
-	  { 0x0CA3, 0x0024, PAD_TYPE_MD,  PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
-	  { 0x054C, 0x05C4, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-	  { 0x054C, 0x09CC, PAD_TYPE_PS4, PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-	  { 0x0F0D, 0x00EE, PAD_TYPE_PS4, PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
-	  { 0x1345, 0x1030, PAD_TYPE_SFC, PAD_NAME("RETROFREAK Controller (10 buttons)") },
-	  { 0x045E, 0x028E, PAD_TYPE_SFC, PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (10 buttons)") },
-	  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
-	};
-	必要であればVIDとPIDを調べてリストに追加してみてください。
+	ボタン配置の追加はVIDとPIDを調べてpad_config_listに追加してみてください。
 	
 	PS4パッドで不足するバッファサイズはtinyUSB修正なしで指定する方法に変更。
 	(tusb_config.h 98行)
@@ -184,25 +175,23 @@ original ver: by hra!
 	XINPUTの対応は見送り。
 	(異なるプロトコルの低レベルサポートが必要らしい)
 
-
 2023年11月24日 ver2.5 uniskie
 	HORI FIGHTING COMMANDER for PS4、HORI HORIPAD MINI4（有線タイプ）を自動認識に追加。
+	ボタン配置の追加はVIDとPIDを調べてpad_config_listに追加してみてください。
+
 	HORI FIGHTING COMMANDER for PS4 が認識しない問題に対応。
 	専用ボタン配置を追加。
 	※ モードスイッチをPS3かPS4に指定してください。PCスイッチはXINPUTなので非対応です。
-
-	const pad_foncig_def_t pad_config_list[] = {
-	  // VID     HID     PAD_TYPE
-	  { 0x0CA3, 0x0024, PAD_TYPE_MD,      PAD_NAME("SEGA MegaDrive Mini Controller (10 buttons)") },
-	  { 0x054C, 0x05C4, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-	  { 0x054C, 0x09CC, PAD_TYPE_PS4,     PAD_NAME("Sony DUALSHOCK4 (14 buttons)") },
-	  { 0x0F0D, 0x00EE, PAD_TYPE_PS4,     PAD_NAME("Hori HORIPAD mini4 (14 buttons)") },
-	  { 0x1345, 0x1030, PAD_TYPE_SFC,     PAD_NAME("RETROFREAK Controller (10 buttons)") },
-	  { 0x045E, 0x028E, PAD_TYPE_SFC,     PAD_NAME("CYBER Gadget GYRO CONTROLLER LITE CY-NSGYCL (12 buttons)") },
-	  { 0x045E, 0x028E, PAD_TYPE_XBOX,    PAD_NAME("Microsoft XBOX 360 Controller (10 buttons)") },
-	  { 0x0F0D, 0x0086, PAD_TYPE_XBOXFC,  PAD_NAME("HORI FIGHTING COMMANDER PS4 [PC Mode] (10 buttons)") },
-	  { 0x0F0D, 0x0085, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS3 Mode] (13 buttons)") },
-	  { 0x0F0D, 0x0084, PAD_TYPE_PS4FC,   PAD_NAME("HORI FIGHTING COMMANDER PS4 [PS4 Mode] (14 buttons)") },
-	  { 0xFFFF, 0xFFFF, PAD_TYPE_UNKNOWN, PAD_NAME("Unknown") }, // end
-	};
 	※ XINPUTは未対応です。
+
+2023年11月24日 ver2.5b uniskie
+	LED状態を追加。
+	高速点滅               : ジョイパッド認識中。（レポート待ち）
+	長く点灯、一瞬だけ消灯 : ジョイパッド動作中。
+
+	HORI RAP V HAYABSA SILETNT for PS4を自動認識に追加。
+	※ モードスイッチをPS3かPS4に指定してください。PCスイッチはXINPUTなので非対応です。
+	※ XINPUTは未対応です。
+
+	ボタン配置の追加はVIDとPIDを調べてpad_config_listに追加してみてください。
+
