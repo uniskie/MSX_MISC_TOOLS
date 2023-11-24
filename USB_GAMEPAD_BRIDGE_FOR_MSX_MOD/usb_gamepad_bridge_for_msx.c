@@ -42,7 +42,7 @@
 // --------------------------------------------------------------------
 //      ÉoÅ[ÉWÉáÉì
 // --------------------------------------------------------------------
-#define USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION "mod 2.5b / 24 Nov. 2023"
+#define USB_FAMEPAD_BRIDGE_FOR_MSX_VERSION "mod 2.5c / 24 Nov. 2023"
 
 // --------------------------------------------------------------------
 //      ÉfÉoÉbÉOÅFUUART(SERIAL)ÉfÉoÉbÉOï∂éöóÒèoóÕ
@@ -651,7 +651,7 @@ uint32_t get_report_item_value( uint8_t const* report, uint16_t report_len, joyp
 // ïÑçÜïtÉfÅ[É^ÇÃèÍçáÉ}ÉCÉiÉXÇ≈Ç‡ÉvÉâÉXÇ≈Ç‡trueÇï‘Ç∑ÅiïÑçÜÇ»ÇµÇ…É_ÉCÉiÉ~ÉbÉNÉLÉÉÉXÉgÇµÇƒàµÇ§ÇÃÇ≈Åj
 bool check_report_button( uint8_t const* report, uint16_t report_len, joypad_report_info_t* info, enum JOYPAD_ITEM_ID const item_num )
 {
-  joypad_report_item_t* item = get_report_button_info( info, item_num );
+  joypad_report_item_t* item = get_report_item_info( info, item_num );
   if ( !item ) return false;
 
   uint16_t v = get_report_item_value_( report, report_len, item );
@@ -690,6 +690,12 @@ typedef struct {
 static uint8_t volatile joymega_matrix[5] = {
   0x33, 0x3F, 0x03, 0x3F, 0x3F
 };
+  //                b5,b4,b3,b2,b1,b0
+  //    matrix[0] = è„ â∫ Çk Çk Ç` Çr
+  //    matrix[1] = è„ â∫ ç∂ âE Ça Çb
+  //    matrix[2] = Çk Çk Çk Çk Ç` Çr
+  //    matrix[3] = Çy Çx Çw Çl Çg Çg
+  //    matrix[4] = Çg Çg Çg Çg Ç` Çr
 
 // --------------------------------------------------------------------
 #define MAX_REPORT  4
@@ -764,7 +770,7 @@ static uint64_t inline my_get_us( void ) {
 
 // --------------------------------------------------------------------
 //static bool md_mode = MSX_SEL_LOGIC;
-static void check_logic()
+static inline void check_logic()
 {
   bool rev = gpio_get( MD_SEL_PIN_I );
   //md_mode = MSX_SEL_LOGIC ^ rev;
@@ -776,7 +782,6 @@ static void check_logic()
     MSX_SEL_H = MSX_SEL_H_def;
   }
 }
-
 
 // --------------------------------------------------------------------
 static void joypad_mode( void ) {
@@ -790,11 +795,29 @@ static void joypad_mode( void ) {
   //    matrix[1] = è„ â∫ ç∂ âE Ça Çb
   //    matrix[2] = Çk Çk Çk Çk Ç` Çr
   //    matrix[3] = Çy Çx Çw Çl Çg Çg
-  //    matrix[4] = Çg Çg Çg Çg Ç` Çr
+  //    matrix[4] = -- -- -- -- Ç` Çr
+
+  //    Å¶ âüâ∫éûÇÕLow
+  //    Å¶ --ÇÕñ≥éãÇ∑Ç◊Ç´Ç‡ÇÃ
+
+  // md/msx
+  //  ÇgÇk   è„ â∫ ç∂ âE Ça Çb  matrix[1]
+
+  //  ÇkÇg   è„ â∫ Çk Çk Ç` Çr  matrix[0]
+  //  ÇgÇk   è„ â∫ ç∂ âE Ça Çb  matrix[1]
+  //  ÇkÇg   è„ â∫ Çk Çk Ç` Çr  matrix[0]
+  //  ÇgÇk   è„ â∫ ç∂ âE Ça Çb  matrix[1]
+
+  //  ÇkÇg   Çk Çk Çk Çk Ç` Çr  matrix[2]
+  //  ÇgÇk   Çy Çx Çw Çl Çg Çg  matrix[3]
+  //  ÇkÇg   Çg Çg Çg Çg Ç` Çr  matrix[4]
+
+  //  ÇgÇk   è„ â∫ ç∂ âE Ça Çb  matrix[1]
+  //  ÇkÇg   è„ â∫ Çk Çk Ç` Çr  matrix[0]
 
   check_logic();
 
-  //    state 0
+  //    state 0 (default)
   while( gpio_get( MSX_SEL_PIN ) == MSX_SEL_L ) {
     gpio_put_masked( mask, (uint32_t)joymega_matrix[1] << MSX_BUTTON_PIN );
   }
@@ -867,6 +890,9 @@ static void joypad_mode( void ) {
     if( (my_get_us() - start_time) > sequence_finish_us ) {
       break;
     }
+  }
+  if( (my_get_us() - start_time) > sequence_finish_us ) {
+    return;
   }
 }
 
@@ -1004,10 +1030,31 @@ void led_blinking_task(void) {
 
 // --------------------------------------------------------------------
 static void process_gamepad_report( uint8_t const *report, uint16_t len, report_info_t *info ) {
+  //                b5,b4,b3,b2,b1,b0
+  //    matrix[0] = è„ â∫ Çk Çk Ç` Çr
+  //    matrix[1] = è„ â∫ ç∂ âE Ça Çb
+  //    matrix[2] = Çk Çk Çk Çk Ç` Çr
+  //    matrix[3] = Çy Çx Çw Çl Çg Çg
+  //    matrix[4] = Çg Çg Çg Çg Ç` Çr
   static const uint8_t default_matrix[5] = {
     0x33, 0x3F, 0x03, 0x3F, 0x3F
   };
   uint8_t matrix[5];
+  enum {
+   mask_all   = 0x3F,
+   mask_up    = mask_all ^ 0x20,  // 0x1F
+   mask_down  = mask_all ^ 0x10,  // 0x2F
+   mask_left  = mask_all ^ 0x08,  // 0x37
+   mask_right = mask_all ^ 0x04,  // 0x3B
+   mask_a     = mask_all ^ 0x02,  // 0x3D
+   mask_b     = mask_all ^ 0x02,  // 0x3D
+   mask_c     = mask_all ^ 0x01,  // 0x3E
+   mask_x     = mask_all ^ 0x08,  // 0x37
+   mask_y     = mask_all ^ 0x10,  // 0x2F
+   mask_z     = mask_all ^ 0x20,  // 0x1F
+   mask_start = mask_all ^ 0x01,  // 0x3E
+   mask_mode  = mask_all ^ 0x04,  // 0x3B
+  };
 
   #if DEBUG_UART_ON
   #if DEBUG_USE_ANALYSIS > 1
@@ -1022,13 +1069,6 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   if (need_detect_button_config) {
     detect_button_config();
   }
-
-  //                b5,b4,b3,b2,b1,b0
-  //    matrix[0] = è„ â∫ Çk Çk Ç` Çr
-  //    matrix[1] = è„ â∫ ç∂ âE Ça Çb
-  //    matrix[2] = Çk Çk Çk Çk Ç` Çr
-  //    matrix[3] = Çy Çx Çw Çl Çg Çg
-  //    matrix[4] = Çg Çg Çg Çg Ç` Çr
 
   memcpy( matrix, default_matrix, sizeof(matrix) );
 
@@ -1045,11 +1085,11 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     uint32_t threshold = range / 8;
     // ç∂
     if ( v <= (center - threshold) ) {
-      matrix[1] &= 0x37;
+      matrix[1] &= mask_left; // 0x37;
     } else
     // âE
     if ( v >= (center + threshold) ) {
-      matrix[1] &= 0x3B;
+      matrix[1] &= mask_right; // 0x3B;
   }
   }
 
@@ -1064,13 +1104,13 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
     uint32_t threshold = range / 8;
     // è„
     if ( v <= (center - threshold) ) {
-      matrix[0] &= 0x1F;
-      matrix[1] &= 0x1F;
+      matrix[0] &= mask_up; // 0x1F;
+      matrix[1] &= mask_up; // 0x1F;
     } else
     // â∫
     if ( v >= (center + threshold) ) {
-      matrix[0] &= 0x2F;
-      matrix[1] &= 0x2F;
+      matrix[0] &= mask_down; // 0x2F;
+      matrix[1] &= mask_down; // 0x2F;
   }
   }
 
@@ -1097,21 +1137,21 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
 
       // ç∂
       if (( v > range * 9 / 16 ) && ( v < range * 15 / 16 )) {
-        matrix[1] &= 0x37;
+        matrix[1] &= mask_left; // 0x37;
       }
       // âE
       if (( v > range * 1 / 16 ) && ( v < range * 7 / 16 )) {
-        matrix[1] &= 0x3B;
+        matrix[1] &= mask_right; // 0x3B;
       }
       // è„
       if (( v < range * 3 / 16 ) || ( v > range * 13 / 16 )) {
-        matrix[0] &= 0x1F;
-        matrix[1] &= 0x1F;
+        matrix[0] &= mask_up; // 0x1F;
+        matrix[1] &= mask_up; // 0x1F;
       }
       // â∫
       if (( v > range * 5 / 16 ) && ( v < range * 11 / 16 )) {
-        matrix[0] &= 0x2F;
-        matrix[1] &= 0x2F;
+        matrix[0] &= mask_down; // 0x2F;
+        matrix[1] &= mask_down; // 0x2F;
       }
     }
   }
@@ -1119,32 +1159,32 @@ static void process_gamepad_report( uint8_t const *report, uint16_t len, report_
   // check_report_buttonÇÕì¸óÕÇONÇ©OFFÇ≈
   // ïÑçÜïtÉfÅ[É^ÇÃèÍçáÉ}ÉCÉiÉXÇ≈Ç‡ÉvÉâÉXÇ≈Ç‡ONÇï‘Ç∑
   if( check_report_button( report, len, info, A_BUTTON) ) {
-    matrix[0] &= 0x3D;
-    matrix[2] &= 0x3D;
-    matrix[4] &= 0x3D;
+    matrix[0] &= mask_a;  // 0x3D
+    matrix[2] &= mask_a;  // 0x3D
+    matrix[4] &= mask_a;  // 0x3D
   }
   if( check_report_button( report, len, info, B_BUTTON) ) {
-    matrix[1] &= 0x3D;
+    matrix[1] &= mask_b;  // 0x3D;
   }
   if( check_report_button( report, len, info, C_BUTTON) ) {
-    matrix[1] &= 0x3E;
+    matrix[1] &= mask_c;  // 0x3E;
   }
   if( check_report_button( report, len, info, X_BUTTON) ) {
-    matrix[3] &= 0x37;
+    matrix[3] &= mask_x;  // 0x37;
   }
   if( check_report_button( report, len, info, Y_BUTTON) ) {
-    matrix[3] &= 0x2F;
+    matrix[3] &= mask_y;  // 0x2F;
   }
   if( check_report_button( report, len, info, Z_BUTTON) ) {
-    matrix[3] &= 0x1F;
+    matrix[3] &= mask_z; // 0x1F;
   }
   if( check_report_button( report, len, info, START_BUTTON) ) {
-    matrix[0] &= 0x3E;
-    matrix[2] &= 0x3E;
-    matrix[4] &= 0x3E;
+    matrix[0] &= mask_start;  // 0x3E;
+    matrix[2] &= mask_start;  // 0x3E;
+    matrix[4] &= mask_start;  // 0x3E;
   }
   if( check_report_button( report, len, info, MODE_BUTTON) ) {
-    matrix[3] &= 0x3B;
+    matrix[3] &= mask_mode; // 0x3B;
   }
   memcpy( (void*) joymega_matrix, matrix, sizeof(matrix) );
 

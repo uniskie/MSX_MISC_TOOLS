@@ -195,3 +195,5 @@ original ver: by hra!
 
 	ボタン配置の追加はVIDとPIDを調べてpad_config_listに追加してみてください。
 
+2023年11月24日 ver2.5c uniskie
+	v2.5からボタンを正常にMSXへ送信できなくなっていたのを修正
