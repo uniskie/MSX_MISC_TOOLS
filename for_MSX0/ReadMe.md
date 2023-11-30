@@ -24,6 +24,7 @@ MSX0 Iot ROM ver 0.05.04 での実装に基づいた情報です。
 ## SAMPLE
 
 ![BIGAJUU.png](img/BIGAJUU.png)
+**※黄色いうさぎさんです**
 
 [BIGAJUU/](BIGAJUU/) ... ソースファイルフォルダ 
 
