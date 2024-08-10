@@ -7,6 +7,9 @@
 ;================================================================
 ;	MSX0 Iot ROM
 ;		ver 0.05.04
+;		ver 0.07.08 - I/Oポート変更
+;			旧：08H → 新：58H
+;			旧：10H → 新：57H
 ;
 ; デバイス拡張：使用しない方が良い
 ;	 OPEN"iot:" #n:PRINT#n:INPUT#n は未完成。フリーズもあり
@@ -113,8 +116,12 @@
 ; 値定義
 ;================================================================
 ; I/O port
-iot_io:		equ	#08	;I/O port IOT制御
-terminal_io:	equ	#10	;I/O port ターミナルコンソールへ出力
+; ver 0.05.04
+;iot_io:		equ	#08	;I/O port IOT制御
+;terminal_io:	equ	#10	;I/O port ターミナルコンソールへ出力
+; ver 0.07.08 - I/Oポート変更
+iot_io:		equ	#58	;I/O port IOT制御
+terminal_io:	equ	#57	;I/O port ターミナルコンソールへ出力
 
 ; (VALTYP)の値 = BASIC変数記述子のサイズ
 valtyp_int:	equ	#02	;2=2バイト整数型
