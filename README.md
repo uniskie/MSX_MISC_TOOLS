@@ -51,6 +51,7 @@ GETPALAD.BAS
 HIMEM.BAS
 KEYMTX.BAS
 KEYMTXB.BAS
+VOICE.BAS
 ```
 
 |ツール|説明|
@@ -69,6 +70,7 @@ KEYMTXB.BAS
 | [KEYMTXB.BAS        ](KEYMTXB.BAS        ) |少しリッチなキーマトリクス表示(turboR推奨)<br>![](img/KEYMTXB.png)|
 | [COLCOMB.BAS        ](COLCOMB.BAS        ) |簡易スプライトモード2重ね合わせカラーリスト<br>![](img/COLCOMB.png)|
 | [COLCOMBG.BAS       ](COLCOMBG.BAS       ) |少しリッチなスプライトモード2重ね合わせカラーリスト<br>![](img/COLCOMBG.png)|
+| [MSX_MUSIC_ROM_VOICE_TEST/VOICE.BAS](MSX_MUSIC_ROM_VOICE_TEST/voice.bas) |FMPACと内蔵ROM(A1GT)での音色ライブラリの違いを聞き比べる<br>![](img/MSX_MUSIC_ROM_VOICE_TEST.png)|
 
 
 ## ご利用について
