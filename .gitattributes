@@ -4,6 +4,7 @@
 *.dsk		binary
 
 # diff差分用
+*.bat		diff=sjis encoding=sjis eol=CRLF
 *.bas		diff=sjis encoding=sjis eol=CRLF
 *.asc		diff=sjis encoding=sjis eol=CRLF
 *.asm		diff=sjis encoding=sjis eol=CRLF
