@@ -43,6 +43,7 @@
     --color-accent-emphasis: #1f6feb;
     --color-attention-subtle: rgba(187,128,9,0.15);
     --color-danger-fg: #f85149;
+    --color-blockquote-bg: #201810
   }
 }
 
@@ -91,6 +92,7 @@
     --color-accent-emphasis: #0969da;
     --color-attention-subtle: #fff8c5;
     --color-danger-fg: #cf222e;
+    --color-blockquote-bg: #f0e8e0
   }
 }
 
@@ -366,8 +368,15 @@ body h5,
 body h6 {
   margin-top: 24px;
   margin-bottom: 16px;
+  padding: .25em;
+  padding-left: .4em;
   font-weight: var(--base-text-weight-semibold, 600);
   line-height: 1.25;
+}
+
+body h1 {
+  border-top:  6px solid var(--color-fg-default);
+  border-bottom: 6px solid var(--color-fg-default);
 }
 
 body h2 {
@@ -377,11 +386,16 @@ body h2 {
   border-top: 1px solid var(--color-border-muted);
   border-bottom: 1px solid var(--color-border-muted);
   background-color: var(--color-neutral-muted);
+  border-top:  5px double var(--color-fg-default);
+  border-bottom: 5px double var(--color-fg-default);
 }
 
 body h3 {
   font-weight: var(--base-text-weight-semibold, 600);
   font-size: 1.25em;
+  background-color: var(--color-neutral-muted);
+  border-top: 1px solid var(--color-fg-default);
+  border-bottom: 1px solid var(--color-fg-default);
 }
 
 body h4 {
@@ -409,6 +423,7 @@ body blockquote {
   margin: 0;
   padding: 0 1em;
   color: var(--color-fg-muted);
+  background-color: var(--color-blockquote-bg);
   border-left: .25em solid var(--color-border-default);
 }
 
@@ -786,6 +801,7 @@ body tt {
   margin: 0;
   font-size: 85%;
   white-space: break-spaces;
+  color: var(--color-fg-muted);
   background-color: var(--color-neutral-muted);
   border-radius: 6px;
 }

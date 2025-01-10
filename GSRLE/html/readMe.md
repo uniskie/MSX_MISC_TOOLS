@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_028.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_028.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_029.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -426,6 +426,59 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 
 ----
 
+## ドットアスペクト比について
+
+縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。
+
+### ドットアスペクト比 情報元
+
+1. 情報元1 「The real V99x8 Pixel Aspect Ratio (PAR)」  
+   [https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)
+
+2. 情報元2 「VDPマニュアルによれは 284.5pixels*262line」 という情報
+   [https://x.com/spacemoai/status/1877688639980716493](https://x.com/spacemoai/status/1877688639980716493)  
+   VDPマニュアルの該当箇所については不明
+
+### ドットアスペクト比 設定値リスト
+
+1. **「1.228 : 1」**  (1 : 0.814)  
+     openMSXの**Horisontal stretch**で設定するなら **260**。  
+
+     spacemoai氏から提供された ``284.5pixels*262line出力``という情報からそのまま求めた値。
+
+     ```(320 ÷ 284.5) × (262 ÷ 240) = 1.2278851786760398359695371997657```
+  
+     MSX2版イース2の雑誌広告と一致。  
+
+2. **「1.177 : 1」** (1 : 0.850)  
+     openMSXの**Horisontal stretch**で設定するなら **272 (Realistic)**。
+
+     Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。
+
+3. **「1.166 : 1」**  (1 : 0.858)  
+   openMSXの**Horisontal stretch**で設定するなら **274**。
+
+   根拠は失念したが、おぼろげな記憶に寄れば他のコンソールの設定値を参照した値。
+
+4. **「1.133 : 1」**  (1 : 0.882)  
+     openMSXの**Horisontal stretch**で設定するなら **282** または **284**。  
+
+     [FRS氏の計算](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)を元にした設定値。
+
+     ```(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756```  
+
+5. **「1 : 1」**  
+     openMSXの**Horisontal stretch**で設定するなら **320**。
+
+     いわゆるドットバイドット。  
+     モアレを除去したい場合に利用することがあるので用意。
+
+現在、リストからの選択になっています。
+
+要望が在れば任意の値を指定できるようにするかもしれませんが、各自でgsrle.htmlを弄って頂いた方が早いかと思います。
+
+----
+
 ## 使用許諾
 
 ### 禁止事項
@@ -445,6 +498,9 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2025/01/11 [ver.0.29](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z)
+  - ドットアスペクト比 1.228:1（284.5pixels*262lineから求めた値。雑誌広告などとの一致優先）を追加
 
 - 2023/10/07 [ver.0.28](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_028.7z)
   - BSAVE保存(VRAMパレット書込)が内部エラーで止まっていた問題の修正

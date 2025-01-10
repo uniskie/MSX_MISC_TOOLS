@@ -8,6 +8,7 @@
 		"html"
 	],
 	"markdown-pdf.convertOnSave": false,
-	"markdown-pdf.includeDefaultStyles": true,
+	"markdown-pdf.includeDefaultStyles": false,
 	"dotnet.defaultSolution": "disable",
+	"markdown-pdf.mermaidServer": "",
 }

@@ -5,228 +5,6 @@
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
 <style>
-/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
-body {
-	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
-	font-size: var(--vscode-markdown-font-size, 14px);
-	padding: 0 26px;
-	line-height: var(--vscode-markdown-line-height, 22px);
-	word-wrap: break-word;
-}
-
-#code-csp-warning {
-	position: fixed;
-	top: 0;
-	right: 0;
-	color: white;
-	margin: 16px;
-	text-align: center;
-	font-size: 12px;
-	font-family: sans-serif;
-	background-color:#444444;
-	cursor: pointer;
-	padding: 6px;
-	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
-}
-
-#code-csp-warning:hover {
-	text-decoration: none;
-	background-color:#007acc;
-	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
-}
-
-body.scrollBeyondLastLine {
-	margin-bottom: calc(100vh - 22px);
-}
-
-body.showEditorSelection .code-line {
-	position: relative;
-}
-
-body.showEditorSelection .code-active-line:before,
-body.showEditorSelection .code-line:hover:before {
-	content: "";
-	display: block;
-	position: absolute;
-	top: 0;
-	left: -12px;
-	height: 100%;
-}
-
-body.showEditorSelection li.code-active-line:before,
-body.showEditorSelection li.code-line:hover:before {
-	left: -30px;
-}
-
-.vscode-light.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(0, 0, 0, 0.15);
-}
-
-.vscode-light.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(0, 0, 0, 0.40);
-}
-
-.vscode-light.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-.vscode-dark.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(255, 255, 255, 0.4);
-}
-
-.vscode-dark.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(255, 255, 255, 0.60);
-}
-
-.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-.vscode-high-contrast.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(255, 160, 0, 0.7);
-}
-
-.vscode-high-contrast.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(255, 160, 0, 1);
-}
-
-.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-img {
-	max-width: 100%;
-	max-height: 100%;
-}
-
-a {
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-a:focus,
-input:focus,
-select:focus,
-textarea:focus {
-	outline: 1px solid -webkit-focus-ring-color;
-	outline-offset: -1px;
-}
-
-hr {
-	border: 0;
-	height: 2px;
-	border-bottom: 2px solid;
-}
-
-h1 {
-	padding-bottom: 0.3em;
-	line-height: 1.2;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
-}
-
-h1, h2, h3 {
-	font-weight: normal;
-}
-
-table {
-	border-collapse: collapse;
-}
-
-table > thead > tr > th {
-	text-align: left;
-	border-bottom: 1px solid;
-}
-
-table > thead > tr > th,
-table > thead > tr > td,
-table > tbody > tr > th,
-table > tbody > tr > td {
-	padding: 5px 10px;
-}
-
-table > tbody > tr + tr > td {
-	border-top: 1px solid;
-}
-
-blockquote {
-	margin: 0 7px 0 5px;
-	padding: 0 16px 0 10px;
-	border-left-width: 5px;
-	border-left-style: solid;
-}
-
-code {
-	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-	font-size: 1em;
-	line-height: 1.357em;
-}
-
-body.wordWrap pre {
-	white-space: pre-wrap;
-}
-
-pre:not(.hljs),
-pre.hljs code > div {
-	padding: 16px;
-	border-radius: 3px;
-	overflow: auto;
-}
-
-pre code {
-	color: var(--vscode-editor-foreground);
-	tab-size: 4;
-}
-
-/** Theming */
-
-.vscode-light pre {
-	background-color: rgba(220, 220, 220, 0.4);
-}
-
-.vscode-dark pre {
-	background-color: rgba(10, 10, 10, 0.4);
-}
-
-.vscode-high-contrast pre {
-	background-color: rgb(0, 0, 0);
-}
-
-.vscode-high-contrast h1 {
-	border-color: rgb(0, 0, 0);
-}
-
-.vscode-light table > thead > tr > th {
-	border-color: rgba(0, 0, 0, 0.69);
-}
-
-.vscode-dark table > thead > tr > th {
-	border-color: rgba(255, 255, 255, 0.69);
-}
-
-.vscode-light h1,
-.vscode-light hr,
-.vscode-light table > tbody > tr + tr > td {
-	border-color: rgba(0, 0, 0, 0.18);
-}
-
-.vscode-dark h1,
-.vscode-dark hr,
-.vscode-dark table > tbody > tr + tr > td {
-	border-color: rgba(255, 255, 255, 0.18);
-}
-
-</style>
-
-<style>
 /* Tomorrow Theme */
 /* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
 /* Original theme - https://github.com/chriskempson/tomorrow-theme */
@@ -301,68 +79,25 @@ pre code {
 	font-weight: bold;
 }
 </style>
-
-<style>
-/*
- * Markdown PDF CSS
- */
-
- body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
-	padding: 0 12px;
-}
-
-pre {
-	background-color: #f8f8f8;
-	border: 1px solid #cccccc;
-	border-radius: 3px;
-	overflow-x: auto;
-	white-space: pre-wrap;
-	overflow-wrap: break-word;
-}
-
-pre:not(.hljs) {
-	padding: 23px;
-	line-height: 19px;
-}
-
-blockquote {
-	background: rgba(127, 127, 127, 0.1);
-	border-color: rgba(0, 122, 204, 0.5);
-}
-
-.emoji {
-	height: 1.4em;
-}
-
-code {
-	font-size: 14px;
-	line-height: 19px;
-}
-
-/* for inline code */
-:not(pre):not(.hljs) > code {
-	color: #C9AE75; /* Change the old color so it seems less like an error */
-	font-size: inherit;
-}
-
-/* Page Break : use <div class="page"/> to insert page break
--------------------------------------------------------- */
-.page {
-	page-break-after: always;
-}
-
-</style>
 <link rel="stylesheet" href="img/markdown.css" type="text/css">
+<script src=""></script>
 </head>
 <body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
 <h1 id="html5-msx-graphics-viewer">HTML5 MSX GRAPHICS Viewer</h1>
 <p>ブラウザ版 MSX画像ビューア</p>
 <p>グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。</p>
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_028.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_028.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_029.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -1377,6 +1112,55 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 </li>
 </ul>
 <hr>
+<h2 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">ドットアスペクト比について</h2>
+<p>縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。</p>
+<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E6%83%85%E5%A0%B1%E5%85%83">ドットアスペクト比 情報元</h3>
+<ol>
+<li>
+<p>情報元1 「The real V99x8 Pixel Aspect Ratio (PAR)」<br>
+<a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par</a></p>
+</li>
+<li>
+<p>情報元2 「VDPマニュアルによれは 284.5pixels*262line」 という情報
+<a href="https://x.com/spacemoai/status/1877688639980716493">https://x.com/spacemoai/status/1877688639980716493</a><br>
+VDPマニュアルの該当箇所については不明</p>
+</li>
+</ol>
+<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E8%A8%AD%E5%AE%9A%E5%80%A4%E3%83%AA%E3%82%B9%E3%83%88">ドットアスペクト比 設定値リスト</h3>
+<ol>
+<li>
+<p><strong>「1.228 : 1」</strong>  (1 : 0.814)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>260</strong>。</p>
+<p>spacemoai氏から提供された <code>284.5pixels*262line出力</code>という情報からそのまま求めた値。</p>
+<p><code>(320 ÷ 284.5) × (262 ÷ 240) = 1.2278851786760398359695371997657</code></p>
+<p>MSX2版イース2の雑誌広告と一致。</p>
+</li>
+<li>
+<p><strong>「1.177 : 1」</strong> (1 : 0.850)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (Realistic)</strong>。</p>
+<p>Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。</p>
+</li>
+<li>
+<p><strong>「1.166 : 1」</strong>  (1 : 0.858)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
+<p>根拠は失念したが、おぼろげな記憶に寄れば他のコンソールの設定値を参照した値。</p>
+</li>
+<li>
+<p><strong>「1.133 : 1」</strong>  (1 : 0.882)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong> または <strong>284</strong>。</p>
+<p><a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">FRS氏の計算</a>を元にした設定値。</p>
+<p><code>(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756</code></p>
+</li>
+<li>
+<p><strong>「1 : 1」</strong><br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>320</strong>。</p>
+<p>いわゆるドットバイドット。<br>
+モアレを除去したい場合に利用することがあるので用意。</p>
+</li>
+</ol>
+<p>現在、リストからの選択になっています。</p>
+<p>要望が在れば任意の値を指定できるようにするかもしれませんが、各自でgsrle.htmlを弄って頂いた方が早いかと思います。</p>
+<hr>
 <h2 id="%E4%BD%BF%E7%94%A8%E8%A8%B1%E8%AB%BE">使用許諾</h2>
 <h3 id="%E7%A6%81%E6%AD%A2%E4%BA%8B%E9%A0%85">禁止事項</h3>
 <p>音楽データや画像ファイルの再利用はご遠慮ください。（全体的に）</p>
@@ -1389,6 +1173,12 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2025/01/11 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z">ver.0.29</a></p>
+<ul>
+<li>ドットアスペクト比 1.228:1（284.5pixels*262lineから求めた値。雑誌広告などとの一致優先）を追加</li>
+</ul>
+</li>
 <li>
 <p>2023/10/07 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_028.7z">ver.0.28</a></p>
 <ul>

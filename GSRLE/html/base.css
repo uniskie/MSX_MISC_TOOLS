@@ -103,6 +103,12 @@ a {
 
     /*transition: .5s;*/
 }
+#help_guide a {
+    color:#482828;
+    background: #d0b8a8;
+    font-weight: bolder;
+    margin: 0 0.3em 0 0.3em;
+}
 a:hover {
     /*color:#f88;*/
     animation: 1s a_blink linear infinite;

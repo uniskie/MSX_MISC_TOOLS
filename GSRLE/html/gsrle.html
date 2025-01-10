@@ -13,7 +13,7 @@
             HTML5 MSX GRAPHICS Viewer
         </summary>
         <div class="guide">
-            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.28 - 
+            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.29 - 
                 <a href="index.html" target="_blank">【 説明ページ 】</a>
                 <br>使い方：画像ファイルをドロップ（複数可）</div>
         </div>
@@ -260,8 +260,10 @@
                     <li><span>SC0,SC1はSSCREEN12のインターレース画像として扱うため</span>
                         <span>SCREEN1はSR1、SCREEN0はTX1,TX2などを使用可能</span>
                     </li>
-                    <li>ドットアスペクト比 1.177:1 はOpenMSXに近い値</li>
-                    <li>ドットアスペクト比 1.228:1 はVDP仕様284.5pixels*262lineから求めた値</li>
+                    <li><span>補足：
+                        <a href="index.html#%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6"
+                         target="_blank">
+                        [ ドットアスペクト比（ピクセル縦横比）について ] </a> ※ご一読ください。</span></li>
                 </ol>
             </div>
             </div>
@@ -279,7 +281,7 @@
                 <label class="click"><input type="radio" name="height_mode" value="256"         >256固定</label>
             </span>
             <span class="select_group" id="stretch_screen">
-                <label class="label">DotAspect比 (ピクセル縦横比)</label>
+                <label class="label">ドットアスペクト比 (ピクセル縦横比)</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.228" checked>1.228:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.177">1.177:1</label>
                 <label class="click"><input type="radio" name="stretch_screen" value="1.166"        >1.166:1</label>
