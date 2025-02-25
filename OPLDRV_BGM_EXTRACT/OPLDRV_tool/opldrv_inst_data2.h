@@ -1,10 +1,10 @@
-ï»¿#ifndef __OPLDRV_INST_DATA2_H__
+#ifndef __OPLDRV_INST_DATA2_H__
 #define __OPLDRV_INST_DATA2_H__
 
 #include "opldrv_data.h"
 
 //===============================================
-// æœ¬ä½“å†…è”µROMç‰ˆ ROMéŸ³è‰²ãƒ‡ãƒ¼ã‚¿
+// –{‘Ì“à‘ ROM”Å ROM‰¹Fƒf[ƒ^
 //===============================================
 namespace OPLDRV {
 // MSX-MUSIC BIOS (A1GT)

@@ -4,6 +4,7 @@
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>fmpac0.bin /l:fmpac0.mml.log  /mml:fmpac0.mml  /ts:16 /@t:32 /dl:16 /loop /v+- /cv:fmpac /cl:fmpac /cl:music</LocalDebuggerCommandArguments>
+    <NXTargetName>Default</NXTargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NXTargetName>Default</NXTargetName>
@@ -12,6 +13,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NXTargetName>Default</NXTargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NXTargetName>Default</NXTargetName>
   </PropertyGroup>
 </Project>

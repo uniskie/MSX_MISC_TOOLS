@@ -1,4 +1,4 @@
-ï»¿#include "uni_common.h"
+#include "uni_common.h"
 #include "opldrv_data.h"
 #include <deque>
 
@@ -6,8 +6,8 @@
 using namespace OPLDRV;
 using namespace uni_common;
 
-#include"opldrv_inst_data.h"	// FMPACç‰ˆ æ‹¡å¼µéŸ³è‰²
-#include"opldrv_inst_data2.h"	// A1GTç‰ˆ æ‹¡å¼µéŸ³è‰²
+#include"opldrv_inst_data.h"	// FMPAC”Å Šg’£‰¹F
+#include"opldrv_inst_data2.h"	// A1GT”Å Šg’£‰¹F
 
 //==================================================
 //
@@ -17,7 +17,7 @@ using namespace uni_common;
 
 //--------------------------------------------------
 //! OplDrvData::VoiceData
-//! éŸ³è‰²å®šç¾©MMLã‚’è¿”ã™ï¼ˆMGSDRVï¼‰
+//! ‰¹F’è‹`MML‚ğ•Ô‚·iMGSDRVj
 //--------------------------------------------------
 string OplDrvData::VoiceData::make_mgs_mml()
 {
@@ -73,7 +73,7 @@ bool OplDrvData::trace_mode = true;
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 //--------------------------------------------------
 OplDrvData::Header::Header()
 {
@@ -82,7 +82,7 @@ OplDrvData::Header::Header()
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 //--------------------------------------------------
 OplDrvData::Header::Header(const u8* data_ptr, const u8* end_ptr)
 {
@@ -92,7 +92,7 @@ OplDrvData::Header::Header(const u8* data_ptr, const u8* end_ptr)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒªã‚ºãƒ ãƒ¢ãƒ¼ãƒ‰ã‹ã©ã†ã‹è¿”ã™
+//! ƒŠƒYƒ€ƒ‚[ƒh‚©‚Ç‚¤‚©•Ô‚·
 //--------------------------------------------------
 bool OplDrvData::Header::isRhythmMode() const
 {
@@ -101,8 +101,8 @@ bool OplDrvData::Header::isRhythmMode() const
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒ¡ãƒ­ãƒ‡ã‚£ãƒãƒ£ãƒ³ãƒãƒ«ã®ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¿”ã™
-//! ç¯„å›²å¤–ãªã‚‰0
+//! ƒƒƒfƒBƒ`ƒƒƒ“ƒlƒ‹‚Ìƒf[ƒ^ƒIƒtƒZƒbƒg‚ğ•Ô‚·
+//! ”ÍˆÍŠO‚È‚ç0
 //--------------------------------------------------
 u16 OplDrvData::Header::get_melody_binary_offset(u8 ch)
 {
@@ -127,9 +127,9 @@ u16 OplDrvData::Header::get_melody_binary_offset(u8 ch)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒªã‚ºãƒ ãƒãƒ£ãƒ³ãƒãƒ«ã®ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¿”ã™
+//! ƒŠƒYƒ€ƒ`ƒƒƒ“ƒlƒ‹‚Ìƒf[ƒ^ƒIƒtƒZƒbƒg‚ğ•Ô‚·
 //--------------------------------------------------
-//! ãƒªã‚ºãƒ ãƒ¢ãƒ¼ãƒ‰ã§ãªã‘ã‚Œã°0
+//! ƒŠƒYƒ€ƒ‚[ƒh‚Å‚È‚¯‚ê‚Î0
 u16 OplDrvData::Header::get_rhythm_binary_offset()
 {
 	if (isRhythmMode())
@@ -141,7 +141,7 @@ u16 OplDrvData::Header::get_rhythm_binary_offset()
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+//! ƒf[ƒ^‚ğƒNƒŠƒA‚·‚é
 //--------------------------------------------------
 void OplDrvData::Header::clear()
 {
@@ -150,7 +150,7 @@ void OplDrvData::Header::clear()
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒ‡ãƒ¼ã‚¿ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
+//! ƒf[ƒ^‚ğƒZƒbƒg‚·‚é
 //--------------------------------------------------
 void OplDrvData::Header::from_binary(const u8* data_ptr, const u8* end_ptr)
 {
@@ -189,7 +189,7 @@ void OplDrvData::Header::from_binary(const u8* data_ptr, const u8* end_ptr)
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ã‚³ãƒãƒ³ãƒ‰åå–å¾—
+//! ƒRƒ}ƒ“ƒh–¼æ“¾
 //--------------------------------------------------
 string OplDrvData::Command::getCmdName(int cmd)
 {
@@ -214,7 +214,7 @@ string OplDrvData::Command::getCmdName(int cmd)
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–åå–å¾—
+//! ƒIƒNƒ^[ƒu–¼æ“¾
 //--------------------------------------------------
 string OplDrvData::Command::getOctaveName(int param)
 {
@@ -222,7 +222,7 @@ string OplDrvData::Command::getOctaveName(int param)
 }
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å–å¾—
+//! ƒIƒNƒ^[ƒuæ“¾
 //--------------------------------------------------
 int OplDrvData::Command::getOctave(int param)
 {
@@ -231,7 +231,7 @@ int OplDrvData::Command::getOctave(int param)
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! éŸ³éšåå–å¾—
+//! ‰¹ŠK–¼æ“¾
 //--------------------------------------------------
 string OplDrvData::Command::getNoteName(int n)
 {
@@ -247,7 +247,7 @@ string OplDrvData::Command::getNoteName(int n)
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ãƒªã‚ºãƒ æ¥½å™¨åå–å¾—
+//! ƒŠƒYƒ€ŠyŠí–¼æ“¾
 //--------------------------------------------------
 string OplDrvData::Command::getRhythmName(int param, bool use_space)
 {
@@ -277,7 +277,7 @@ string OplDrvData::Command::getRhythmName(int param, bool use_space)
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ã‚¯ãƒªã‚¢
+//! ƒNƒŠƒA
 //--------------------------------------------------
 void OplDrvData::Command::clear()
 {
@@ -289,7 +289,7 @@ void OplDrvData::Command::clear()
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! æ™‚é–“æŒ‡å®šã‚’èª­ã¿è¾¼ã‚€
+//! ŠÔw’è‚ğ“Ç‚İ‚Ş
 //--------------------------------------------------
 const u8* OplDrvData::Command::read_time(u64& time, const u8* data_ptr, const u8* end_ptr)
 {
@@ -312,7 +312,7 @@ const u8* OplDrvData::Command::read_time(u64& time, const u8* data_ptr, const u8
 		}
 		if (c < 255)
 		{
-			return p;	// æ­£å¸¸çµ‚äº†
+			return p;	// ³íI—¹
 		}
 	}
 	print_error(string("[ERROR] not enough read buffer in read_time."));
@@ -322,7 +322,7 @@ const u8* OplDrvData::Command::read_time(u64& time, const u8* data_ptr, const u8
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ãƒ¡ãƒ­ãƒ‡ã‚£ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
+//! ƒƒƒfƒB[ƒf[ƒ^‚ğ“Ç‚İ‚Ş
 //--------------------------------------------------
 const u8* OplDrvData::Command::read_melody(const u8* data_ptr, const u8* end_ptr)
 {
@@ -440,7 +440,7 @@ const u8* OplDrvData::Command::read_melody(const u8* data_ptr, const u8* end_ptr
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ãƒªã‚ºãƒ ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
+//! ƒŠƒYƒ€ƒf[ƒ^‚ğ“Ç‚İ‚Ş
 //--------------------------------------------------
 const u8* OplDrvData::Command::read_rhythm(const u8* data_ptr, const u8* end_ptr)
 {
@@ -500,7 +500,7 @@ const u8* OplDrvData::Command::read_rhythm(const u8* data_ptr, const u8* end_ptr
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! æ™‚é–“æŒ‡å®šã‚’æ›¸ãè¾¼ã‚€
+//! ŠÔw’è‚ğ‘‚«‚Ş
 //--------------------------------------------------
 u8* OplDrvData::Command::write_time(u64 time, u8* data_ptr, const u8* end_ptr) const
 {
@@ -526,7 +526,7 @@ u8* OplDrvData::Command::write_time(u64 time, u8* data_ptr, const u8* end_ptr) c
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ãƒ¡ãƒ­ãƒ‡ã‚£ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€
+//! ƒƒƒfƒB[ƒf[ƒ^‚ğ‘‚«‚Ş
 //--------------------------------------------------
 u8* OplDrvData::Command::write_melody(u8* data_ptr, const u8* end_ptr) const
 {
@@ -628,7 +628,7 @@ u8* OplDrvData::Command::write_melody(u8* data_ptr, const u8* end_ptr) const
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ãƒªã‚ºãƒ ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€
+//! ƒŠƒYƒ€ƒf[ƒ^‚ğ‘‚«‚Ş
 //--------------------------------------------------
 u8* OplDrvData::Command::write_rhythm(u8* data_ptr, const u8* end_ptr) const
 {
@@ -684,7 +684,7 @@ u8* OplDrvData::Command::write_rhythm(u8* data_ptr, const u8* end_ptr) const
 
 //--------------------------------------------------
 //! OplDrvData::Command
-//! ã‚³ãƒãƒ³ãƒ‰æƒ…å ±æ–‡å­—åˆ—ã‚’å–å¾—
+//! ƒRƒ}ƒ“ƒhî•ñ•¶š—ñ‚ğæ“¾
 //--------------------------------------------------
 string OplDrvData::Command::getCmdInfo() const
 {
@@ -800,7 +800,7 @@ string OplDrvData::Command::getCmdInfo() const
 
 //--------------------------------------------------
 //! OplDrvData
-//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 //--------------------------------------------------
 OplDrvData::OplDrvData()
 {
@@ -809,17 +809,17 @@ OplDrvData::OplDrvData()
 
 //--------------------------------------------------
 //! OplDrvData
-//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 //--------------------------------------------------
-OplDrvData::OplDrvData(const u8* data_ptr, const u8* end_ptr, u16 base_address)
+OplDrvData::OplDrvData(const u8* data_ptr, const u8* end_ptr, u16 base_address, u16 music_address)
 {
 	clear();
-	from_binary(data_ptr, end_ptr, base_address);
+	from_binary(data_ptr, end_ptr, base_address, music_address);
 }
 
 //--------------------------------------------------
 //! OplDrvData
-//! ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+//! ƒf[ƒ^‚ğƒNƒŠƒA‚·‚é
 //--------------------------------------------------
 void OplDrvData::clear()
 {
@@ -835,21 +835,21 @@ void OplDrvData::clear()
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆã™ã‚‹
+//! ƒoƒCƒiƒŠƒf[ƒ^‚©‚çƒf[ƒ^‚ğì¬‚·‚é
 //--------------------------------------------------
-bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address)
+bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address, u16 music_address)
 {
-	size_t data_size = end_ptr - data_ptr;
+	auto music_ptr = data_ptr + (music_address - base_address);
 
 	// header
-	m_header.from_binary(data_ptr, end_ptr);
+	m_header.from_binary(music_ptr, end_ptr);
 
-	// ãƒªã‚ºãƒ ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒŠƒYƒ€ƒ`ƒƒƒ“ƒlƒ‹
 	if (m_header.isRhythmMode())
 	{
 		auto offset = m_header.get_rhythm_binary_offset();
-		const u8* p = data_ptr + offset;
-		m_rhythm_ch.reserve(0x1000); // é©å½“ã«äºˆç´„
+		auto p = music_ptr + offset;
+		m_rhythm_ch.reserve(0x1000); // “K“–‚É—\–ñ
 
 		if (trace_mode)
 		{
@@ -883,7 +883,7 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 
 			m_rhythm_ch.push_back(cmd);
 
-			// çµ‚ç«¯
+			// I’[
 			if (cmd.m_cmd == OplDrvData::Command::CMD_END)
 			{
 				// end
@@ -892,13 +892,13 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 		}
 	}
 	
-	// ãƒ¡ãƒ­ãƒ‡ã‚£ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒƒƒfƒBƒ`ƒƒƒ“ƒlƒ‹
 	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
 	{
 		auto offset = m_header.get_melody_binary_offset(ch);
-		const u8* p = data_ptr + offset;
+		auto p = music_ptr + offset;
 
-		m_melody_ch[ch].reserve(0x1000); // é©å½“ã«äºˆç´„
+		m_melody_ch[ch].reserve(0x1000); // “K“–‚É—\–ñ
 
 		if (trace_mode)
 		{
@@ -922,33 +922,35 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 				print_log(cmd.getCmdInfo());
 			}
 
-			// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©éŸ³è‰²
+			// ƒ†[ƒU[’è‹`‰¹F
 			if (cmd.m_cmd == OplDrvData::Command::CMD_USER_VOICE)
 			{
 				// user voice data
-				if (intptr_t(end_ptr - p)  < VoiceRaw::data_size)
-				{
-					print_error("[ERROR] VOICE DATA is not contained in buffer.");
-					ASSERT(0);
-				}
-				else
 				{
 					u16 voice_idx = u16(cmd.m_param);
 					u16 voice_offset = u16(cmd.m_param) - base_address;
 					
-					// æœªè¨­å®šãªã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’å–ã‚Šè¾¼ã‚€
+					// –¢İ’è‚È‚çƒf[ƒ^‚ğæ‚è‚Ş
 					if (!m_voice.count(voice_idx))
 					{
-						auto& voice = m_voice[voice_idx];
-						const u8* voice_ptr = data_ptr + voice_offset;
-						std::copy(voice_ptr, voice_ptr + VoiceRaw::data_size, voice.m_data.reg);
-						voice.m_data.name = "0x" + hex(u16(cmd.m_param));
-						voice.m_data.long_name = "(user) 0x" + voice.m_data.name;
+						auto voice_ptr = data_ptr + voice_offset;
+						if (intptr_t(end_ptr - voice_ptr)  < VoiceRaw::data_size)
+						{
+							print_error("[ERROR] VOICE DATA is not contained in buffer.");
+							ASSERT(0);
+						}
+						else
+						{
+							auto& voice = m_voice[voice_idx];
+							std::copy(voice_ptr, voice_ptr + VoiceRaw::data_size, voice.m_data.reg);
+							voice.m_data.name = "0x" + hex(u16(cmd.m_param));
+							voice.m_data.long_name = "(user) 0x" + voice.m_data.name;
+						}
 					}
 				}
 			}
 
-			// çµ‚ç«¯
+			// I’[
 			if (cmd.m_cmd == OplDrvData::Command::CMD_NONE)
 			{
 				// error
@@ -987,7 +989,7 @@ bool OplDrvData::from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_add
 
 //--------------------------------------------------
 //! OplDrvData
-//! ROMå†…è”µæ‹¡å¼µéŸ³è‰²å®šç¾©ãƒ†ãƒ¼ãƒ–ãƒ«ã‚’å–å¾—
+//! ROM“à‘ Šg’£‰¹F’è‹`ƒe[ƒuƒ‹‚ğæ“¾
 //--------------------------------------------------
 const OplDrvData::ExtraVoiceSet* OplDrvData::getExtraVoiceSet(int rom_type)
 {
@@ -1009,7 +1011,7 @@ const OplDrvData::ExtraVoiceSet* OplDrvData::getExtraVoiceSet(int rom_type)
 
 //--------------------------------------------------
 //! OplDrvData
-//! ROMå†…è”µæ‹¡å¼µéŸ³è‰²å®šç¾©MMLã‚’ä½œæˆ(MGSDRV)
+//! ROM“à‘ Šg’£‰¹F’è‹`MML‚ğì¬(MGSDRV)
 //--------------------------------------------------
 string OplDrvData::make_ex_voice_mgs_mml(int mgs_voice_no, int rom_voice_no, int rom_type)
 {
@@ -1027,7 +1029,7 @@ string OplDrvData::make_ex_voice_mgs_mml(int mgs_voice_no, int rom_voice_no, int
 		voice.m_data = src;
 		voice.m_data.long_name =
 			"(" + voice_table->name + " #" + dec(rom_voice_no) + ") " + voice.m_data.long_name;
-		voice.voice_no = mgs_voice_no; // å›ºå®š
+		voice.voice_no = mgs_voice_no; // ŒÅ’è
 		return voice.make_mgs_mml();
 	}
 
@@ -1036,7 +1038,7 @@ string OplDrvData::make_ex_voice_mgs_mml(int mgs_voice_no, int rom_voice_no, int
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ROMå†…è”µæ‹¡å¼µéŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ã«å¤‰æ›ã™ã‚‹
+//! ROM“à‘ Šg’£‰¹FƒRƒ}ƒ“ƒh‚ğƒ†[ƒU[‰¹F‚É•ÏŠ·‚·‚é
 //--------------------------------------------------
 bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 {
@@ -1046,7 +1048,7 @@ bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 		return false;
 	}
 
-	// ãƒ¡ãƒ­ãƒ‡ã‚£ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒƒƒfƒBƒ`ƒƒƒ“ƒlƒ‹
 	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
 	{
 		auto& melody_ch = m_melody_ch[ch];
@@ -1055,9 +1057,9 @@ bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 		{
 			if (i->m_cmd == OplDrvData::Command::CMD_ROM_VOICE)
 			{
-				// ROMå†…è”µæ‹¡å¼µéŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ã«å¤‰æ›ã™ã‚‹
+				// ROM“à‘ Šg’£‰¹FƒRƒ}ƒ“ƒh‚ğƒ†[ƒU[‰¹F‚É•ÏŠ·‚·‚é
 
-				// å†…è”µéŸ³è‰²ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ãƒªã‚¹ãƒˆã¸ç™»éŒ²
+				// “à‘ ‰¹Fƒf[ƒ^‚ğƒ†[ƒU[‰¹FƒŠƒXƒg‚Ö“o˜^
 				u16 n = u16(i->m_param);
 				ASSERT((0 <= n) && (n <= 63));
 				if (!((0 <= n) && (n <= 63)))
@@ -1073,7 +1075,7 @@ bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 				voice.m_data.long_name =
 					"(" + voice_table->name + " #" + dec(n) + ") " + voice.m_data.long_name;
 
-				// USER_VOICE ã‚³ãƒãƒ³ãƒ‰ ã¸ å¤‰æ›´
+				// USER_VOICE ƒRƒ}ƒ“ƒh ‚Ö •ÏX
 				i->m_cmd = OplDrvData::Command::CMD_USER_VOICE;
 				i->m_param = idx; // new voice index
 
@@ -1093,15 +1095,15 @@ bool OplDrvData::convert_voice_rom_to_user(int rom_type)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! éŸ³é‡ã‚’å¢—æ¸›ã™ã‚‹
-//! @return ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ãŸã‚³ãƒãƒ³ãƒ‰æ•°
+//! ‰¹—Ê‚ğ‘Œ¸‚·‚é
+//! @return ƒI[ƒo[ƒtƒ[‚µ‚½ƒRƒ}ƒ“ƒh”
 //--------------------------------------------------
 int OplDrvData::modify_volume(int volume_change)
 {
 	int overflow_count = 0;
 
 	print("[INFO] volume modify " + dec(volume_change));
-	// ãƒªã‚ºãƒ ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒŠƒYƒ€ƒ`ƒƒƒ“ƒlƒ‹
 	if (m_rhythm_ch.size())
 	{
 		int cmd_num = 0;
@@ -1131,7 +1133,7 @@ int OplDrvData::modify_volume(int volume_change)
 			}
 		}
 	}
-	// ãƒ¡ãƒ­ãƒ‡ã‚£ãƒ¼ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒƒƒfƒB[ƒ`ƒƒƒ“ƒlƒ‹
 	for (int ch = 0; ch < countof(m_melody_ch); ++ch)
 	{
 		if (m_melody_ch[ch].size())
@@ -1173,26 +1175,26 @@ int OplDrvData::modify_volume(int volume_change)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆã™ã‚‹.
-//! @param	outbuffer		ã“ã®vector<u8>ã«ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ãŒå‡ºåŠ›ã•ã‚Œã‚‹.
-//! @param	base_address	ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ãƒ‡ãƒ¼ã‚¿ã‚’ä½¿ç”¨ã™ã‚‹å ´åˆãƒ‡ãƒ¼ã‚¿ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒå¿…è¦
+//! ƒoƒCƒiƒŠƒf[ƒ^‚ğì¬‚·‚é.
+//! @param	outbuffer		‚±‚Ìvector<u8>‚ÉƒoƒCƒiƒŠƒf[ƒ^‚ªo—Í‚³‚ê‚é.
+//! @param	base_address	ƒ†[ƒU[‰¹Fƒf[ƒ^‚ğg—p‚·‚éê‡ƒf[ƒ^‚Ìæ“ªƒAƒhƒŒƒX‚ª•K—v
 //--------------------------------------------------
 bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 {
-	// ãƒ¯ãƒ¼ã‚¯ãƒãƒƒãƒ•ã‚¡ 256 bytes
+	// ƒ[ƒNƒoƒbƒtƒ@ 256 bytes
 	std::vector<u8>	temp(256);
 	u8* temp_start = &temp[0];
 	const u8* temp_end = temp_start + temp.size();
 
-	// ãƒˆãƒ©ãƒƒã‚¯ç•ªå·
+	// ƒgƒ‰ƒbƒN”Ô†
 	int tr = 0;
 
-	// ãƒˆãƒ©ãƒƒã‚¯å…ˆé ­ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+	// ƒgƒ‰ƒbƒNæ“ªƒIƒtƒZƒbƒg
 	u16 header_size = m_header.isRhythmMode() ? 
 		OplDrvData::Header::mode_r :
 		OplDrvData::Header::mode_m ;
 
-	// å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡ (ãƒ˜ãƒƒãƒ€ã‚µã‚¤ã‚º)+(reserve 64K Bytes)
+	// o—Íƒoƒbƒtƒ@ (ƒwƒbƒ_ƒTƒCƒY)+(reserve 64K Bytes)
 	outbuffer.clear();
 	outbuffer.reserve(0x10000);
 	for (int i=0; i < header_size; ++i)
@@ -1200,15 +1202,15 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 		outbuffer.push_back(0);
 	}
 
-	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ä½¿ç”¨ä½ç½®ãƒªã‚¹ãƒˆ
+	// ƒ†[ƒU[‰¹Fg—pˆÊ’uƒŠƒXƒg
 	std::deque<u16> voice_adr_list;
 	
-	// ãƒªã‚ºãƒ ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒŠƒYƒ€ƒ`ƒƒƒ“ƒlƒ‹
 	if (m_header.isRhythmMode())
 	{
 		if (0 == m_rhythm_ch.size())
 		{
-			// ãªã—
+			// ‚È‚µ
 			m_header.offset[tr++] = 0;
 		}
 		else
@@ -1226,7 +1228,7 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 				
 				if (!p)
 				{
-					// ã‚¨ãƒ©ãƒ¼ãŒã‚ã£ãŸ
+					// ƒGƒ‰[‚ª‚ ‚Á‚½
 					return false;
 				}
 
@@ -1244,14 +1246,14 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 		}
 	}
 
-	// ãƒ¡ãƒ­ãƒ‡ã‚£ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒƒƒfƒBƒ`ƒƒƒ“ƒlƒ‹
 	for (int ch = 0; ch < m_header.getMelodyChCount(); ++ch)
 	{
 		auto& melody_ch = m_melody_ch[ch];
 
 		if (0 == melody_ch.size())
 		{
-			// ãªã—
+			// ‚È‚µ
 			m_header.offset[tr++] = 0;
 		}
 		else
@@ -1269,7 +1271,7 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 
 				if (!p)
 				{
-					// ã‚¨ãƒ©ãƒ¼ãŒã‚ã£ãŸ
+					// ƒGƒ‰[‚ª‚ ‚Á‚½
 					return false;
 				}
 
@@ -1280,9 +1282,9 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 
 				if (i->m_cmd == OplDrvData::Command::CMD_USER_VOICE)
 				{
-					// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©éŸ³è‰²ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å¾Œã‹ã‚‰æ›¸ãæ›ãˆã‚‹
-					voice_adr_list.push_back( u16(outbuffer.size() - 2) ); // ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒã‚ã‚‹ã‚ªãƒ•ã‚»ãƒƒãƒˆã®ç™»éŒ²
-					ASSERT(outbuffer.size() > 2 + size_t(m_header.offset[0]));	// ä¸€å¿œæ¤œæŸ»
+					// ƒ†[ƒU[’è‹`‰¹F‚ÌƒAƒhƒŒƒX‚ğŒã‚©‚ç‘‚«Š·‚¦‚é
+					voice_adr_list.push_back( u16(outbuffer.size() - 2) ); // ƒAƒhƒŒƒX‚ª‚ ‚éƒIƒtƒZƒbƒg‚Ì“o˜^
+					ASSERT(outbuffer.size() > 2 + size_t(m_header.offset[0]));	// ˆê‰ŒŸ¸
 				}
 
 				if (i->m_cmd == OplDrvData::Command::CMD_END)
@@ -1294,10 +1296,10 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 		}
 	}
 
-	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ãƒ‡ãƒ¼ã‚¿
+	// ƒ†[ƒU[‰¹Fƒf[ƒ^
 	if (m_voice.size())
 	{
-		// å‡ºåŠ›ãƒã‚¤ãƒŠãƒªã¸è¿½åŠ 
+		// o—ÍƒoƒCƒiƒŠ‚Ö’Ç‰Á
 		for (auto v = m_voice.begin(); v != m_voice.end(); ++v)
 		{
 			auto& voice = v->second;
@@ -1309,17 +1311,17 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 			ASSERT(offset < 0x10000);
 			voice.offset = u16(offset);
 		}
-		// ä½¿ç”¨ç®‡æ‰€ã®éŸ³è‰²ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒ‰ãƒ¬ã‚¹å€¤ã‚’å¤‰æ›´
+		// g—p‰ÓŠ‚Ì‰¹Fƒf[ƒ^ƒAƒhƒŒƒX’l‚ğ•ÏX
 		for (auto i = voice_adr_list.begin(); i != voice_adr_list.end(); ++i)
 		{
 			size_t pos = *i;
 			u16 idx = u16(outbuffer[pos + 0]) + u16(outbuffer[pos + 1]) * 0x100;
 
-			// éŸ³è‰²ãƒ‡ãƒ¼ã‚¿æƒ…å ±å–å¾—
+			// ‰¹Fƒf[ƒ^î•ñæ“¾
 			auto& voice = m_voice[idx];
 			ASSERT(voice.offset);
 
-			// æ–°ã—ã„å€¤ã‚’æ›¸ãè¾¼ã‚€
+			// V‚µ‚¢’l‚ğ‘‚«‚Ş
 			auto new_addr = base_address + size_t(voice.offset);
 			outbuffer[pos + 0] = u8(new_addr & 0xff);
 			outbuffer[pos + 1] = u8(new_addr >> 8);
@@ -1331,11 +1333,11 @@ bool OplDrvData::make_binary(std::vector<u8>& outbuffer, u16 base_address)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! MMLå‡ºåŠ›ç”¨ã®TEMPOã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
+//! MMLo—Í—p‚ÌTEMPOƒZƒbƒgƒAƒbƒv
 //--------------------------------------------------
 void OplDrvData::set_tempo(float tempo)
 {
-	// éŸ³é•· tickãƒªã‚¹ãƒˆ
+	// ‰¹’· tickƒŠƒXƒg
 	add_note_length(1, tempo);
 	add_note_length(2, tempo);
 	add_note_length(3, tempo);
@@ -1359,7 +1361,7 @@ void OplDrvData::set_tempo(float tempo)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! MMLå‡ºåŠ›ç”¨ï¼šéŸ³é•·ãƒªã‚¹ãƒˆè¿½åŠ 
+//! MMLo—Í—pF‰¹’·ƒŠƒXƒg’Ç‰Á
 //--------------------------------------------------
 void OplDrvData::add_note_length(int n, float tempo)
 {
@@ -1368,8 +1370,8 @@ void OplDrvData::add_note_length(int n, float tempo)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! MMLå‡ºåŠ›ç”¨ï¼šéŸ³é•·æ¯”è¼ƒ
-//! @return 0=ä¸€è‡´ -1=tickãŒå°ã•ã„ +1=tickãŒå¤§ãã„
+//! MMLo—Í—pF‰¹’·”äŠr
+//! @return 0=ˆê’v -1=tick‚ª¬‚³‚¢ +1=tick‚ª‘å‚«‚¢
 //--------------------------------------------------
 int OplDrvData::compare_note_length(float tick, int n)
 {
@@ -1379,10 +1381,10 @@ int OplDrvData::compare_note_length(float tick, int n)
 		return 0;	// equal
 	}
 
-	// ãƒ‡ãƒ¼ã‚¿å´ãŒæ•´æ•°ãªã®ã§åˆ‡ã‚Šæ¨ã¦ã¨åˆ‡ã‚Šä¸Šã’ã‚‚æ¤œæŸ»
+	// ƒf[ƒ^‘¤‚ª®”‚È‚Ì‚ÅØ‚èÌ‚Ä‚ÆØ‚èã‚°‚àŒŸ¸
 	auto ft = floor(tick);
-	auto fn = floor(m_note_length[n]); // åˆ‡ã‚Šæ¨ã¦
-	auto cn = ceil(m_note_length[n]); // åˆ‡ã‚Šä¸Šã’
+	auto fn = floor(m_note_length[n]); // Ø‚èÌ‚Ä
+	auto cn = ceil(m_note_length[n]); // Ø‚èã‚°
 	if ((ft==fn) || (ft==cn))
 	{
 		return 0;	// equal
@@ -1397,13 +1399,13 @@ int OplDrvData::compare_note_length(float tick, int n)
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! MMLå‡ºåŠ›ç”¨ï¼šéŸ³é•·ãƒªã‚¹ãƒˆè¿½åŠ 
+//! MMLo—Í—pF‰¹’·ƒŠƒXƒg’Ç‰Á
 //--------------------------------------------------
 int OplDrvData::get_note_length(float tick, float& note_tick)
 {
 	note_tick = tick;
 
-	// ä¸€è‡´ã‚’å„ªå…ˆ
+	// ˆê’v‚ğ—Dæ
 	for (auto i = m_note_length.begin(); i != m_note_length.end(); ++i)
 	{
 		if (0 == compare_note_length(tick, i->first))
@@ -1411,20 +1413,20 @@ int OplDrvData::get_note_length(float tick, float& note_tick)
 			return i->first;
 		}
 	}
-	// ç«¯æ•°ã®ã‚ã‚‹å ´åˆ
+	// ’[”‚Ì‚ ‚éê‡
 	for (auto i = m_note_length.begin(); i != m_note_length.end(); ++i)
 	{
 		if (i->second <= tick)
 		{
-			if (i->first == 2) // L2ã®æ™‚
+			if (i->first == 2) // L2‚Ì
 			{
 				if (0 == compare_note_length(tick - m_note_length[3], 3))
 				{
 					note_tick = m_note_length[3];
-					return 3; // 3+3ãªã‚‰3ã‚’ã¾ãšè¿”ã™
+					return 3; // 3+3‚È‚ç3‚ğ‚Ü‚¸•Ô‚·
 				}
 			}
-			if (0 == (i->first % 3)) // L3ã®å€æ•°ã®æ™‚
+			if (0 == (i->first % 3)) // L3‚Ì”{”‚Ì
 			{
 				auto n = i->first * 2;
 				if (0 == compare_note_length(tick - m_note_length[n], i->first))
@@ -1432,7 +1434,7 @@ int OplDrvData::get_note_length(float tick, float& note_tick)
 					note_tick = i->second;
 					return i->first;
 				}
-				continue; // 3ã®å€æ•°ã®çµ„ã¿åˆã‚ã›ã§ãªã‘ã‚Œã°ã‚¹ã‚­ãƒƒãƒ—
+				continue; // 3‚Ì”{”‚Ì‘g‚İ‡‚í‚¹‚Å‚È‚¯‚ê‚ÎƒXƒLƒbƒv
 			}
 			note_tick = i->second;
 			return i->first;
@@ -1445,16 +1447,16 @@ int OplDrvData::get_note_length(float tick, float& note_tick)
 class mml_buffer
 {
 public:
-	std::stringstream mml;		// å‡ºåŠ›å…ˆ
-	std::stringstream buff;		// ä¸€æ™‚å‡ºåŠ›å…ˆ
-	size_t line_size;			// è¡Œã®é•·ã•
-	size_t line_limit;			// 1è¡Œã®é•·ã•
-	float sum_tick;				// ç™ºéŸ³é•·åˆè¨ˆ
-	float measure_tick;			// 1å°ç¯€
-	int measure_count;			// å°ç¯€æ•°
-	bool measure_1st;			// å°ç¯€ã®æœ€åˆã‹ã©ã†ã‹
-	int line_measure_count;		// ã“ã®å°ç¯€ã”ã¨ã«æ”¹è¡Œ
-	string line_head;			// è¡Œã®å…ˆé ­
+	std::stringstream mml;		// o—Íæ
+	std::stringstream buff;		// ˆêo—Íæ
+	size_t line_size;			// s‚Ì’·‚³
+	size_t line_limit;			// 1s‚Ì’·‚³
+	float sum_tick;				// ”­‰¹’·‡Œv
+	float measure_tick;			// 1¬ß
+	int measure_count;			// ¬ß”
+	bool measure_1st;			// ¬ß‚ÌÅ‰‚©‚Ç‚¤‚©
+	int line_measure_count;		// ‚±‚Ì¬ß‚²‚Æ‚É‰üs
+	string line_head;			// s‚Ìæ“ª
 public:
 	mml_buffer()
 		: line_size(0)
@@ -1532,32 +1534,32 @@ public:
 		size_t next_line_size = line_size + s.size();
 		if (0 == line_size)
 		{
-			next_line_size += line_head.size(); // ãƒ©ã‚¤ãƒ³ãƒ˜ãƒƒãƒ€ã‚’è€ƒæ…®
+			next_line_size += line_head.size(); // ƒ‰ƒCƒ“ƒwƒbƒ_‚ğl—¶
 		}
 		if (1 < measure_count)
 		{
-			next_line_size += 1; // å°ç¯€ã®é–“ã®ã‚¹ãƒšãƒ¼ã‚¹åˆ†
+			next_line_size += 1; // ¬ß‚ÌŠÔ‚ÌƒXƒy[ƒX•ª
 		}
 
 		if (line_limit <= next_line_size)
 		{
-			MML_TRACE("1è¡Œã®æ–‡å­—æ•°æŒ‡å®šã‚’ã‚ªãƒ¼ãƒãƒ¼\n");
+			MML_TRACE("1s‚Ì•¶š”w’è‚ğƒI[ƒo[\n");
 			MML_TRACE(buff.str().c_str()); MML_TRACE("\n");
 			if (0 < measure_count)
 			{
-				MML_TRACE("2å°ç¯€ç›®ä»¥é™ã¯å°ç¯€é–“ã«æ”¹è¡Œã‚’æŒ¿å…¥\n");
+				MML_TRACE("2¬ß–ÚˆÈ~‚Í¬ßŠÔ‚É‰üs‚ğ‘}“ü\n");
 				mml << std::endl;
 				line_size = size_t(buff.tellp());
 				line_size += line_head.size();
 				if (line_size)
 				{
-					MML_TRACE("å°ç¯€ã®ä¸€æ–‡å­—ç›®ã§ã¯ãªã„ã®ã§ãƒ©ã‚¤ãƒ³ãƒ˜ãƒƒãƒ€ã‚‚æŒ¿å…¥\n");
+					MML_TRACE("¬ß‚Ìˆê•¶š–Ú‚Å‚Í‚È‚¢‚Ì‚Åƒ‰ƒCƒ“ƒwƒbƒ_‚à‘}“ü\n");
 					mml << line_head;
 					measure_1st = false;
 				}
 				else
 				{
-					MML_TRACE("å°ç¯€ã®å…ˆä¸€æ–‡å­—ç›®ãªã®ã§ãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹ï¼ˆã“ã®å¾Œã®addã§line_headã¯è¿½åŠ ã•ã‚Œã‚‹ï¼‰\n");
+					MML_TRACE("¬ß‚Ìæˆê•¶š–Ú‚È‚Ì‚Åƒtƒ‰ƒO‚ğ—§‚Ä‚éi‚±‚ÌŒã‚Ìadd‚Åline_head‚Í’Ç‰Á‚³‚ê‚éj\n");
 					measure_1st = true;
 				}
 				measure_count = 0;
@@ -1565,10 +1567,10 @@ public:
 			else
 			if (!no_cr)
 			{
-				MML_TRACE("1å°ç¯€ç›®ã¯é€”ä¸­æ”¹è¡Œã—ã¦ã‹ã‚‰è¿½åŠ \n");
+				MML_TRACE("1¬ß–Ú‚Í“r’†‰üs‚µ‚Ä‚©‚ç’Ç‰Á\n");
 				if (1 < measure_count)
 				{
-					MML_TRACE("ç©ºç™½ã‚’è¿½åŠ \n");
+					MML_TRACE("‹ó”’‚ğ’Ç‰Á\n");
 					mml << " ";
 					line_size += 1;
 				}
@@ -1577,24 +1579,24 @@ public:
 		}
 		add(s);
 
-		// 1å°ç¯€
+		// 1¬ß
 		if ((0.f < measure_tick) && (0.f < tick)
 			&& (measure_tick <= sum_tick))
 		{
 			sum_tick -= measure_tick;
 			++measure_count;
 
-			measure_1st = true; // æ¬¡ã®ã‚³ãƒãƒ³ãƒ‰ãŒå°ç¯€ã®é ­
+			measure_1st = true; // Ÿ‚ÌƒRƒ}ƒ“ƒh‚ª¬ß‚Ì“ª
 
-			MML_TRACE("1å°ç¯€ã®åŒºåˆ‡ã‚Š\n");
+			MML_TRACE("1¬ß‚Ì‹æØ‚è\n");
 			MML_TRACE(buff.str().c_str()); MML_TRACE("\n");
 
 			if (line_measure_count <= measure_count)
 			{
-				MML_TRACE("è¦å®šå°ç¯€æ•°ã‚’è¶…ãˆãŸã®ã§è¿½åŠ ã—ã¦æ”¹è¡Œ\n");
+				MML_TRACE("‹K’è¬ß”‚ğ’´‚¦‚½‚Ì‚Å’Ç‰Á‚µ‚Ä‰üs\n");
 				if (1 < measure_count)
 				{
-					MML_TRACE("å°ç¯€é–“ã«ç©ºç™½ã‚’è¿½åŠ \n");
+					MML_TRACE("¬ßŠÔ‚É‹ó”’‚ğ’Ç‰Á\n");
 					mml << " ";
 					line_size += 1;
 				}
@@ -1606,13 +1608,13 @@ public:
 				{
 					//if ((line_size + 1) < line_limit)
 					//{
-						MML_TRACE("å°ç¯€é–“ã«ç©ºç™½ã‚’è¿½åŠ \n");
+						MML_TRACE("¬ßŠÔ‚É‹ó”’‚ğ’Ç‰Á\n");
 						mml << " ";
 						line_size += 1;
 					//}
 					//else
-					//{ // â†’ äº‹å‰ã«æ¡ã‚ãµã‚Œå‡¦ç†æ¸ˆã¿ãªã®ã§ä¸è¦
-					//	MML_TRACE("åˆ¶é™æ–‡å­—æ•°ã‚’è¶…ãˆã‚‹ã®ã§æ”¹è¡Œã‚’æŒ¿å…¥\n");
+					//{ // ¨ –‘O‚ÉŒ…‚ ‚Ó‚êˆ—Ï‚İ‚È‚Ì‚Å•s—v
+					//	MML_TRACE("§ŒÀ•¶š”‚ğ’´‚¦‚é‚Ì‚Å‰üs‚ğ‘}“ü\n");
 					//	mml << std::endl;
 					//	mml << line_head;
 					//	line_size = size_t(buff.tellp());
@@ -1628,7 +1630,7 @@ public:
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! æœ€ã‚‚é•·ã„ãƒãƒ£ãƒ³ãƒãƒ«ã®æ¼”å¥æ™‚é–“ã‚’å–å¾—ã™ã‚‹ (tick)
+//! Å‚à’·‚¢ƒ`ƒƒƒ“ƒlƒ‹‚Ì‰‰‘tŠÔ‚ğæ“¾‚·‚é (tick)
 //--------------------------------------------------
 double OplDrvData::calc_max_ch_time()
 {
@@ -1663,14 +1665,14 @@ double OplDrvData::calc_max_ch_time()
 
 //--------------------------------------------------
 //! OplDrvData::Header
-//! MMLã‚’ä½œæˆã™ã‚‹.
-//! @param	outbuffer		ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ã‚’å—ã‘å–ã‚‹
-//! @param	tempo			ãƒ†ãƒ³ãƒã‚’æŒ‡å®š
-//! @param	mml_loop		MMLã«ãƒ«ãƒ¼ãƒ—æŒ‡å®š
-//! @param	mml_rel_volume	ç›¸å¯¾éŸ³é‡ã§å‡ºåŠ›
-//! @param	def_len			çœç•¥æ™‚éŸ³é•· L?
-//! @param	title			ã‚¿ã‚¤ãƒˆãƒ«
-//! @param	time_signiture_d8	8åˆ†ã®ä½•æ‹å­ã‹æŒ‡å®š
+//! MML‚ğì¬‚·‚é.
+//! @param	outbuffer		ƒoƒCƒiƒŠƒf[ƒ^o—Í‚ğó‚¯æ‚é
+//! @param	tempo			ƒeƒ“ƒ|‚ğw’è
+//! @param	mml_loop		MML‚Éƒ‹[ƒvw’è
+//! @param	mml_rel_volume	‘Š‘Î‰¹—Ê‚Åo—Í
+//! @param	def_len			È—ª‰¹’· L?
+//! @param	title			ƒ^ƒCƒgƒ‹
+//! @param	time_signiture_d8	8•ª‚Ì‰½”q‚©w’è
 //--------------------------------------------------
 bool OplDrvData::make_mgs_mml(
 		std::string& outbuffer,
@@ -1682,25 +1684,25 @@ bool OplDrvData::make_mgs_mml(
 		int time_signiture_d8
 )
 {
-	const int default_volume = 12;		// OPLDRVãƒœãƒªãƒ¥ãƒ¼ãƒ åˆæœŸå€¤
+	const int default_volume = 12;		// OPLDRVƒ{ƒŠƒ…[ƒ€‰Šú’l
 
 	set_tempo(tempo);
 
-	mml_buffer buffer;					// å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡
+	mml_buffer buffer;					// o—Íƒoƒbƒtƒ@
 
 	float signiture_time = m_note_length[1];
 	if (time_signiture_d8 != 8)
 	{
-		// n/8æ‹å­
+		// n/8”q
 		signiture_time = m_note_length[8] * time_signiture_d8;
 	}
 
-	// æœ€å¤§æ¡80ã€ã¾ãŸã¯ ?/4å°ç¯€
+	// Å‘åŒ…80A‚Ü‚½‚Í ?/4¬ß
 	buffer.init( 80, signiture_time, 4);
 
-	int def_note_length = 0;			// çœç•¥æ™‚éŸ³é•·
+	int def_note_length = 0;			// È—ª‰¹’·
 
-	// ä½¿ç”¨ãƒãƒ£ãƒ³ãƒãƒ«ãƒªã‚¹ãƒˆæ–‡å­—åˆ—
+	// g—pƒ`ƒƒƒ“ƒlƒ‹ƒŠƒXƒg•¶š—ñ
 	string all_ch = "";
 	if (m_rhythm_ch.size())
 	{
@@ -1743,7 +1745,7 @@ bool OplDrvData::make_mgs_mml(
 		<< " }"  << std::endl
 		<< std::endl;
 
-	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²
+	// ƒ†[ƒU[‰¹F
 	/*
 	@v15 = { ; E - Guiter
 	;       TL FB
@@ -1752,7 +1754,7 @@ bool OplDrvData::make_mgs_mml(
 	  15, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0,
 	  15, 7, 0, 7, 0, 8, 0, 0, 1, 0, 1 }
 	 */
-	u8 cur_user_voice = 16;	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ç•ªå·
+	u8 cur_user_voice = 16;	// ƒ†[ƒU[‰¹F”Ô†
 	for (auto i = m_voice.begin(); i != m_voice.end(); ++i)
 	{
 		auto& voice = i->second;
@@ -1762,17 +1764,17 @@ bool OplDrvData::make_mgs_mml(
 		buffer.mml << std::endl;
 	}
 
-	// æœ€å¤§æ¼”å¥æ™‚é–“
+	// Å‘å‰‰‘tŠÔ
 	double max_tick = calc_max_ch_time();
 	print("[INFO] max ch. time : " + double_str(max_tick));
 
-	// ãƒ«ãƒ¼ãƒ—
+	// ƒ‹[ƒv
 	if (mml_loop && all_ch.size())
 	{
 		buffer.mml << all_ch << " [0" << std::endl << std::endl;
 	}
 
-	// ãƒªã‚ºãƒ ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒŠƒYƒ€ƒ`ƒƒƒ“ƒlƒ‹
 	if (m_rhythm_ch.size() && m_header.isRhythmMode())
 	{
 		buffer.mml << ";--- Rhythm ---" << std::endl;
@@ -1786,7 +1788,7 @@ bool OplDrvData::make_mgs_mml(
 			buffer.add_cmd("L" + dec(def_len));
 		}
 
-		// åˆå›ã¯ãƒœãƒªãƒ¥ãƒ¼ãƒ åˆæœŸå€¤æŒ‡å®š
+		// ‰‰ñ‚Íƒ{ƒŠƒ…[ƒ€‰Šú’lw’è
 		buffer.add_cmd("V" + dec(default_volume));
 		int volume[Command::RHYTHM_INST_NUM];
 		std::fill(volume, volume + Command::RHYTHM_INST_NUM, -1);
@@ -1806,7 +1808,7 @@ bool OplDrvData::make_mgs_mml(
 
 				if (def_len && (n== def_len))
 				{
-					// éŸ³é•·çœç•¥
+					// ‰¹’·È—ª
 					buffer.add_cmd(Command::getRhythmName(i->m_opt) + ":", note_tick);
 				}
 				else
@@ -1828,10 +1830,10 @@ bool OplDrvData::make_mgs_mml(
 					}
 					else
 					{
-						// [æš«å®š] ãƒªã‚ºãƒ éŸ³æºã¯&ãŒãªã„ã®ã§ä¼‘ç¬¦ã§æ®‹ã‚Šã‚’æŒ‡å®š
+						// [b’è] ƒŠƒYƒ€‰¹Œ¹‚Í&‚ª‚È‚¢‚Ì‚Å‹x•„‚Åc‚è‚ğw’è
 						if (def_len && (n == def_len))
 						{
-							// éŸ³é•·çœç•¥
+							// ‰¹’·È—ª
 							buffer.add_cmd("R:", note_tick);
 						}
 						else
@@ -1909,7 +1911,7 @@ bool OplDrvData::make_mgs_mml(
 		buffer.mml << std::endl;
 	}
 
-	// ãƒ¡ãƒ­ãƒ‡ã‚£ãƒ¼ãƒãƒ£ãƒ³ãƒãƒ«
+	// ƒƒƒfƒB[ƒ`ƒƒƒ“ƒlƒ‹
 	for (int ch = 0; ch < m_header.getChannelCount(); ++ch)
 	{
 		auto& melody_ch = m_melody_ch[ch];
@@ -1921,10 +1923,10 @@ bool OplDrvData::make_mgs_mml(
 
 			bool legato = false;
 
-			int octave = -1;				// ç¾åœ¨ã®ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–
-			int volume = -1;				// ç¾åœ¨ã®ãƒœãƒªãƒ¥ãƒ¼ãƒ 
-			int user_voice = 15;			// ç¾åœ¨ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²(15ã¯æœªå®šç¾©)
-			bool req_user_voice = false;	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ãŒå¿…è¦
+			int octave = -1;				// Œ»İ‚ÌƒIƒNƒ^[ƒu
+			int volume = -1;				// Œ»İ‚Ìƒ{ƒŠƒ…[ƒ€
+			int user_voice = 15;			// Œ»İ‚Ìƒ†[ƒU[‰¹F(15‚Í–¢’è‹`)
+			bool req_user_voice = false;	// ƒ†[ƒU[‰¹FƒRƒ}ƒ“ƒh‚ª•K—v
 
 			double total_tick = 0.;
 
@@ -1947,21 +1949,21 @@ bool OplDrvData::make_mgs_mml(
 					if (!n) break;
 					tick -= note_tick;
 
-					// ãƒœãƒªãƒ¥ãƒ¼ãƒ æœªè¨­å®š
+					// ƒ{ƒŠƒ…[ƒ€–¢İ’è
 					if (volume < 0)
 					{
 						volume = default_volume;
 						buffer.add_cmd("v" + dec(volume));
 					}
 
-					// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²æœªè¨­å®š
+					// ƒ†[ƒU[‰¹F–¢İ’è
 					if (req_user_voice)
 					{
 						buffer.add_cmd("@" + dec(user_voice));
 						req_user_voice = false;
 					}
 
-					// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–
+					// ƒIƒNƒ^[ƒu
 					if (i->m_opt)
 					{
 						int o = Command::getOctave(i->m_opt);
@@ -1987,14 +1989,14 @@ bool OplDrvData::make_mgs_mml(
 
 					float note_total = note_tick;
 
-					if (legato && i->m_opt) // ä¼‘ç¬¦ã¯ã®æ™‚ã¯ã‚¹ãƒ©ãƒ¼ä¸è¦
+					if (legato && i->m_opt) // ‹x•„‚Í‚Ì‚ÍƒXƒ‰[•s—v
 					{
-						// ãƒ¬ã‚¬ãƒ¼ãƒˆON
+						// ƒŒƒK[ƒgON
 						buffer.add_cmd("&");
 					}
 					if (def_len && (n == def_len))
 					{
-						// éŸ³é•·çœç•¥
+						// ‰¹’·È—ª
 						buffer.add_cmd(
 							get_lower(Command::getNoteName(i->m_opt))
 							, note_tick);
@@ -2017,28 +2019,28 @@ bool OplDrvData::make_mgs_mml(
 
 						if (!buffer.measure_1st && (old_n > 1) && (n == old_n * 2))
 						{
-							// åŠåˆ†ãªã‚‰.
+							// ”¼•ª‚È‚ç.
 							buffer.add_cmd(".", note_tick, true);
 						}
 						else
 						{
 							if (!buffer.measure_1st && (note_total <= m_note_length[1]))
 							{
-								// å…¨éŸ³ç¬¦ä»¥å†…ãªã‚‰^ã§éŸ³é•·ã ã‘ç¹‹ã’ã‚‹
+								// ‘S‰¹•„ˆÈ“à‚È‚ç^‚Å‰¹’·‚¾‚¯Œq‚°‚é
 								buffer.add_cmd("^" + dec(n), note_tick, true);
 								ASSERT(n > 1);
 							}
 							else
 							{
-								// ã‚¹ãƒ©ãƒ¼ã§ç¹‹ã’ã‚‹
+								// ƒXƒ‰[‚ÅŒq‚°‚é
 								note_total = note_tick;
-								if (i->m_opt) // ä¼‘ç¬¦ã¯ã®æ™‚ã¯ã‚¹ãƒ©ãƒ¼ä¸è¦
+								if (i->m_opt) // ‹x•„‚Í‚Ì‚ÍƒXƒ‰[•s—v
 								{
 									buffer.add_cmd("&");
 								}
 								if (def_len && (n == def_len))
 								{
-									// éŸ³é•·çœç•¥
+									// ‰¹’·È—ª
 									buffer.add_cmd(
 										get_lower(Command::getNoteName(i->m_opt))
 										, note_tick);
@@ -2094,29 +2096,29 @@ bool OplDrvData::make_mgs_mml(
 				}
 				case Command::CMD_VOICE:
 				{
-					//	éŸ³è‰²ç•ªå·    ROMéŸ³è‰²ç•ªå·    éŸ³è‰²å
-					//		0        1	   ãƒã‚¤ã‚ªãƒªãƒ³
-					//		1        2	   ã‚®ã‚¿ãƒ¼
-					//		2		 3	   ãƒ”ã‚¢ãƒ
-					//		3		 4	   ãƒ•ãƒ«ãƒ¼ãƒˆ
-					//		4		 5	   ã‚¯ãƒ©ãƒªãƒãƒƒãƒˆ
-					//		5		 6	   ã‚ªãƒ¼ãƒœã‚¨
-					//		6		 7	   ãƒˆãƒ©ãƒ³ãƒšãƒƒãƒˆ
-					//		7		 8	   ã‚ªãƒ«ã‚¬ãƒ³
-					//		8		 9	   ãƒ›ãƒ«ãƒ³
-					//		9		10	   ã‚·ãƒ³ã‚»
-					//		10		11	   ãƒãƒ¼ãƒ—ã‚·ã‚³ãƒ¼ãƒ‰
-					//		11		12	   ãƒ“ãƒ–ãƒ©ãƒ•ã‚©ãƒ³
-					//		12		13	   ã‚·ãƒ³ã‚»ãƒ™ãƒ¼ã‚¹
-					//		13		14	   ã‚¦ãƒƒãƒ‰ãƒ™ãƒ¼ã‚¹
-					//		14		15	   ã‚¨ãƒ¬ã‚­ãƒ™ãƒ¼ã‚¹
+					//	‰¹F”Ô†    ROM‰¹F”Ô†    ‰¹F–¼
+					//		0        1	   ƒoƒCƒIƒŠƒ“
+					//		1        2	   ƒMƒ^[
+					//		2		 3	   ƒsƒAƒm
+					//		3		 4	   ƒtƒ‹[ƒg
+					//		4		 5	   ƒNƒ‰ƒŠƒlƒbƒg
+					//		5		 6	   ƒI[ƒ{ƒG
+					//		6		 7	   ƒgƒ‰ƒ“ƒyƒbƒg
+					//		7		 8	   ƒIƒ‹ƒKƒ“
+					//		8		 9	   ƒzƒ‹ƒ“
+					//		9		10	   ƒVƒ“ƒZ
+					//		10		11	   ƒn[ƒvƒVƒR[ƒh
+					//		11		12	   ƒrƒuƒ‰ƒtƒHƒ“
+					//		12		13	   ƒVƒ“ƒZƒx[ƒX
+					//		13		14	   ƒEƒbƒhƒx[ƒX
+					//		14		15	   ƒGƒŒƒLƒx[ƒX
 					//		15		 0
-					//		: : ã‚ªãƒªã‚¸ãƒŠãƒ«éŸ³è‰²
+					//		: : ƒIƒŠƒWƒiƒ‹‰¹F
 					//		31		 0
 					int voice = int(i->m_opt - 1);
-					if (voice < 0)
+					if ((voice < 0) || (14 < voice))
 					{
-						req_user_voice = true;	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²æŒ‡å®šäºˆç´„
+						req_user_voice = true;	// ƒ†[ƒU[‰¹Fw’è—\–ñ
 					}
 					else
 					{
@@ -2126,7 +2128,7 @@ bool OplDrvData::make_mgs_mml(
 				}
 				case Command::CMD_SUSTAIN:
 				{
-					buffer.add_cmd(string("s") + (i->m_opt ? " o" : " f"));
+					buffer.add_cmd(string("s") + (i->m_opt ? "o " : "f "));
 					break;
 				}
 				case Command::CMD_ROM_VOICE:
@@ -2147,7 +2149,7 @@ bool OplDrvData::make_mgs_mml(
 						ASSERT(voice.voice_no);
 					}
 					user_voice = voice.voice_no;
-					req_user_voice = false;	// ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²æŒ‡å®šäºˆç´„è§£é™¤
+					req_user_voice = false;	// ƒ†[ƒU[‰¹Fw’è—\–ñ‰ğœ
 					break;
 				}
 				case Command::CMD_LEGATO:
@@ -2164,7 +2166,7 @@ bool OplDrvData::make_mgs_mml(
 				{
 					if (i == melody_ch.begin())
 					{
-						// MGSDRVã¯ãƒãƒ£ãƒ³ãƒãƒ«ã«ç™ºéŸ³ã‹ä¼‘ç¬¦ãŒãªã„ã¨ãƒã‚°ã‚‹
+						// MGSDRV‚Íƒ`ƒƒƒ“ƒlƒ‹‚É”­‰¹‚©‹x•„‚ª‚È‚¢‚ÆƒoƒO‚é
 						auto n = def_len ? def_len : 16;
 						buffer.add_cmd("R" + dec(n),m_note_length[n]);
 						total_tick += m_note_length[n];
@@ -2205,7 +2207,7 @@ bool OplDrvData::make_mgs_mml(
 		}
 	}
 
-	// ãƒ«ãƒ¼ãƒ—
+	// ƒ‹[ƒv
 	if (mml_loop && all_ch.size())
 	{
 		buffer.mml << all_ch << " ]" << std::endl;

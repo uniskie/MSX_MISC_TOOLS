@@ -1,10 +1,10 @@
-Ôªø#ifndef __OPLDRV_INST_DATA_H__
+#ifndef __OPLDRV_INST_DATA_H__
 #define __OPLDRV_INST_DATA_H__
 
 #include "opldrv_data.h"
 
 //===============================================
-// FM-PACÁâà ROMÈü≥Ëâ≤„Éá„Éº„Çø
+// FM-PACî≈ ROMâπêFÉfÅ[É^
 //===============================================
 namespace OPLDRV {
 // FM-PAC 

@@ -1,4 +1,4 @@
-﻿#ifndef __UNI_COMMON_H__
+#ifndef __UNI_COMMON_H__
 #define __UNI_COMMON_H__
 
 #include <sstream>

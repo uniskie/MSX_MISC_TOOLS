@@ -1,4 +1,4 @@
-ï»¿#include "uni_common.h"
+#include "uni_common.h"
 #include "opldrv_data.h"
 
 #include <vector>
@@ -28,6 +28,7 @@ void showHelp()
 		"\n"
 		"/l:[filename]  Log text output to file.\n"
 		"/a:[address]   base address. (for RAW file) (need for user voice.)\n"
+		"/s:[address]   music start address. (for RAW file) (for multiple music set.)\n"
 		"/r:[address]   relocate to address. (need for user voice.)\n"
 		"/b             add BSAVE header to output.\n"
 		"/-b            RAW output. (remove BSAVE header)\n"
@@ -65,29 +66,30 @@ int main(int argc, char* argv[])
     string outFileNameReq = "";
 	string out_ext = ".out";
 
-	bool silent_mode = false;			//!< ã‚­ãƒ¼å…¥åŠ›å¾…ã¡ã‚’ã—ãªã„
-	bool protect_infile = false;		//!< å…ƒãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ä¸Šæ›¸ãã‚’ç¦æ­¢ã™ã‚‹
+	bool silent_mode = false;			//!< ƒL[“ü—Í‘Ò‚¿‚ğ‚µ‚È‚¢
+	bool protect_infile = false;		//!< Œ³ƒtƒ@ƒCƒ‹‚Ö‚Ìã‘‚«‚ğ‹Ö~‚·‚é
 
-	u16 in_base_address = 0;
-	u16 out_base_address = 0;			//!< å‡ºåŠ›ãƒ‡ãƒ¼ã‚¿ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ï¼ˆãƒ¦ãƒ¼ã‚¶éŸ³è‰²ä½¿ç”¨æ™‚ã«å¿…è¦ï¼‰
+	u16 in_base_address = 0;			//!< ƒoƒCƒiƒŠ‚ÌMSXãƒx[ƒXƒAƒhƒŒƒX
+	u16 in_music_address = 0xffff;			//!< ‰‰‘tƒf[ƒ^‚ÌMSXãƒx[ƒXƒAƒhƒŒƒX
+	u16 out_base_address = 0;			//!< o—Íƒf[ƒ^‚Ìæ“ªƒAƒhƒŒƒXiƒ†[ƒU‰¹Fg—p‚É•K—vj
 
-	bool use_bsave_header = false;		//!< BSAVEãƒ˜ãƒƒãƒ€ã‚’ä»˜ä¸ã™ã‚‹ï¼ˆå…ƒãŒBSAVEãƒ•ã‚¡ã‚¤ãƒ«ãªã‚‰trueï¼‰
-	bool force_bsave_header = false;	//!< å¿…ãšBSAVEãƒ˜ãƒƒãƒ€ã‚’ä»˜ä¸ã™ã‚‹
-	bool remove_bsave_header = false;	//!< å¿…ãšBSAVEãƒ˜ãƒƒãƒ€ã‚’å‰Šé™¤ã™ã‚‹
+	bool use_bsave_header = false;		//!< BSAVEƒwƒbƒ_‚ğ•t—^‚·‚éiŒ³‚ªBSAVEƒtƒ@ƒCƒ‹‚È‚çtruej
+	bool force_bsave_header = false;	//!< •K‚¸BSAVEƒwƒbƒ_‚ğ•t—^‚·‚é
+	bool remove_bsave_header = false;	//!< •K‚¸BSAVEƒwƒbƒ_‚ğíœ‚·‚é
 
 	string logFileName = "";
 
-	int convert_rom_voice = 0;			//!< æ‹¡å¼µéŸ³è‰²ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©éŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ã«å¤‰æ›´
-										//!< 1=FMPACæ‹¡å¼µéŸ³è‰²/2=A1GTæ‹¡å¼µéŸ³è‰²
+	int convert_rom_voice = 0;			//!< Šg’£‰¹F‚ğƒ†[ƒU[’è‹`‰¹FƒRƒ}ƒ“ƒh‚É•ÏX
+										//!< 1=FMPACŠg’£‰¹F/2=A1GTŠg’£‰¹F
 
-	int volume_change = 0;				//!< éŸ³é‡å¤‰æ›´ ãƒã‚¤ãƒŠã‚¹ãªã‚‰éŸ³ãŒå¤§ãããªã‚‹
+	int volume_change = 0;				//!< ‰¹—Ê•ÏX ƒ}ƒCƒiƒX‚È‚ç‰¹‚ª‘å‚«‚­‚È‚é
 
-	string mmlFileName = "";			//!< MMLå‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
-	float tempo = 120.f;				//!< MMLå¤‰æ›æ™‚ã®ãƒ†ãƒ³ãƒ
-	int default_note_length = 16;		//!< MMLãƒ‡ãƒ•ã‚©ãƒ«ãƒˆéŸ³é•·
-	int time_signiture_d8 = 8;			//!< MMLæ‹å­(?/8)
-	bool mml_loop = false;				//!< MMLãƒ«ãƒ¼ãƒ—
-	bool mml_rel_volume = false;		//!< MMLç›¸å¯¾éŸ³é‡ãƒ¢ãƒ¼ãƒ‰
+	string mmlFileName = "";			//!< MMLo—Íƒtƒ@ƒCƒ‹–¼
+	float tempo = 120.f;				//!< MML•ÏŠ·‚Ìƒeƒ“ƒ|
+	int default_note_length = 16;		//!< MMLƒfƒtƒHƒ‹ƒg‰¹’·
+	int time_signiture_d8 = 8;			//!< MML”q(?/8)
+	bool mml_loop = false;				//!< MMLƒ‹[ƒv
+	bool mml_rel_volume = false;		//!< MML‘Š‘Î‰¹—Êƒ‚[ƒh
 
     //-- parse arguments
     int argi = 1;
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
         if (arg.size())
         {
             string l = get_lower(arg);
-			//-- arg: BSAVEå½¢å¼å‡ºåŠ›ï¼ˆ*.binï¼‰
+			//-- arg: BSAVEŒ`®o—Íi*.binj
 			if (l == "/b")
 			{
 				print(string("arg: add BSAVE header: ") + arg);
@@ -110,7 +112,7 @@ int main(int argc, char* argv[])
 				remove_bsave_header = false;
 			}
 			else
-			//-- arg: RAWå½¢å¼å‡ºåŠ›ï¼ˆ*.oplï¼‰
+			//-- arg: RAWŒ`®o—Íi*.oplj
 			if (l == "/-b")
 			{
 				print(string("arg: remove BSAVE header: ") + arg);
@@ -118,15 +120,15 @@ int main(int argc, char* argv[])
 				remove_bsave_header = true;
 			}
 			else
-			//-- arg: ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«å‡ºåŠ›
+			//-- arg: ƒƒOƒtƒ@ƒCƒ‹o—Í
 			if (l.substr(0, 3) == "/l:")
 			{
 				logFileName = arg.substr(3);
 				print(string("arg: logFileName : ") + arg);
-				OplDrvData::trace_mode = true; // è§£æå‡ºåŠ›ã‚’æœ‰åŠ¹åŒ–
+				OplDrvData::trace_mode = true; // ‰ğÍo—Í‚ğ—LŒø‰»
 			}
 			else
-			//-- arg: ãƒ‡ãƒ¼ã‚¿ã®ãƒ™ãƒ¼ã‚¹ã‚¢ãƒ‰ãƒ¬ã‚¹æŒ‡å®šï¼ˆRAW+ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©éŸ³è‰²ç”¨ï¼‰
+			//-- arg: ƒoƒCƒiƒŠƒf[ƒ^‚Ìƒx[ƒXƒAƒhƒŒƒXw’èiRAW+ƒ†[ƒU[’è‹`‰¹F—pj
 			if (l.substr(0, 3) == "/a:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> in_base_address;
@@ -137,7 +139,18 @@ int main(int argc, char* argv[])
 				}
 			}
 			else
-			//-- arg: ãƒ¡ãƒ¢ãƒªå†é…ç½®
+			//-- arg: ‰‰‘tƒf[ƒ^‚Ìƒx[ƒXƒAƒhƒŒƒXw’èi•¡”ƒAƒhƒŒƒX‚Ü‚½‚ÍA‰‰‘tƒf[ƒ^‚ªæ“ª‚É‚È‚¢ƒoƒCƒiƒŠ—pj
+			if (l.substr(0, 3) == "/s:")
+			{
+				std::istringstream(arg.substr(3)) >> std::hex >> in_music_address;
+				print(string("arg: music address : ") + hex(in_music_address, 4, "0"));
+				if (!req_out_base_address)
+				{
+					in_music_address;
+				}
+			}
+			else
+			//-- arg: ƒƒ‚ƒŠÄ”z’u
 			if (l.substr(0, 3) == "/r:")
 			{
 				std::istringstream(arg.substr(3)) >> std::hex >> out_base_address;
@@ -145,7 +158,7 @@ int main(int argc, char* argv[])
 				req_out_base_address = true;
 			}
 			else
-			//-- arg: ROMæ‹¡å¼µéŸ³è‰²ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©éŸ³è‰²ã«å¤‰æ›ï¼ˆROMæ‹¡å¼µéŸ³è‰²ãŒFMPACã‚„å†…è”µæ©Ÿç¨®ã§é•ã†å•é¡Œã‚’å›é¿ï¼‰
+			//-- arg: ROMŠg’£‰¹F‚ğƒ†[ƒU[’è‹`‰¹F‚É•ÏŠ·iROMŠg’£‰¹F‚ªFMPAC‚â“à‘ ‹@í‚Åˆá‚¤–â‘è‚ğ‰ñ”ğj
 			if (l.substr(0, 4) == "/cv:")
 			{
 				string romtype = get_lower(arg.substr(4));
@@ -173,7 +186,7 @@ int main(int argc, char* argv[])
 			}
 			else
 		#if 1
-			//-- arg: ROMæ‹¡å¼µéŸ³è‰²ãƒªã‚¹ãƒˆå‡ºåŠ›
+			//-- arg: ROMŠg’£‰¹FƒŠƒXƒgo—Í
 			if (l.substr(0, 4) == "/cl:")
 			{
 				string romtype = get_lower(arg.substr(4));
@@ -211,21 +224,21 @@ int main(int argc, char* argv[])
 			}
 		#endif
 			else
-			//-- arg: éŸ³é‡è£œæ­£
+			//-- arg: ‰¹—Ê•â³
 			if (l.substr(0, 3) == "/v:")
 			{
 				std::istringstream(arg.substr(3)) >> std::dec >> volume_change;
 				print("arg: modify volume : " + dec(volume_change));
 			}
 			else
-			//-- arg: MML: MMLå‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
+			//-- arg: MML: MMLo—Íƒtƒ@ƒCƒ‹–¼
 			if (l.substr(0, 5) == "/mml:")
 			{
 				mmlFileName = arg.substr(5);
 				print(string("arg: mmlFileName: ") + arg);
 			}
 			else
-			//-- arg: MML: ãƒ†ãƒ³ãƒæŒ‡å®š
+			//-- arg: MML: ƒeƒ“ƒ|w’è
 			if (l.substr(0, 3) == "/t:")
 			{
 				std::istringstream(arg.substr(3)) >> std::dec >> tempo;
@@ -239,7 +252,7 @@ int main(int argc, char* argv[])
 				}
 			}
 			else
-			//-- arg: MML: 4åˆ†éŸ³ç¬¦ã®tickæ•°ã§ãƒ†ãƒ³ãƒæŒ‡å®š
+			//-- arg: MML: 4•ª‰¹•„‚Ìtick”‚Åƒeƒ“ƒ|w’è
 			if (l.substr(0, 4) == "/@t:")
 			{
 				int qt;
@@ -279,35 +292,35 @@ int main(int argc, char* argv[])
 			#endif
 			}
 			else
-			//-- arg: MML: çœç•¥æ™‚éŸ³é•· (L?)
+			//-- arg: MML: È—ª‰¹’· (L?)
 			if (l.substr(0, 4) == "/dl:")
 			{
 				std::istringstream(arg.substr(4)) >> std::dec >> default_note_length;
 				print("arg:MML default note length : L" + dec(default_note_length));
 			}
 			else
-			//-- arg: MML: 8åˆ†ã®næ‹å­æŒ‡å®š
+			//-- arg: MML: 8•ª‚Ìn”qw’è
 			if (l.substr(0, 4) == "/ts:")
 			{
 				std::istringstream(arg.substr(4)) >> std::dec >> time_signiture_d8;
 				print("arg:MML time signiture : " + dec(time_signiture_d8) + "/8");
 			}
 			else
-			//-- arg: MML: ãƒ«ãƒ¼ãƒ—æœ‰åŠ¹
+			//-- arg: MML: ƒ‹[ƒv—LŒø
 			if (l.substr(0, 5) == "/loop")
 			{
 				mml_loop = true;
 				print("arg:MML set loop");
 			}
 			else
-			//-- arg: MML: ç›¸å¯¾éŸ³é‡æœ‰åŠ¹
+			//-- arg: MML: ‘Š‘Î‰¹—Ê—LŒø
 			if (l.substr(0, 4) == "/v+-")
 			{
 				mml_rel_volume = true;
 				print("arg:MML set relative volume mode");
 			}
 			else
-			//-- arg: å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
+			//-- arg: “ü—Íƒtƒ@ƒCƒ‹–¼
 			if (filename_arg_step == 0)
 			{
 				inFileName = arg;
@@ -316,7 +329,7 @@ int main(int argc, char* argv[])
 			}
 #if USE_OUT_FILE_NAME_OPTION
 			else
-			//-- arg: å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
+			//-- arg: o—Íƒtƒ@ƒCƒ‹–¼
 			if (l.substr(0, 3) == "/o:")
 			{
 				if (filename_arg_step == 1)
@@ -395,13 +408,13 @@ int main(int argc, char* argv[])
 	print(string("fs::current_path():") + fs::current_path().generic_string());
 
 	//-------------------------------------
-	// ä¸Šæ›¸ãã‹ã©ã†ã‹èª¿ã¹ã‚‹
+	// ã‘‚«‚©‚Ç‚¤‚©’²‚×‚é
 	if (inFileName == outFileName)
 	{
 		print(string("[overwrite source file] ") + outFileName + " -> " + outFileName);
 		if (protect_infile)
 		{
-			// ä¸Šæ›¸ãç¦æ­¢
+			// ã‘‚«‹Ö~
 			print_error(string("[ERROR] Overwriting the original file is prohibited."));
 			if (!silent_mode)   std::cin.get();
 			return 1; // error end
@@ -409,7 +422,7 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
-	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
+	// ƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
 	FILE* inFile;
 	errno_t err_no = fopen_s(&inFile, inFileName.c_str(), "rb");
 	if (err_no != 0)
@@ -434,7 +447,7 @@ int main(int argc, char* argv[])
 	print(string("in_file size = ") + std::to_string(inFileSize));
 
 	//-------------------------------------
-	// ãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
+	// ƒtƒ@ƒCƒ‹“Ç‚İ‚İ
 	std::vector<u8> data(inFileSize);
 	size_t rsize = fread(&data[0], 1, inFileSize, inFile);
 	if (rsize != inFileSize)
@@ -447,7 +460,7 @@ int main(int argc, char* argv[])
 	inFile = nullptr;
 
 	//-------------------------------------
-	// ã‚³ãƒãƒ³ãƒ‰ãƒ‡ãƒ¼ã‚¿è§£æ
+	// ƒRƒ}ƒ“ƒhƒf[ƒ^‰ğÍ
 	OplDrvData opldata;
 	const u8* p = &data[0];
 	size_t offset = 0;
@@ -470,7 +483,12 @@ int main(int argc, char* argv[])
 			out_base_address = in_base_address;
 		}
 	}
-	bool result = opldata.from_binary( p + offset, p + data.size(), in_base_address );
+	if (in_music_address == 0xffff) // –¢İ’è‚Ìê‡ ƒx[ƒXƒAƒhƒŒƒX=‰¹Šyƒf[ƒ^æ“ª
+	{
+		in_music_address = in_base_address;
+	}
+
+	bool result = opldata.from_binary( p + offset, p + data.size(), in_base_address, in_music_address );
 	if (!result)
 	{
 		if (!silent_mode)   std::cin.get();
@@ -478,14 +496,14 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
-	// éŸ³é‡ä¿®æ­£
+	// ‰¹—ÊC³
 	if (volume_change)
 	{
 		opldata.modify_volume( volume_change );
 	}
 
 	//-------------------------------------
-	// ROMæ‹¡å¼µéŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ã‚³ãƒãƒ³ãƒ‰ã«å¤‰æ›
+	// ROMŠg’£‰¹FƒRƒ}ƒ“ƒh‚ğƒ†[ƒU[‰¹FƒRƒ}ƒ“ƒh‚É•ÏŠ·
 	if (convert_rom_voice)
 	{
 		if (!opldata.convert_voice_rom_to_user(convert_rom_voice))
@@ -496,7 +514,7 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
-	// å‡ºåŠ›
+	// o—Í
 	if (outFileName.size())
 	{
 		std::vector<u8> output_buffer;
@@ -555,7 +573,7 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------------------------
-	// mml å‡ºåŠ›
+	// mml o—Í
 	if (mmlFileName.size())
 	{
 		print("[INFO] output mml file: " + mmlFileName);

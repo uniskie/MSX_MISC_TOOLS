@@ -1,4 +1,4 @@
-ï»¿
+
 #ifndef __OPLDRV_DATA_H__
 #define __OPLDRV_DATA_H__
 
@@ -18,38 +18,38 @@ public:
 	/*
 	# FM-BIOS MUSIC DATA
 
-	## ãƒ¡ãƒ­ãƒ‡ã‚£6éŸ³+ãƒªã‚ºãƒ æ§‹æˆã®ãƒ˜ãƒƒãƒ€
+	## ƒƒƒfƒB6‰¹+ƒŠƒYƒ€\¬‚Ìƒwƒbƒ_
 
 	| adr. | value             | size    | desc.
 	|------|-------------------|---------|-------|
-	| +00H | rhythm ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ | 000EH
-	| +02H | CH1 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +04H | CH2 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +06H | CH3 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +08H | CH4 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +0AH | CH5 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +0CH | CH6 ã‚ªãƒ•ã‚»ãƒƒãƒˆ    | 2ãƒã‚¤ãƒˆ |
-	| +0EH | ãƒ‡ãƒ¼ã‚¿æœ¬ä½“        |         |
+	| +00H | rhythm ƒIƒtƒZƒbƒg | 2ƒoƒCƒg | 000EH
+	| +02H | CH1 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +04H | CH2 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +06H | CH3 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +08H | CH4 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +0AH | CH5 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +0CH | CH6 ƒIƒtƒZƒbƒg    | 2ƒoƒCƒg |
+	| +0EH | ƒf[ƒ^–{‘Ì        |         |
 
 
-	## ãƒ¡ãƒ­ãƒ‡ã‚£9éŸ³æ§‹æˆã®ãƒ˜ãƒƒãƒ€
+	## ƒƒƒfƒB9‰¹\¬‚Ìƒwƒbƒ_
 
 	| adr. | value          | size    | desc.
 	|------|----------------|---------|-------|
-	| +00H | CH1 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ | 0012H
-	| +02H | CH2 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +04H | CH3 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +06H | CH4 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +08H | CH5 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +0AH | CH6 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +0CH | CH7 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +0EH | CH8 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +10H | CH1 ã‚ªãƒ•ã‚»ãƒƒãƒˆ | 2ãƒã‚¤ãƒˆ |
-	| +14H | ãƒ‡ãƒ¼ã‚¿æœ¬ä½“     |         |
+	| +00H | CH1 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg | 0012H
+	| +02H | CH2 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +04H | CH3 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +06H | CH4 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +08H | CH5 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +0AH | CH6 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +0CH | CH7 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +0EH | CH8 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +10H | CH1 ƒIƒtƒZƒbƒg | 2ƒoƒCƒg |
+	| +14H | ƒf[ƒ^–{‘Ì     |         |
 	*/
 public:
 	//--------------------------------------------------
-	//! OPLDRV ãƒ‡ãƒ¼ã‚¿ã®ãƒ˜ãƒƒãƒ€ãƒ¼éƒ¨
+	//! OPLDRV ƒf[ƒ^‚Ìƒwƒbƒ_[•”
 	//--------------------------------------------------
 	class Header
 	{
@@ -80,30 +80,30 @@ public:
 	};
 
 	/*
-	## ãƒ‡ãƒ¼ã‚¿æœ¬ä½“
+	## ƒf[ƒ^–{‘Ì
 
-	### ãƒ¡ãƒ­ãƒ‡ã‚£éƒ¨(FMéƒ¨)
+	### ƒƒƒfƒB•”(FM•”)
 
-	| value      | æ„å‘³         | è£œè¶³
+	| value      | ˆÓ–¡         | •â‘«
 	|------------|--------------|----------------------------------------------------------------------|
-	|  00H       | ä¼‘ç¬¦         | ç¶šã1ãƒã‚¤ãƒˆãŒéŸ³é•·ã€‚<br> éŸ³é•·ãŒ0FFHã®ã¨ãã¯ã•ã‚‰ã«ç¶šã1ãƒã‚¤ãƒˆã‚‚éŸ³é•·ã«åŠ ç®—ã€‚
-	|  01Hï½ž 5FH | éŸ³ç¨‹         | ç¶šã1ãƒã‚¤ãƒˆãŒéŸ³é•·ã€‚<br> éŸ³é•·ãŒ0FFHã®ã¨ãã¯ã•ã‚‰ã«ç¶šã1ãƒã‚¤ãƒˆã‚‚éŸ³é•·ã«åŠ ç®—ã€‚
-	|  60Hï½ž 6FH | éŸ³é‡         | ã“ã®å€¤ã‹ã‚‰60Hã‚’å¼•ã„ãŸå€¤ãŒã€éŸ³é‡ã¨ã—ã¦ä½¿ç”¨ã•ã‚Œã‚‹ã€‚
-	|  70Hï½ž 7FH | éŸ³è‰²         | ã“ã®å€¤ã‹ã‚‰70Hã‚’å¼•ã„ãŸå€¤ãŒã€éŸ³è‰²ç•ªå·ã¨ã—ã¦ä½¿ç”¨ã•ã‚Œã‚‹ã€‚
-	|  80H, 81H  | ã‚µã‚¹ãƒ†ã‚£ãƒ³   | 80Hã§ã‚µã‚¹ãƒ†ã‚£ãƒ³OFFã€‚81Hã§ã‚µã‚¹ãƒ†ã‚£ãƒ³ONã€‚
-	|  82H       | æ‹¡å¼µéŸ³è‰²     | ç¶šã1ãƒã‚¤ãƒˆã®å€¤(0ï½ž63)ãŒROMã®å†…è”µéŸ³è‰²ç•ªå·ã€‚(éŸ³è‰²ãƒ‡ãƒ¼ã‚¿ã¯4C00H)
-	|  83H       | ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰² | ç¶šã2ãƒã‚¤ãƒˆã®å€¤ãŒéŸ³è‰²ãƒ‡ãƒ¼ã‚¿å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ã€‚ï¼ˆçµ¶å¯¾ã‚¢ãƒ‰ãƒ¬ã‚¹ï¼‰
-	|  84H       | ãƒ¬ã‚¬ãƒ¼ãƒˆã‚ªãƒ• | éŸ³ã‚’éŸ³ç¬¦æ¯Žã«åˆ‡ã‚‹ã€‚
-	|  85H       | ãƒ¬ã‚¬ãƒ¼ãƒˆã‚ªãƒ³ | éŸ³ã‚’åˆ‡ã‚‰ãšã«ã¤ãªãã€‚
-	|  86H       | QæŒ‡å®š        | ç¶šã1ãƒã‚¤ãƒˆ(1ï½ž8)ã§æŒ‡å®šã€‚ï¼ˆãƒ¬ã‚¬ãƒ¼ãƒˆã‚ªãƒ³æ™‚ã¯ã€QæŒ‡å®šã‚’ç„¡è¦–ï¼‰
-	|  87Hï½ž0FEH | æœªä½¿ç”¨       |
-	|  0FFH      | çµ‚äº†         | ãƒãƒ£ãƒ³ãƒãƒ«æ¯Žã®ãƒ‡ãƒ¼ã‚¿ã®çµ‚äº†ã‚³ãƒ¼ãƒ‰ã€‚
+	|  00H       | ‹x•„         | ‘±‚­1ƒoƒCƒg‚ª‰¹’·B<br> ‰¹’·‚ª0FFH‚Ì‚Æ‚«‚Í‚³‚ç‚É‘±‚­1ƒoƒCƒg‚à‰¹’·‚É‰ÁŽZB
+	|  01H` 5FH | ‰¹’ö         | ‘±‚­1ƒoƒCƒg‚ª‰¹’·B<br> ‰¹’·‚ª0FFH‚Ì‚Æ‚«‚Í‚³‚ç‚É‘±‚­1ƒoƒCƒg‚à‰¹’·‚É‰ÁŽZB
+	|  60H` 6FH | ‰¹—Ê         | ‚±‚Ì’l‚©‚ç60H‚ðˆø‚¢‚½’l‚ªA‰¹—Ê‚Æ‚µ‚ÄŽg—p‚³‚ê‚éB
+	|  70H` 7FH | ‰¹F         | ‚±‚Ì’l‚©‚ç70H‚ðˆø‚¢‚½’l‚ªA‰¹F”Ô†‚Æ‚µ‚ÄŽg—p‚³‚ê‚éB
+	|  80H, 81H  | ƒTƒXƒeƒBƒ“   | 80H‚ÅƒTƒXƒeƒBƒ“OFFB81H‚ÅƒTƒXƒeƒBƒ“ONB
+	|  82H       | Šg’£‰¹F     | ‘±‚­1ƒoƒCƒg‚Ì’l(0`63)‚ªROM‚Ì“à‘ ‰¹F”Ô†B(‰¹Fƒf[ƒ^‚Í4C00H)
+	|  83H       | ƒ†[ƒU[‰¹F | ‘±‚­2ƒoƒCƒg‚Ì’l‚ª‰¹Fƒf[ƒ^æ“ªƒAƒhƒŒƒXBiâ‘ÎƒAƒhƒŒƒXj
+	|  84H       | ƒŒƒK[ƒgƒIƒt | ‰¹‚ð‰¹•„–ˆ‚ÉØ‚éB
+	|  85H       | ƒŒƒK[ƒgƒIƒ“ | ‰¹‚ðØ‚ç‚¸‚É‚Â‚È‚®B
+	|  86H       | QŽw’è        | ‘±‚­1ƒoƒCƒg(1`8)‚ÅŽw’èBiƒŒƒK[ƒgƒIƒ“Žž‚ÍAQŽw’è‚ð–³Ž‹j
+	|  87H`0FEH | –¢Žg—p       |
+	|  0FFH      | I—¹         | ƒ`ƒƒƒ“ƒlƒ‹–ˆ‚Ìƒf[ƒ^‚ÌI—¹ƒR[ƒhB
 
-	### éŸ³ç¨‹ãƒ‡ãƒ¼ã‚¿è¡¨
+	### ‰¹’öƒf[ƒ^•\
 
-	00Hï½ž5FHãŒéŸ³ç¨‹ã‚³ãƒžãƒ³ãƒ‰ã ãŒã€00HHã¯ä¼‘ç¬¦ã¨ãªã‚‹ç‚ºã€
-	ä½¿ç”¨ã§ãã‚‹éŸ³ç¨‹ã¯o1cã‹ã‚‰08a#ã¾ã§ã€‚
-	o8bã¯ä½¿ç”¨ã§ããªã„ã€‚
+	00H`5FH‚ª‰¹’öƒRƒ}ƒ“ƒh‚¾‚ªA00HH‚Í‹x•„‚Æ‚È‚éˆ×A
+	Žg—p‚Å‚«‚é‰¹’ö‚Ío1c‚©‚ç08a#‚Ü‚ÅB
+	o8b‚ÍŽg—p‚Å‚«‚È‚¢B
 
 	|   | C   | C#  | D   | D#  | E   | F   | F#  | G   | G#  | A   | A#  | B   |
 	|:-:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:----:|
@@ -116,7 +116,7 @@ public:
 	| 7 | 49H | 4AH | 4BH | 4CH | 4DH | 4EH | 4FH | 50H | 51H | 52H | 53H | 54H |
 	| 8 | 55H | 56H | 57H | 58H | 59H | 5AH | 5BH | 5CH | 5DH | 5EH | 5FH | --- |
 
-	### ãƒªã‚ºãƒ éƒ¨
+	### ƒŠƒYƒ€•”
 
 	```
 	 BIT |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
@@ -124,7 +124,7 @@ public:
 		 |  V  |  0  |  1  |  B  |  S  |  T  |  C  |  H  |
 	```
 
-	å‚è€ƒï¼šOPLL R#0E ãƒªã‚ºãƒ ãƒ¬ã‚¸ã‚¹ã‚¿
+	ŽQlFOPLL R#0E ƒŠƒYƒ€ƒŒƒWƒXƒ^
 	```
 	 BIT |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 	---- |-----|-----|-----|-----|-----|-----|-----|-----|
@@ -133,17 +133,17 @@ public:
 	```
 
 
-	| ãƒ“ãƒƒãƒˆ    | æ„å‘³
+	| ƒrƒbƒg    | ˆÓ–¡
 	|-----------|------|
-	| B,S,T,C,H | å„ãƒ“ãƒƒãƒˆãŒ1ãªã‚‰ã€ãã®ãƒ“ãƒƒãƒˆã«å¯¾å¿œã—ãŸæ¥½å™¨ãŒé¸æŠžã•ã‚Œã‚‹ã€‚
-	| V         | 0 = ãƒªã‚ºãƒ ç™ºå£°ã€‚ç¶šããƒ‡ãƒ¼ã‚¿ãŒéŸ³é•·ãƒ‡ãƒ¼ã‚¿ã€‚<br> ï¼ˆèª­ã¿å‡ºã—æ–¹ã¯ãƒ¡ãƒ­ãƒ‡ã‚£éƒ¨ã®éŸ³é•·ã®å ´åˆã¨åŒã˜ï¼‰
-	|           | 1 = éŸ³é‡ã‚’æŒ‡å®šã—ã¾ã™ã€‚ç¶šã1ãƒã‚¤ãƒˆãŒéŸ³é‡ãƒ‡ãƒ¼ã‚¿(0ï½ž15)ã€‚
-	| 0FFH      | ãƒªã‚ºãƒ éƒ¨ã®ãƒ‡ãƒ¼ã‚¿ã®æœ€çµ‚ã‚³ãƒ¼ãƒ‰ã€‚
+	| B,S,T,C,H | Šeƒrƒbƒg‚ª1‚È‚çA‚»‚Ìƒrƒbƒg‚É‘Î‰ž‚µ‚½ŠyŠí‚ª‘I‘ð‚³‚ê‚éB
+	| V         | 0 = ƒŠƒYƒ€”­ºB‘±‚­ƒf[ƒ^‚ª‰¹’·ƒf[ƒ^B<br> i“Ç‚Ýo‚µ•û‚ÍƒƒƒfƒB•”‚Ì‰¹’·‚Ìê‡‚Æ“¯‚¶j
+	|           | 1 = ‰¹—Ê‚ðŽw’è‚µ‚Ü‚·B‘±‚­1ƒoƒCƒg‚ª‰¹—Êƒf[ƒ^(0`15)B
+	| 0FFH      | ƒŠƒYƒ€•”‚Ìƒf[ƒ^‚ÌÅIƒR[ƒhB
 */
 
 public:
 	//--------------------------------------------------
-	//! OPLDRVã‚³ãƒžãƒ³ãƒ‰
+	//! OPLDRVƒRƒ}ƒ“ƒh
 	//--------------------------------------------------
 	class Command
 	{
@@ -226,7 +226,7 @@ public:
 
 	
 /*
-	## ãƒ¦ãƒ¼ã‚¶ãƒ¼éŸ³è‰²ãƒ‡ãƒ¼ã‚¿
+	## ƒ†[ƒU[‰¹Fƒf[ƒ^
 
 	```
 		 |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
@@ -304,11 +304,11 @@ public:
 public:
 
 	OplDrvData();
-	OplDrvData(const u8* data_ptr, const u8* end_ptr, u16 base_address);
+	OplDrvData(const u8* data_ptr, const u8* end_ptr, u16 base_address, u16 music_address);
 	~OplDrvData() {};
 
 	void clear();
-	bool from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address);
+	bool from_binary(const u8* data_ptr, const u8* end_ptr, u16 base_address, u16 music_address);
 
 	bool convert_voice_rom_to_user(int romtype);
 	int modify_volume(int volume_change);
@@ -343,12 +343,12 @@ public:
 	enum {
 		FPS = 60,
 	};
-	/// TEMPOã‹ã‚‰nåˆ†éŸ³ç¬¦ã®tickã‚’è¨ˆç®—
+	/// TEMPO‚©‚çn•ª‰¹•„‚Ìtick‚ðŒvŽZ
 	static float tempo2tick(float tempo, int n)
 	{
 		return float(FPS) * 60.f * 4.f / tempo / n;
 	}
-	/// 4åˆ†éŸ³ç¬¦ã®tickã‹ã‚‰TEMPOã‚’è¨ˆç®—
+	/// 4•ª‰¹•„‚Ìtick‚©‚çTEMPO‚ðŒvŽZ
 	static float l4tick2tempo(float quarter_note_tick)
 	{
 		return float(FPS) * 60.f / quarter_note_tick;
