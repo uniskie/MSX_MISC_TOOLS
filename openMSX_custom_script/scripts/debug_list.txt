@@ -1,0 +1,37 @@
+{Kanji ROM}
+{VDP palette}
+ioports
+joystickports
+{Firmware romblocks}
+{MSX Kanji Driver with BASIC}
+{Printer Port}
+{PSG regs}
+{MSX Opening ROM romblocks}
+{VDP status regs}
+{Memory Mapped FDC romblocks}
+{VDP register latch status}
+Firmware
+{MSX Sub ROM}
+{slotted memory}
+keymatrix
+{physical VRAM}
+{Main RAM regs}
+MapperIO
+{VDP palette latch status}
+{MSX Music ROM}
+{MSX BIOS with BASIC ROM}
+{Firmware SRAM}
+{VDP regs}
+memory
+VRAM
+{S1990 regs}
+{VDP data latch value}
+{CPU regs}
+{VRAM access status}
+{Memory Mapped FDC ROM}
+{Main RAM}
+{VRAM pointer}
+{MSX Opening ROM}
+{MSX Music regs}
+{Real time clock SRAM}
+PanasonicRom
