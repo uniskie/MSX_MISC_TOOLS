@@ -35,6 +35,18 @@ OpenMSXコマンドコンソールから使用したいものは、
 - _bmp_util.tcl  
   `save2bmp`というコマンドのヘルプテキストや処理内容を定義しています。
 
+- _disasm3.tcl  
+  `disasm3`や`get_symbol`というコマンドのヘルプテキストや処理内容を定義しています。  
+  `disasm3`は[disasm2](https://www.msx.org/forum/msx-talk/openmsx/openmsx-disasm)をベースに拡張した自分用逆アセンブル出力コマンドです。  
+
+  1. 開始アドレス、終了アドレスで範囲を指定
+  2. Symbol Managerを参照してラベルに対応
+  3. ダンプをコメントとして追加
+
+  （`disasm2_sub`は1行逆アセンブルで内部用をおまけで外部に出してます。）
+  
+  `save_to_file {sample.asm} [disasm3 0x0000 0x3fff]`⏎ のようにすると逆アセンブル結果出力をファイルに保存できます。
+
 ## skin 解説
 
 ### skins/uni-set
