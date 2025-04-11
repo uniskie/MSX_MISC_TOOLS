@@ -9,5 +9,6 @@
 
 register_lazy "_bmp_util.tcl" {save2bmp}
 register_lazy "_disasm3.tcl" {get_symbol}
+register_lazy "_disasm3.tcl" {from_symbol}
 register_lazy "_disasm3.tcl" {disasm3_sub}
 register_lazy "_disasm3.tcl" {disasm3}

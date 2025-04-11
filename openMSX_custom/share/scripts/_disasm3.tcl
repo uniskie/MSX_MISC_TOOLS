@@ -1,3 +1,5 @@
+# source $env(OPENMSX_USER_DATA)/scripts/_disasm3.tcl
+
 namespace eval disasm3 {
 
 #
@@ -12,16 +14,42 @@ proc get_symbol {value} {
 	return [lindex [debug symbols lookup -value $value] 0 3]
 }
 
-#
-# disasm3_sub
-#
-set_help_text disasm3_sub \
-{disasm3_sub <addr>
+set_help_text from_symbol \
+{from_symbol <name>
+Returns the value that matches label name from the symbols registered in the Symbol Manager.
+(Returns the first one found.)
 }
-proc disasm3_sub {addr} {
-	set data [debug read_block memory $addr 4]
-	return [debug disasm_blob $data $addr {get_symbol}]
+proc from_symbol {name} {
+	set a [lindex [debug symbols lookup -name $name] 0 3]
+	if {[llength $a]} {
+		return [format "0x%04X" $a]
+	}
 }
+
+#
+# disasm3_l
+#
+set_help_text disasm3_l \
+{disasm3_l <addr>
+"debug disasm" variation (dis-assemble one line with label)
+}
+proc disasm3_l {addr} {
+	set hex [lrange [debug disasm $addr] 1 end]
+	set bin [binary format H* [join $hex {}]]
+	set dsa [debug disasm_blob $bin $addr {get_symbol}]
+	return [concat [list [lindex $dsa 0]] $hex]
+}
+#proc disasm3_l {addr} {
+#	set bin [debug read_block memory $addr 4]
+#	set dsa [debug disasm_blob $bin $addr {get_symbol}]
+#	set cnt [lindex $dsa 1]
+#	set hex {}
+#	for {set i 0} {$i < $cnt} {incr i} {
+#		binary scan $bin [join [list "x" $i "H2"] {}] h
+#		lappend hex $h
+#	}
+#	return [concat [list [lindex $dsa 0]] $hex]
+#}
 
 #
 # disasm3
@@ -37,23 +65,28 @@ Usage:
   https://www.msx.org/forum/msx-talk/openmsx/openmsx-disasm
 }
 proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
+	set a [from_symbol $address]
+	if {[string length $a]} {set address $a}
 	if {$address == -1} {set address [reg PC]}
+
+	set a [from_symbol $endadr]
+	if {[string length $a]} {set endadr $a}
 	if {$endadr == -1} {set endadr [expr {$address + 16}]}
+
+	# pick up address list
 	set addr $address
 	while {$addr<=$endadr} {
 		set data [debug disasm $addr]
-
 		set start [string first "#" $data]
 		if {$start ne -1} {
 			scan [string range $data $start end] "#%x" curadr
 			if {$curadr >= $address && $curadr <= $endadr} {lappend adrlist $curadr}
 		}
-		set label [get_symbol $addr]
-		if {[llength $label]} {lappend adrlist $addr}
 		set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}]
 	}
-	lappend adrlist 99999
-	set pointr 99999
+	lappend adrlist 0XFFFFFFFF
+
+	# process list
 	set addr $address
 	set ind 0
 	set adrlist [lsort -dictionary -unique $adrlist]
@@ -61,21 +94,21 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 
 	# list top
 	set label [get_symbol $addr]
-	#if {[llength $label]} {
-	#	append result $label ": \n"
-	#} else {
+	if {[llength $label]} {
+	} elseif {$addr != $curadr} {
 		append result [format ".X%04X: \n" $addr]
-	#}
-	if {$addr == $curadr} {
-		incr ind
-		set curadr [lindex $adrlist $ind]
 	}
 
+	# list lines
 	while {$addr<=$endadr} {
+		#adress label
+		set label [get_symbol $addr]
+		if {[llength $label]} {
+			append result [format "%s: \n" $label]
+		}
+		#jump destination label
 		if {$addr == $curadr} {
-			set label [get_symbol $addr]
 			if {[llength $label]} {
-				append result $label ": \n"
 			} else {
 				append result [format ".X%04X: \n" $curadr]
 			}
@@ -83,19 +116,57 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 			set curadr [lindex $adrlist $ind]
 		}
 		append result " "
-		set datar [debug disasm $addr]
-		set data [disasm3_sub $addr]
-		set start [string first "#" $data]
-		scan [string range $data $start end] "#%x" pointr
-		set dump \t\;[format "%04X: %s" $addr [join [lrange $datar 1 4]]]
-		if {$pointr >= $address && $pointr <= $endadr} {
-		#	append result [string map {# .X} [string toupper [lindex $data 0]\n]]
-			append result [string map {# .X} [string toupper [lindex $data 0]$dump\n]]
+		set data [debug disasm $addr]
+
+		set dstr [string toupper [lindex $data 0]]
+		set dump \t\;[format "%04X: %s" $addr [join [lrange $data 1 end]]]
+
+		#nemonic get value string
+		set start [string first "#" $dstr]
+		if {$start < 0} {
+			set adr_l 0
+			set pointr -1
 		} else {
-		#	append result [string toupper [lindex $data 0]\n]
-			append result [string toupper [lindex $data 0]$dump\n]
+			set e $start
+			for {set i 1} {$i < 8} {incr i} {
+				if {[string match -nocase {[0-9A-F]} [string index $dstr [expr $e+1]]]} {
+					incr e
+				} else {
+					break
+				}
+			}
+			set adr_l [expr $e - $start]
+			set adr_s [string range $dstr [expr $start+1] $e]
+			if {$adr_l == 4} {
+				scan $adr_s "%x" pointr
+			} else {
+				set pointr -1
+			}
 		}
-		set addr [expr {($addr + [llength $datar] - 1) & 0xFFFF}]
+		#get label
+		if {$pointr < 0}  {
+			set label ""
+		} else {
+			set label [get_symbol $pointr]
+		}
+
+		#replace address
+		if {[llength $label]} {
+			set nemonic [string map [list #$adr_s $label] $dstr]
+		} elseif {$pointr >= $address && $pointr <= $endadr} {
+			set nemonic [string map {"#" .X} $dstr]
+		} else {
+			set nemonic $dstr
+		}
+		
+		#tab reformat text
+		set trimed [string trimright $nemonic]
+		set spacing [string repeat " " [expr 22-[string length $trimed]]]
+		append result $trimed$spacing$dump\n
+
+		set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}]
+
+		#intermediate completion label
 		while {$addr > $curadr} {
 			append result [format ".X%04X: EQU $[expr ($curadr-$addr)]\n" $curadr]
 			incr ind
@@ -105,8 +176,9 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 	return $result
 }
 
+namespace export from_symbol
 namespace export get_symbol
-namespace export disasm3_sub
+namespace export disasm3_l
 namespace export disasm3
 
 
