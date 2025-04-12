@@ -31,7 +31,7 @@ proc from_symbol {name} {
 #
 set_help_text disasm3_l \
 {disasm3_l <addr>
-"debug disasm" variation (dis-assemble one line with label)
+debug disasm variation (dis-assemble one line with label)
 }
 proc disasm3_l {addr} {
 	set hex [lrange [debug disasm $addr] 1 end]
@@ -61,8 +61,13 @@ Usage:
   disasm3               Disassemble 8 instr starting at the currect PC
   disasm3 <start>       Disassemble 8 instr starting at address <adr>
   disasm3 <start> <end> Disassemble <num> instr starting at address <addr>
-  disasm3 <start> <end> <useadr>  useadr==1 ... 
-  https://www.msx.org/forum/msx-talk/openmsx/openmsx-disasm
+
+  start,end ... can use symbol name.  ** case sensitive **
+  end ... can use relative size.
+          e.g.) disasm3 0x4000 +0x1f
+                same as `disasm3 0x4000 0x401f`
+
+  based on disasm2: https://www.msx.org/forum/msx-talk/openmsx/openmsx-disasm
 }
 proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 	set a [from_symbol $address]
@@ -71,6 +76,7 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 
 	set a [from_symbol $endadr]
 	if {[string length $a]} {set endadr $a}
+	if {[string index $endadr 0] == "+"} {set endadr [expr {$address + $endadr}]}
 	if {$endadr == -1} {set endadr [expr {$address + 16}]}
 
 	# pick up address list
@@ -78,40 +84,44 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 	while {$addr<=$endadr} {
 		set data [debug disasm $addr]
 		set start [string first "#" $data]
-		if {$start ne -1} {
+		if {$start != -1} {
 			scan [string range $data $start end] "#%x" curadr
-			if {$curadr >= $address && $curadr <= $endadr} {lappend adrlist $curadr}
+			if {$curadr >= $address && $curadr <= $endadr} {
+				lappend adrlist $curadr
+			}
 		}
 		set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}]
 	}
-	lappend adrlist 0XFFFFFFFF
+	# tail guardian (need Explicit integer specification)
+	lappend adrlist  int(0x7FFFFF)
 
 	# process list
 	set addr $address
-	set ind 0
 	set adrlist [lsort -dictionary -unique $adrlist]
+	set ind 0
 	set curadr [lindex $adrlist $ind]
 
 	# list top
-	set label [get_symbol $addr]
-	if {[llength $label]} {
-	} elseif {$addr != $curadr} {
-		append result [format ".X%04X: \n" $addr]
+	if {$addr != $curadr} {
+		set label [get_symbol $addr]
+		set label_l [llength $label]
+		if {$label_l == 0} {
+			append result [format ".X%04X: \n" $addr]
+		}
 	}
 
 	# list lines
 	while {$addr<=$endadr} {
-		#adress label
+		#address label
 		set label [get_symbol $addr]
-		if {[llength $label]} {
+		set label_l [llength $label]
+		if {$label_l} {
 			append result [format "%s: \n" $label]
 		}
-		#jump destination label
 		if {$addr == $curadr} {
-			if {[llength $label]} {
-			} else {
+		#	if {$label_l == 0} {
 				append result [format ".X%04X: \n" $curadr]
-			}
+		#	}
 			incr ind
 			set curadr [lindex $adrlist $ind]
 		}
@@ -123,10 +133,9 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 
 		#nemonic get value string
 		set start [string first "#" $dstr]
-		if {$start < 0} {
-			set adr_l 0
-			set pointr -1
-		} else {
+		set adr_l 0
+		set pointr -1
+		if {$start >= 0} {
 			set e $start
 			for {set i 1} {$i < 8} {incr i} {
 				if {[string match -nocase {[0-9A-F]} [string index $dstr [expr $e+1]]]} {
