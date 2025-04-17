@@ -78,6 +78,9 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 	if {[string length $a]} {set endadr $a}
 	if {[string index $endadr 0] == "+"} {set endadr [expr {$address + $endadr}]}
 	if {$endadr == -1} {set endadr [expr {$address + 16}]}
+	if {$endadr > 65535} {set endadr 0xffff}
+
+	#puts [format "start:0x%04X, end:0x%04X" $address $endadr]
 
 	# pick up address list
 	set addr $address
@@ -90,7 +93,10 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 				lappend adrlist $curadr
 			}
 		}
-		set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}]
+		set b [llength $data]
+		set addadr [expr {($b < 1 ? 1 : $b -1)}]
+		#set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}] ;NG : over flow -> 0000 -> inifinite loop
+		set addr [expr {$addr + $addadr}]
 	}
 	# tail guardian (need Explicit integer specification)
 	lappend adrlist  int(0x7FFFFF)
@@ -173,7 +179,10 @@ proc disasm3 {{address -1} {endadr -1} {useadr 0}} {
 		set spacing [string repeat " " [expr 22-[string length $trimed]]]
 		append result $trimed$spacing$dump\n
 
-		set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}]
+		set b [llength $data]
+		set addadr [expr {($b < 1 ? 1 : $b -1)}]
+		#set addr [expr {($addr + [llength $data] - 1) & 0xFFFF}] ;NG : over flow -> 0000 -> inifinite loop
+		set addr [expr {$addr + $addadr}]
 
 		#intermediate completion label
 		while {$addr > $curadr} {
