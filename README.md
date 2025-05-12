@@ -1,10 +1,11 @@
 # MSX_MISC_TOOLS
 
-## 他のRepository
+
+## テキストエディタマクロ　（サクラエディタ/EmEditor）
 
 |ツール|説明|
 |---|---|
-| [EXTRACT_MSX_CAS/  ](https://github.com/uniskie/EXTRACT_MSX_CAS/ ) |MSXテープイメージからファイルを取り出す(Python3)
+| [macro/MSXBASIC.js](macro/MSXBASIC.js) | サクラエディタやEmEditorで開いたMSX BASICファイルをアスキーリスト形式に変換するマクロ<br>それぞれのエディタのmacroフォルダに置いて使用してください。 |
 
 ## ブラウザで動作するMSX用ツール
 HTML5+javascript ES6 で動作
@@ -12,7 +13,6 @@ HTML5+javascript ES6 で動作
 |ツール|説明|
 |---|---|
 | [GSRLE/html/](GSRLE/html/) | 【HTML5版 MSX画像ビューア】<br>BSAVE画像やグラフサウルス形式圧縮画像 (派生型ランレングス圧縮)の読み込み・表示・変換・保存が出来るツール<br> [ブラウザで実行 → https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html) <br> ![](GSRLE/html/img/gsrle_html_default.png) <br>MSX上での展開表示は [LOADSRD](LOADSRD)|
-
 
 ## Windowsで動作するMSX用ツール
 
@@ -74,6 +74,11 @@ UNKOSLOT.BAS
 | [COLCOMBG.BAS       ](COLCOMBG.BAS       ) |少しリッチなスプライトモード2重ね合わせカラーリスト<br>![](img/COLCOMBG.png)|
 | [MSX_MUSIC_ROM_VOICE_TEST/VOICE.BAS](MSX_MUSIC_ROM_VOICE_TEST/voice.bas) |FMPACと内蔵ROM(A1GT)での音色ライブラリの違いを聞き比べる<br>![](img/MSX_MUSIC_ROM_VOICE_TEST.png)|
 
+## 他のRepository
+
+|ツール|説明|
+|---|---|
+| [EXTRACT_MSX_CAS/  ](https://github.com/uniskie/EXTRACT_MSX_CAS/ ) |MSXテープイメージからファイルを取り出す(Python3)
 
 ## ご利用について
 
