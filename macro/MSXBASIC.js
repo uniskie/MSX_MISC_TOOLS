@@ -95,7 +95,7 @@ var ff_token_list = [
 function efunc(){}
 try{
 	// emEditor
-	var b = document.selection.IsEmpty; // is EmEditor ? 
+	efunc.emEditor = (editor.Version > 0); // is EmEditor ? 
 	efunc.inputBox = function( msg, def )	{	return prompt( msg, def );	}
 	efunc.alertBox = function( s, o )		{	if(o==null) { alert( s ); }else{ alert( s, o ); }	}
 	efunc.isSelectionEmpty = function()		{	return document.selection.IsEmpty;	}
@@ -109,6 +109,7 @@ try{
 	efunc.setPos = function( x, y )			{	document.selection.SetActivePoint( eePosView, x, y ); }
 }catch(e){
 	// sakura editor
+	efunc.emEditor = false; // is EmEditor ? 
 	efunc.inputBox = function( msg, def )	{	return Editor.InputBox( msg, def, 8 );	}
 	efunc.alertBox = function( s, o )		{	if(o==null) { Editor.InfoMsg( s ); }else{ Editor.InfoMsg( s + "\n" + o ); }	}
 	efunc.isSelectionEmpty = function()		{	return (Editor.IsTextSelected == 0);	}
@@ -372,7 +373,7 @@ function decodeBasic( arg )
 			}
 			else
 			// token
-			if ((cmd_token_s <= c) && (c < cmd_token_e)) {
+			if ((cmd_token_s <= c) && (c <= cmd_token_e)) {
 				if ((c == rem_token) && (c2 == rem_token_2)) {
 				// 3A 8F E6 = ":REM" E6 = "'"
 					t = "'";
@@ -384,7 +385,7 @@ function decodeBasic( arg )
 				}
 			}
 			else
-			// token 2
+			// FF token
 			if (c == ff_token) {
 				if ((ff_token_s <= c2) && (c2 <= ff_token_e)) {
 					p++;
@@ -453,7 +454,7 @@ function decodeBasic( arg )
 		lines.push( text );
 	}
 
-	var ascStr = lines.join("\n") + "\n" + String.fromCharCode(0x1A);
+	var ascStr = lines.join("\r\n") + "\r\n" + String.fromCharCode(0x1A);
 	return sjis2unicode( ascStr );
 }
 
