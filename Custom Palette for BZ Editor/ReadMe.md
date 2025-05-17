@@ -6,9 +6,26 @@
 構造体表示機能や分割画面と比較、
 メモリのビットマップ表示機能があります。 
 
+
+## MSX向けビットマップビュー拡張版
+
+ビットマップビューを追加拡張しています。
+
+- 1bit color 8x8 （フォントやキャラ用）
+- 1bit color
+- width 512
+
+1bit color 8x8 モードではカーソル位置とアドレスの関係もそれっぽくしています。
+
+- インストーラ―版 [BzEditor-1.9.8.7-for-msx.exe](BzEditor-1.9.8.7-for-msx.exe)
+- ポータブル版 [Bz1987Portable-for-MSX.zip](Bz1987Portable-for-MSX.zip)
+- 改変版ソースコードリポジトリ [https://gitlab.com/uniskie/binaryeditorbz-for-msx](https://gitlab.com/uniskie/binaryeditorbz-for-msx)
+
+![](../img/BzEditor_for_msx.png)
+
+
 ## MSXパレット定義を作りました
 
-残念ながら4bitカラーには対応していませんが、
 8ビット256ピクセル表示だと丁度SCREEN8になります。
 
 ディスクイメージをこれで手軽にのぞいてみるのも
@@ -22,3 +39,6 @@ Bz Editorのメニューの
 MSX16.txt と MSX256.txt を入れて再起動してみてください。 
 
 ![](../img/BZ_MSX_PALETTE.png)
+
+パレット定義まとめセット[BZPallets-for-MSX.zip](BZPallets-for-MSX.zip)
+
