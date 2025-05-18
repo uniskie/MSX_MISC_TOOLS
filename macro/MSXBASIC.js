@@ -1,6 +1,15 @@
-﻿/**
- *		MSX BASIC LIST を アスキーリスト化してエディタに書き出す
+/**
+ *		テキストエディタ マクロ for サクラエディタ/EmEditor
+ *		
+ *		「MSX BASIC LIST を アスキーリスト化してエディタに書き出す」
  *		（コード化け回避のために元ファイルを直接読み込む）
+ *
+ *		SJISエディタを経由するとエンコード化けするので
+ *		直接 "元のファイル名.ASC" で アスキーリストも保存します。
+ *	**
+ *		この時、同じファイル名のファイルがあっても
+ *		問い合わせ無しに上書きするので、注意してください。
+ *	**
  */
 
 //==========================================================
@@ -21,6 +30,8 @@ var double_token	= 0x1F;	// 倍精度実数
 
 // 文字列囲い
 var quote_token = 0x22;	// " （ダブルクオーテーション）
+// DATA REM 以後、行末まで文字列
+var data_token  = 0x84;	// DATA
 
 // 特殊組み合わせ
 // $3A $8F $E6  ... '    ( `:REM $E6` を `'` に置換)
@@ -30,6 +41,7 @@ var colon_token = 0x3A;	// :
 var rem_token   = 0x8F;	// REM
 var rem_token_2 = 0xE6;	// '
 var else_token  = 0xA1;	// ELSE
+
 
 // コマンドトークン
 var cmd_token_s = 0x81;
@@ -152,6 +164,14 @@ function bin2hex(binStr){
 	return(String(binObj.text));
 }
 
+function hex2bin(hexStr){
+	var xmldom = new ActiveXObject("Microsoft.XMLDOM");
+	var binObj= xmldom.createElement("binObj");
+	binObj.dataType = 'bin.hex';
+	binObj.text = hexStr;
+	return(binObj.nodeTypedValue);
+}
+
 function str2hex( ascStr ){
 	var hex = new Array;
 	for(var i = 0; i < ascStr.length; ++i) {
@@ -227,6 +247,18 @@ function loadBinaryFile( path ) {
 	ado.Type = adTypeBinary;
 	ado.LoadFromFile( path );
 	var bin = ado.Read();
+	ado.CLose();
+	ado = null;
+	return bin;
+}
+
+function saveBinaryFile( path, bin ) {
+	//efunc.alertBox("path", path);
+	var ado = new ActiveXObject("ADODB.Stream");
+	ado.Open();
+	ado.Type = adTypeBinary;
+	ado.Write( bin );
+	ado.SaveToFile( path, adSaveCreateOverWrite );
 	ado.CLose();
 	ado = null;
 	return bin;
@@ -337,6 +369,7 @@ function decodeBasic( arg )
 		var line_no =  dat[p++] + dat[p++] * 256;
 
 		var text = line_no.toString(10) + " ";
+		var dquote = false;
 		var quoted = false;
 
 		while (p < dat_len) {
@@ -354,10 +387,10 @@ function decodeBasic( arg )
 
 			if (c == quote_token) {
 			// double quotation
-				quoted = !quoted;
+				dquote = !dquote;
 			}
 
-			if (quoted) {
+			if (dquote || quoted) {
 				// 文字列
 			}
 			else
@@ -378,10 +411,14 @@ function decodeBasic( arg )
 				// 3A 8F E6 = ":REM" E6 = "'"
 					t = "'";
 					p++;
+					quoted = true;	// 以下、文字列扱い
 				}
 				else
 				{
 					t = cmd_token_list[c - cmd_token_s];
+				}
+				if (c == rem_token || c == data_token) {
+					quoted = true;	// 以下、文字列扱い
 				}
 			}
 			else
@@ -455,6 +492,9 @@ function decodeBasic( arg )
 	}
 
 	var ascStr = lines.join("\r\n") + "\r\n" + String.fromCharCode(0x1A);
+	
+	saveBinaryFile( arg + ".ASC", hex2bin( str2hex(ascStr) ) );
+	
 	return sjis2unicode( ascStr );
 }
 
