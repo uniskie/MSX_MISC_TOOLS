@@ -551,12 +551,17 @@ if (efunc.isEditor) {
 		efunc.setPos( x, y );
 	}
 } else {
-	var input_path = WScript.Arguments(0).toUpperCase()
-	var output_path = input_path + ".ASC"
-	var ret = decodeBasic( input_path, output_path );
-	if (ret.length) {
-		WScript.Echo( ret );
-		WScript.Echo( 'MSXBASICアスキーリスト変換: "'+ output_path + '"を保存しました。' );
+	try {
+		var input_path = WScript.Arguments(0).toUpperCase()
+		var output_path = input_path + ".ASC"
+		WScript.Echo( 'read ' + input_path );
+		var ret = decodeBasic( input_path, output_path );
+		if (ret.length) {
+			WScript.Echo( ret );
+			WScript.Echo( 'MSXBASICアスキーリスト変換: "'+ output_path + '"を保存しました。' );
+		}
+	} catch(e) {
+		WScript.Echo( e.message );
 	}
 }
 
