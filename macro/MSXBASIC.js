@@ -1,41 +1,39 @@
 /**
- *		ãƒ†ã‚­ã‚¹ãƒˆã‚¨ãƒ‡ã‚£ã‚¿ ãƒã‚¯ãƒ­ for ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿/EmEditor
- *		
- *		ã€ŒMSX BASIC LIST ã‚’ ã‚¢ã‚¹ã‚­ãƒ¼ãƒªã‚¹ãƒˆåŒ–ã—ã¦ã‚¨ãƒ‡ã‚£ã‚¿ã«æ›¸ãå‡ºã™ã€
- *		ï¼ˆã‚³ãƒ¼ãƒ‰åŒ–ã‘å›é¿ã®ãŸã‚ã«å…ƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’ç›´æ¥èª­ã¿è¾¼ã‚€ï¼‰
+ *	uMSX BASIC LIST ‚ğ ƒAƒXƒL[ƒŠƒXƒg‰»‚µ‚ÄƒGƒfƒBƒ^‚É‘‚«o‚·v
+ *	- •¶š‰»‚¯‰ñ”ğ‚Ì‚½‚ß‚ÉŒ³ƒtƒ@ƒCƒ‹‚ğ’¼Ú“Ç‚İ‚Ş
+ *	- •¶š‰»‚¯‰ñ”ğ‚Ì‚½‚ß‚É"Œ³‚Ìƒtƒ@ƒCƒ‹–¼.ASC"‚Å•ÏŠ·Œã‚ÌƒeƒLƒXƒg‚ğ’¼Ú•Û‘¶
  *
- *		SJISã‚¨ãƒ‡ã‚£ã‚¿ã‚’çµŒç”±ã™ã‚‹ã¨ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰åŒ–ã‘ã™ã‚‹ã®ã§
- *		ç›´æ¥ "å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«å.ASC" ã§ ã‚¢ã‚¹ã‚­ãƒ¼ãƒªã‚¹ãƒˆã‚‚ä¿å­˜ã—ã¾ã™ã€‚
- *	**
- *		ã“ã®æ™‚ã€åŒã˜ãƒ•ã‚¡ã‚¤ãƒ«åã®ãƒ•ã‚¡ã‚¤ãƒ«ãŒã‚ã£ã¦ã‚‚
- *		å•ã„åˆã‚ã›ç„¡ã—ã«ä¸Šæ›¸ãã™ã‚‹ã®ã§ã€æ³¨æ„ã—ã¦ãã ã•ã„ã€‚
- *	**
+ *	  ** “¯‚¶ƒtƒ@ƒCƒ‹–¼‚Ìƒtƒ@ƒCƒ‹‚ª‚ ‚Á‚Ä‚à
+ *		 –â‚¢‡‚í‚¹–³‚µ‚Éã‘‚«‚·‚é‚Ì‚ÅA’ˆÓ‚µ‚Ä‚­‚¾‚³‚¢B **
+ *
+ *	ƒeƒLƒXƒgƒGƒfƒBƒ^ MACRO (ƒTƒNƒ‰ƒGƒfƒBƒ^/EmEditor)
+ *	‚à‚µ‚­‚Í WSHicscriptj‚Å“®ì
  */
 
 //==========================================================
-// MSX BASIC ãƒˆãƒ¼ã‚¯ãƒ³ãƒ‡ãƒ¼ã‚¿
+// MSX BASIC ƒg[ƒNƒ“ƒf[ƒ^
 //==========================================================
 
-// æ•°å€¤ãƒˆãƒ¼ã‚¯ãƒ³
-var oct_token		= 0x0B;	// 8é€²æ•°
-var hex_token		= 0x0C;	// 16é€²æ•°
-var line_adr_token	= 0x0D;	// ã‚¢ãƒ‰ãƒ¬ã‚¹åŒ–æ¸ˆã¿è¡Œç•ªå·ï¼ˆâ€»ã‚»ãƒ¼ãƒ–ãƒªã‚¹ãƒˆã«ã¯å­˜åœ¨ã—ãªã„ï¼‰
-var line_num_token	= 0x0E;	// è¡Œç•ªå·
-var int8b_token		= 0x0F;	// æ•´æ•°ï¼ˆ10ï½255ï¼‰
-var int0_token		= 0x11; // æ•´æ•°ï¼ˆ0ï½9ï¼‰
-var int9_token		= 0x1A;	//    ã€ƒ
-var int16b_token	= 0x1C;	// æ•´æ•°ï¼ˆ256ï½32767ï¼‰
-var single_token	= 0x1D;	// å˜ç²¾åº¦å®Ÿæ•°
-var double_token	= 0x1F;	// å€ç²¾åº¦å®Ÿæ•°
+// ”’lƒg[ƒNƒ“
+var oct_token		= 0x0B;	// 8i”
+var hex_token		= 0x0C;	// 16i”
+var line_adr_token	= 0x0D;	// ƒAƒhƒŒƒX‰»Ï‚İs”Ô†i¦ƒZ[ƒuƒŠƒXƒg‚É‚Í‘¶İ‚µ‚È‚¢j
+var line_num_token	= 0x0E;	// s”Ô†
+var int8b_token		= 0x0F;	// ®”i10`255j
+var int0_token		= 0x11; // ®”i0`9j
+var int9_token		= 0x1A;	//    V
+var int16b_token	= 0x1C;	// ®”i256`32767j
+var single_token	= 0x1D;	// ’P¸“xÀ”
+var double_token	= 0x1F;	// ”{¸“xÀ”
 
-// æ–‡å­—åˆ—å›²ã„
-var quote_token = 0x22;	// " ï¼ˆãƒ€ãƒ–ãƒ«ã‚¯ã‚ªãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³ï¼‰
-// DATA REM ä»¥å¾Œã€è¡Œæœ«ã¾ã§æ–‡å­—åˆ—
+// •¶š—ñˆÍ‚¢
+var quote_token = 0x22;	// " iƒ_ƒuƒ‹ƒNƒI[ƒe[ƒVƒ‡ƒ“j
+// DATA REM ˆÈŒãAs––‚Ü‚Å•¶š—ñ
 var data_token  = 0x84;	// DATA
 
-// ç‰¹æ®Šçµ„ã¿åˆã‚ã›
-// $3A $8F $E6  ... '    ( `:REM $E6` ã‚’ `'` ã«ç½®æ›)
-// $3A $A1      ... ELSE ( `:ELSE` ã‚’ `ELSE` ã«ç½®æ›)
+// “Áê‘g‚İ‡‚í‚¹
+// $3A $8F $E6  ... '    ( `:REM $E6` ‚ğ `'` ‚É’uŠ·)
+// $3A $A1      ... ELSE ( `:ELSE` ‚ğ `ELSE` ‚É’uŠ·)
 // $FF XX       ... ff_tokens
 var colon_token = 0x3A;	// :
 var rem_token   = 0x8F;	// REM
@@ -43,7 +41,7 @@ var rem_token_2 = 0xE6;	// '
 var else_token  = 0xA1;	// ELSE
 
 
-// ã‚³ãƒãƒ³ãƒ‰ãƒˆãƒ¼ã‚¯ãƒ³
+// ƒRƒ}ƒ“ƒhƒg[ƒNƒ“
 var cmd_token_s = 0x81;
 var cmd_token_e = 0xFC;
 var cmd_token_list = [
@@ -81,7 +79,7 @@ var cmd_token_list = [
 	"EQV",		"INP",		"MOD",		"\\",		
 ];
 
-// ã‚³ãƒãƒ³ãƒ‰ãƒˆãƒ¼ã‚¯ãƒ³ ï¼ˆFF XXï¼‰
+// ƒRƒ}ƒ“ƒhƒg[ƒNƒ“ iFF XXj
 var ff_token   = 0xFF;
 var ff_token_s = 0x81;
 var ff_token_e = 0xB0;
@@ -102,16 +100,26 @@ var ff_token_list = [
 ];
 
 //==========================================================
-// Editorä¾å­˜é–¢æ•°ç³»
+// EditorˆË‘¶ŠÖ”Œn
 //==========================================================
+var shell = new ActiveXObject( "WScript.Shell" );
 function efunc(){}
+
+efunc.isEditor = false;
+efunc.emEditor = false;
+efunc.sakuraEditor = false;
+
 try{
 	// emEditor
-	efunc.emEditor = (editor.Version > 0); // is EmEditor ? 
-	efunc.inputBox = function( msg, def )	{	return prompt( msg, def );	}
+	(editor.Version > 0); // is EmEditor ? 
+
+	efunc.emEditor = true;
+	efunc.isEditor = true;
+
+//	efunc.inputBox = function( msg, def )	{	return prompt( msg, def );	}
 	efunc.alertBox = function( s, o )		{	if(o==null) { alert( s ); }else{ alert( s, o ); }	}
 	efunc.isSelectionEmpty = function()		{	return document.selection.IsEmpty;	}
-	efunc.selectLine = function()			{	document.selection.SelectLine();	}
+//	efunc.selectLine = function()			{	document.selection.SelectLine();	}
 	efunc.getSelectionText = function()		{	return document.selection.Text;	}
 	efunc.selectAll = function()			{	document.selection.SelectAll();	}
 	efunc.setText = function( s )			{	document.selection.Text = s;	}
@@ -120,12 +128,20 @@ try{
 	efunc.getPosY = function()				{	return document.selection.GetActivePointY( eePosView );	}
 	efunc.setPos = function( x, y )			{	document.selection.SetActivePoint( eePosView, x, y ); }
 }catch(e){
-	// sakura editor
-	efunc.emEditor = false; // is EmEditor ? 
-	efunc.inputBox = function( msg, def )	{	return Editor.InputBox( msg, def, 8 );	}
+	efunc.emEditor = false;
+	efunc.isEditor = false;
+}
+if (!efunc.emEditor) {
+try{
+	Editor.IsPossibleUndo;	// is SakuraEditor?
+
+	efunc.sakuraEditor = true;
+	efunc.isEditor = true;
+
+//	efunc.inputBox = function( msg, def )	{	return Editor.InputBox( msg, def, 8 );	}
 	efunc.alertBox = function( s, o )		{	if(o==null) { Editor.InfoMsg( s ); }else{ Editor.InfoMsg( s + "\n" + o ); }	}
 	efunc.isSelectionEmpty = function()		{	return (Editor.IsTextSelected == 0);	}
-	efunc.selectLine = function()			{	Editor.SelectLine();	}
+//	efunc.selectLine = function()			{	Editor.SelectLine();	}
 	efunc.getSelectionText = function()		{	return Editor.GetSelectedString();	}
 	efunc.selectAll = function()			{	Editor.SelectAll( 0 );	}
 	efunc.setText = function( s )			{	Editor.InsText( s );	}
@@ -133,28 +149,48 @@ try{
 	efunc.getPosX = function()				{	return Editor.GetSelectColumnFrom();	}
 	efunc.getPosY = function()				{	return Editor.GetSelectLineFrom();	}
 	efunc.setPos = function( x, y )			{	Editor.MoveCursor( y, x, 0 );	}
+}catch(e){
+	efunc.sakuraEditor = false;
+	efunc.isEditor = false;
+}
+}
+if (!efunc.isEditor) {
+	// ƒeƒLƒXƒgƒGƒfƒBƒ^‚Å‚Í‚È‚¢ = WScript
+
+	//	efunc.inputBox = function( msg, def )	{shell.Popup( '“ü—Í‚Å‚«‚È‚¢‚Ì‚ÅƒfƒtƒHƒ‹ƒg’l‚ğg‚¢‚Ü‚·', 0, msg ); return def;	}
+	//	efunc.alertBox = function( s, o )		{return shell.Popup( s, 0, o );}
+	efunc.alertBox = function( s, o )		{if(o==null){WScript.Echo( s );} else {WScript.Echo( s + "\n" + o );}}
+	efunc.isSelectionEmpty = function()		{return true;	}
+	//	efunc.selectLine = function()			{}
+	efunc.getSelectionText = function()		{return "";	}
+	efunc.selectAll = function()			{}
+	efunc.setText = function( s )			{}
+	efunc.getFullName = function()			{return "";	}
+	efunc.getPosX = function()				{return 0;	}
+	efunc.getPosY = function()				{return 0;	}
+	efunc.setPos = function( x, y )			{}
 }
 //==========================================================
 
 
 //==========================================================
-// ADODB.Stream å®šæ•°
+// ADODB.Stream ’è”
 //==========================================================
 // StreamTypeEnum
-var adTypeBinary = 1; // ãƒã‚¤ãƒŠãƒª
-var adTypeText   = 2; // ãƒ†ã‚­ã‚¹ãƒˆ
+var adTypeBinary = 1; // ƒoƒCƒiƒŠ
+var adTypeText   = 2; // ƒeƒLƒXƒg
 // StreamReadEnum
-var adReadAll  = -1; // å…¨è¡Œ
-var adReadLine = -2; // ä¸€è¡Œã”ã¨
+var adReadAll  = -1; // ‘Ss
+var adReadLine = -2; // ˆês‚²‚Æ
 // StreamWriteEnum
-var adWriteChar = 0; // æ”¹è¡Œãªã—
-var adWriteLine = 1; // æ”¹è¡Œã‚ã‚Š
+var adWriteChar = 0; // ‰üs‚È‚µ
+var adWriteLine = 1; // ‰üs‚ ‚è
 // SaveOptionsEnum 
-var adSaveCreateNotExist  = 1; // ãªã„å ´åˆã¯æ–°è¦ä½œæˆ
-var adSaveCreateOverWrite = 2; // ã‚ã‚‹å ´åˆã¯ä¸Šæ›¸ã
+var adSaveCreateNotExist  = 1; // ‚È‚¢ê‡‚ÍV‹Kì¬
+var adSaveCreateOverWrite = 2; // ‚ ‚éê‡‚Íã‘‚«
 
 //==========================================================
-// ADODB.Stream ã§ã® ãƒã‚¤ãƒŠãƒªãƒ»ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ å‡¦ç†ç³»
+// ADODB.Stream ‚Å‚Ì ƒoƒCƒiƒŠEƒGƒ“ƒR[ƒh ˆ—Œn
 //==========================================================
 function bin2hex(binStr){
 	var xmldom = new ActiveXObject("Microsoft.XMLDOM");
@@ -284,9 +320,9 @@ function saveBinaryFile( path, bin ) {
 //}
 
 //==========================================================
-// æµ®å‹•å°æ•°ç‚¹æ•°ã®MSX BASICè¡¨ç¾
-// (single! ) EE XX XX XX (ä»®æ•°éƒ¨ã¯DAC)
-// (double# ) EE XX XX XX XX XX XX XX (ä»®æ•°éƒ¨ã¯DAC)
+// •‚“®¬”“_”‚ÌMSX BASIC•\Œ»
+// (single! ) EE XX XX XX (‰¼”•”‚ÍDAC)
+// (double# ) EE XX XX XX XX XX XX XX (‰¼”•”‚ÍDAC)
 //==========================================================
 function toPrecisionStr( hex, deco ) {
 
@@ -302,9 +338,9 @@ function toPrecisionStr( hex, deco ) {
 	var v = parseFloat(t);
 
 	t = v.toExponential(siglen);
-	e = parseInt(t.replace(/[^e]+e/i,''));	// Eä»¥é™ã®æŒ‡æ•°
-	var sig = t.replace(/0*e.+/i,'');	// Eã‚ˆã‚Šæ‰‹å‰ã®æ•°å€¤ã‚’0ã‚µãƒ—ãƒ¬ã‚¹
-	var fraclen = sig.length - 2;		//ï¼ˆ0ã‚µãƒ—ãƒ¬ã‚¹ã—ãŸã‚ã¨ã®ï¼‰å°æ•°ç‚¹ä»¥ä¸‹ã®æ¡æ•°
+	e = parseInt(t.replace(/[^e]+e/i,''));	// EˆÈ~‚Ìw”
+	var sig = t.replace(/0*e.+/i,'');	// E‚æ‚èè‘O‚Ì”’l‚ğ0ƒTƒvƒŒƒX
+	var fraclen = sig.length - 2;		//i0ƒTƒvƒŒƒX‚µ‚½‚ ‚Æ‚Ìj¬”“_ˆÈ‰º‚ÌŒ…”
 
 	if ((-3 < e) && (e < fraclen)) {
 		t = v.toString(10).replace(/0\./, '.');
@@ -322,21 +358,21 @@ function toPrecisionStr( hex, deco ) {
 }
 
 //==========================================================
-// MSX BASIC ãƒˆãƒ¼ã‚¯ãƒ³ã®è§£èª­ãƒ»ASCIIå½¢å¼ãƒªã‚¹ãƒˆä½œæˆ
+// MSX BASIC ƒg[ƒNƒ“‚Ì‰ğ“ÇEASCIIŒ`®ƒŠƒXƒgì¬
 //==========================================================
-function decodeBasic( arg )
+function decodeBasic( input_path, output_filenmae )
 {
-	// emeditorã¯0x00ãŒ0x20ã«åŒ–ã‘ã‚‹ã®ã§
-	// NGâ†’ var bin = uniucode2sjis_bin( arg );
-	// OKâ†“ å…ƒãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ç›´æ¥èª­ã¿è¾¼ã‚€
-	var bin = loadBinaryFile( arg );
+	// emeditor‚Í0x00‚ª0x20‚É‰»‚¯‚é‚Ì‚Å
+	// NG¨ var bin = uniucode2sjis_bin( src_text );
+	// OK« Œ³ƒtƒ@ƒCƒ‹‚©‚ç’¼Ú“Ç‚İ‚Ş
+	var bin = loadBinaryFile( input_path );
 
-	// jsã§ã¯WSH.Binaryå‹ã‚’æ‰±ãˆãªã„ã®ã§ã€
-	// Binaryå‹â†’HEXæ–‡å­—åˆ—â†’æ•´æ•°Array
+	// js‚Å‚ÍWSH.BinaryŒ^‚ğˆµ‚¦‚È‚¢‚Ì‚ÅA
+	// BinaryŒ^¨HEX•¶š—ñ¨®”Array
 	var hex = bin2hex( bin );
 	//saveTextFile( hex, path + "\\" + "hex_temp.txt" )
 	var dat = hex2array( hex );
-	// æµ®å‹•å°æ•°ç‚¹æ•°ã®å‡¦ç†ã§æ‰‹æŠœãã‚’ã™ã‚‹ãŸã‚ã«æ®‹ã™ â†’ hex = null;
+	// •‚“®¬”“_”‚Ìˆ—‚Åè”²‚«‚ğ‚·‚é‚½‚ß‚Éc‚· ¨ hex = null;
 
 	var dat_len = dat.length;
 	var p = 0;
@@ -345,25 +381,25 @@ function decodeBasic( arg )
 	
 	if (dat[p++] != 0xff) {
 		//efunc.alertBox("test");
-		efunc.alertBox("MSX BASIC ãƒˆãƒ¼ã‚¯ãƒ³ ã§ã¯ã‚ã‚Šã¾ã›ã‚“", "header 0x"  + dat[0].toString(16) + " != 0xFF");
+		efunc.alertBox(input_path + "‚Í ’†ŠÔŒ¾ŒêŒ`® ‚Å‚Í‚ ‚è‚Ü‚¹‚ñ", "header 0x"  + dat[0].toString(16) + " != 0xFF");
 		return "";
 	}
 	
 	while (p < dat_len) {
 		if ((p+2) > dat_len) {
-			// ã‚¨ãƒ©ãƒ¼æŠœã‘
-			efunc.alertBox("ãƒªã‚¹ãƒˆãŒä¸­æ–­ã•ã‚Œã¾ã—ãŸ", "in " + lines.length);
+			// ƒGƒ‰[”²‚¯
+			efunc.alertBox("ƒŠƒXƒg‚ª’†’f‚³‚ê‚Ü‚µ‚½", "in " + lines.length);
 			break;
 		}
 
 		var link_ptr = dat[p++] + dat[p++] * 256;
 		if (link_ptr == 0) {
-			break;	// çµ‚ç«¯
+			break;	// I’[
 		}
 
 		if ((p+2) > dat_len) {
-			// ã‚¨ãƒ©ãƒ¼æŠœã‘
-			efunc.alertBox("ãƒªã‚¹ãƒˆãŒä¸­æ–­ã•ã‚Œã¾ã—ãŸ", lines.length);
+			// ƒGƒ‰[”²‚¯
+			efunc.alertBox("ƒŠƒXƒg‚ª’†’f‚³‚ê‚Ü‚µ‚½", lines.length);
 			break;
 		}
 		var line_no =  dat[p++] + dat[p++] * 256;
@@ -391,7 +427,7 @@ function decodeBasic( arg )
 			}
 
 			if (dquote || quoted) {
-				// æ–‡å­—åˆ—
+				// •¶š—ñ
 			}
 			else
 			if (c == colon_token) {
@@ -411,14 +447,14 @@ function decodeBasic( arg )
 				// 3A 8F E6 = ":REM" E6 = "'"
 					t = "'";
 					p++;
-					quoted = true;	// ä»¥ä¸‹ã€æ–‡å­—åˆ—æ‰±ã„
+					quoted = true;	// ˆÈ‰ºA•¶š—ñˆµ‚¢
 				}
 				else
 				{
 					t = cmd_token_list[c - cmd_token_s];
 				}
 				if (c == rem_token || c == data_token) {
-					quoted = true;	// ä»¥ä¸‹ã€æ–‡å­—åˆ—æ‰±ã„
+					quoted = true;	// ˆÈ‰ºA•¶š—ñˆµ‚¢
 				}
 			}
 			else
@@ -473,13 +509,13 @@ function decodeBasic( arg )
 				p += 2;
 			}
 			else
-			// (single! ) EE XX XX XX (ä»®æ•°éƒ¨ã¯DAC)
+			// (single! ) EE XX XX XX (‰¼”•”‚ÍDAC)
 			if (c == single_token) {
 				t = toPrecisionStr( hex.substring((p+0)*2, (p+4)*2), '!');
 				p += 4;
 			}
 			else
-			// (double# ) EE XX XX XX XX XX XX XX (ä»®æ•°éƒ¨ã¯DAC)
+			// (double# ) EE XX XX XX XX XX XX XX (‰¼”•”‚ÍDAC)
 			if (c == double_token) {
 				t = toPrecisionStr( hex.substring((p+0)*2, (p+8)*2), '#');
 				p += 8;
@@ -493,20 +529,34 @@ function decodeBasic( arg )
 
 	var ascStr = lines.join("\r\n") + "\r\n" + String.fromCharCode(0x1A);
 	
-	saveBinaryFile( arg + ".ASC", hex2bin( str2hex(ascStr) ) );
+	if (output_filenmae.length) {
+		saveBinaryFile( output_filenmae, hex2bin( str2hex(ascStr) ) );
+	}
 	
 	return sjis2unicode( ascStr );
 }
 
 //==========================================================
-// ãƒ¡ã‚¤ãƒ³å‡¦ç†
+// ƒƒCƒ“ˆ—
 //==========================================================
-var x = efunc.getPosX();
-var y = efunc.getPosY();
-var ret = decodeBasic( efunc.getFullName() );
-if (ret.length) {
-	efunc.selectAll()
-	efunc.setText( ret );
-	efunc.setPos( x, y );
+if (efunc.isEditor) {
+	var x = efunc.getPosX();
+	var y = efunc.getPosY();
+	var input_path = efunc.getFullName();
+	var output_path = input_path + ".ASC"
+	var ret = decodeBasic( input_path, output_path );
+	if (ret.length) {
+		efunc.selectAll()
+		efunc.setText( ret );
+		efunc.setPos( x, y );
+	}
+} else {
+	var input_path = WScript.Arguments(0).toUpperCase()
+	var output_path = input_path + ".ASC"
+	var ret = decodeBasic( input_path, output_path );
+	if (ret.length) {
+		WScript.Echo( ret );
+		WScript.Echo( 'MSXBASICƒAƒXƒL[ƒŠƒXƒg•ÏŠ·: "'+ output_path + '"‚ğ•Û‘¶‚µ‚Ü‚µ‚½B' );
+	}
 }
 
