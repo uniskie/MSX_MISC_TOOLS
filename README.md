@@ -25,7 +25,7 @@ HTML5+javascript ES6 で動作
 |ファイル|説明|
 |---|---|
 | [OpenMSX custom data](openMSX_custom) | ![](openMSX_custom/osd_setting_2.png)openMSX用のカスタムスクリプトサンプルと小さめのOSDアイコン |
-| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor for MSX (Bitmap拡張＆追加Palette)<br> ![](img/BZ_MSX_PALETTE.png) ![](img/BzEditor_for_msx.png) |
+| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor for MSX (Bitmap拡張＆追加Palette)<br> ![](img/BZ_MSX_PALETTE.png) ![](img/BzEditor_for_msx_2.png) |
 
 ## MSXで動作するツール
 
