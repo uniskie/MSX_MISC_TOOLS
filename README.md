@@ -5,7 +5,7 @@
 
 |ツール|説明|
 |---|---|
-| [macro/MSXBASIC.js](macro/MSXBASIC.js) | アスキーリスト形式に変換するjavascriptファイル<br>（`元ファイル名.ASC` でアスキーリスト変換後のファイルを作成。<br>**同じファイル名があっても強制上書きするので注意してください**。）<br><br>サクラエディタやEmEditorのマクロとしても、<br>コマンドラインから `CScript MSXBASIC.js ファイル名`としても使用可能です。<br><br>エディタマクロとして使用する場合も、**文字化け**回避のために変換後のファイルを保存します。<br>エディタマクロとしての使用方法はエディタのヘルプを参照ください。（基本的に、macroフォルダに置いてメニューから選択して使用します。） |
+| [macro/MSXBASIC.js](macro/MSXBASIC.js) | アスキーリスト形式に変換するjavascriptファイル<br>（`元ファイル名.ASC` でアスキーリスト変換後のファイルを作成。<br>**同じファイル名があっても強制上書きするので注意してください**。）<br><br>サクラエディタやEmEditorのマクロとしても、<br>コマンドラインから `CScript MSXBASIC.js ファイル名`としても使用可能です。![](img/MSXBASIC_JS.png)<br><br>エディタマクロとして使用する場合も、**文字化け**回避のために変換後のファイルを保存します。<br>エディタマクロとしての使用方法はエディタのヘルプを参照ください。（基本的に、macroフォルダに置いてメニューから選択して使用します。） |
 
 ## ブラウザで動作するMSX用ツール
 HTML5+javascript ES6 で動作
@@ -18,6 +18,7 @@ HTML5+javascript ES6 で動作
 
 |ツール|説明|
 |---|---|
+| [Binary Editor Bz for MSX](Custom%20Palette%20for%20BZ%20Editor)|[バイナリエディタ Bz (MSX向けビットマップビュー拡張版)](Custom%20Palette%20for%20BZ%20Editor/ReadMe.md)<br> ![](img/BzEditor_for_msx_2.png) |
 | [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<br> ![](img/GSRLE.png) <br>展開表示(MSX用)は [LOADSRD](LOADSRD)|
 | [OPLDRV_BGM_EXTRACT/](OPLDRV_BGM_EXTRACT ) |1. FMPACとRTYPEのOPLDRV用BGMデータをカートリッジから取り出すプログラム<br>2. opldrvデータを解析するプログラム <br> ![](OPLDRV_BGM_EXTRACT/img/OPLDRV_tool.png)|
 
@@ -25,7 +26,7 @@ HTML5+javascript ES6 で動作
 |ファイル|説明|
 |---|---|
 | [OpenMSX custom data](openMSX_custom) | ![](openMSX_custom/osd_setting_2.png)openMSX用のカスタムスクリプトサンプルと小さめのOSDアイコン |
-| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor for MSX (Bitmap拡張＆追加Palette)<br> ![](img/BZ_MSX_PALETTE.png) ![](img/BzEditor_for_msx_2.png) |
+| [Custom Palette for BZ Editor](Custom%20Palette%20for%20BZ%20Editor)|バイナリエディタ Bz Editor用パレット定義ファイル<br> ![](img/BZ_MSX_PALETTE.png) |
 
 ## MSXで動作するツール
 
