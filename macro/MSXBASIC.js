@@ -14,6 +14,14 @@
 // MSX BASIC トークンデータ
 //==========================================================
 
+// 接頭辞
+var oct_prefix		= '&O';	// 8進数
+var hex_prefix		= '&H';	// 16進数
+// 接尾辞
+var int_suffix		= '%';	// 整数
+var single_suffix	= '!';	// 単精度実数
+var double_suffix	= '#';	// 倍精度実数
+
 // 数値トークン
 var oct_token		= 0x0B;	// 8進数
 var hex_token		= 0x0C;	// 16進数
@@ -23,8 +31,8 @@ var int8b_token		= 0x0F;	// 整数（10～255）
 var int0_token		= 0x11; // 整数（0～9）
 var int9_token		= 0x1A;	//    〃
 var int16b_token	= 0x1C;	// 整数（256～32767）
-var single_token	= 0x1D;	// 単精度実数
-var double_token	= 0x1F;	// 倍精度実数
+var single_token	= 0x1D;	// 単精度実数 0.000000E-0
+var double_token	= 0x1F;	// 倍精度実数 0.00000000000000E-0
 
 // 文字列囲い
 var quote_token = 0x22;	// " （ダブルクオーテーション）
@@ -39,7 +47,6 @@ var colon_token = 0x3A;	// :
 var rem_token   = 0x8F;	// REM
 var rem_token_2 = 0xE6;	// '
 var else_token  = 0xA1;	// ELSE
-
 
 // コマンドトークン
 var cmd_token_s = 0x81;
