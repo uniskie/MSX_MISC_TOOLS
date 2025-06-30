@@ -131,7 +131,8 @@ proc save2bmp {filename start dx dy {convert_mode 0} {neg_height 1}} {
 	puts -nonewline $file "\x00" 
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biXPelsPerMeter
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biYPelsPerMeter
-	puts -nonewline $file "\x00\x00\x00\x00"						;#biClrUsed
+	puts -nonewline $file [format %c [$pal_num]]
+	puts -nonewline $file "\x00\x00\x00"						;#biClrUsed
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biClrImportant
 
 	#set color palette BGRA
@@ -143,7 +144,7 @@ proc save2bmp {filename start dx dy {convert_mode 0} {neg_height 1}} {
 			set b [expr ($col * 2 ) & 7]
 			set color [format "%1d%1d%1d" $r $g $b]
 		} else {
-			if {$bpp == 4} {
+			if {$bpp == 2} {
 				set color [getcolor [expr ($col & 3)]]
 			} else {
 				set color [getcolor $col]
