@@ -1,0 +1,236 @@
+﻿<!doctype hyml>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Mrx LOGO</title>
+		<script>
+			const cell_xc = 64;
+			const cell_yc = 22;
+			var cell_w = 4;
+			var cell_h = 4;
+			const scw = (cell_xc + 8 + 2) * cell_w; //256;
+			const sch = (cell_yc + 8 + 2) * cell_h;//212;
+			const color = [
+				'rgb(  0   0   0 /0)', /* 0  transparent */
+				'rgb(  0   0   0)',   /* 1  black */
+				'rgb( 73 182  73)',   /* 2  medium green */
+				'rgb(109 219 109)',   /* 3  light green */
+				'rgb( 73  73 219)',   /* 4  dark blue */
+				'rgb(146 109 255)',   /* 5  light blue */
+				'rgb(182 109  73)',   /* 6  dark red */
+				'rgb(109 219 255)',   /* 7  cyan */
+				'rgb(219 109  73)',   /* 8  medium red */
+				'rgb(255 146 109)',   /* 9  light red */
+				'rgb(219 182 109)',   /* 10 dark yellow */
+				'rgb(219 219 146)',   /* 11 light yellow */
+				'rgb( 73 146  73)',   /* 12 dark green */
+				'rgb(182 109 182)',   /* 13 magenta */
+				'rgb(219 219 219)',   /* 14 gray */
+				'rgb(255 255 255)',   /* 15 white */
+			];
+			const logo_data = [
+				// M
+				{type:'start', x:  0, y: 22},
+				{type:'line',  x:  6, y:-22},
+				{type:'line',  x:  6, y:  0},
+				{type:'line',  x: -6, y: 22},
+				{type:'line',  x: -6, y:  0},
+				{type:'end'},
+				{type:'start', x:  6, y:  0},
+				{type:'line',  x:  5, y: 22},
+				{type:'line',  x:  6, y:  0},
+				{type:'line',  x: -5, y:-22},
+				{type:'line',  x: -6, y:  0},
+				{type:'end'},
+				{type:'start', x: 11, y: 22},
+				{type:'line',  x:  5, y:-22},
+				{type:'line',  x:  6, y:  0},
+				{type:'line',  x: -5, y: 22},
+				{type:'line',  x: -6, y:  0},
+				{type:'end'},
+				{type:'start', x: 16, y:  0},
+				{type:'line',  x:  6, y: 22},
+				{type:'line',  x:  6, y:  0},
+				{type:'line',  x: -6, y:-22},
+				{type:'line',  x: -6, y:  0},
+				{type:'end'},
+				// S
+				{type:'start', x: 25.5, y: 22},
+				{type:'line',  x: 11.5, y:  0},
+				{type:'line',  x:    0, y: -6},
+				{type:'line',  x:-11.5, y:  0},
+				{type:'line',  x:    0, y:  6},
+				{type:'end'},
+				{type:'start', x: 37, y: 22},
+				{type:'arc',   x:  0, y:-14, r:7, s:270, e: 90, d:true},
+				{type:'line',  x:  0, y:  6},
+				{type:'arc',   x:  0, y:  2, r:1, s: 90, e:270, d:false},
+				{type:'line',  x:  0, y:  6},
+				{type:'end'},
+				{type:'start', x: 37, y:  8},
+				{type:'line',  x: -5, y:  0},
+				{type:'line',  x:  0, y:  6},
+				{type:'line',  x:  5, y:  0},
+				{type:'line',  x:  0, y: -6},
+				{type:'end'},
+				{type:'start', x: 32, y: 14},
+				{type:'arc',   x:  0, y:-14, r:7, s:270, e: 90, d:false},
+				{type:'line',  x:  0, y:  6},
+				{type:'arc',   x:  0, y:  2, r:1, s: 90, e:270, d:true},
+				{type:'line',  x:  0, y:  6},
+				{type:'end'},
+				{type:'start', x: 32, y:  0},
+				{type:'line',  x: 15, y:  0},
+				{type:'line',  x:  0, y:  6},
+				{type:'line',  x:-15, y:  0},
+				{type:'line',  x:  0, y: -6},
+				{type:'end'},
+				// X
+				{type:'start', x: 42, y:  0},
+				{type:'line',  x:  7, y:  0},
+				{type:'line',  x: 15, y: 22},
+				{type:'line',  x: -7, y:  0},
+				{type:'line',  x:-15, y:-22},
+				{type:'end'},
+				{type:'start', x: 57, y:  0},
+				{type:'line',  x:  7, y:  0},
+				{type:'line',  x:-15, y: 22},
+				{type:'line',  x: -7, y:  0},
+				{type:'line',  x: 15, y:-22},
+				{type:'end'},
+			];
+			function resize_inner(canvas) {
+				if (!canvas.getContext) return;
+				const ctx = canvas.getContext('2d');
+				// `window.devicePixelRatio`を取得
+				const dpr = window.devicePixelRatio || 1;
+
+				const b_aspect_ratio = scw / sch;//4/3
+				const bw = document.body.clientWidth - 16;
+				const bh = Math.floor(bw / b_aspect_ratio);
+
+				const aspect_ratio = 1;(320/272);
+				const cw = bw * scw / 320 * aspect_ratio;
+				const ch = bw * sch / 320;
+
+				canvas.width = cw * dpr;
+				canvas.height = ch * dpr;
+
+				canvas.style.width = cw + 'px';
+				canvas.style.height = ch + 'px';
+				canvas.style.paddingTop = (bh-ch) / 2;
+				canvas.style.paddingBottom = (bh-ch) / 2;
+				canvas.style.paddingLeft = (bw-cw) / 2;
+				canvas.style.paddingRight = (bw-cw) / 2;
+				canvas.style.backgroundColor = 'rgb(240 240 240)';//color[4];
+
+				// 描画コンテキストのスケールを設定
+				ctx.scale(dpr, dpr);
+			}
+
+			function draw_grid(ctx, cw, ch, rx, ry, topleft) {
+				ctx.fillStyle = 'rgb(220 220 220)';//color[1];
+				ctx.fillRect(0, 0, cw, ch);
+
+				ctx.beginPath();
+				ctx.strokeStyle = 'rgb(0 0 0 / 25%)';
+				const pad = 4;
+				var xs = topleft.x - pad * cell_w * rx;
+				var xe = xs + (cell_xc + pad + pad) * cell_w * rx;
+				var ys = topleft.y - pad * cell_h * ry;
+				var ye = ys + (cell_yc + pad + pad) * cell_h * ry;
+				for (var i = 0; i <= cell_xc + pad + pad; ++i) {
+					var x = xs + i * cell_w * rx ;
+					ctx.moveTo(x , ys);
+					ctx.lineTo(x , ye);
+				}
+				for (var i = 0; i <= cell_yc + pad + pad; ++i) {
+					var y = ys + i * cell_h * ry;
+					ctx.moveTo(xs, y);
+					ctx.lineTo(xe, y);
+				}
+				ctx.closePath();
+				ctx.stroke();
+			}
+
+			function draw_data(ctx, cw, ch, scale_x, scale_y, topleft, data) {
+				const rx = cell_w * scale_x;
+				const ry = cell_h * scale_y;
+				var x = 0;
+				var y = 0;
+				var sx, sy;
+
+				ctx.strokeStyle = 'rgb(0 0 0)';
+				ctx.fillStyle = 'rgb(0 0 0 / 5%)';
+
+				//ctx.beginPath();
+				for (const i of data) {
+					//console.log(i);
+					sx = x;
+					sy = y;
+					switch (i.type)
+					{
+						case 'start':
+							ctx.beginPath();
+							x = topleft.x + i.x * rx;
+							y = topleft.y + i.y * ry;
+							ctx.moveTo(x, y);
+							break;
+						case 'line':
+							x += i.x * rx;
+							y += i.y * ry;
+							ctx.lineTo(x, y);
+							break;
+						case 'arc':
+							x += i.x * rx;
+							y += i.y * ry;
+							ctx.arc(sx + (x-sx) * 0.5, sy + (y-sy) * 0.5,
+								    i.r * rx, 
+									(360 - i.s) * Math.PI / 180, 
+									(360 - i.e) * Math.PI / 180,
+									i.d
+								 );
+							break;
+						case 'end':
+							ctx.stroke();
+							ctx.fill();
+							//ctx.closePath();
+							break;
+						default:
+							break;
+					}
+				}
+				//ctx.stroke();
+				//ctx.fill();
+				////ctx.closePath();
+			}
+
+			function draw_msxlogo() {
+				const canvas = document.getElementById("mrxlogo");
+				resize_inner(canvas);
+
+				const canvas_style = window.getComputedStyle(canvas);
+				const cw = parseInt(canvas_style.width)
+				const ch = parseInt(canvas_style.height);
+				const rx = cw / scw;
+				const ry = ch / sch;
+
+				if (!canvas.getContext) return;
+				const ctx = canvas.getContext("2d");
+				//ctx.imageSmoothingEnabled = false;
+
+				const topleft = {
+					x : (scw - cell_xc * cell_w) / 2 * rx,
+					y : (sch - cell_yc * cell_h) / 2 * ry,
+				};
+				draw_grid(ctx, cw, ch, rx, ry, topleft);
+				draw_data(ctx, cw, ch, rx, ry, topleft, logo_data);
+			}
+			window.addEventListener("load", draw_msxlogo);
+		</script>
+	</head>
+	<body>
+		<canvas id="mrxlogo"></canvas>
+	</body>
+</html>

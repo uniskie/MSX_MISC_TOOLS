@@ -8,6 +8,9 @@
 | [macro/MSXBASIC.js](macro/MSXBASIC.js) | アスキーリスト形式に変換するjavascriptファイル<br>（`元ファイル名.ASC` でアスキーリスト変換後のファイルを作成。<br>**同じファイル名があっても強制上書きするので注意してください**。）<br><br>サクラエディタやEmEditorのマクロとしても、<br>コマンドラインから `CScript MSXBASIC.js ファイル名`としても使用可能です。![](img/MSXBASIC_JS.png)<br><br>エディタマクロとして使用する場合も、**文字化け**回避のために変換後のファイルを保存します。<br>エディタマクロとしての使用方法はエディタのヘルプを参照ください。（基本的に、macroフォルダに置いてメニューから選択して使用します。） |
 
 ## ブラウザで動作するMSX用ツール
+
+https://uniskie.github.io/MSX_MISC_TOOLS/
+
 HTML5+javascript ES6 で動作
 
 |ツール|説明|
