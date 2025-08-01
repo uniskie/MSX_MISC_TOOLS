@@ -9,3 +9,18 @@
 [MSX LOGO リファレンスデザイン表示 の WEBページ](MSXLOGO/msxlogo.html)
 
 [ソースコード](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/MSXLOGO/msxlogo.html)
+
+# おまけ：Bz用パレット変換ツール
+
+[ブラウザで実行](BzTool/palette.html)
+
+[ソースファイル](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/BinaryEditorBz_for_MSX/palette.html)
+
+javascript対応ブラウザで使用してください。  
+ちゃんとテストしてません。  
+
+変換方法は
+- SFC16bit(RGB555)パレット
+- MSX16bit(RGB333)パレット
+- MSX8bitx2パレット（バイトの並びが逆順）
+が選べます。
