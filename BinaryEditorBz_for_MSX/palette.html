@@ -4,27 +4,48 @@
 <title>パレット変換</title>
 <script type="text/javascript"><!--
 const lf = '\n';
-const sfc_16bit_def = {
- name: 'SFC 16bit Palette',
- desc: 'RGB555 - 0BBBBBGGGGGRRRRR (16ビット値)',
+const sfc_palette_def = {
+ name: 'SFC Palette',
+ desc: 'RGB555 - 0BBBBBGGGGGRRRRR',
  r: {shift:0 , mask:0x1F},
  g: {shift:5 , mask:0x1F},
  b: {shift:10, mask:0x1F},
 };
-const msx_16bit_def = {
- name: 'MSX 16bit Palette',
- desc: 'RGB333 - 00000GGG0RRR0BBB (16ビット値)',
+const msx_palette_def = {
+ name: 'MSX Palette',
+ desc: 'RGB333 - 00000GGG0RRR0BBB',
  r: {shift:4 , mask:0x07},
  g: {shift:8 , mask:0x07},
  b: {shift:0 , mask:0x07},
 };
-const msx_8bitx2_def = {
- name: 'MSX 8bit x2 Palette',
- desc: 'RGB333 - 0RRR0BBB00000GGG (8ビット値×2個)',
- r: {shift:12 , mask:0x07},
- g: {shift:0  , mask:0x07},
- b: {shift:8  , mask:0x07},
-};
+const option_dic  = {
+	sfc_16bit: {
+		name: 'SFCパレット 16bit値リスト',
+		bit: 16,
+		format: sfc_palette_def
+	},
+	sfc_8bit: {
+		name: 'SFCパレット ダンプリスト',
+		bit: 8,
+		format: sfc_palette_def
+	},
+	msx_16bit: {
+		name: 'MSXパレット 16bit値リスト',
+		bit: 16,
+		format: msx_palette_def
+	},
+	msx_8bit: {
+		name: 'MSXパレット ダンプリスト',
+		bit: 8,
+		format: msx_palette_def
+	},
+}
+//==========================================
+// optionに対応するoption情報を返す
+//==========================================
+function getOption( opt_control ) {
+	return option_dic[ opt_control.value ];
+}
 //==========================================
 // パレットフォーマットを参照してRGB888配列に変換
 //==========================================
@@ -60,25 +81,46 @@ function toHex(v, zero = '00') {
 //==========================================
 // パレット文字列変換
 //==========================================
-function convertToBzPalette(s, format) {
+function convertToBzPalette(s, option) {
 	// スペース、カンマ、改行を区切り扱い
 	// コメント等は非対応
-	var ln = s.replace(/([^\s]+)\s+/g,'$1,').replace(/[,]/g,lf).split(lf);
+	var ln = s.replace(/([^\s]+)\s+/g,'$1,').replace(/[\-,]/g,lf).split(lf);
 	var out = [];
+	var bits = 0;
+	var d = 0;
+	var sc = '';
+	var cn = 0;
 	for (var i = 0; i < ln.length; ++i) {
 		var c = ln[i];
 		if (!c.length) continue;
 		var v = decodeHex(c);
-		if (v<0) continue;
-		var rgb = toRGB888(v, format);
+		if (v < 0) continue;
+		bits += option.bit;
+		if (option.bit == 8) {
+			if (bits == 8) {
+				d = v;
+				sc = c;
+				continue;
+			} else {
+				d = d + (v << 8);
+				sc = sc + ',' + c;
+			}
+		} else {
+			d = v;
+			sc = c;
+		}
+		var rgb = toRGB888(d, option.format);
 		out.push( 
-		  '0x' + toHex(i) + ' rgb' 
+		  '0x' + toHex(cn) + ' rgb' 
 		  + '(0x' + toHex(rgb.r) // R
 		  + ',0x' + toHex(rgb.g) // G
 		  + ',0x' + toHex(rgb.b) // B
 		  + ')'
-		  + '\t// ' + c
+		  + '\t// ' + sc
 		);
+		d = 0;
+		bits = 0;
+		++cn;
 	}
 	return out.join(lf);
 }
@@ -92,17 +134,13 @@ function convert() {
 	if (!src_control) return;
 	if (!dst_control) return;
 	if (!opt_control) return;
-	const opt_dic = {
-		sfc_16bit : sfc_16bit_def,
-		msx_16bit : msx_16bit_def,
-		msx_8bitx2: msx_8bitx2_def,
-	};
-	var format = opt_dic[ opt_control.value ];
-	if (!format) return;
-	var res = convertToBzPalette( src_control.value, format );
+	var option = getOption(opt_control);
+	if (!option) return;
+	var res = convertToBzPalette( src_control.value, option );
 	dst.innerText = 
-	  '// ' + format.name + lf + 
-	  '// ' + format.desc + lf + 
+	  '// ' + option.format.name + lf + 
+	  '// ' + option.format.desc + lf + 
+	  '// -> RGB888' + lf +
 	  res;
 	console.log(res);
 }
@@ -113,14 +151,41 @@ window.onload = function() {
 	opt_control = document.getElementById("opt");
 	src_control = document.getElementById("src");
 	dst_control = document.getElementById("dst");
+
+	if (opt_control) {
+		var isFirst = true;
+		for (var i in option_dic) {
+			const n = document.createElement('option');
+			n.value = i;
+			n.text = option_dic[i].name;
+			n.select = isFirst;
+			isFirst = false;
+			opt_control.add(n);
+		}
+		opt_control.onchange = function() {
+			var option = getOption(opt_control);
+			if (!option) return;
+			if (option.bit == 8) {
+				src_control.cols = 80;
+				src_control.rows = 8;
+				src_control.placeholder = 
+					'ここに8bitダンプを入力（16進数）' + 
+					'（※アドレスや文字表示部は取り除いてください）';
+			} else {
+				src_control.cols = 24;
+				src_control.rows = 16;
+				src_control.placeholder = 'ここに16bitパレットを入力（16進数）';
+			}
+			//src_control.value = '';
+			dst_control.innerText = 'ここに結果表示'
+		};
+		opt_control.onchange();
+	}
 }
 // --> </script>
 </head>
 <body>
 	<select id="opt">
-		<option value="sfc_16bit" selected>SFC 16bitパレット</option>
-		<option value="msx_16bit">MSX 16bitパレット</option>
-		<option value="msx_8bitx2">MSX 8bitx2パレット（16bit値と並びが逆順）</option>
 	</select>
 	<form>
 		<textarea id="src" rows="16" cols="24" placeholder="ここに16進数パレットを入力"></textarea><br>
