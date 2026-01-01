@@ -178,7 +178,11 @@ a:active {
     /*
     border:2px inset #888;
     */
+    /*
     border:2px solid #888;
+    */
+    /* boredr だとキャンバスサイズが小さくなるので外側に */
+    box-shadow: 0 0 0 2px #888;
 }
 /*
 .canvas_area:active {

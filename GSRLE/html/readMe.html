@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>readMe.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+<link rel="stylesheet" href="file:///d%3A/github/_uniskie/MSX_MISC_TOOLS/GSRLE/html/img/markdown.css" type="text/css">
+<script src=""></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="html5-msx-graphics-viewer">HTML5 MSX GRAPHICS Viewer</h1>
+<p>ブラウザ版 MSX画像ビューア</p>
+<p>グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。</p>
+<ul>
+<li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
+<li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_030.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_030.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
+</ul>
+<p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
+<hr>
+<h2 id="%E6%A6%82%E8%A6%81">概要</h2>
+<p><img src="img/gsrle_html_preview.png" alt="プレビュー"></p>
+<ul>
+<li>SCREEN 0～SCREEN 12のMSX画像ファイルに対応</li>
+<li>BSAVE形式、グラフサウルス圧縮形式の読み書き表示</li>
+<li>インターレース画像対応（SCREEN5以上）</li>
+<li>openMSXコンソールから<code>vram2bmp ファイル名.bmp 0 256 1024</code>で保存したBMPに対応</li>
+<li>スプライト(モード1&amp;2)に対応</li>
+<li>COPY文での範囲保存（グラフサウルスではGL?）ファイルに対応</li>
+</ul>
+<p>メインターゲットはスクリーン5～12のMSX画像です。</p>
+<p>HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。</p>
+<p><img src="img/gsrle_html_default.png" alt="プレビュー"></p>
+<h2 id="%E4%BD%BF%E3%81%84%E6%96%B9">使い方</h2>
+<p>ファイルをウィンドウにドロップするか<br>
+ファイルボタンを使用してファイルを開いてください。</p>
+<p>インターレースモード用画像かどうかは拡張子で判定されます。<br>
+（<a href="#%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">拡張子一覧</a>）</p>
+<p>メイン画像ファイルと判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。</p>
+<p>その為、複数ファイルで構成された画像の場合は順番に開く必要があります。</p>
+<p>順番は</p>
+<ol>
+<li>メイン画像ファイル</li>
+<li>インターレースモードなら2枚目のページの画像ファイル</li>
+<li>パレットファイル</li>
+</ol>
+<p>です。</p>
+<p>この順番でドロップするか、まとめてドロップしてください。</p>
+<p>まとめてドロップした場合は自動的に読み込む順番を整えて読み込みます。<br>
+この時、1～3の分類それぞれにつき、各1個だけ読み込みます。</p>
+<p>また、ファイルボタンから開くことも可能です。<br>
+（その場合も複数ファイル指定可能です）</p>
+<hr>
+<h2 id="msx%E5%AE%9F%E6%A9%9F%E3%81%A7%E3%81%AE%E3%83%AD%E3%83%BC%E3%83%89%E3%82%B0%E3%83%A9%E3%83%95%E3%82%B5%E3%82%A6%E3%83%AB%E3%82%B9%E5%9C%A7%E7%B8%AE%E5%BD%A2%E5%BC%8F">MSX実機でのロード(グラフサウルス圧縮形式)</h2>
+<p>ローダーのサンプルがあります。</p>
+<p><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a></p>
+<p>ビューアー・ローダーともに、
+ソースコードの再利用はご自由にどうぞ。</p>
+<p>画像ファイルの再利用はご遠慮ください。</p>
+<hr>
+<h2 id="msx%E7%94%BB%E5%83%8F%E3%81%AE%E5%9C%A7%E7%B8%AE%E3%83%BB%E5%B1%95%E9%96%8B-%E4%BF%9D%E5%AD%98%E6%A9%9F%E8%83%BD">MSX画像の圧縮・展開 保存機能</h2>
+<p>読み込み済みファイルがあれば保存・圧縮保存が可能です。</p>
+<p>また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。</p>
+<h3 id="%E5%85%A8%E4%BD%93%E4%BF%9D%E5%AD%98--plt%E4%BF%9D%E5%AD%98--%E3%83%9A%E3%83%BC%E3%82%B8%E4%BF%9D%E5%AD%98">全体保存 / PLT保存 / ページ保存</h3>
+<p><img src="img/gsrle_html_savebutton.png" alt="プレビュー"></p>
+<p><img src="img/gsrle_html_savebutton2.png" alt="プレビュー"></p>
+<table>
+<thead>
+<tr>
+<th>ボタン名</th>
+<th>説明</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PLT保存</td>
+<td>カラーパレットデータを保存します</td>
+<td>グラフサウルスと違い、スロット1本分の32バイトのファイルです。</td>
+</tr>
+<tr>
+<td>BSAVE (VRAMパレット書込)</td>
+<td>VRAMのカラーパレットテーブルを含む範囲でBSAVEベタ形式保存</td>
+<td>VRAMパレットテーブルに現在のパレットを書き込みます。</br>保存サイズがVRAMパレットテーブルより小さければ、テーブルを含む領域まで保存します。</td>
+</tr>
+<tr>
+<td>BSAVE (画素のみ)</td>
+<td>カラーパレットを含まない BSAVEベタ形式保存</td>
+<td>VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。</td>
+</tr>
+<tr>
+<td>GS圧縮 (画素のみ)</td>
+<td>カラーパレットを含まない グラフサウルス圧縮形式保存</td>
+<td>VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。</td>
+</tr>
+<tr>
+<td>PLT保存</td>
+<td>カラーパレットデータを保存します</td>
+<td>グラフサウルスと違い、スロット1本分の32バイトのファイルです。</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>画像保存ボタンは全体保存とページ毎保存があります。</li>
+<li>設定に読み込み後自動保存機能があります</li>
+<li>ファイルを何も読み込んでいないと保存ボタンは動作しません。</li>
+</ul>
+<hr>
+<h2 id="%E8%A8%AD%E5%AE%9A%E4%BF%9D%E5%AD%98%E3%83%BB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF">設定保存・読み込み</h2>
+<p><img src="img/gsrle_html_config.png" alt="プレビュー"></p>
+<p>各種設定を保存、読み込み出来ます。</p>
+<p>保存時には <code>gsrle_html_config.json</code> というJSONファイルが保存されます。<br>
+任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。</p>
+<p>読み込み時はJSONファイルを開くかドロップしてください。</p>
+<p>保存・読み込みされる設定内容：</p>
+<ul>
+<li>スクリーンモード番号、インターレースモード、表示ページ</li>
+<li>スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）</li>
+<li>キャラクタジェネレータ・ベースアドレス</li>
+<li>スプライト・ベースアドレス</li>
+<li>画面縦サイズ設定、DotAspect比、読み込み後自動保存設定</li>
+<li>カラーパレットVRAM読み込み設定、TMS9918風カラー設定</li>
+</ul>
+<h3 id="%E6%B3%A8bsave%E4%BF%9D%E5%AD%98%E6%99%82%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%98%E3%83%83%E3%83%80%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">注：BSAVE保存時のファイルヘッダについて</h3>
+<p>BLOADで読み込むときに、サイズ&amp;hFFFFを越えるファイルは読みだしたデータが化けます。</p>
+<blockquote>
+<p>例)<br>
+<code>START=0, END=FFFF</code> を越えるファイル<br>
+ファイル全体では<code>&amp;h10007</code>バイト以上</p>
+<ul>
+<li>VRAM全体セーブ</li>
+<li>SCREEN7,8,10,12での1ページ丸ごと保存</li>
+</ul>
+</blockquote>
+<p>そのため、BSAVEファイルヘッダのENDエントリはサイズが&amp;hFFFFを越えない値を書き出します。
+ファイル自体は最後まで書き込まれまます。</p>
+<blockquote>
+<p>例)</p>
+<ul>
+<li>
+<p>VRAM全体セーブ</p>
+<p><code>START=0, END=FFFE</code> → <code>START=0, END=FFFE</code><br>
+実際にファイルに書きだされるVRAMの範囲は<code>&amp;h0000～&amp;hFFFF</code><br>
+ファイル全体のサイズは<code>&amp;h10007</code>バイト</p>
+</li>
+<li>
+<p>SCREEN7,8,10,12での1ページ丸ごと保存</p>
+<p><code>START=0, END=FFFE</code> → <code>START=0, END=FFFE</code><br>
+実際にファイルに書きだされるVRAMの範囲は<code>&amp;h0000～&amp;hFFFF</code><br>
+ファイル全体のサイズは<code>&amp;h10007</code>バイト</p>
+</li>
+</ul>
+</blockquote>
+<p>この対策によりデータは化けなくなりますが<br>
+BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
+<p>全体を読みだしたいときは独自のローダーを使用し、<br>
+ファイルサイズを見て読みだすようにすれば、<br>
+データの最後まで読み込むことが出来ます。</p>
+<p>( <a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a> など)</p>
+<hr>
+<h2 id="openmsx-vram2bmp%E5%87%BA%E5%8A%9B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A1%A8%E7%A4%BA">openMSX vram2bmp出力ファイルの表示</h2>
+<p>openMSXでは<code>vram2bmp</code>でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。</p>
+<ol>
+<li>openMSXでF10キーを押してコンソールを表示</li>
+<li>コンソールで <code>vram2bmp ファイル名.bmp 0 256 1024</code>でVRAM全体保存
+<img src="img/openmsx_console.png" alt="openMSX console"></li>
+</ol>
+<blockquote>
+<p><strong>Note</strong>: 保存先について</p>
+<p>カレントフォルダは
+基本的にOpenMSXを起動した実行ファイルと同じ場所になっています。</p>
+<ol>
+<li>OpenMSX Catapultから実行した場合は <code>OpenMSX\Catapult\bin</code></li>
+<li>openmsx.exeを直接実行した場合は <code>OpenMSX\</code>
+<code>cd</code>（チェンジディレクトリ）コマンドでカレントディレクトリを変えておくとファイルが整理しやすくて良いかもしれません。</li>
+</ol>
+<p><strong>Note</strong>: 保存先の変更例</p>
+<ol>
+<li><code>マイドキュメント\openMSX\</code> に <code>bmp</code> フォルダを作成</li>
+<li>コンソールから <code>cd $env(OPENMSX_USER_DATA)/bmp</code></li>
+</ol>
+<p>→ マイドキュメント\openMSX\bmp\ に保存されるようになる</p>
+<blockquote>
+<p>openMSX起動時に自動的に実行されるスクリプトに<br>
+<code>cd $env(OPENMSX_USER_DATA)</code> を書いておけば良いかもしれません。<br>
+（自分はユーザーフォルダに自動実行スクリプトを配置する方法が分からないのでやっていません）</p>
+</blockquote>
+</blockquote>
+<p><code>vram2bmp</code>で保存されるのはRAWイメージなので普通のBMPとして表示すると実際の画面に表示されている映像とは異なる見た目になります。</p>
+<p>当ビューアではそのVRAM RAWイメージを読み込んで、MSX上での見え方で表示することが可能です。<br>
+（画面モードや、ベースアドレスは自分で指定してください）</p>
+<p>自分向け遊び機能ですが、内容確認などの使い道はあるかもしれません。</p>
+<h3 id="%E8%A1%A8%E7%A4%BA%E4%BE%8B">表示例</h3>
+<p><img src="img/gsrle_html_raw_bmp_preview.png" alt="display RAW BMP"></p>
+<p><img src="img/gsrle_html_raw_bmp_preview2.png" alt="display RAW BMP"></p>
+<p>HYDLIDE3 (C) T&amp;E SOFT / D4 Enterprise</p>
+<hr>
+<h2 id="%E3%82%B9%E3%83%97%E3%83%A9%E3%82%A4%E3%83%88%E3%83%BB%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%B8%E3%82%A7%E3%83%8D%E3%81%AE%E8%A1%A8%E7%A4%BA%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9%E6%8C%87%E5%AE%9A">スプライト・キャラジェネの表示ベースアドレス指定</h2>
+<ul>
+<li>
+<p>スクリーン0～4ではキャラクタジェネレータ欄が表示されます。<br>
+<img src="img/gsrle_html_chrgen.png" alt="キャラクタジェネレータ"></p>
+</li>
+<li>
+<p>スクリーン1～12ではスプライト欄が表示されます。<br>
+<img src="img/gsrle_html_sprgen.png" alt="スプライトジェネレータ"></p>
+</li>
+</ul>
+<h3 id="%E5%90%84%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9">各ベースアドレス</h3>
+<p>VDPで設定可能な値がドロップダウンリストに登録されていますので、そこから選択可能です。</p>
+<ul>
+<li>PATNAM (キャラクターパターンネームテーブル)</li>
+<li>PATGEN (キャラクターパターンジェネレータテーブル)</li>
+<li>PATCOL (キャラクターパターンカラーテーブル)</li>
+<li>SPRATR (スプライトアトリビュートテーブル)</li>
+<li>SPRPAT (スプライトパターンテーブル)</li>
+</ul>
+<p>※ SPRCOL (スプライトカラーテーブル) は<code>SPRATR (スプライトアトリビュートテーブル) - 512</code>にVDPが自動決定します。</p>
+<hr>
+<h2 id="%E8%A8%AD%E5%AE%9A%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E5%BE%8C%E8%87%AA%E5%8B%95%E4%BF%9D%E5%AD%98">設定：読み込み後自動保存</h2>
+<p>画像の読み込みが終わった後に指定の形式で自動保存するオプション</p>
+<p><img src="img/gsrle_html_autosave.png" alt="プレビュー"></p>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>内容</th>
+<th>パレットデータ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BSAVE(VRAMパレット書込)</td>
+<td>BSAVE形式（VRAMカラーパレットテーブルを含む）画像ファイル</td>
+<td>BSAVEファイルに含む</td>
+</tr>
+<tr>
+<td>BSAVE+PLT分離</td>
+<td>BSAVE形式（VRAMカラーパレットテーブルを含まない）画像ファイルと、PLTファイルのセット</td>
+<td>PLTファイル</td>
+</tr>
+<tr>
+<td>GS圧縮+PLT分離</td>
+<td>グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット</td>
+<td>PLTファイル</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="%E3%81%8A%E3%81%BE%E3%81%91%E7%B8%A6%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB%EF%BC%8F%E6%A8%AA%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB">おまけ：縦スクロール／横スクロール</h2>
+<p>VDPシミュレートの検証で付けている処理です。</p>
+<p><img src="img/gsrle_html_scroll.png" alt="スクロール機能"></p>
+<ol>
+<li>
+<p><strong>▲▼VScroll</strong><br>
+縦スクロールスイッチ</p>
+<ul>
+<li>上下にドラッグで縦スクロール</li>
+<li>クリックでリセット</li>
+</ul>
+<p>スプライトごと移動する</p>
+</li>
+<li>
+<p><strong>◀▶HScroll</strong><br>
+横スクロールスイッチ</p>
+<ul>
+<li>上下にドラッグで縦スクロール</li>
+<li>クリックでリセット</li>
+</ul>
+<p>スプライトは影響をうけない</p>
+</li>
+<li>
+<p><strong>HScroll Mask</strong><br>
+画面左に8ドット幅の周辺色マスクを表示する
+スプライトもマスクされる</p>
+</li>
+<li>
+<p><strong>2Page HScroll</strong><br>
+VDP R#25 bit0：2画面横スクロール<br>
+表示ページは奇数を指定する</p>
+<p>1ページのVRAMサイズ</p>
+<ul>
+<li>SCREEN0～6,9は<code>0x8000</code></li>
+<li>SCREEN7,8,10～12は<code>0x10000</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="%E8%A3%9C%E8%B6%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9%EF%BC%86%E3%83%95%E3%83%AA%E3%83%83%E3%83%97%E3%83%A2%E3%83%BC%E3%83%89">補足：インターレース＆フリップモード</h2>
+<p>インターレースモードで2ページをフリップさせて疑似的に424ライン表示する機能</p>
+<p><img src="img/gsrle_html_topbar.png" alt="interlace button"></p>
+<p><code>Interlace</code>にチェックを付けるとインターレース＆フリップモードになります。<br>
+市販ソフトではDPSSGがSCREEN7で使用して、VGAに近い解像度を実現していました。</p>
+<p>※ SCREEN0～4では使用できません</p>
+<p>※ <code>2Page HScroll</code>と同様に強制的に表示ページを奇数ページに変更します。</p>
+<hr>
+<h2 id="%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">対応拡張子</h2>
+<p>拡張子で判定して、インターレースモードでの読込先ページを決定します。</p>
+<ol>
+<li>パレットの有無、画面サイズ、圧縮などはデータの内容を見て判定します。</li>
+<li>SC1はSSCREEN12のインターレース画像として扱います。</li>
+<li>SCREEN1画像の場合、SC1の代わりにSR1を使用してみてください。</li>
+<li>SCREEN 9は未テストです。</li>
+<li>保存時は現在表示している縦サイズで保存します。</li>
+</ol>
+<h3 id="%E3%83%8E%E3%83%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">ノンインターレース ビットマップ画像</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号</th>
+<th>インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.SC5</td>
+<td>SCREEN  5</td>
+<td>non-interlace</td>
+<td>.SC5</td>
+<td>.SR5</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC6</td>
+<td>SCREEN  6</td>
+<td>non-interlace</td>
+<td>.SC6</td>
+<td>.SR6</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC7</td>
+<td>SCREEN  7</td>
+<td>non-interlace</td>
+<td>.SC7</td>
+<td>.SR7</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC8</td>
+<td>SCREEN  8</td>
+<td>non-interlace</td>
+<td>.SC8</td>
+<td>.SR8</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.S10</td>
+<td>SCREEN 10</td>
+<td>non-interlace</td>
+<td>.S10</td>
+<td>.SRA</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.S12</td>
+<td>SCREEN 12</td>
+<td>non-interlace</td>
+<td>.S12</td>
+<td>.SRC</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SR5</td>
+<td>SCREEN  5</td>
+<td>non-interlace</td>
+<td>.SC5</td>
+<td>.SR5</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR6</td>
+<td>SCREEN  6</td>
+<td>non-interlace</td>
+<td>.SC6</td>
+<td>.SR6</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR7</td>
+<td>SCREEN  7</td>
+<td>non-interlace</td>
+<td>.SC7</td>
+<td>.SR7</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR8</td>
+<td>SCREEN  8</td>
+<td>non-interlace</td>
+<td>.SC8</td>
+<td>.SR8</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRA</td>
+<td>SCREEN 10</td>
+<td>non-interlace</td>
+<td>.S10</td>
+<td>.SRA</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRC</td>
+<td>SCREEN 12</td>
+<td>non-interlace</td>
+<td>.S12</td>
+<td>.SRC</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SRS</td>
+<td>SCREEN 12</td>
+<td>non-interlace</td>
+<td>.S12</td>
+<td>.SRS</td>
+<td>GRAPH SAURUS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B92%E6%9E%9A%E7%B5%84-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">インターレース（2枚組） ビットマップ画像</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号</th>
+<th>インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.S50</td>
+<td>SCREEN  5</td>
+<td>interlace page:0</td>
+<td>.S50</td>
+<td>.R50</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S51</td>
+<td>SCREEN  5</td>
+<td>interlace page:1</td>
+<td>.S51</td>
+<td>.R51</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S60</td>
+<td>SCREEN  6</td>
+<td>interlace page:0</td>
+<td>.S60</td>
+<td>.R60</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S61</td>
+<td>SCREEN  6</td>
+<td>interlace page:1</td>
+<td>.S61</td>
+<td>.R61</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S70</td>
+<td>SCREEN  7</td>
+<td>interlace page:0</td>
+<td>.S70</td>
+<td>.R70</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S71</td>
+<td>SCREEN  7</td>
+<td>interlace page:1</td>
+<td>.S71</td>
+<td>.R71</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S80</td>
+<td>SCREEN  8</td>
+<td>interlace page:0</td>
+<td>.S80</td>
+<td>.R80</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.S81</td>
+<td>SCREEN  8</td>
+<td>interlace page:1</td>
+<td>.S81</td>
+<td>.R81</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.SA0</td>
+<td>SCREEN 10</td>
+<td>interlace page:0</td>
+<td>.SA0</td>
+<td>.RA0</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.SA1</td>
+<td>SCREEN 10</td>
+<td>interlace page:1</td>
+<td>.SA1</td>
+<td>.RA1</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.SC0</td>
+<td>SCREEN 12</td>
+<td>interlace page:0</td>
+<td>.SC0</td>
+<td>.RC0</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.SC1</td>
+<td>SCREEN 12</td>
+<td>interlace page:1</td>
+<td>.SC1</td>
+<td>.RC1</td>
+<td>BSAVE interlace</td>
+</tr>
+<tr>
+<td>.R50</td>
+<td>SCREEN  5</td>
+<td>interlace page:0</td>
+<td>.S50</td>
+<td>.R50</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R51</td>
+<td>SCREEN  5</td>
+<td>interlace page:1</td>
+<td>.S51</td>
+<td>.R51</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R60</td>
+<td>SCREEN  6</td>
+<td>interlace page:0</td>
+<td>.S60</td>
+<td>.R60</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R61</td>
+<td>SCREEN  6</td>
+<td>interlace page:1</td>
+<td>.S61</td>
+<td>.R61</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R70</td>
+<td>SCREEN  7</td>
+<td>interlace page:0</td>
+<td>.S70</td>
+<td>.R70</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R71</td>
+<td>SCREEN  7</td>
+<td>interlace page:1</td>
+<td>.S71</td>
+<td>.R71</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R80</td>
+<td>SCREEN  8</td>
+<td>interlace page:0</td>
+<td>.S80</td>
+<td>.R80</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.R81</td>
+<td>SCREEN  8</td>
+<td>interlace page:1</td>
+<td>.S81</td>
+<td>.R81</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.RA0</td>
+<td>SCREEN 10</td>
+<td>interlace page:0</td>
+<td>.SA0</td>
+<td>.RA0</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.RA1</td>
+<td>SCREEN 10</td>
+<td>interlace page:1</td>
+<td>.SA1</td>
+<td>.RA1</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.RC0</td>
+<td>SCREEN 12</td>
+<td>interlace page:0</td>
+<td>.SC0</td>
+<td>.RC0</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+<tr>
+<td>.RC1</td>
+<td>SCREEN 12</td>
+<td>interlace page:1</td>
+<td>.SC1</td>
+<td>.RC1</td>
+<td>GRAPH SAURUS interlace</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%8D%E3%83%AC%E3%83%BC%E3%82%BF%E7%B3%BBscreen-04">キャラクタージェネレータ系（SCREEN 0～4）</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号</th>
+<th>インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.TX1</td>
+<td>SCREEN 0 WIDTH 40</td>
+<td>non-interlace</td>
+<td>.TX1</td>
+<td>.TX1</td>
+<td>BSAVE / GS</td>
+</tr>
+<tr>
+<td>.TX2</td>
+<td>SCREEN 0 WIDTH 80</td>
+<td>non-interlace</td>
+<td>.TX2</td>
+<td>.TX2</td>
+<td>BSAVE / GS</td>
+</tr>
+<tr>
+<td>.GR1</td>
+<td>SCREEN 1</td>
+<td>non-interlace</td>
+<td>.GR1</td>
+<td>.GR1</td>
+<td>BSAVE / GS</td>
+</tr>
+<tr>
+<td>.SR0</td>
+<td>SCREEN 0 WIDTH 40</td>
+<td>non-interlace</td>
+<td>.SR0</td>
+<td>.SR0</td>
+<td>BSAVE / GS</td>
+</tr>
+<tr>
+<td>.SR1</td>
+<td>SCREEN 1</td>
+<td>non-interlace</td>
+<td>.SR1</td>
+<td>.SR1</td>
+<td>BSAVE / GS</td>
+</tr>
+<tr>
+<td>.SC2</td>
+<td>SCREEN  2</td>
+<td>non-interlace</td>
+<td>.SC2</td>
+<td>.SR2</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC3</td>
+<td>SCREEN  3</td>
+<td>non-interlace</td>
+<td>.SC3</td>
+<td>.SR4</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SC4</td>
+<td>SCREEN  4</td>
+<td>non-interlace</td>
+<td>.SC4</td>
+<td>.SR3</td>
+<td>BSAVE</td>
+</tr>
+<tr>
+<td>.SR2</td>
+<td>SCREEN  2</td>
+<td>non-interlace</td>
+<td>.SC2</td>
+<td>.SR2</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR4</td>
+<td>SCREEN  3</td>
+<td>non-interlace</td>
+<td>.SC3</td>
+<td>.SR4</td>
+<td>GRAPH SAURUS</td>
+</tr>
+<tr>
+<td>.SR3</td>
+<td>SCREEN  4</td>
+<td>non-interlace</td>
+<td>.SC4</td>
+<td>.SR3</td>
+<td>GRAPH SAURUS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E7%89%B9%E6%AE%8A-%E3%83%90%E3%82%A4%E3%83%8A%E3%83%AA%E3%83%95%E3%82%A1%E3%82%A4%E3%83%ABbsavebload">特殊 バイナリファイル（BSAVE/BLOAD）</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号 &amp; インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.BIN</td>
+<td>現在の画面モード</td>
+<td>.BIN</td>
+<td>.BIN</td>
+<td>汎用</td>
+</tr>
+<tr>
+<td>.VRM</td>
+<td>現在の画面モード</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>BSAVE RAWイメージ - 新10倍で読み込み変換したもの等</td>
+</tr>
+<tr>
+<td>.SPR</td>
+<td>現在の画面モード</td>
+<td>.SPR</td>
+<td>.SPR</td>
+<td>スプライト</td>
+</tr>
+<tr>
+<td>.SPC</td>
+<td>現在の画面モード</td>
+<td>.SPC</td>
+<td>.SPC</td>
+<td>スプライトカラー</td>
+</tr>
+<tr>
+<td>.NAM</td>
+<td>現在の画面モード</td>
+<td>.NAM</td>
+<td>.NAM</td>
+<td>SC2 パターンネーム</td>
+</tr>
+<tr>
+<td>.COL</td>
+<td>現在の画面モード</td>
+<td>.COL</td>
+<td>.COL</td>
+<td>SC2 パターンカラー</td>
+</tr>
+<tr>
+<td>.GEN</td>
+<td>現在の画面モード</td>
+<td>.GEN</td>
+<td>.GEN</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+<tr>
+<td>.PAT</td>
+<td>現在の画面モード</td>
+<td>.PAT</td>
+<td>.PAT</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+<tr>
+<td>.NM</td>
+<td>現在の画面モード</td>
+<td>.NM'</td>
+<td>.NM'</td>
+<td>SC2 パターンネーム</td>
+</tr>
+<tr>
+<td>.CL</td>
+<td>現在の画面モード</td>
+<td>.CL'</td>
+<td>.CL'</td>
+<td>SC2 パターンカラー</td>
+</tr>
+<tr>
+<td>.GN</td>
+<td>現在の画面モード</td>
+<td>.GN'</td>
+<td>.GN'</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+<tr>
+<td>.CL0</td>
+<td>現在の画面モード</td>
+<td>.CL0</td>
+<td>.CL0</td>
+<td>SC2 パターンカラー</td>
+</tr>
+<tr>
+<td>.CL1</td>
+<td>現在の画面モード</td>
+<td>.CL1</td>
+<td>.CL1</td>
+<td>SC2 パターンカラー</td>
+</tr>
+<tr>
+<td>.CL2</td>
+<td>現在の画面モード</td>
+<td>.CL2</td>
+<td>.CL2</td>
+<td>SC2 パターンカラー</td>
+</tr>
+<tr>
+<td>.GN0</td>
+<td>現在の画面モード</td>
+<td>.GN0</td>
+<td>.GN0</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+<tr>
+<td>.GN1</td>
+<td>現在の画面モード</td>
+<td>.GN1</td>
+<td>.GN1</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+<tr>
+<td>.GN2</td>
+<td>現在の画面モード</td>
+<td>.GN2</td>
+<td>.GN2</td>
+<td>SC2 パターンジェネレータ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E7%89%B9%E6%AE%8A-raw%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 RAWイメージ</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号 &amp; インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.BMP</td>
+<td>現在の画面モード</td>
+<td>.SCR</td>
+<td>.GSR</td>
+<td>BMPヘッダ+RAWイメージ - OpenMSX vram2bmp の非圧縮BMP</td>
+</tr>
+<tr>
+<td>.SCR</td>
+<td>現在の画面モード</td>
+<td>.SCR</td>
+<td>.GSR</td>
+<td>RAWイメージ</td>
+</tr>
+<tr>
+<td>.GSR</td>
+<td>現在の画面モード</td>
+<td>.SCR</td>
+<td>.GSR</td>
+<td>RAWイメージ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E7%89%B9%E6%AE%8A-%E7%AF%84%E5%9B%B2%E4%BF%9D%E5%AD%98%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 範囲保存イメージ</h3>
+<table>
+<thead>
+<tr>
+<th>拡張子</th>
+<th>SCREEN番号 &amp; インターレースモード</th>
+<th>BSAVE拡張子</th>
+<th>GS拡張子</th>
+<th>補足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.CPY</td>
+<td>現在の画面モード</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CP5</td>
+<td>SCREEN  5</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CP6</td>
+<td>SCREEN  6</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CP7</td>
+<td>SCREEN  7</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CP8</td>
+<td>SCREEN  8</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CPA</td>
+<td>SCREEN 10</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.CPC</td>
+<td>SCREEN 12</td>
+<td>.VRM</td>
+<td>.GSR</td>
+<td>範囲画像（BASIC COPY文）</td>
+</tr>
+<tr>
+<td>.GL5</td>
+<td>SCREEN  5</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GL6</td>
+<td>SCREEN  6</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GL7</td>
+<td>SCREEN  7</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GL8</td>
+<td>SCREEN  8</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+<tr>
+<td>.GLA</td>
+<td>SCREEN 10</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GLC</td>
+<td>SCREEN 12</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子風）</td>
+</tr>
+<tr>
+<td>.GLS</td>
+<td>SCREEN 12</td>
+<td>.VRM</td>
+<td>.CPR</td>
+<td>範囲画像（BASIC COPY文/グラフサウルス拡張子）</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="png%E3%82%84bmp%E3%81%8B%E3%82%89msx%E7%94%A8%E7%94%BB%E5%83%8F%E3%81%B8%E3%81%AE%E5%A4%89%E6%8F%9B%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">PNGやBMPからMSX用画像への変換について</h2>
+<p>本ツールにはMSX画像形式からの圧縮や展開のみをサポートしています。<br>
+PNGなどからの変換機能が欲しい場合は他のツールを使用してください。</p>
+<p>(※vram2bmpで保存したbmpはVRAMのRAWイメージなので特別にそのまま表示可能です。)</p>
+<ul>
+<li>
+<p>BMP to MSX<br>
+自分が良く使用しているのは、hra1129さんの変換ツール  BMP to MSX です。<br>
+<a href="https://github.com/hra1129/bmp2msx">https://github.com/hra1129/bmp2msx</a></p>
+</li>
+<li>
+<p>その他ツール紹介ページ<br>
+<a href="https://gigamix.hatenablog.com/entry/devmsx/graphics-tools#MSX-Screen-Converter%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3-MSX%E5%90%91%E3%81%91%E5%90%84%E7%A8%AE%E7%94%BB%E5%83%8F%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF">Gigamax Online Webアプリ多め！ネットで見つけたMSX向け画像編集ツールまとめ</a></p>
+</li>
+</ul>
+<hr>
+<h2 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">ドットアスペクト比について</h2>
+<p>縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。</p>
+<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E6%83%85%E5%A0%B1%E5%85%83">ドットアスペクト比 情報元</h3>
+<ol>
+<li>
+<p>情報元1 「The real V99x8 Pixel Aspect Ratio (PAR)」<br>
+<a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par</a></p>
+</li>
+<li>
+<p>情報元2 「VDPマニュアルによれは 284.5pixels*262line」 という情報
+<a href="https://x.com/spacemoai/status/1877688639980716493">https://x.com/spacemoai/status/1877688639980716493</a><br>
+VDPマニュアルの該当箇所については不明</p>
+</li>
+</ol>
+<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E8%A8%AD%E5%AE%9A%E5%80%A4%E3%83%AA%E3%82%B9%E3%83%88">ドットアスペクト比 設定値リスト</h3>
+<ol>
+<li>
+<p><strong>「1.228 : 1」</strong>  (1 : 0.814)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>260</strong>。</p>
+<p>spacemoai氏から提供された <code>284.5pixels*262line出力</code>という情報からそのまま求めた値。</p>
+<p><code>(320 ÷ 284.5) × (262 ÷ 240) = 1.2278851786760398359695371997657</code></p>
+<p>MSX2版イース2の雑誌広告と一致。</p>
+</li>
+<li>
+<p><strong>「1.177 : 1」</strong> (1 : 0.850)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (Realistic)</strong>。</p>
+<p>Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。</p>
+</li>
+<li>
+<p><strong>「1.166 : 1」</strong>  (1 : 0.858)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
+<p>根拠は失念したが、おぼろげな記憶に寄れば他のコンソールの設定値を参照した値。</p>
+</li>
+<li>
+<p><strong>「1.133 : 1」</strong>  (1 : 0.882)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong> または <strong>284</strong>。</p>
+<p><a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">FRS氏の計算</a>を元にした設定値。</p>
+<p><code>(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756</code></p>
+</li>
+<li>
+<p><strong>「1 : 1」</strong><br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>320</strong>。</p>
+<p>いわゆるドットバイドット。<br>
+モアレを除去したい場合に利用することがあるので用意。</p>
+</li>
+</ol>
+<p>現在、リストからの選択になっています。</p>
+<p>要望が在れば任意の値を指定できるようにするかもしれませんが、各自でgsrle.htmlを弄って頂いた方が早いかと思います。</p>
+<hr>
+<h2 id="%E4%BD%BF%E7%94%A8%E8%A8%B1%E8%AB%BE">使用許諾</h2>
+<h3 id="%E7%A6%81%E6%AD%A2%E4%BA%8B%E9%A0%85">禁止事項</h3>
+<p>音楽データや画像ファイルの再利用はご遠慮ください。（全体的に）</p>
+<h3 id="%E5%86%8D%E5%88%A9%E7%94%A8%E5%8F%AF%E8%83%BD%E3%81%AA%E3%82%82%E3%81%AE">再利用可能なもの</h3>
+<p>画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。
+改変なども可能です。</p>
+<h3 id="%E5%BC%95%E8%B2%AC%E4%BA%8B%E9%A0%85">引責事項</h3>
+<p>転載や改変についてサポートは致しかねます。<br>
+また、このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。</p>
+<hr>
+<h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
+<ul>
+<li>
+<p>2026/01/01 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_030.7z">ver.0.30</a></p>
+<ul>
+<li>borderスタイルで境界線をつけたためにキャンバスの上下左右1pxが描画されないので、box-shadowで外側に変更</li>
+<li>VSCodのワークスペースにして、MarkdownPDFプラグインでのhtml変換を自動化</li>
+</ul>
+</li>
+<li>
+<p>2025/01/11 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z">ver.0.29</a></p>
+<ul>
+<li>ドットアスペクト比 1.228:1（284.5pixels*262lineから求めた値。雑誌広告などとの一致優先）を追加</li>
+</ul>
+</li>
+<li>
+<p>2023/10/07 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_028.7z">ver.0.28</a></p>
+<ul>
+<li>BSAVE保存(VRAMパレット書込)が内部エラーで止まっていた問題の修正</li>
+</ul>
+</li>
+<li>
+<p>2023/10/05 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_027.7z">ver.0.27</a></p>
+<ul>
+<li>ファイルの複数ドラッグアンドドロップ改善</li>
+</ul>
+</li>
+<li>
+<p>2023/09/20 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_026.7z">ver.0.26</a></p>
+<ul>
+<li>スプライト16x16x2の時にスプライトジェネレータのパターン一覧が2倍表示であふれるのを修正</li>
+<li>スプライトジェネレータ背景の透明色切替を追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/18 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_025.7z">ver.0.25</a></p>
+<ul>
+<li>グレースケール表示追加</li>
+<li>テスト機能：SCREEN1,2,4で明るい色側をビット1に補正するボタン追加</li>
+<li>(.SC? .SR?ファイル)SCREEN4以下でも元のファイルの範囲だけ保存するように変更</li>
+<li>SCREEN4以下の時に0x0000～0x3FFFを保存する機能はオプションに移動</li>
+<li>.VRMファイルの扱いをRAWイメージからBSAVEイメージに修正</li>
+</ul>
+</li>
+<li>
+<p>2023/09/17 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024b.7z">ver.0.24b</a></p>
+<ul>
+<li>COPY文で保存したファイルの拡張子にグラフサウルスのGL?を追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/16 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_024.7z">ver.0.24</a></p>
+<ul>
+<li>COPY文で保存したファイルの読み込みに対応</li>
+</ul>
+</li>
+<li>
+<p>2023/09/15 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_023.7z">ver.0.23</a></p>
+<ul>
+<li>スプライトベースアドレス選択のページリストがおかしくなっていたのを修正</li>
+<li>SCREEN7,8,10,11,12で実機同様にVRAMへのインターリーブ接続を有効にする。（画面モード切替時の表示が実機と同じになる）</li>
+</ul>
+</li>
+<li>
+<p>2023/09/15 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_022.7z">ver.0.22</a></p>
+<ul>
+<li>スプライト処理最適化に伴う拡大表示のバグ修正</li>
+<li>スクロール対応描画処理最適化に伴うインターレース表示時の横256ドット時のバグ修正</li>
+<li>横スクロールの処理追加</li>
+<li>表示更新処理を最適化</li>
+<li>インターレースモード画像表示時に違う画面モードのインターレース画像を表示した際に表示ページが0になるバグの修正<br>
+（※ インタレース＆フリップでの424ライン表示の場合はVDP表示ページを奇数にする必要がある）</li>
+</ul>
+</li>
+<li>
+<p>2023/09/13 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_021.7z">ver.0.21</a></p>
+<ul>
+<li>スプライトモード2の時の表示制限判定を修正</li>
+<li>スプライトモード2の時の表示制限で半透明処理をする際に不透明ピクセルの透明度を上書きしないように修正</li>
+<li>メインキャンバスをドラッグでスクロールする機能を追加</li>
+<li>BSAVEヘッダのサイズ制限について説明追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/11 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_020.7z">ver.0.20</a></p>
+<ul>
+<li>スプライト横並び制限設定に網掛追加</li>
+<li>アーカイブ置き場変更</li>
+</ul>
+</li>
+<li>
+<p>2023/09/11 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_019.7z">ver.0.19</a></p>
+<ul>
+<li>設定読み書きにVRAMパレットテーブル読み込み抑制スイッチ追加</li>
+<li>パレット無効化スイッチを画面下にも追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/10 ver.0.18</p>
+<ul>
+<li>設定読み込み時、&quot;画面縦サイズ&quot;、&quot;DotAspect比&quot;のラジオボタン選択状態が反映されないのを修正</li>
+</ul>
+</li>
+<li>
+<p>2023/09/09 ver.0.17</p>
+<ul>
+<li>スプライト横並び制限設定に半透明追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/09 ver.0.16</p>
+<ul>
+<li>スプライト横並び制限が常に無効になっていたのを修正</li>
+<li>スプライト横並び制限の無効化スイッチ追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/09 ver.0.15</p>
+<ul>
+<li>設定の保存と読み込みを追加<br>
+設定保存ボタンでgsrle_html_config.jsonが保存されます<br>
+*.jsonを開く、またはドロップで設定が反映されます</li>
+</ul>
+</li>
+<li>
+<p>2023/09/09 ver.0.14</p>
+<ul>
+<li>BMP・GSR・SCRのRAWファイル読み込み時のファイル名表示修正</li>
+</ul>
+</li>
+<li>
+<p>2023/09/09 ver.0.13</p>
+<ul>
+<li>表示ページ指定を追加</li>
+<li>スプライトの<strong>縦位置が1ドット上</strong>だったのを修正</li>
+<li>スプライトモード２のCCビット処理を修正
+<ul>
+<li>3枚以上での重ね合わせを修正</li>
+<li>同一ラインにCC=0のスプライトが表示しない場合でも表示していたのを修正</li>
+</ul>
+</li>
+<li>スプライトのTPビットの処理が常に有効だったのを修正<br>
+（TPビット:カラー０を指定したときに透明にならずにカラーパレットの色で表示する）</li>
+<li>スクリーン0,1,2,3でカラーパレットのチェックを外して無効にした際、TMS9918A風の色にする設定を追加</li>
+</ul>
+</li>
+<li>
+<p>2023/09/08 ver.0.12</p>
+<ul>
+<li>仮に HTML5 MSX GRAPHICS Viewer ver.0.12 とした。</li>
+<li>画面モードの変更や各種画面設定を変更できるようにUIや処理追加。</li>
+<li>スプライトモード1と2に対応。表示サイズモードやスプライト非表示スイッチも追加。</li>
+<li>openMSXで <code>VRAM2bmp filename.bmp 0 256 1024</code> として保存したBMPに対応
+（画面モードやベースアドレスは自分で指定）</li>
+<li>SCREEN0～12まで正式対応。</li>
+<li>SCREEN0 WIDTH80でのブリンクは非対応</li>
+<li>スプライトモード2のTRビット（透明色ではなくカラー0で描画）には非対応</li>
+<li>細かいUIデザイン変更。</li>
+</ul>
+</li>
+<li>
+<p>2023/09/05</p>
+<ul>
+<li>SCREEN2～4の画像保存が正常動作しないのを修正。</li>
+<li>こっそりSCREEN0と1に対応。</li>
+<li>こっそりGEN、COL、NAM、PATなどのVRAM部分セーブファイルに対応。
+<ul>
+<li>扱いはSCREEN2画像</li>
+<li>部分ファイルはメインファイル名として記録されないのでメイン画像がないと保存出来ない。<br>
+（※TEST.SC2などのSCREEN2全体画像を読み込んだ後に部分データを読み込むとセーブ可能）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>それ以前</p>
+<ul>
+<li>何か色々修正</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

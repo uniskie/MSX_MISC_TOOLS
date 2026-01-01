@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		// css指定
+		"markdown-pdf.styles": ["./img/markdown.css"],
+		// 自動セーブ
+		"markdown-pdf.convertOnSave": true,
+		// 出力フォーマット: pdf, html, png, jpeg
+		"markdown-pdf.type": "html",
+	}
+}
