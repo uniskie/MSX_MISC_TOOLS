@@ -2461,7 +2461,7 @@ class VDP {
                 }
             }
             // パターン一覧
-            pgofs += 256;
+            pgofs += 256 - 1; // スプライトが1ライン下に表示される処理を無効化
             pal = vdp.pal_bf;
             chr_step = chr_count;
             write0bit = 1;

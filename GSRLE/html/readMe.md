@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_030.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_030.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_031.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -498,6 +498,10 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2026/01/01 [ver.0.31](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z)
+  - borderスタイルのせいではないので境界線をborder指定に戻した
+  - スプライトが1ライン下にずれる処理をパターン一覧時に無効化してないのが原因でスプライトパターン一覧の下一ラインが表示されない問題の修正
 
 - 2026/01/01 [ver.0.30](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_030.7z)
   - borderスタイルで境界線をつけたためにキャンバスの上下左右1pxが描画されないので、box-shadowで外側に変更
