@@ -502,6 +502,7 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 - 2026/01/01 [ver.0.30](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_030.7z)
   - borderスタイルで境界線をつけたためにキャンバスの上下左右1pxが描画されないので、box-shadowで外側に変更
   - VSCodのワークスペースにして、MarkdownPDFプラグインでのhtml変換を自動化
+  - cssファイル名整理
 
 - 2025/01/11 [ver.0.29](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_029.7z)
   - ドットアスペクト比 1.228:1（284.5pixels*262lineから求めた値。雑誌広告などとの一致優先）を追加
