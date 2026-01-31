@@ -1,5 +1,6 @@
-MSX2 SHIFT-JIS TEXT EDITOR  
-[ FIELD WORK ] ver. 0.83  
+# MSX2 SHIFT-JIS TEXT EDITOR [ FIELD WORK ]
+
+ver. 0.83  
 (C) 1996,2023 UNKOSOFT
 
 ![](img/FieldWork.png)
@@ -8,57 +9,83 @@ Disk image: [fw.dsk](fw.dsk)
 
 # 取扱説明書 
 
+とにかく動作が軽量な漢字対応テキストエディタが欲しくて自作したものです。
+
+1. スクリーン2使用で高速動作
+2. 表示文字数は半角32x12
+3. BASICから起動、BASICに復帰
+   (VRAMに一時退避/復帰)
+
+→ [基本操作](#基本操作)  
+→ [メニュー](#メニュー)  
+→ [MSX-JEモード入力操作](#msx-jeモード入力操作)  
+
+## 必要スペック
+
+1. MSX-JE搭載のMSX2+以上推奨。  
+   （MSX2でも周辺機器を揃えれば使用可能）
+2. 要漢字ROM
+3. 漢字入力をしたい場合、要MSX-JE。  
+   なければビューアーとしてのみ動作。
+4. バージョンアップアダプター非対応。
+
 ## 起動
 
-RUN"FW.BAS"で起動。
+BASIC画面から  
+```
+RUN"FW.BAS"
+```
+で起動。
 
 [SHIFT+ESC]でBASICに戻ります。
 
 BASICに戻ったら[F1]キーで
-起動時のHIMEM値が出ます。
+起動時のHIMEM値（フリーエリアの上限）が表示されます。
 
-例) CLEAR200,&HE518
+例) `CLEAR200,&HE518`
 
-## 特徴
-
-1. 要MSX2以上。推奨はMSX-JE搭載のMSX2+以上。
-2. 要漢字ROM
-3. 漢字入力は要MSX-JE。なければ表示のみ可能。
-4. ﾊﾞｰｼﾞｮﾝｱｯﾌﾟｱﾀﾞﾌﾟﾀｰ非対応
-5. ｽｸﾘｰﾝ2使用で高速動作
-6. 表示文字数は半角32x12
-7. BASICから起動、BASICに復帰
-   (VRAMに一時退避/復帰)
 
 ## 注意事項
 
-- このエディターはRAMをディスクワークエリアぎりぎりまで使います。
-  KANJI命令や、_MUSIC命令のようにフリーエリアを大きく消費するものとは共存できません。
+- このエディターはRAMをディスクワークエリアぎりぎりまで使います。  
+  CALL KANJI命令や、CALL MUSIC命令のように  
+  フリーエリアを大きく消費するものとは同時使用できません。
 
-- H.SYNC、スクロール機能、２１２ライン表示を使用しているため、MSX2以上が必要となっています。
+- MSX2以上が必要となっています。  
+  以下の機能を使用しているためです。
 
-- クリップボード機能はありません。
+  - VDP R#23の縦スクロール機能
+  - 212ライン表示
+  - H.SYNCでの画面切り替え
+  - VRAMへのRAMページ退避
 
-- ビューア―としては漢字ROMのみで使えますが、漢字入力にはMSX-JEが必要です。  
-  MSX-JE非搭載の場合は漢字入力は出来ません。  
+- クリップボード/UNDO機能はありません。
+
+- ビューア―としては漢字ROMのみで使えますが、漢字入力にはMSX-JEが必要です。
+
+  (MSX-JE非搭載の場合は漢字入力は出来ません。)
+
   漢字BASIC内蔵の単漢字変換は一般アプリから利用できないのでMSX-JE搭載機種が必要になります。
   
-  - MSX2+以上でMSX-JEを搭載していない機種は、SANYO WAVYシリーズ、Panasonic FS-A1FXなどの廉価MSX2+
-  - MSX2+以上でMSX-JE内蔵機種は、SONY HB-F1XDJ、HB-F1XV、Panasonic FS-A1WX、FS-A1WSX、FS-A1ST、FS-A1GT
-  - MSX-JE内蔵カートリッジは、MSX-WRITE/Ⅱ、HALNOTE、HBI-J1、FS-SR021、FS-PW1
+  → [MSX-JE搭載機種のリスト](#msx-je搭載機種のリスト)
 
-## キー操作
+
+- MSX-JEを利用した漢字変換は、
+  長時間の割り込み禁止が発生する為、  
+  変換時に画面がちらつきがちです。
+  
+## 基本操作
 
 | キー         | 別入力 | 動作                     |
 |--------------|--------|--------------------------|
-| [ESC]        | CTRL+[ | メニュー表示／キャンセル |
+| [ESC]        | CTRL+[ | メニュー表示/キャンセル |
 | [SHIFT+ESC]  |        | エディタを終了           |
 |--------------|--------|--------------------------|
 | [SELECT]     | CTRL+X | MSX-JEのON/OFF           |
 |--------------|--------|--------------------------|
 | [INS]        | CTRL+R | 挿入/上書き切り替え      |
-| [DEL]        |        | カーソル位置の１文字削除 |
-| [BS]         | CTRL+H | カーソル手前の１文字削除 |
+| [DEL]        |        | カーソル位置の1文字削除 |
+| [BS]         | CTRL+H | カーソル手前の1文字削除 |
 | [CTRL+E]     |        | カーソルより右を削除     |
 |--------------|--------|--------------------------|
 | [HOME]       | CTRL+K | 先頭ページを表示         |
@@ -86,7 +113,7 @@ BASICに戻ったら[F1]キーで
   ファイル名無しで[RETURN]キーで
   ファイル一覧から選択可能
 
-## MSX-JE 入力時操作
+## MSX-JEモード入力操作
 
 | キー          | 動作                         |
 |---------------|------------------------------|
@@ -99,13 +126,71 @@ BASICに戻ったら[F1]キーで
 | [F5][RETURN]  | 確定                         |
 | [かな]        | ローマ字・かな切替           |
 
+# BUILD 手順
 
-# STB CODE
+## 使用しているアセンブラ
 
-MSX-JE
-STB (Screen image Text Block)  functions
+1. tniasm v0.45  
+	http://www.tni.nl/products/tniasm.html
 
-STBはMSX-JEが入力処理中の表示をするために使用するテキストデータです。
+2. sjasmplus  
+	https://github.com/z00m128/sjasmplus  
+	sjasmplus v1.20.3  
+	https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3
+
+自分の場合、asMSX ￫ tniasm ￫ sjasmplusで移行しています。
+
+> sjasmplusは基本的にtniasmのコードが通りますが、ファイル系のディレクティブが3つほど違うので、そちらの互換のためのマクロ宣言が```sjasm_preamble.asm```です。
+
+## 準備
+
+1. SRCフォルダかパスの通ったフォルダに```tniasm.exe```または```sjamplus.exe```を配置
+
+## アセンブル
+
+1. コマンドライン```cmd.exe```を起動
+2. (SRCフォルダにカレントパスを移動)  
+   コマンドラインに  
+   ```cd "ソースファイルのあるフォルダ"```
+3. tniasmの場合、コマンドラインに  
+   ```_tniasm FW.ASM```
+   
+   sjasmplusの場合、コマンドラインに  
+   ```_sjasm FW.ASM```
+
+で、ASM.BIN が出力されます。
+
+## 参考
+
+sjamplusでtniasm向けのソースをビルドする  
+https://specnext.dev/blog/2020/11/13/migration-of-msx-project-from-tniasm-to-sjasmplus/
+
+# 追加資料
+
+## MSX-JE搭載機種のリスト
+
+  - MSX2+以上でMSX-JEを搭載していない機種は
+    - SANYO WAVYシリーズ
+    - Panasonic FS-A1FXなどの廉価MSX2+
+  - MSX2+以上でMSX-JE内蔵機種は
+    - SONY HB-F1XDJ
+    - SONY HB-F1XV
+    - Panasonic FS-A1WX
+    - Panasonic FS-A1WSX
+    - Panasonic FS-A1ST
+    - Panasonic FS-A1GT
+  - MSX-JE内蔵カートリッジは
+    - MSX-WRITE/Ⅱ
+    - HALNOTE
+    - HBI-J1
+    - FS-SR021
+    - FS-PW1
+
+## STB CODE
+
+MSX-JE STB (Screen image Text Block)  functions
+
+STBはMSX-JEが入力処理中の表示をするために使用するテキストデータです。  
 アプリケーションはこれを処理して、入力中表示をする必要があります。
 
 | データ   | 意味                                                                               |
@@ -123,54 +208,14 @@ STBはMSX-JEが入力処理中の表示をするために使用するテキス�
 
 | データ                   | 意味                                                           |
 |--------------------------|----------------------------------------------------------------|
-| 上記以外で00～15のコード | システム予約です。スキップして下さい。                         |
-| 上記以外で16～31のコード | システム予約です。このコードと続く1バイトもスキップして下さい。|
+| 上記以外で00~15のコード | システム予約です。スキップして下さい。                         |
+| 上記以外で16~31のコード | システム予約です。このコードと続く1バイトもスキップして下さい。|
 
-# BUILD
-
-## アセンブラ
-
-1. tniasm v0.45  
-	http://www.tni.nl/products/tniasm.html
-
-2. sjasmplus  
-	https://github.com/z00m128/sjasmplus  
-	sjasmplus v1.20.3  
-	https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3
-
-自分の場合、asMSX → tniasm → sjasmplusで移行しています。
-
-> sjasmplusは基本的にtniasmのコードが通りますが、ファイル系のディレクティブが3つほど違うので、そちらの互換のためのマクロ宣言が```sjasm_preamble.asm```です。
-
-## 準備
-
-1. SRCフォルダかパスの通ったフォルダに```tniasm.exe```または```sjamplus.exe```を配置
-
-## アセンブル
-
-1. コマンドライン```cmd.exe```を起動
-2. （SRCフォルダにカレントパスを移動）  
-   コマンドラインに  
-   ```cd "ソースファイルのあるフォルダ"```
-3. tniasmの場合、コマンドラインに  
-   ```_tniasm FW.ASM```
-   
-   sjasmplusの場合、コマンドラインに  
-   ```_sjasm FW.ASM```
-
-で、ASM.BIN が出力されます。
-
-## 利用について
+# 利用について
 
 ソースコード含め、改変・再配布はご自由にどうぞ。
 
-ただし、サポート・保証などはございません。
+ただし、サポート・保証などはございません。  
+このプログラムを使用して起きた問題については一切補償いたしません。
 
-このプログラムを使用して起きた問題については補償いたしかねますので、
-ファイル・ディスクは常にバックアップを取って使用してください。
-
-## 参考
-
-sjamplusでtniasm向けのソースをビルドする  
-https://specnext.dev/blog/2020/11/13/migration-of-msx-project-from-tniasm-to-sjasmplus/
-
+念のためファイル・ディスクは常にバックアップを取って使用してください。
