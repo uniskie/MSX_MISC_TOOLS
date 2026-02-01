@@ -97,7 +97,7 @@
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_031.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_032.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
@@ -1114,27 +1114,8 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 <hr>
 <h2 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">ドットアスペクト比について</h2>
 <p>縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。</p>
-<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E6%83%85%E5%A0%B1%E5%85%83">ドットアスペクト比 情報元</h3>
-<ol>
-<li>
-<p>情報元1 「The real V99x8 Pixel Aspect Ratio (PAR)」<br>
-<a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par</a></p>
-</li>
-<li>
-<p>情報元2 「VDPマニュアルによれは 284.5pixels*262line」 という情報
-<a href="https://x.com/spacemoai/status/1877688639980716493">https://x.com/spacemoai/status/1877688639980716493</a><br>
-VDPマニュアルの該当箇所については不明</p>
-</li>
-</ol>
 <h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E8%A8%AD%E5%AE%9A%E5%80%A4%E3%83%AA%E3%82%B9%E3%83%88">ドットアスペクト比 設定値リスト</h3>
 <ol>
-<li>
-<p><strong>「1.228 : 1」</strong>  (1 : 0.814)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>260</strong>。</p>
-<p>spacemoai氏から提供された <code>284.5pixels*262line出力</code>という情報からそのまま求めた値。</p>
-<p><code>(320 ÷ 284.5) × (262 ÷ 240) = 1.2278851786760398359695371997657</code></p>
-<p>MSX2版イース2の雑誌広告と一致。</p>
-</li>
 <li>
 <p><strong>「1.177 : 1」</strong> (1 : 0.850)<br>
 openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (Realistic)</strong>。</p>
@@ -1143,13 +1124,41 @@ openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (
 <li>
 <p><strong>「1.166 : 1」</strong>  (1 : 0.858)<br>
 openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
-<p>根拠は失念したが、おぼろげな記憶に寄れば他のコンソールの設定値を参照した値。</p>
+<p>MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。
+約1.15～約1.17で諸説あり、一旦、中間値を採用した物。</p>
+<p>MSXの解像度をそのまま4:3を覆うように広げた形。
+当時そのような基準で調整していた人が多いかもしれない。</p>
+</li>
+<li>
+<p><strong>「1.154 : 1」</strong>  (1 : 0.8866)<br>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>277</strong></p>
+<p><a href="https://www.msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">TomHさんの計算</a>をもとにした設定値。</p>
+<blockquote>
+<p>TSCラインは227.5カラークロックの長さで、これは水平同期間の周期です。TMSとV99x8はどちらも水平同期間のカラークロックは228&quot;</p>
+<p>256サイクルのピクセル、1ピクセルあたり2/3の色サイクルは、ライン全体の75%に非常に近いピクセル数です。つまり、各ピクセルはラインの1/(227.5 * 1.5)です。ラインの約52/64が見えるということは、64 / (227.5 * 1.5 * 52) = 64 / 17745となります。&quot;</p>
+</blockquote>
+<p><code>(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693</code></p>
 </li>
 <li>
 <p><strong>「1.133 : 1」</strong>  (1 : 0.882)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong> または <strong>284</strong>。</p>
+openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong>か<strong>283</strong></p>
 <p><a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">FRS氏の計算</a>を元にした設定値。</p>
+<blockquote>
+<ol>
+<li>480i（240p）のラインのみが描画されます。そのため、V99x8がレンダリングする3ライン分はオーバースキャンとして画面からはみ出します。</li>
+<li>1ラインの画像周期はちょうど52.6マイクロ秒です。これより後に送信されるピクセルはオーバースキャンとして画面からはみ出します。</li>
+</ol>
+<p>V99x8では、leftBorder+ActiveArea+rightBorder = 1139サイクル = 53.03281μSec</p>
+<p>右境界の最後の 4.647799 ピクセルがオーバースキャンとして画面から外れてしまいます</p>
+</blockquote>
 <p><code>(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756</code></p>
+<p>他にPAL信号をベースに計算した1.1375:1(1:0.879)という説もあるようです。<br>
+（openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>281</strong>か<strong>282</strong>）</p>
+<p>https://x.com/spacemoai/status/1928869425014251590?s=20</p>
+<blockquote>
+<p>284.75ピクセル×243ラインは4:3のアスペクト比に収まらなければならないので、(284.75:4) : (243:3) ≈ 1.1375:1 となります。</p>
+</blockquote>
+<p><code>(284.75:4) : (243:3) ≈ 1.1375:1</code></p>
 </li>
 <li>
 <p><strong>「1 : 1」</strong><br>
@@ -1173,6 +1182,15 @@ openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>320</
 <hr>
 <h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
 <ul>
+<li>
+<p>2026/02/02 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z">ver.0.32</a></p>
+<ul>
+<li>デフォルトのピクセル縦横比を1.228:1から1.166:1に変更。<br>
+ピクセル縦横比1.228は誤解に基づいた値とのことで削除。<br>
+印刷物との比較で一番近かったので、残すことも考えたが、印刷自体横長に感じたことも多いので一旦削除<br>
+https://x.com/uniskie2/status/1877917688464572817</li>
+</ul>
+</li>
 <li>
 <p>2026/01/01 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z">ver.0.31</a></p>
 <ul>

@@ -6,7 +6,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_031.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_032.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
@@ -430,48 +430,61 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 
 縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。
 
-### ドットアスペクト比 情報元
-
-1. 情報元1 「The real V99x8 Pixel Aspect Ratio (PAR)」  
-   [https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)
-
-2. 情報元2 「VDPマニュアルによれは 284.5pixels*262line」 という情報
-   [https://x.com/spacemoai/status/1877688639980716493](https://x.com/spacemoai/status/1877688639980716493)  
-   VDPマニュアルの該当箇所については不明
-
 ### ドットアスペクト比 設定値リスト
 
-1. **「1.228 : 1」**  (1 : 0.814)  
-     openMSXの**Horisontal stretch**で設定するなら **260**。  
-
-     spacemoai氏から提供された ``284.5pixels*262line出力``という情報からそのまま求めた値。
-
-     ```(320 ÷ 284.5) × (262 ÷ 240) = 1.2278851786760398359695371997657```
-  
-     MSX2版イース2の雑誌広告と一致。  
-
-2. **「1.177 : 1」** (1 : 0.850)  
+1. **「1.177 : 1」** (1 : 0.850)  
      openMSXの**Horisontal stretch**で設定するなら **272 (Realistic)**。
 
      Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。
 
-3. **「1.166 : 1」**  (1 : 0.858)  
+2. **「1.166 : 1」**  (1 : 0.858)  
    openMSXの**Horisontal stretch**で設定するなら **274**。
 
-   根拠は失念したが、おぼろげな記憶に寄れば他のコンソールの設定値を参照した値。
+   MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。
+   約1.15～約1.17で諸説あり、一旦、中間値を採用した物。
+   
+   MSXの解像度をそのまま4:3を覆うように広げた形。 
+   当時そのような基準で調整していた人が多いかもしれない。  
+
+3. **「1.154 : 1」**  (1 : 0.8866)  
+   openMSXの**Horisontal stretch**で設定するなら **277**  
+
+   [TomHさんの計算](https://www.msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)をもとにした設定値。
+   
+   >TSCラインは227.5カラークロックの長さで、これは水平同期間の周期です。TMSとV99x8はどちらも水平同期間のカラークロックは228"
+   >
+   >256サイクルのピクセル、1ピクセルあたり2/3の色サイクルは、ライン全体の75%に非常に近いピクセル数です。つまり、各ピクセルはラインの1/(227.5 * 1.5)です。ラインの約52/64が見えるということは、64 / (227.5 * 1.5 * 52) = 64 / 17745となります。"
+    
+   ```(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693```
 
 4. **「1.133 : 1」**  (1 : 0.882)  
-     openMSXの**Horisontal stretch**で設定するなら **282** または **284**。  
+     openMSXの**Horisontal stretch**で設定するなら **282**か**283**
 
-     [FRS氏の計算](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)を元にした設定値。
+   [FRS氏の計算](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)を元にした設定値。
 
-     ```(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756```  
+   >1) 480i（240p）のラインのみが描画されます。そのため、V99x8がレンダリングする3ライン分はオーバースキャンとして画面からはみ出します。
+   >2) 1ラインの画像周期はちょうど52.6マイクロ秒です。これより後に送信されるピクセルはオーバースキャンとして画面からはみ出します。
+   >
+   >V99x8では、leftBorder+ActiveArea+rightBorder = 1139サイクル = 53.03281μSec
+   >
+   >右境界の最後の 4.647799 ピクセルがオーバースキャンとして画面から外れてしまいます
+
+   ```(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756```  
+   
+   他にPAL信号をベースに計算した1.1375:1(1:0.879)という説もあるようです。  
+   （openMSXの**Horisontal stretch**で設定するなら **281**か**282**）
+   
+   https://x.com/spacemoai/status/1928869425014251590?s=20
+
+   >284.75ピクセル×243ラインは4:3のアスペクト比に収まらなければならないので、(284.75:4) : (243:3) ≈ 1.1375:1 となります。
+
+   ```(284.75:4) : (243:3) ≈ 1.1375:1```
 
 5. **「1 : 1」**  
-     openMSXの**Horisontal stretch**で設定するなら **320**。
+    openMSXの**Horisontal stretch**で設定するなら **320**。
 
-     いわゆるドットバイドット。  
-     モアレを除去したい場合に利用することがあるので用意。
+    いわゆるドットバイドット。  
+    モアレを除去したい場合に利用することがあるので用意。
 
 現在、リストからの選択になっています。
 
@@ -498,6 +511,12 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 ----
 
 ## 更新履歴
+
+- 2026/02/02 [ver.0.32](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z)
+  - デフォルトのピクセル縦横比を1.228:1から1.166:1に変更。  
+    ピクセル縦横比1.228は誤解に基づいた値とのことで削除。  
+    印刷物との比較で一番近かったので、残すことも考えたが、印刷自体横長に感じたことも多いので一旦削除  
+    https://x.com/uniskie2/status/1877917688464572817
 
 - 2026/01/01 [ver.0.31](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_031.7z)
   - borderスタイルのせいではないので境界線をborder指定に戻した
