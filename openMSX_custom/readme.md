@@ -5,6 +5,8 @@
 |[share/scripts](share/scripts)| カスタムコマンド追加サンプルです。 |
 |[share/skins](share/skins)| skins/uni-set ... 少し小さめのOnScreenDisplayアイコンセットです。 |
 |[layouts](layouts)| skins/uni-setのアイコンを使用したレイアウト保存データです。<BR>openMSXメニューの 「Settings」 → 「GUI」→「Save Layout」で保存、「Restore Layout」で呼び出し。 |
+|[OpenMSX_TV_Shader](https://github.com/uniskie/MSX_DOCUMENTS/tree/main/OpenMSX_TV_Shader)| TVシェーダーをNTSC滲み風に変えるシェーダーです。（別リポジトリ）|
+
 
 
 ## 使い方
