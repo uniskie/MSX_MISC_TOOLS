@@ -4,8 +4,8 @@
 |---|---|
 |[share/scripts](share/scripts)| カスタムコマンド追加サンプルです。 |
 |[share/skins](share/skins)| skins/uni-set ... 少し小さめのOnScreenDisplayアイコンセットです。 |
+|[share/shader](share/shader)| TVシェーダーをNTSC滲み風に変えるシェーダーです。|
 |[layouts](layouts)| skins/uni-setのアイコンを使用したレイアウト保存データです。<BR>openMSXメニューの 「Settings」 → 「GUI」→「Save Layout」で保存、「Restore Layout」で呼び出し。 |
-|[OpenMSX_TV_Shader](https://github.com/uniskie/MSX_DOCUMENTS/tree/main/OpenMSX_TV_Shader)| TVシェーダーをNTSC滲み風に変えるシェーダーです。（別リポジトリ）|
 
 
 
@@ -50,18 +50,56 @@ OpenMSXコマンドコンソールから使用したいものは、
   （`disasm3_l`はおまけ。ラベル対応1行逆アセンブル）
   
   `save_to_file {sample.asm} [disasm3 0x0000 0x3fff]`⏎ のようにすると逆アセンブル結果出力をファイルに保存できます。
+
+### コマンドコンソール（tcl/tkコンソール）の簡単なTIPS
+
+- カレントディレクトリの取得は`pwd⏎`  
+- カレントディレクトリの変更は`cd パス⏎`
+
+- Windowsのパス区切り文字列\などを使った指定の場合、
+  エスケープシーケンスを無効化して文字列そのものを指定するほうが楽です。  
+  その場合はパスを{}で囲んで指定します。  
+  例) `cd {C:\GitHub\_uniskie\MSX_MISC_TOOLS\openMSX_custom}`
+ 
+-  環境変数などを使用する場合は`{}`で囲まず  
+  `cd $env(OPENMSX_USER_DATA)/../`  
+  のような感じで `\`の代わりに`/`を使うと楽です。
   
-> カレントディレクトリの取得は`pwd⏎`  
-> カレントディレクトリの変更は`cd パス⏎`
->
-> windowsのパス区切り文字列\などを使った指定の場合、
-> エスケープシーケンスを無効化して文字列そのものを指定するほうが楽です。  
-> その場合はパスを{}で囲んで指定します。  
-> 例) `cd {C:\GitHub\_uniskie\MSX_MISC_TOOLS\openMSX_custom}`
->
-> 環境変数などを使用する場合は{}を囲まず
-> `cd $env(OPENMSX_USER_DATA)/../`
-> のような感じで \の代わりに/を使うと楽です。
+  そのほかのTIPSは書きかけですが、
+  [MSX_DOCUMENTS Repositryの openMSX Tclスクリプト活用ガイド](https://github.com/uniskie/MSX_DOCUMENTS/blob/main/OpenMSX_script/openMSX%20Tcl%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E6%B4%BB%E7%94%A8%E3%82%AC%E3%82%A4%E3%83%89.md) を参照ください。
+
+## shader 解説
+
+### tv shader custom
+
+公式版のTVフィルタをNTSC（Compsite VIDEO）風のにじみのある映像に変更するshaderです。  
+Themaister's NTSC shaderベースの処理を移植したもので、アナログテレビ風のにじみに少し近くなります。
+
+#### Themaister's NTSC shader
+
+表示時に一度NTSC信号に変換し、
+クロスカラー(色の干渉)やドット妨害(暗いドット)の処理を施した後、
+RGBに戻して表示する物です。
+
+- クロスカラー  
+  ![cross-color](share/shader/img/CrossColor.png)
+
+- ドット妨害  
+  ![cross-luminance](share/shader/img/CrossLuminance.png)
+
+### VIDEO設定
+
+![](share/shader/video_setting_tv.png)
+
+Settings→Video→Scalerを「TV」に変更すると反映されます。
+
+明るい色ほどスキャンラインの隙間に滲み出す処理も入っているので、
+個人的なおすすめはScanline 75%です。
+
+*※注) TVフィルタでは、Scanlineは反映されますが、Blurは無視されます。*
+
+
+詳細は[share/shader/ReadMe.md](share/shader/ReadMe.md)を参照してください。
 
 ## skin 解説
 
