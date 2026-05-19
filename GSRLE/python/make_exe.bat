@@ -1,2 +1,2 @@
-pyinstaller gsrle.py --onefile --noupx
+python -m PyInstaller --onefile --noconsole --noupx gsrle.py
 pause
