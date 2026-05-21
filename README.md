@@ -16,7 +16,7 @@ HTML5+javascript ES6 で動作
 
 |ツール|説明|
 |---|---|
-| [MSXDumpEditor](MSXDumpEditor)|Python習作バイナリエディタ。スプライトプレビュー窓、MSXフォントでの表示、逆アセンブラなどを搭載。<br>![](MSXDumpEditor/screenshot.png)![](MSXDumpEditor/disasm.png)|
+| [MSXDumpEditor](MSXDumpEditor)|Python習作バイナリエディタ。スプライトプレビュー窓、MSXフォントでの表示、逆アセンブラなどを搭載。<br>![](MSXDumpEditor/screenshot_win.png)![](MSXDumpEditor/disasm.png)|
 | [Binary Editor Bz for MSX](BinaryEditorBz_for_MSX)|[バイナリエディタBz (MSX/レトロコンソール向けビットマップビュー拡張版)](BinaryEditorBz_for_MSX/ReadMe.md)<br> ![](img/BzEditor_for_msx_2.png) ![](img/BzEditor_for_msx_3.png) |
 | [GSRLE/            ](GSRLE             ) |グラフサウルス形式圧縮ツール (派生型ランレングス圧縮)<br> ![](img/GSRLE.png) <br>展開表示(MSX用)は [LOADSRD](LOADSRD)|
 | [OPLDRV_BGM_EXTRACT/](OPLDRV_BGM_EXTRACT ) |1. FMPACとRTYPEのOPLDRV用BGMデータをカートリッジから取り出すプログラム<br>2. opldrvデータを解析するプログラム <br> ![](OPLDRV_BGM_EXTRACT/img/OPLDRV_tool.png)|

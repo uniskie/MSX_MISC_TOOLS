@@ -37,10 +37,11 @@ HAS_Z80DIS = True
 z80disasm = z80disasm()
 ASM_DELIM = ">"
 
-
 #--------------------------------------------------------------------------
 # フォントヘルパーの組み込み
 import font_helper as fh
+
+EDIT_FONT_HEIGHT    = 18                      # HEX/ASIIエディット：フォントの高さ(px)
 
 #--------------------------------------------------------------------------
 # MSX-FONTがインストールされているか調べる
@@ -50,18 +51,22 @@ MSX_FONT_HELP = """
  文字表示欄がMSXフォントで表示されます。
    URL: https://bugfire2009.ojaru.jp/download.html
 """
-MSX_FONT_WIDE   = "MSX-FONT-Wide"
-MSX_FONT_NORMAL = "MSX-FONT"
-if fh.has_font(MSX_FONT_WIDE):     MSX_FONT = MSX_FONT_WIDE
-elif fh.has_font(MSX_FONT_NORMAL): MSX_FONT = MSX_FONT_NORMAL
-else:                              MSX_FONT = ""
-HAS_MSX_FONT = (len(MSX_FONT) > 0)
+MSX_FONT_LIST = [
+    "MSX-FONT-Wide",
+    "MSX-FONT"
+]
+MSX_FONT        = ""            # check_msx_fontで更新
+HAS_MSX_FONT    = False         # check_msx_fontで更新
+def check_msx_font():
+    global HAS_MSX_FONT, MSX_FONT
+    MSX_FONT = fh.find_font_first(MSX_FONT_LIST)
+    HAS_MSX_FONT = (len(MSX_FONT) > 0)
 
 #--------------------------------------------------------------------------
 # MSX文字コード変換テーブル
 # 一文字目が表示用 (for MSX-FONT.ttf by DumpListEditor)
 # 2文字目以降はMSX文字コードへの変換用
-CUSTOM_MAP = [
+ALTERNATIVE_MSX_CHAR_MAP = [
 	# 00-1F : GRAPHIC文字
 	"." ,"月","火","水","木","金","土","日",    "年","円","時","分","秒","百","千","万",
 	"π","┴","┬","┤","├","┼","│","─",	"┌","┐","└","┘","╳×","大","中","小",
@@ -85,29 +90,33 @@ CUSTOM_MAP = [
 	"た","ち","つ","て","と","な","に","ぬ",	"ね","の","は","ひ","ふ","へ","ほ","ま",
 	"み","む","め","も","や","ゆ","よ","ら",	"り","る","れ","ろ","わ","ん","\u00FE","\u00FF"
 ]
-if not (len(CUSTOM_MAP) == 256):
-    raise ValueError("CUSTOM_MAP is not 256 entries.")
+if not (len(ALTERNATIVE_MSX_CHAR_MAP) == 256):
+    raise ValueError("ALTERNATIVE_MSX_CHAR_MAP is not 256 entries.")
 
+# ユニコード文字からMSX文字コードを引く辞書
+UNICODE_TO_MSX_DIC = {}
+for i,chars in enumerate(ALTERNATIVE_MSX_CHAR_MAP):
+    for c in chars:
+        UNICODE_TO_MSX_DIC[c] = i
+
+# 1文字ずつALTERNATIVE_MSX_CHAR_MAPのインデックスに変換し、bytesストリーム（バイト列）を生成
 def convert_str_to_msx_characters(input_text):
-    # 1文字ずつCUSTOM_MAPのインデックスに変換し、bytesストリーム（バイト列）を生成
     # （見つからない文字は飛ばす）
     return bytes(
         idx for char in input_text
-        if (idx := next((i for i, val in enumerate(CUSTOM_MAP) if char in val), None)) is not None
+        if (idx := UNICODE_TO_MSX_DIC.get(char)) is not None
     )
 
 # 検索コマンド（先頭の一文字）
 PRE_FIND_BIN = "#" # バイナリサーチ #xx xx xx
 PRE_FIND_GO = ">"  # アドレスジャンプ >xxxxxx
-FIND_PLACEHOLDER = f"{PRE_FIND_BIN}xx xx ...：バイナリ検索 / {PRE_FIND_GO}xxxxx ... :アドレス移動"
+FIND_PLACEHOLDER = f"{PRE_FIND_BIN}xx xx ...：BIN / {PRE_FIND_GO}xxxxx ... :GO"
 
 #--------------------------------------------------------------------------
 # Hex Dump Editor
 #--------------------------------------------------------------------------
 class HexDumpEditor:
     BASE_TITLE = APP_NAME
-
-    FONT_HEIGHT    = 16                           # pixel size
 
     ADDRESS_PAD1   = 1                            # アドレスのあとの余白
     ADDRESS_DIGITS = 8                            # アドレス部の桁数
@@ -124,25 +133,27 @@ class HexDumpEditor:
 
     BIT_FG_COLOR = "white"
     BIT_BG_COLOR = "black"
-    HEX_HEADER_FG_COLOR     = "#444444"
-    HEX_HEADER_BG_COLOR     = "#bbcccc"
-    HEX_ADDRESS_FG_COLOR    = "#ffffff"
-    HEX_ADDRESS_BG_COLOR    = "#445566"
-    INSERT_MODE_FG_COLOR    = ["#ffe2b0", "#fff8f0", "#6a4423"]
-    INSERT_MODE_BG_COLOR    = ["#814423", "#9a5938", "#efd2b0"]
-    OVERWRITE_MODE_FG_COLOR = ["#d0ffd0", "#d9ffe2", "#23428a"]
-    OVERWRITE_MODE_BG_COLOR = ["#23428a", "#406080", "#c0d5ef"]
-    HEX_SELECTION_FG_COLOR  = "#000000"
-    HEX_SELECTION_BG_COLOR  = "#b0e8f4"
-    ASCII_CHR_FG_COLOR      = "#363f32"
-    ASCII_CHR_BG_COLOR      = "#e0e0e0"
-    HEX_FG_COLOR            = "#000000"
-    HEX_BG_COLOR            = "#ffffff"
+    HEX_HEADER_FG_COLOR      = "#444444"
+    HEX_HEADER_BG_COLOR      = "#bbcccc"
+    HEX_ADDRESS_FG_COLOR     = "#ffffff"
+    HEX_ADDRESS_BG_COLOR     = "#445566"
+    INSERT_MODE_FG_COLOR     = ["#ffe2b0", "#fff8f0", "#6a4423"]
+    INSERT_MODE_BG_COLOR     = ["#914423", "#9a5938", "#efd2b0"]
+    OVERWRITE_MODE_FG_COLOR  = ["#d0ffd0", "#d9ffe2", "#23428a"]
+    OVERWRITE_MODE_BG_COLOR  = ["#2342aa", "#4060b0", "#c0d5ef"]
+    INACTIVE_CURSOR_FG_COLOR = "#338833"
+    INACTIVE_CURSOR_BG_COLOR = "#aabbaa"
+    HEX_SELECTION_FG_COLOR   = "#000000"
+    HEX_SELECTION_BG_COLOR   = "#b0e8f4"
+    ASCII_CHR_FG_COLOR       = "#363f32"
+    ASCII_CHR_BG_COLOR       = "#e0e0e0"
+    HEX_FG_COLOR             = "#000000"
+    HEX_BG_COLOR             = "#ffffff"
 
-    DISASM_BAR_BG           = "#384440"
-    DISASM_BAR_FG           = "#F0FFF0"
-    NEXT_INST_HELP_FG       = "#485550"
-    NEXT_INST_HELP_BG       = "#D0DDD0"
+    DISASM_BAR_BG            = "#384440"
+    DISASM_BAR_FG            = "#F0FFF0"
+    NEXT_INST_HELP_FG        = "#485550"
+    NEXT_INST_HELP_BG        = "#D0DDD0"
 
 
     def __init__(self, root, load_path = None):
@@ -157,14 +168,15 @@ class HexDumpEditor:
             self.data = bytearray()
         
         # 状態管理
-        self.cursor          = 0     # 現在のカーソル位置
-        self.anchor          = 0     # 範囲選択時のアンカー位置
-        self.insert_mode     = False # 挿入モード
-        self.half_byte       = None  # HEX入力時、2文字中1文字目かどうか
-        self.auto_scroll_id  = None  # ドラッグスクロール用タイマー
-        self.drag_widget     = None  # ドラッグ中のウィジェットを保持
-        self.cursor_flash    = False # カーソル点滅状態
-        self.cursor_blink_id = None  # カーソル点滅タイマーID
+        self.cursor           = 0     # 現在のカーソル位置
+        self.anchor           = 0     # 範囲選択時のアンカー位置
+        self.insert_mode      = False # 挿入モード
+        self.input_mode_ascii = False # ASCII入力モード
+        self.half_byte        = None  # HEX入力時、2文字中1文字目かどうか
+        self.auto_scroll_id   = None  # ドラッグスクロール用タイマー
+        self.drag_widget      = None  # ドラッグ中のウィジェットを保持
+        self.cursor_flash     = False # カーソル点滅状態
+        self.cursor_blink_id  = None  # カーソル点滅タイマーID
 
         # UNDO/REDP管理
         self.undo_stack = []
@@ -181,7 +193,10 @@ class HexDumpEditor:
 
         # 子ウィンドウ
         self.log_window = None      # ログ表示ウィンドウ
-    
+
+        # デフォルトフォントの高さ(px)
+        self.line_space = tk.font.nametofont('TkDefaultFont').metrics()['linespace'] 
+
         # 描画物セットアップ
         self.build_menu()
         self.build_ui()
@@ -234,6 +249,9 @@ class HexDumpEditor:
         search_menu.add_separator()
         search_menu.add_command(label="Next Z80 Instruction", accelerator="F4", command=self.next_z80inst, underline=5)
         search_menu.add_command(label="Disassemble Selection", accelerator="Ctrl+Return", command=self.disasm_selection, underline=0)
+        search_menu.add_separator()
+        search_menu.add_command(label="Toggle Input (Hex/Ascii)", accelerator="F2", command=self.toggle_input_area, underline=0)
+
         menubar.add_cascade(label="Search", menu=search_menu, underline=0)
         
         # Help Menu
@@ -285,6 +303,19 @@ class HexDumpEditor:
         messagebox.showinfo(title, message)
 
     def build_ui(self):
+        sans_font_name  = fh.font_name_sans
+        fixed_font_name = fh.font_name_program
+        font_style_fix = fh.get_font_for_pixel_height(self.line_space, fixed_font_name)
+        font_style_sans= fh.get_font_for_pixel_height(self.line_space, sans_font_name )
+
+        font_px_size = EDIT_FONT_HEIGHT
+        hex_font_style = fh.get_font_for_pixel_height(font_px_size, fh.font_name_program)
+        if HAS_MSX_FONT:
+            msx_font_style = fh.get_font_for_pixel_height(font_px_size, MSX_FONT)
+        else:
+            msx_font_style = hex_font_style
+
+
         #----------------------------------------
         # ツールバー
         #----------------------------------------
@@ -347,7 +378,7 @@ class HexDumpEditor:
         tk.Label(search_frame, text="Search:").pack(side=tk.LEFT, padx=(6, 2))
         
         self.search_var = tk.StringVar()
-        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, width=43)
+        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, width=43, font=font_style_fix)
         self.search_entry.pack(side=tk.LEFT)
         self.search_entry.bind("<Return>", self.search_decide)
         self.search_entry.bind("<Shift-Return>", self.search_decide)
@@ -361,18 +392,7 @@ class HexDumpEditor:
         self.search_entry.bind("<FocusIn>", self.on_search_focus_in)
         self.search_entry.bind("<FocusOut>", self.on_search_focus_out)
         
-        editor_parent = tk.Frame(self.root, bd=2, relief=tk.SUNKEN)
-        editor_parent.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=0)
         
-        font_px_size = self.FONT_HEIGHT
-        font_style = fh.get_font_for_pixel_height(font_px_size, "TkFixedFont")
-        self.line_height = font_style.metrics("linespace") # フォントの実際の高さを記憶
-        
-        if HAS_MSX_FONT:
-            msx_font_style = fh.get_font_for_pixel_height(font_px_size, MSX_FONT)
-        else:
-            msx_font_style = font_style
-
         #----------------------------------------
         # HEXビュー
         #----------------------------------------
@@ -388,11 +408,17 @@ class HexDumpEditor:
             f"{' ' * self.BYTES_PAD}{header_str_ascii}"
         )
         
-        text_edit_width = self.COL_E_ASCII + 1
-        if "MSX-FONT-Wide" == MSX_FONT:
-            text_edit_width += self.LINE_BYTES
+        ascii_width = msx_font_style.measure("0" * (self.LINE_BYTES))
+        hex_font_base = hex_font_style.measure("0")
+        text_edit_width = self.COL_S_ASCII + ((ascii_width + hex_font_base - 1) // hex_font_base)
+
+        editor_parent = tk.Frame(self.root, bd=2, relief=tk.SUNKEN)
+        editor_parent.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=0)
+
         self.header = tk.Label(editor_parent
-            , font=font_style, width=text_edit_width, height=1
+            , font=hex_font_style
+            , width=text_edit_width
+            , height=1
             , bd=0, highlightthickness=0
             , bg=self.HEX_HEADER_BG_COLOR #self.root.cget('bg')
             , fg=self.HEX_HEADER_FG_COLOR
@@ -403,8 +429,11 @@ class HexDumpEditor:
         self.header.grid(row=0, column=0, sticky="ew", padx=2, pady=0)
 
         # ビュー設定 (HexとASCIIを1つのTextで表示)
+        self.line_height = hex_font_style.metrics("linespace") # フォントの実際の高さを記憶
         self.text_editor = tk.Text(editor_parent
-            , font=font_style, width=text_edit_width, height=32
+            , font=hex_font_style
+            , width=text_edit_width
+            , height=32
             , bd=0, highlightthickness=0
             , undo=False
             , exportselection=False
@@ -413,10 +442,9 @@ class HexDumpEditor:
             , fg=self.HEX_FG_COLOR
             , pady=0
         )
-        #self.text_editor.config(state=tk.DISABLED)
         self.text_editor.grid(row=1, column=0, sticky="nsew", padx=2, pady=(0,2))
         
-        # 仮想スクロールバーの制御
+        # 仮想スクロールバー
         # Textコントロールにデータをすべて入れると重すぎるので
         # 見えている範囲だけレンダリングする方式
         def virtual_scroll(*args):
@@ -432,7 +460,7 @@ class HexDumpEditor:
             self.top_line = max(0, min(self.top_line, total_lines - 1))
             self.render()
 
-        self.scrollbar = tk.Scrollbar(editor_parent, command=virtual_scroll)
+        self.scrollbar = tk.Scrollbar(editor_parent, command=virtual_scroll, takefocus=False)
         self.scrollbar.grid(row=1, column=1, sticky="ns")
         
         editor_parent.columnconfigure(0, weight=1)
@@ -442,6 +470,7 @@ class HexDumpEditor:
         # タグ設定 (システム予約の"sel"を捨てて独自タグを使用)
         self.text_editor.tag_configure("hex_selection", background=self.HEX_SELECTION_BG_COLOR, foreground=self.HEX_SELECTION_FG_COLOR)
         self.text_editor.tag_configure("hex_cursor", background=self.OVERWRITE_MODE_BG_COLOR[0], foreground=self.OVERWRITE_MODE_FG_COLOR[0])
+        self.text_editor.tag_configure("ascii_cursor", background=self.INACTIVE_CURSOR_BG_COLOR, foreground=self.INACTIVE_CURSOR_FG_COLOR)
         # ASCII文字部分に対するMSXフォントタグ
         self.text_editor.tag_configure("msx_font", font=msx_font_style, background=self.ASCII_CHR_BG_COLOR, foreground=self.ASCII_CHR_FG_COLOR)
         # アドレス表示部の色指定タグ
@@ -452,17 +481,13 @@ class HexDumpEditor:
         self.text_editor.tag_raise("msx_font")
         self.text_editor.tag_raise("hex_selection")
         self.text_editor.tag_raise("hex_cursor")
+        self.text_editor.tag_raise("ascii_cursor")
         
         #----------------------------------------
         # ステータスバー
         #----------------------------------------
         status_frame = tk.Frame(self.root)
         status_frame.pack(side=tk.BOTTOM, fill=tk.X)
-
-        fixed_font_name = "TkFixedFont"
-        sans_font_name  = "TkNormalFont"
-        font_style_fix = fh.get_font_for_pixel_height(13, fixed_font_name)
-        font_style     = fh.get_font_for_pixel_height(13, sans_font_name )
 
         # 左側
         left_frame = tk.Frame(status_frame)
@@ -481,19 +506,19 @@ class HexDumpEditor:
         # 左側の上から1つ目 の 左から2つ目：選択範囲
         self.status_sel_var = tk.StringVar()
         status_sel_label = tk.Label(status_bar_frame, textvariable=self.status_sel_var
-            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style)
+            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style_sans)
         status_sel_label.pack(side=tk.LEFT, fill=tk.BOTH, pady=0, padx=0)
 
-        # 左側の上から1つ目 の 右から1つ目：上書き/挿入
+        # 左側の上から1つ目 の 右から1つ目：上書き/挿入/入力モード
         self.status_mode_var = tk.StringVar()
         status_mode_label = tk.Label(status_bar_frame, textvariable=self.status_mode_var
-            , width=6 ,anchor=tk.CENTER, justify=tk.CENTER, bd=1, relief=tk.GROOVE, font=font_style)
+            , width=14 ,anchor=tk.CENTER, justify=tk.CENTER, bd=1, relief=tk.GROOVE, font=font_style_sans)
         status_mode_label.pack(side=tk.RIGHT, fill=tk.BOTH, pady=0, padx=0)
 
         # 左側の上から1つ目 の 右から2つ目：合計サイズ
         self.status_total_var = tk.StringVar()
         status_total_label = tk.Label(status_bar_frame, textvariable=self.status_total_var
-            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style)
+            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style_sans)
         status_total_label.pack(side=tk.RIGHT, fill=tk.BOTH, pady=0, padx=0)
 
         # 左側の上から2つ目：逆アセンブラ
@@ -502,24 +527,28 @@ class HexDumpEditor:
         self.disasm_var = tk.StringVar()
         self.disasm_label = tk.Entry(disasm_bar_frame, textvariable=self.disasm_var
             , width=5+8+2+(2*4+3)+3+23+12
-            , bd=1, relief=tk.GROOVE, font=font_style_fix
-            , highlightthickness=0, exportselection=False
-            , state="readonly", takefocus=False
+            , bd=1, relief=tk.GROOVE
+            , font=font_style_fix
+            , highlightthickness=0
+            , exportselection=False
+            , state="readonly"
+            , takefocus=False
             , readonlybackground=self.DISASM_BAR_BG, fg=self.DISASM_BAR_FG
         )
         self.disasm_label.pack(side=tk.LEFT,  anchor=tk.W
             , fill=tk.X, expand=True
             , pady=0, padx=0
         )
+        #self.disasm_label.bind("<FocusIn>", self.block_focus)
         tk.Label(disasm_bar_frame, text=" [Enter]/[F4]:次の命令へ移動 "
             , fg=self.NEXT_INST_HELP_FG, bg=self.NEXT_INST_HELP_BG
-            , bd=1, relief=tk.GROOVE, font=font_style
+            , bd=1, relief=tk.GROOVE, font=font_style_sans
         ).pack(side=tk.LEFT, pady=0, padx=(0, 2))
 
         # 左側の上から3つ目：ファイルパス
         self.info_var = tk.StringVar()
         self.info_label = tk.Label(left_frame, textvariable=self.info_var, anchor=tk.W, justify=tk.LEFT
-            , bd=1, relief=tk.GROOVE, font=font_style)
+            , bd=1, relief=tk.GROOVE, font=font_style_sans)
         self.info_label.pack(side=tk.TOP, fill=tk.X, expand=True, pady=(0,2), padx=2)
 
         # 16x16 ビットパターン表示用 Canvas（1ドット=3x3ピクセルで描画）
@@ -545,6 +574,24 @@ class HexDumpEditor:
         
         self.text_editor.focus_set()
         self.text_editor.config(state=tk.DISABLED)
+
+    ## takefocus=Falseをすり抜ける現象対策
+    #def block_focus(self, event):
+    #    if event.state & 4: # Shift key
+    #        event.widget.tk_focusPrev().focus_set()
+    #    else:
+    #        event.widget.tk_focusNext().focus_set()
+    #    return "break"
+
+    def set_input_mode(self, is_ascii):
+        """HEX入力とASCII入力のフォーカスを切り替える"""
+        if self.input_mode_ascii != is_ascii:
+            self.commit_half_byte_if_needed()
+            self.input_mode_ascii = is_ascii
+            self.blink_cursor_stop()
+            self.set_cursor_color()
+            self.update_status()
+            self.blink_cursor()
 
     def get_baseofs(self):
         user_input = self.baseofs_combo.get()
@@ -760,7 +807,6 @@ class HexDumpEditor:
         else:
             # === 逆方向検索 (Prev) ===
             # 現在の選択開始位置より「前」を検索対象とする
-            # rfind(sub, start, end) の end を start_pos にすることで、現在位置より前を検索
             hit_pos = self.data.rfind(search_bytes, 0, start_pos)
             if hit_pos == -1:
                 # 見つからなかった場合は末尾からラップアラウンド検索
@@ -811,7 +857,13 @@ class HexDumpEditor:
         self.text_editor.bind("<Button-4>", self.on_text_editor_mouse_whee)
         self.text_editor.bind("<Button-5>", self.on_text_editor_mouse_whee)
         
-        self.text_editor.bind("<Configure>", self.on_text_editor_resize) # ウィンドウリサイズ時の行数再計算
+         # ウィンドウリサイズ時の行数再計算
+        self.text_editor.bind("<Configure>", self.on_text_editor_resize)
+
+        # TAB でのHEX編集←→ASCII編集遷移の為
+        self.text_editor.bind("<Tab>", self.handle_tab)
+        self.text_editor.bind("<Shift-Tab>", self.handle_shift_tab)
+        self.text_editor.bind("<Shift-ISO_Left_Tab>", self.handle_shift_tab)
             
         self.root.bind("<Key>", self.dispatch_key_event)
         self.root.bind("<Alt-F4>", self.quit_app)
@@ -863,11 +915,11 @@ class HexDumpEditor:
         return max(0, min(len(self.data), new_pos))
 
     def on_text_editor_focus_in(self, event):
-        self.blink_hex_cursor()
+        self.blink_cursor()
         self.text_editor.config(state=tk.DISABLED)
 
     def on_text_editor_focus_out(self, event):
-        self.blink_hex_cursor_stop()
+        self.blink_cursor_stop()
         if self.commit_half_byte_if_needed(): self.render()
         self.text_editor.config(state=tk.NORMAL)
 
@@ -876,6 +928,15 @@ class HexDumpEditor:
     def on_text_editor_click(self, event):
         event.widget.focus_set()
         self.stop_auto_scroll()
+        
+        # クリック位置から列を特定して入力フォーカスモードを切り替え
+        pos = event.widget.index(f"@{event.x},{event.y}")
+        _, col = map(int, pos.split('.'))
+        if self.COL_S_ASCII <= col < self.COL_E_ASCII:
+            self.set_input_mode(True)
+        elif self.COL_S_HEX <= col < self.COL_E_HEX:
+            self.set_input_mode(False)
+
         if self.commit_half_byte_if_needed():
             self.render()
         new_pos = self.get_index_from_mouse(event.widget, event.x, event.y)
@@ -888,6 +949,15 @@ class HexDumpEditor:
     def on_text_editor_shift_click(self, event):
         event.widget.focus_set()
         self.stop_auto_scroll()
+        
+        # クリック位置から列を特定して入力フォーカスモードを切り替え
+        pos = event.widget.index(f"@{event.x},{event.y}")
+        _, col = map(int, pos.split('.'))
+        if self.COL_S_ASCII <= col < self.COL_E_ASCII:
+            self.set_input_mode(True)
+        elif self.COL_S_HEX <= col < self.COL_E_HEX:
+            self.set_input_mode(False)
+
         if self.commit_half_byte_if_needed():
             self.render()
         self.drag_widget = event.widget
@@ -980,7 +1050,11 @@ class HexDumpEditor:
             return True
         return False
 
-    def set_hex_corsor_color(self):
+    def set_cursor_color(self, is_focus = None):
+
+        if is_focus is None:
+            is_focus = bool(self.root.focus_get() != self.text_editor)
+
         i = 1 if self.cursor_flash else 0
         if self.insert_mode: 
             fg_color = self.INSERT_MODE_FG_COLOR[i] 
@@ -988,20 +1062,34 @@ class HexDumpEditor:
         else:
             fg_color = self.OVERWRITE_MODE_FG_COLOR[i]
             bg_color = self.OVERWRITE_MODE_BG_COLOR[i]
-        self.text_editor.tag_configure("hex_cursor", background=bg_color, foreground=fg_color)
+            
+        inactive_fg = self.INACTIVE_CURSOR_FG_COLOR
+        inactive_bg = self.INACTIVE_CURSOR_BG_COLOR
 
-    def blink_hex_cursor(self):
+        if not is_focus:
+            self.text_editor.tag_configure("ascii_cursor", background=inactive_bg, foreground=inactive_fg)
+            self.text_editor.tag_configure("hex_cursor", background=inactive_bg, foreground=inactive_fg)
+        elif self.input_mode_ascii:
+            self.text_editor.tag_configure("ascii_cursor", background=bg_color, foreground=fg_color)
+            self.text_editor.tag_configure("hex_cursor", background=inactive_bg, foreground=inactive_fg)
+        else:
+            self.text_editor.tag_configure("hex_cursor", background=bg_color, foreground=fg_color)
+            self.text_editor.tag_configure("ascii_cursor", background=inactive_bg, foreground=inactive_fg)
+
+    def blink_cursor(self):
         self.cursor_flash = not self.cursor_flash
-        self.set_hex_corsor_color()
-        interval = 1000 if self.cursor_flash else 500
-        self.cursor_blink_id = root.after(interval, self.blink_hex_cursor)
+        self.set_cursor_color( True )
 
-    def blink_hex_cursor_stop(self):
+        interval = 1000 if self.cursor_flash else 500
+        self.cursor_blink_id = self.root.after(interval, self.blink_cursor)
+
+    def blink_cursor_stop(self):
         if self.cursor_blink_id is not None:
-            root.after_cancel(self.cursor_blink_id)
+            self.root.after_cancel(self.cursor_blink_id)
             self.cursor_blink_id = None
             self.cursor_flash = False
-            self.set_hex_corsor_color()
+
+        self.set_cursor_color( False )
 
     def render(self):
         # アドレスやASCII文字列付きDumpリストの表示 (仮想スクロール用)
@@ -1033,7 +1121,7 @@ class HexDumpEditor:
                         row_hex += f"{self.data[idx]:02X} "
                     c = self.data[idx]
                     if HAS_MSX_FONT:
-                        row_ascii += CUSTOM_MAP[c][0]
+                        row_ascii += ALTERNATIVE_MSX_CHAR_MAP[c][0]
                     else:
                         row_ascii += chr(c) if 0x20 <= c <= 0x7E else "."
                 elif idx == len(self.data):
@@ -1099,7 +1187,8 @@ class HexDumpEditor:
                 ])
 
         # カーソル位置の色付け
-        cursor_ranges = []
+        hex_cursor_ranges = []
+        ascii_cursor_ranges = []
         if visible_start_idx <= self.cursor <= visible_end_idx:
             data_line = self.cursor // self.LINE_BYTES
             text_line = data_line - self.top_line + 1
@@ -1107,9 +1196,9 @@ class HexDumpEditor:
             col_ascii = self.COL_S_ASCII + (self.cursor % self.LINE_BYTES)
             
             if self.cursor <= data_len:
-                cursor_ranges.extend([f"{text_line}.{col_hex}", f"{text_line}.{col_hex+2}"])
+                hex_cursor_ranges.extend([f"{text_line}.{col_hex}", f"{text_line}.{col_hex+2}"])
             if self.cursor <= data_len:
-                cursor_ranges.extend([f"{text_line}.{col_ascii}", f"{text_line}.{col_ascii+1}"])
+                ascii_cursor_ranges.extend([f"{text_line}.{col_ascii}", f"{text_line}.{col_ascii+1}"])
 
         # アドレス適用範囲
         address_ranges = []
@@ -1130,6 +1219,7 @@ class HexDumpEditor:
             ,f"{w} tag remove msx_font 1.0 end"
             ,f"{w} tag remove hex_selection 1.0 end"
             ,f"{w} tag remove hex_cursor 1.0 end"
+            ,f"{w} tag remove ascii_cursor 1.0 end"
         ]
 
         if address_ranges:
@@ -1147,8 +1237,11 @@ class HexDumpEditor:
             for i in range(0, len(sel_ranges), chunk_size):
                 tcl_script.append(f"{w} tag add hex_selection {' '.join(sel_ranges[i:i+chunk_size])}")
                 
-        if cursor_ranges:
-            tcl_script.append(f"{w} tag add hex_cursor {' '.join(cursor_ranges)}")
+        if hex_cursor_ranges:
+            tcl_script.append(f"{w} tag add hex_cursor {' '.join(hex_cursor_ranges)}")
+            
+        if ascii_cursor_ranges:
+            tcl_script.append(f"{w} tag add ascii_cursor {' '.join(ascii_cursor_ranges)}")
             
         # Tcl/Tkインタプリタで直接一括評価（画面の描画更新が割り込めないようにする）
         self.text_editor.tk.eval("\n".join(tcl_script))
@@ -1157,7 +1250,10 @@ class HexDumpEditor:
         """ ステータスバーの更新 """
 
         # 基本情報
-        mode_str = "挿入" if self.insert_mode else "上書き"
+        insert_str = "挿入" if self.insert_mode else "上書き"
+        focus_str = "[ASCII]" if self.input_mode_ascii else "[HEX]"
+        mode_str = f"{focus_str}{insert_str}"
+        
         sel_size = abs(self.cursor - self.anchor) + 1 if self.cursor != self.anchor else 1
         bd = self.data[self.cursor] if self.cursor < len(self.data) else 0
         
@@ -1193,7 +1289,7 @@ class HexDumpEditor:
         if self.current_file_path:
             file_info = f"File: {self.current_file_path}"
             self.info_var.set(file_info)
-            self.info_label.config(bg=root.cget("background"))
+            self.info_label.config(bg=self.root.cget("background"))
         else:
             drag_and_drop_enabled = "" #" (Drag & Drop Supported)"
             if not HAS_DND:
@@ -1206,7 +1302,7 @@ class HexDumpEditor:
             if not (HAS_DND and HAS_MSX_FONT):
                 self.info_label.config(bg="#ffcccc")
             else:
-                self.info_label.config(bg=root.cget("background"))
+                self.info_label.config(bg=self.root.cget("background"))
 
     def get_address_offset(self):
         """ 逆アセンブラ用アドレスオフセットを計算 """
@@ -1251,7 +1347,7 @@ class HexDumpEditor:
 
         if 0 < len(disasm_list):
             if (self.log_window is None) or (not self.log_window.is_alive()):
-                self.log_window = DisasmWindow(root)
+                self.log_window = DisasmWindow(self.root)
                 self.log_window.window.lift()
                 self.log_window.window.focus_force()
 
@@ -1286,20 +1382,42 @@ class HexDumpEditor:
                 color = self.BIT_FG_COLOR if bit_on else self.BIT_BG_COLOR
                 self.bit_canvas.itemconfig(self.bit_rects[row][col], fill=color)
 
+    def handle_tab(self, event):
+        if not self.input_mode_ascii:
+            self.set_input_mode(not self.input_mode_ascii)
+            return "break"
+
+        # 標準のTAB処理へ
+
+    def handle_shift_tab(self, event):
+        if self.input_mode_ascii:
+            self.set_input_mode(not self.input_mode_ascii)
+            return "break"
+        
+        # 標準のShift+TAB処理へ
+
+    def toggle_input_area(self):
+            self.set_input_mode(not self.input_mode_ascii)
+            return "break"
+
     def dispatch_key_event(self, event):
         keysym, state, char = event.keysym, event.state, event.char
         is_mac = sys.platform == "darwin"
+        is_win = sys.platform == "win32"
         shift = (state & 1) != 0
         ctrl_cmd = ((state & 8) != 0 or (state & 0x100) != 0 or (state & 4) != 0) if is_mac else (state & 4) != 0
         is_alt = (
             "Alt" in keysym or 
             "Option" in keysym or 
-            bool(state & 0x20000) or  # Windows
-            #bool(state & 0x0008) or   # Linux -> tkInterのバグで他の要因で立ちっぱなしになる
-            bool(state & 0x0010)      # Mac
+            (is_win and bool(state & 0x20000)) or  # Windows
+            #is_lnx and bool(state & 0x0008)) or   # Linux -> tkInterのバグで他の要因で立ちっぱなしになる
+            (is_mac and bool(state & 0x0010))      # Mac
         )
 
         # グローバルショートカットの判定 (フォーカス位置に関係なく動作させる)
+        if keysym == 'F2':
+            self.toggle_input_area()
+            return "break"
         if keysym == 'F3':
             if ctrl_cmd:
                 self.search_current(event)
@@ -1381,16 +1499,22 @@ class HexDumpEditor:
         if keysym == 'Insert':
             if self.commit_half_byte_if_needed(): self.render()
             self.insert_mode = not self.insert_mode
-            self.set_hex_corsor_color()
+            self.blink_cursor_stop()
+            self.set_cursor_color()
+            self.blink_cursor()
             self.update_status()
             return "break"
         elif keysym in ('Delete', 'BackSpace'):
             self.delete_data(keysym)
             return "break"
             
-        if char and char.upper() in '0123456789ABCDEF':
-            self.handle_hex_input(char.upper())
-            return "break"
+        if char:
+            if self.input_mode_ascii:
+                self.handle_ascii_input(char)
+                return "break"
+            elif char.upper() in '0123456789ABCDEF':
+                self.handle_hex_input(char.upper())
+                return "break"
             
         if keysym in ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R", "Meta_L", "Meta_R"):
             return "break"
@@ -1424,21 +1548,56 @@ class HexDumpEditor:
             
         if self.half_byte is None:
             self.save_history()
+
+            # 範囲選択されていた場合は削除
             if self.cursor != self.anchor:
                 start, end = min(self.cursor, self.anchor), max(self.cursor, self.anchor)
                 del self.data[start:min(end, len(self.data)-1)+1]
                 self.cursor = self.anchor = start
+    
             self.half_byte = char
         else:
             val = int(self.half_byte + char, 16)
+
             if self.cursor < len(self.data):
-                if not self.insert_mode: self.data[self.cursor] = val
-                else: self.data.insert(self.cursor, val)
+                if not self.insert_mode:
+                    self.data[self.cursor] = val
+                else:
+                    self.data.insert(self.cursor, val)
             else:
                 self.data.append(val)
+
             self.half_byte = None
             self.cursor = self.anchor = self.cursor + 1
             
+        self.adjust_top_line()
+        self.render()
+
+    def handle_ascii_input(self, char):
+        # MSX文字コードに変換
+        if (val := UNICODE_TO_MSX_DIC.get( char )) is None:
+            return  # MSX文字コードマップに存在しない文字は無視
+
+        if self.cursor > len(self.data):
+            self.cursor = self.anchor = len(self.data)
+            
+        self.save_history()
+        
+        # 範囲選択されていた場合は削除
+        if self.cursor != self.anchor:
+            start, end = min(self.cursor, self.anchor), max(self.cursor, self.anchor)
+            del self.data[start:min(end, len(self.data)-1)+1]
+            self.cursor = self.anchor = start
+
+        if self.cursor < len(self.data):
+            if not self.insert_mode: 
+                self.data[self.cursor] = val
+            else: 
+                self.data.insert(self.cursor, val)
+        else:
+            self.data.append(val)
+            
+        self.cursor = self.anchor = self.cursor + 1
         self.adjust_top_line()
         self.render()
 
@@ -1657,16 +1816,25 @@ class HexDumpEditor:
 #--------------------------------------------------------------------------
 # Log Window
 #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# Log Window
+#--------------------------------------------------------------------------
 class DisasmWindow:
     def __init__(self, master):
         # Toplevelで新しいウィンドウを作成
         self.window = tk.Toplevel(master)
         self.window.title(APP_NAME + ": DisAssemble View")
-        self.window.geometry("560x600")
+        #self.window.geometry("560x600")
 
-        self.window.attributes("-toolwindow", True)
-        #self.window.transient(self.master) # 常にTOP
-        
+        if sys.platform == "win32":
+            self.window.attributes("-toolwindow", True)
+        else:
+            # Linuxで "-type utility" はフォーカス喪失やフリーズの原因になるため "dialog" または設定なしが安全
+            try:
+                self.window.attributes("-type", "dialog")
+            except Exception:
+                pass
+
         container = tk.Frame(self.window)
         container.pack(expand=True, fill='both', padx=5, pady=5)
 
@@ -1681,13 +1849,18 @@ class DisasmWindow:
         # ESCキーでも閉じる
         self.window.bind("<Escape>", self.on_close)
 
+        font_px_size = tk.font.nametofont("TkDefaultFont").metrics('linespace')
+        asm_font_style = fh.get_font_for_pixel_height(font_px_size, fh.font_name_program)
+
         #コントロールの配置
-        self.log_text = tk.Text(
-            container, 
-        #    state='disabled', 
-            wrap='none',  # 自動改行なし
-            yscrollcommand=v_scroll.set, # 縦スクロールを連動
-            xscrollcommand=h_scroll.set  # 横スクロールを連動
+        self.log_text = tk.Text(container 
+            , exportselection=False
+            , wrap='none'  # 自動改行なし
+            , yscrollcommand=v_scroll.set # 縦スクロールを連動
+            , xscrollcommand=h_scroll.set  # 横スクロールを連動
+            , font=asm_font_style
+            , width=80
+            , height=40
         )
         self.log_text.pack(expand=True, fill='both', side=tk.LEFT)
 
@@ -1700,11 +1873,15 @@ class DisasmWindow:
         h_scroll.config(command=self.log_text.xview)
 
     def is_alive(self):
-            return (self.window is not None) and tk.Toplevel.winfo_exists(self.window)
+        return (self.window is not None) and tk.Toplevel.winfo_exists(self.window)
 
     def on_close(self, event=None):
         if self.window:
-            self.window.destroy()
+
+            #self.window.destroy()
+            self.window.withdraw() 
+            self.window.after(1, self.window.destroy)
+
             self.window = None
 
     def block_input(self, event):
@@ -1727,22 +1904,22 @@ class DisasmWindow:
 
     def put(self, message):
         """すべて書き換え"""
-        #self.log_text.config(state="normal")
+        if not self.is_alive(): return
         self.log_text.delete("1.0", tk.END)
         self.log_text.insert(tk.END, message + "\n")
         self.log_text.mark_set("insert", "1.0")
         self.log_text.see("1.0")
-        #self.log_text.config(state="disabled")
-        self.window.lift()
+        
+        # 毎回lift()を呼ぶとLinux環境でウィンドウイベントが詰まるため、削除
         self.log_text.focus_set()
 
     def log(self, message):
         """末尾に追加"""
-        #self.log_text.config(state="normal")
+        if not self.is_alive(): return
         self.log_text.insert(tk.END, message + "\n")
         self.log_text.see(tk.END)
-        #self.log_text.config(state="disabled")
-        self.window.lift()
+        
+        # 毎回lift()を呼ぶとLinux環境でウィンドウイベントが詰まるため、削除
         self.log_text.focus_set()
 
 #--------------------------------------------------------------------------
@@ -1753,7 +1930,10 @@ if __name__ == "__main__":
         root = TkinterDnD.Tk()
     else:
         root = tk.Tk()
-    
+
+    fh.setup_default_font(root)
+    check_msx_font()
+   
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
         app = HexDumpEditor(root, file_path)

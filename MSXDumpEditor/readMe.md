@@ -1,15 +1,29 @@
-# MSX Dump List Editor
+# MSX Dump Editor
 
-![](screenshot.png)
+![](screenshot_win.png)
 
 MSXバイナリ向けのエディターです。  
 自分が欲しい機能を付けました。
 
 PythonとtkInterによるGUIプログラミングの学習・復習用に作ったものなのであまり期待しないでください。
 
+一応WSL2経由のUbuntuで動作ができるように調整はしました。
+
+![](screenshot_linux.png)
+
+
 このドキュメントは実装メモのような物です。
 
-## MSX-FONT について
+## フォントについて
+
+日本語フォントが無いと結構酷いことになります。  
+推奨フォントを優先して使用するようにしています。
+
+- VLゴシック フォント  
+  マルチプラットフォーム向けに、VLゴシックがインストールされていれば使用します。
+
+- HackGen フォント 
+  HEX表示とASM表示でHackGenがインストールされていればVLゴシックより優先して使用します。
 
 - MSX-FONT、MSX-FONT-Wide  
   bugfireさんのDumpListEditorに同梱されている、
@@ -22,21 +36,23 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 - Windowsであれば`MSXDumpEditor.exe`を実行
 
 - Python3がインストールされている環境なら  
-  `> py MSXDumpEditor.py`  
+  `py MSXDumpEditor.py`  
+  または
+  `python3 MSXDumpEditor.py`  
+  
   で実行可能
   
 ### 表示機能
 
 - HEX表示
 
-- 文字表示（MSX-FONTがインストールされていればそれを使用）
+- アスキー文字表示（MSX-FONTがインストールされていればそれを使用）
 
 - スプライトプレビュー
 
 - 1ライン逆アセンブラ
   カーソル位置から1命令逆アセンブル表示
   （データのオフセット指定とそれに対応するMSXアドレスの設定あり）
-
 
 ※ テスト用のダミーデータありで起動しますが、困らないと思うのでそのままにしてます。
 
@@ -59,11 +75,19 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
   - 未定義命令にも対応（未定義の場合は補足を付けて表示）  
   ![](disasm.png)
 
-- HEX値入力編集 （文字入力編集は無し）  
+- HEX入力とアスキー文字入力モードの切り替え
+  - `F2` で交互に切り替え
+  - TAB/Shift+Tabで前後にフォーカス移動
+
+- HEX値入力モード
   - `0`～`9`、`A`～`F`を入力すると値書き換え
   - 2桁入力で自動確定して次のアドレスへ移動
   - 2文字入力する前にカーソルを動かしたりHEXエディット以外に遷移すると1桁で確定
-  
+
+- アスキー文字入力モード
+  - ASCII文字(アスキーコード32～126)以外にも全角の代替文字で入力可能
+  - コントロールコードはHEX入力で入力して下さい
+
   - `DEL`：カーソル位置の1バイトを削除
   - `BS`：前の1バイトを削除
   - `HOME`、`END`：行頭、行末、Ctrl押しながら出データ先頭と末尾へ移動
@@ -111,13 +135,11 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 
 ### 検索ボックス
 
-  - バイナリ検索：  
-     `#xx xx xx...`  
+  - バイナリ検索： `#xx xx xx...`  
      - 先頭が#で16進数(0～FF)  
      - スペース切りで複数バイト指定可能
 
-  - アドレスジャンプ:
-     `>xxxxxx`  
+  - アドレスジャンプ: `>xxxxxx`  
      - 先頭が>の16進数文字列(0～FFFFFFFF)
 
   - 文字検索：  
@@ -131,8 +153,8 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
   pyファイルの実行をする場合に必要。  
   WindowsであればストアやVSインストーラからインストール可能。  
 
-
 ### 使用するPythonモジュール
+
 - tkinterdnd2  
   ファイルのドラッグアンドドロップに対応するために必要。  
   インストールはコマンドコンソールから  
@@ -143,7 +165,79 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
   インストールはコマンドコンソールから  
   `> pip install PyInstaller⏎`
 
-## 今後
+### メモ
+
+#### WSL:Ubuntuの場合
+
+- linuxで *VL Gothic*をインストール  
+  `sudo apt update && sudo apt install fonts-vlgothic -y`
+
+- `pip` インストール  
+
+  `sudo apt update && sudo apt install python3-pip -y`
+
+- `tkinterdnd2` インストール
+
+  `pip3 install pipreqs --break-system-packages`
+
+- `import tkinter`でエラーが出る  
+
+  ディストリビューションによってはtkが入ってないのでインストールする  
+  `sudo apt update && sudo apt install python3-tk -y`
+
+- 日本語文字が化ける  
+
+  日本語フォントが入ってないのでインストールする
+  `sudo apt update && sudo apt install fonts-noto-cjk -y`
+
+- MSX-FONTを使いたい  
+  
+  - 自分のアカウントでのみ使う場合
+  
+    1. アカウント用のフォントフォルダ作成（なければ）  
+       `mkdir -p ~/.local/share/fonts`
+  
+    2. アカウント用のフォントフォルダへコピー  
+       `cp "/(DumpListEditor/Font/MSX)/MSX-FONT-Wide.tff" ~/.local/share/fonts/`  
+       `cp "/(DumpListEditor/Font/MSX)/MSX/MSX-FONT.tff" ~/.local/share/fonts/`
+
+       ※ `(DumpListEditor/Font/MSX)`は、各自がDumpListEditorをダウンロードして展開した場所に合わせて書き換える
+
+    3. フォントキャッシュを更新  
+       `fc-cache -fv`
+  
+  - システム共通で使う場合（管理者権限が必要）
+  
+    1. システム用のフォントディレクトリにファイルをコピーする  
+       `sudo cp "/(各自にあわせる)/DumpListEditor/font/MSX/MSX-FONT.tff" /usr/local/share/fonts/`
+
+    2. フォントキャッシュを更新  
+       `sudo fc-cache -fv`
+
+  - 確認方法
+  
+    `fc-list | grep -i "MSX"`
+
+#### 寄り道
+
+- `pipregs` インストール  
+
+  `pip3 install pipreqs --break-system-packages`
+  
+- `pipregs`による足りないmoduleリストの作成  
+  このフォルダにカレントパスを移動して  
+  `pipreqs . --encoding=utf-8`
+  
+  これでエラーなら  
+  `~/.local/bin/pipreqs . --encoding=utf-8`
+  
+  成功すれば `requirements.txt` が作成される
+
+- `requirements.txt` を利用したモジュールのインストール  
+
+  `pip3 install -r requirements.txt --break-system-packages`
+
+## 謝辞
 
 練習確認用に適当に作ったものなので、改変はご自由に。
 
@@ -154,7 +248,14 @@ WIN32プログラミングと変わらない手順で、
 
 プロパティである程度用意されていて一括指定しやすいのは良い所。
 
-それでもWIN95時代のCPU並みの速度に感じます。
+Pythonって時々構文書式が気持ち悪いし
+構文がややこしいのも遅さの要因なのではないかと思いますが
+どうなんでしょうね。
 
-Pythonって時々構文書式が気持ち悪いのはどうなんでしょうね。
+速度はWwin95時代のCPU並みの速度に感じます。
 
+tkinterでのGUIプログラミングですが、
+OSによってtkInterの挙動やフォントの処理が違うので
+色々諦めた妥協案にしています。
+
+フォントは大事。
