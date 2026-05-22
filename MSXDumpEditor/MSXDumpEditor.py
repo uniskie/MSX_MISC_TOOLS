@@ -123,9 +123,11 @@ class HexDumpEditor:
     ADDRESS_FMT    = f"0{ADDRESS_DIGITS}X"        # アドレス表示文字列フォーマット
     ADDRESS_PAD2   = 2                            # アドレスのあとの余白
     LINE_BYTES     = 16                           # 1行に表示するバイト数
-    HEADER_LINES   = 1                            # ヘッダ部の行数
     BYTES_PAD      = 1                            # バイトデータのあとの余白
-    
+
+    HEADER_LINES       = 1                        # ヘッダ部の行数
+    EDIT_LINES_DEFAULT = 32                       # 初期表示の行数
+
     COL_S_HEX      = ADDRESS_PAD1 + ADDRESS_DIGITS + ADDRESS_PAD2  # バイトデータ開始位置 (1+8+2=10)
     COL_E_HEX      = COL_S_HEX + LINE_BYTES * 3   # バイトデータ終端位置+1 (10+16*3=10+48=58)
     COL_S_ASCII    = COL_E_HEX + BYTES_PAD        # アスキー文字データ開始位置 (58+余白2=60)
@@ -158,6 +160,9 @@ class HexDumpEditor:
 
     def __init__(self, root, load_path = None):
         self.root = root
+
+        # 画面への表示を抑制
+        root.withdraw()
         
         self.current_file_path = None
         self.current_file_name = None
@@ -210,6 +215,24 @@ class HexDumpEditor:
         # 起動時引数があればロード
         if load_path:
             self.load_bin_from_path( load_path )
+
+        root.update_idletasks()
+
+        # リサイズ最小制限
+        current_width  = root.winfo_width()
+        current_height = root.winfo_height()
+        root.wm_minsize(width=current_width, height=current_height)
+
+        # 左右リサイズを禁止
+        root.resizable(False, True)
+
+        # 表示開始
+        root.deiconify()
+
+        # withdraw -> deiconify でコントロールからフォーカスが外れているので
+        # HEXエディットに強制フォーカス
+        # focus_set() は起動・再表示直後は機能しないため focus_force()
+        self.text_editor.focus_force()
 
     def set_file_path(self, path):
         """ファイルパスを設定し、タイトルバーとステータスバーの表示を更新する"""
@@ -433,7 +456,7 @@ class HexDumpEditor:
         self.text_editor = tk.Text(editor_parent
             , font=hex_font_style
             , width=text_edit_width
-            , height=32
+            , height=self.EDIT_LINES_DEFAULT
             , bd=0, highlightthickness=0
             , undo=False
             , exportselection=False
@@ -1877,11 +1900,9 @@ class DisasmWindow:
 
     def on_close(self, event=None):
         if self.window:
-
             #self.window.destroy()
             self.window.withdraw() 
             self.window.after(1, self.window.destroy)
-
             self.window = None
 
     def block_input(self, event):

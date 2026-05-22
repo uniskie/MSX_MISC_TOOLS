@@ -169,8 +169,6 @@ def setup_default_font(root:tk):
     global font_name_ui, font_name_sans, font_name_mono, font_name_program
     global font_pt
 
-    if tk_root is not None:
-        tk_root.destroy()
     tk_root = root
 
     font_pt = 10
@@ -249,6 +247,7 @@ def print_tkfont_info():
 
 if __name__ == "__main__":
     tk_root = tk.Tk()
+    tk_root.withdraw()
 
     print_all_fonts()
     print_tkfont_info()
