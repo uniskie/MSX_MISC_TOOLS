@@ -5,21 +5,24 @@ import sys
 
 # ワンラインZ80逆アセンブラの組み込み
 from z80_disAssembler import z80disasm
+import z80_disAssembler as z80disAssembler
 
 # フォントヘルパーの組み込み
 import font_helper as fh
 
-FONT_HEIGHT = 18
+FONT_HEIGHT = 16
 
 #--------------------------------------------------------------------------
 # Log Window
 #--------------------------------------------------------------------------
-class DisasmWindow:
-    def __init__(self, parent, APP_NAME):
+class DisAsmWindow:
+    def __init__(self, parent, APP_NAME, file_name):
 
         # Toplevelで新しいウィンドウを作成
         self.window = tk.Toplevel(parent)
-        self.window.title(APP_NAME + ": DisAssemble View")
+        self.window.title(APP_NAME 
+                          + ": DisAssemble View"
+                          + (f" - {file_name}" if file_name is not None else ""))
         self.window.geometry(f"+{parent.winfo_x()}+{parent.winfo_y()}")
 
         if sys.platform == "win32":
@@ -83,10 +86,26 @@ class DisasmWindow:
             self.log_text.bind(key, self._on_key_move_or_select)
 
         # マウス操作
-        self.log_text.bind("<Button-1>", self._on_mouse_click)
+        self.log_text.bind("<Button-1>", self._on_mouse_press) # click
+        # self.log_text.bind("<ButtonPress-1>", self._on_mouse_press) # ButtonPressはBurronのエイリアスらしい
         self.log_text.bind("<Shift-Button-1>", self._on_shift_mouse_click)
-        self.log_text.bind("<ButtonPress-1>", self._on_mouse_press)
         self.log_text.bind("<B1-Motion>", self._on_mouse_drag)
+
+        # ジャンプ機能と履歴移動のキーバインド
+        self.log_text.bind("G", self.cmd_jump_to_address)
+        self.log_text.bind("g", self.cmd_jump_to_address)
+        self.log_text.bind("<Control-g>", self.cmd_jump_to_address)
+        self.log_text.bind("<F4>", self.cmd_jump_to_address)
+        self.log_text.bind("B", self.cmd_history_back)
+        self.log_text.bind("b", self.cmd_history_back)
+        self.log_text.bind("<Alt-Left>", self.cmd_history_back)
+        self.log_text.bind("F", self.cmd_history_forward)
+        self.log_text.bind("f", self.cmd_history_forward)
+        self.log_text.bind("<Alt-Right>", self.cmd_history_forward)
+        
+        # ジャンプ履歴管理用変数
+        self.history = []
+        self.history_index = -1
         ################################################################################
 
         # 書き換え不能に
@@ -101,10 +120,12 @@ class DisasmWindow:
         self.apply_color_tags()
 
     def setup_asm_color_tags(self):
+        # カーソル行の背景色
+        self.log_text.tag_configure("current_line", background="#fff0e0")
 
         # 選択範囲の色
         self.log_text.tag_configure("sel", background="#e0f0e0", foreground="#001100")
-        
+
         # Z80 ASM 構文色分け
         self.log_text.tag_configure("comment",  foreground="#b00000")   # コメント
         self.log_text.tag_configure("label",    foreground="#843683")   # ラベル
@@ -113,12 +134,13 @@ class DisasmWindow:
         self.log_text.tag_configure("number",   foreground="#234623")   # 数値
 
         # 色分け優先度 （低→高）
-        self.log_text.tag_raise("sel")      # 選択範囲
-        self.log_text.tag_raise("register") # レジスタ
-        self.log_text.tag_raise("opcode")   # 命令
-        self.log_text.tag_raise("number")   # 数値
-        self.log_text.tag_raise("label")    # ラベル
-        self.log_text.tag_raise("comment")  # コメント
+        self.log_text.tag_raise("current_line") # カーソル行
+        self.log_text.tag_raise("sel")          # 選択範囲
+        self.log_text.tag_raise("register")     # レジスタ
+        self.log_text.tag_raise("opcode")       # 命令
+        self.log_text.tag_raise("number")       # 数値
+        self.log_text.tag_raise("label")        # ラベル
+        self.log_text.tag_raise("comment")      # コメント
 
         self.rules = [
             ("comment",  r";.*"),                                                # ; から始まるコメント
@@ -140,7 +162,7 @@ class DisasmWindow:
 
         #タグ消し
         for tag_name in tag_positions.keys():
-                self.log_text.tag_remove(tag_name, "1.0", "end")
+            self.log_text.tag_remove(tag_name, "1.0", "end")
 
         end_index = self.log_text.index("end-1c")
         num_lines = int(end_index.split(".")[0])
@@ -158,6 +180,32 @@ class DisasmWindow:
             if positions:
                 self.log_text.tag_add(tag_name, *positions)
 
+    def highlight_current_line(self, event=None):
+        """現在のカーソル行の背景色をハイライトする"""
+        if not self.is_alive(): return
+        
+        # 一旦全体のハイライトを消去
+        self.log_text.tag_remove("current_line", "1.0", tk.END)
+        
+        # カーソル行の先頭から、行末の改行文字(+1c)までハイライトを適用
+        # （改行文字を含めると右端まで色が塗られる）
+        self.log_text.tag_add("current_line", "insert linestart", "insert lineend + 1c")
+
+    ################################################################################
+    # 入力制御・移動・選択処理
+    ################################################################################
+    def get_current_line_info(self):
+        """カーソル位置の行番号、桁(列番号)、1行のテキストを取得する"""
+        if not self.is_alive(): 
+            return 0, 0, ""
+            
+        current_index = self.log_text.index("insert")
+        line_str, col_str = current_index.split(".")
+        line_num, col_num = int(line_str), int(col_str)
+        line_text = self.log_text.get("insert linestart", "insert lineend")
+        
+        return line_num, col_num, line_text
+
     ################################################################################
     # タグで色を付けるとカーソルでのスクロールデフォルト処理が重いので処理を乗っ取る
     # 移動、選択範囲変更を自前処理
@@ -165,9 +213,7 @@ class DisasmWindow:
     # SHIFTなしでのマウスドラッグ（新規選択）
     ################################################################################
     def _on_key_move_or_select(self, event):
-        """あらゆる移動・選択キー入力を一元管理する共通ハンドラ"""
         try:
-            # 押されたキーから、移動の「方向」「単位」「Shift状態」をデータとして展開
             keysym = event.keysym
             state = event.state
             
@@ -222,15 +268,16 @@ class DisasmWindow:
         except Exception:
             pass
 
-        return "break"
+        self.highlight_current_line()
 
-    def _clear_select_start(self, event):
-        """Shiftキー解放時の起点インデックス破棄処理"""
-        self._select_start_index = None
+        return "break"
 
     def _on_mouse_press(self, event):
         """マウスドラッグ開始時の起点インデックス記録処理"""
         self._select_start_index = self.log_text.index(f"@{event.x},{event.y}")
+
+        self.log_text.mark_set("insert", self._select_start_index)
+        self.highlight_current_line()
 
     def _on_mouse_drag(self, event):
         """マウスクリックからドラッグ移動中の選択範囲更新処理"""
@@ -248,12 +295,9 @@ class DisasmWindow:
                 self.log_text.tag_add("sel", start, end)
         except Exception:
             pass
-        return "break"
 
-    def _on_mouse_click(self, event):
-        """マウスクリック時の選択範囲および起点インデックスの消去処理"""
-        self.log_text.tag_remove("sel", "1.0", "end")
-        self._select_start_index = None
+        self.highlight_current_line()
+        return "break"
 
     def _on_shift_mouse_click(self, event):
         """Shift+マウスクリック時の選択範囲の拡張・縮小処理"""
@@ -274,7 +318,99 @@ class DisasmWindow:
             self.log_text.tag_add("sel", start, end)
         except Exception:
             pass
+
+        self.highlight_current_line()
         return "break"
+
+    ################################################################################
+    # ジャンプと履歴管理機能 (Ctrl+G / F4 / Alt+Left / Alt+Right)
+    ################################################################################
+    def cmd_jump_to_address(self, event=None):
+        """カーソル行のラベルを抽出してジャンプする"""
+        if not self.is_alive(): return "break"
+        
+        line_num, col_num, text = self.get_current_line_info()
+        
+        # モジュールからラベルを抽出
+        
+        labels = z80disAssembler.extract_all_addresses_from_label(text)
+        if not labels:
+            return "break"
+
+        target_address = None
+        
+        for address, start_col, end_col in labels:
+            # 行頭はラベル定義なので除外
+            if start_col == 0:
+                continue
+            target_address = address
+            break
+
+        if target_address is not None:
+            self.execute_jump(target_address)
+        return "break"
+
+    def execute_jump(self, address):
+        """指定アドレスを検索して履歴に登録しつつ移動する"""
+        label_str = f"{z80disAssembler.LABEL_PREFIX}{address:{z80disAssembler.LABEL_ADDR_FMT}}"
+        
+        dest_index = self.log_text.search(label_str + ":", "1.0", tk.END)
+        if not dest_index:
+            return
+
+        current_index = self.log_text.index("insert")
+
+        # --- 履歴の更新 ---
+        if self.history_index == -1:
+            self._add_to_history(current_index)
+        else:
+            hist_line = self.history[self.history_index].split(".")[0]
+            curr_line = current_index.split(".")[0]
+            if hist_line != curr_line:
+                self._add_to_history(current_index)
+            else:
+                self.history[self.history_index] = current_index
+
+        # 移動先を履歴に登録
+        self._add_to_history(dest_index)
+        
+        # 実際の移動
+        self._go_to_index(dest_index)
+
+    def _add_to_history(self, index_str):
+        """履歴リストの現在位置以降を切り捨てて、新しい位置を追加する"""
+        if self.history_index < len(self.history) - 1:
+            self.history = self.history[:self.history_index + 1]
+            
+        if not self.history or self.history[-1] != index_str:
+            self.history.append(index_str)
+            self.history_index = len(self.history) - 1
+
+    def cmd_history_back(self, event=None):
+        """Alt+Left: 履歴を戻る"""
+        if self.history_index >= 0:
+            self.history_index -= 1
+            if self.history_index >= 0:
+                self._go_to_index(self.history[self.history_index])
+        return "break"
+
+    def cmd_history_forward(self, event=None):
+        """Alt+Right: 履歴を進む"""
+        if self.history_index < len(self.history) - 1:
+            self.history_index += 1
+            self._go_to_index(self.history[self.history_index])
+        return "break"
+
+    def _go_to_index(self, index_str):
+        """指定のインデックスへカーソルを移動してフォーカスする"""
+        self.log_text.mark_set("insert", index_str)
+        self.log_text.see("insert")
+        # 選択範囲があれば解除する
+        self.log_text.tag_remove("sel", "1.0", tk.END)
+        self._select_start_index = None
+
+        self.highlight_current_line()
+
     ################################################################################
 
     def is_alive(self):
@@ -299,25 +435,41 @@ class DisasmWindow:
             
         # Ctrl+C (コピー) や Ctrl+A (全選択) も許可
         if event.state & 0x0004: # Ctrlキーが押されている状態
-            if event.keysym.lower() in ['c', 'a','f4','w']:
+            if event.keysym.lower() in ['c', 'a', 'f4', 'w', 'g']:
                 return None # 許可
+
+        # Altキーの操作(Alt+Left/Right)は許可
+        if event.state & 0x0008 or event.state & 0x20000: # Alt(Mod1)キーの状態
+            if event.keysym in ['Left', 'Right']:
+                return None
+
+        # キー単体（大文字・小文字両方）の入力を許可する
+        if event.keysym.lower() in ['g', 'b', 'f']:
+            return None
 
         # それ以外の文字入力、BackSpace、Delete、Enterなどはすべてブロック（書き換え禁止）
         return "break"
 
+    #############################################
     def put(self, message):
         """すべて書き換え"""
         if not self.is_alive(): return
         self.log_text.delete("1.0", tk.END)
         self.log_text.insert(tk.END, message + "\n")
-        #self.set_asm_text(message)
         self.log_text.mark_set("insert", "1.0")
         self.log_text.see("1.0")
 
         self.apply_color_tags()
         
+        # 新しいテキストになったら履歴をクリア
+        self.history.clear()
+        self.history_index = -1
+        
         self.log_text.focus_set()
 
+        self.highlight_current_line()
+
+    #############################################
     def log(self, message):
         """末尾に追加"""
         if not self.is_alive(): return
@@ -325,6 +477,6 @@ class DisasmWindow:
         self.log_text.see(tk.END)
 
         self.apply_color_tags()
-
         self.log_text.focus_set()
 
+        self.highlight_current_line()

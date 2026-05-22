@@ -31,10 +31,9 @@ except ImportError:
 
 #--------------------------------------------------------------------------
 # ワンラインZ80逆アセンブラの組み込み
-from z80_disAssembler import z80disasm
 import z80_disAssembler as z80disAssembler
 HAS_Z80DIS = True
-z80disasm = z80disasm()
+z80disasm = z80disAssembler.z80disasm()
 ASM_DELIM = ">"
 
 #--------------------------------------------------------------------------
@@ -44,11 +43,11 @@ import font_helper as fh
 #--------------------------------------------------------------------------
 # アセンブリビューの組み込み
 import asm_view as av
-from asm_view import DisasmWindow
+from asm_view import DisAsmWindow
 
 # HEX/ASIIエディット：フォントの高さ(px)
 # フォントとサイズの組み合わせによっては機種で誤差が出る
-EDIT_FONT_HEIGHT    = 20 
+EDIT_FONT_HEIGHT    = 16
 
 #--------------------------------------------------------------------------
 # MSX-FONTがインストールされているか調べる
@@ -225,23 +224,39 @@ class HexDumpEditor:
         if load_path:
             self.load_bin_from_path( load_path )
 
-        root.update_idletasks()
+        self.root.update_idletasks()
 
         # リサイズ最小制限
-        current_width  = root.winfo_width()
-        current_height = root.winfo_height()
-        root.wm_minsize(width=current_width, height=current_height)
+        self.keep_width = self.root.winfo_width()
+        self.init_height = self.root.winfo_height()
+        self.root.wm_minsize(width=self.keep_width, height=self.init_height)
+        self.root.wm_maxsize(width=self.keep_width, height=root.winfo_screenheight())
 
         # 左右リサイズを禁止
-        root.resizable(False, True)
+        self.root.resizable(False, True)
 
         # 表示開始
-        root.deiconify()
+        self.root.deiconify()
 
         # withdraw -> deiconify でコントロールからフォーカスが外れているので
         # HEXエディットに強制フォーカス
         # focus_set() は起動・再表示直後は機能しないため focus_force()
         self.text_editor.focus_force()
+
+        self.root.bind("<Configure>", self._force_reload_constraints)
+
+    def _force_reload_constraints(self, event):
+        """位置を動かさず、Linuxにサイズ制限を強制的に思い出させる"""
+        # （ちらつくけど、有効なのはこの妥協案ぐらいしか見つからなかった）
+        if event.widget == self.root:
+            # 横幅が指定値から外れようとした瞬間だけ実行
+            if event.width != self.keep_width or event.height < self.init_height:
+                # 一瞬だけ全面リサイズ禁止に切り替える
+                self.root.resizable(False, False)
+                # Linuxのウィンドウマネージャに即座にルールを再計算させる
+                self.root.update_idletasks()
+                # 本来の設定に戻す
+                self.root.resizable(False, True)
 
     def set_file_path(self, path):
         """ファイルパスを設定し、タイトルバーとステータスバーの表示を更新する"""
@@ -337,11 +352,17 @@ class HexDumpEditor:
     def build_ui(self):
         sans_font_name  = fh.font_name_sans
         fixed_font_name = fh.font_name_program
-        font_style_fix = fh.get_font_with_pixel_height(self.line_space, fixed_font_name)
+        if sys.platform == "win32":
+            font_style_fix = fh.get_font_with_pixel_height(self.line_space + 1, fixed_font_name)
+        else:
+            font_style_fix = fh.get_font_with_pixel_height(self.line_space + 2, fixed_font_name)
         font_style_sans= fh.get_font_with_pixel_height(self.line_space, sans_font_name )
 
         font_px_size = EDIT_FONT_HEIGHT
-        hex_font_style = fh.get_font_with_pixel_height(font_px_size, fh.font_name_program)
+        if sys.platform == "win32":
+            hex_font_style = fh.get_font_with_pixel_height(font_px_size + 2, fh.font_name_program)
+        else:
+            hex_font_style = fh.get_font_with_pixel_height(font_px_size + 3, fh.font_name_program)
         if HAS_MSX_FONT:
             msx_font_style = fh.get_font_with_pixel_height(font_px_size, MSX_FONT)
         else:
@@ -392,6 +413,7 @@ class HexDumpEditor:
         self.baseofs_combo.bind("<FocusOut>", self.on_baseofs_combo_focus_out)
         self.baseofs_combo.bind("<<ComboboxSelected>>", self.on_baseofs_combo_change)
         self.baseofs_combo.bind("<KeyRelease>", self.on_baseofs_combo_change)
+        self.baseofs_combo.bind("<Map>", self.change_dropdown_font)
 
         tk.Label(toolbar, text="-> Asm:").pack(side=tk.LEFT, padx=(2, 2))
         self.asmbase_combo = ttk.Combobox(toolbar
@@ -401,6 +423,7 @@ class HexDumpEditor:
         )
         self.asmbase_combo.pack(side=tk.LEFT)
         self.asmbase_combo.current(1) # 0x4000
+        self.asmbase_combo.bind("<Map>", self.change_dropdown_font)
 
         #----------------------------------------
         # 検索ボックス
@@ -410,7 +433,7 @@ class HexDumpEditor:
         tk.Label(search_frame, text="Search:").pack(side=tk.LEFT, padx=(6, 2))
         
         self.search_var = tk.StringVar()
-        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, width=43, font=font_style_fix)
+        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, width=35, font=font_style_fix)
         self.search_entry.pack(side=tk.LEFT)
         self.search_entry.bind("<Return>", self.search_decide)
         self.search_entry.bind("<Shift-Return>", self.search_decide)
@@ -423,7 +446,6 @@ class HexDumpEditor:
         self.search_entry.config(fg="gray")
         self.search_entry.bind("<FocusIn>", self.on_search_focus_in)
         self.search_entry.bind("<FocusOut>", self.on_search_focus_out)
-        
         
         #----------------------------------------
         # HEXビュー
@@ -445,7 +467,7 @@ class HexDumpEditor:
         text_edit_width = self.COL_S_ASCII + ((ascii_width + hex_font_base - 1) // hex_font_base)
 
         editor_parent = tk.Frame(self.root, bd=2, relief=tk.SUNKEN)
-        editor_parent.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=0)
+        editor_parent.pack(side=tk.TOP, fill=tk.Y, expand=True, padx=5, pady=0)
 
         self.header = tk.Label(editor_parent
             , font=hex_font_style
@@ -607,6 +629,12 @@ class HexDumpEditor:
         self.text_editor.focus_set()
         self.text_editor.config(state=tk.DISABLED)
 
+    # ドロップダウンリストのフォント変更
+    def change_dropdown_font(self, event):
+        font = event.widget.cget('font')
+        popdown = self.root.tk.eval(f"ttk::combobox::PopdownWindow {event.widget}")
+        self.root.tk.call(f"{popdown}.f.l", "configure", "-font", font)
+        
     ## takefocus=Falseをすり抜ける現象対策
     #def block_focus(self, event):
     #    if event.state & 4: # Shift key
@@ -1381,7 +1409,7 @@ class HexDumpEditor:
 
         if 0 < len(disasm_list):
             if (self.log_window is None) or (not self.log_window.is_alive()):
-                self.log_window = DisasmWindow(self.root, APP_NAME)
+                self.log_window = DisAsmWindow(self.root, APP_NAME, self.current_file_name)
                 self.log_window.window.lift()
                 self.log_window.window.focus_force()
 
@@ -1856,6 +1884,10 @@ if __name__ == "__main__":
     else:
         root = tk.Tk()
 
+    if sys.platform == 'darwin':
+        # Macの標準72DPIをWindows基準の96DPI相当(約1.33倍)に引き上げる
+        root.tk.call('tk', 'scaling', 1.3333333333333333)
+        
     fh.setup_default_font(root)
     check_msx_font()
    

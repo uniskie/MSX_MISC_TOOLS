@@ -1,8 +1,54 @@
 import re
 
+# 区切り文字
+ADDRESS_DELIM = ':'
+BODY_DELIM    = '>'
+COMMENT_DELIM = ';'
+
+# アドレスラベル
+LABEL_PREFIX  = 'X'
+LABEL_ADDR_FMT = '04X'
+LABEL_PATTERN = (
+    rf"(?<![a-zA-Z0-9_])"         # 直前が英数字やアンダースコアではない
+    rf"{re.escape(LABEL_PREFIX)}" # プレフィックス ('X')
+    rf"([0-9A-Fa-f]{{4}})"        # 16進数4桁を抽出（f-string内なので波括弧は二重 {{}}
+    rf"(?![a-zA-Z0-9_])"          # 直後が英数字やアンダースコアではない
+)
+
 # ==========================================
+# ヘルパー：アドレスをラベルに変換
+# ==========================================
+def to_hex_label(adr):
+    return f"{LABEL_PREFIX}{adr:{LABEL_ADDR_FMT}}"
+
+# ==========================================
+# ヘルパー：ラベルからアドレスに変換
+# ==========================================
+def from_hex_label(text):
+    if match := re.search(LABEL_PATTERN, text):
+        hex_str = match.group(1) #16進数4桁部
+        address = int(hex_str, 16)
+        if to_hex_label(address) == text:
+            return address
+
+    return None
+
+# ==========================================
+# ヘルパー：文字列からラベルを検出して
+#           アドレス、ラベル開始位置・終了位置を返す
+# ==========================================
+def extract_all_addresses_from_label(text):
+    results = []
+    for match in re.finditer(LABEL_PATTERN, text):
+        address = int(match.group(1), 16)
+        start_col, end_col = match.span()
+        results.append((address, start_col, end_col))
+        
+    return results
+
+#======================================================
 # ヘルパー：0x表記をH表記に変更
-# ==========================================
+#======================================================
 def format_asm_to_h_style(asm_str: str) -> str:
     """
     アセンブリ文字列内の '0x...' 表記を 'xxH' 表記に一括変換する。
@@ -219,7 +265,7 @@ class z80disasm:
                     
                     # 強制的に下位3ビットを 6 (HL) にしてベース命令を取得し、置換
                     sub_op_hl = (sub_op & 0xF8) | 0x06
-                    fmt_hl = self.cb_table.get(sub_op_hl, f"DB CB, {sub_op_hl:02X}")
+                    fmt_hl = self.cb_table.get(sub_op_hl, f"DB 0xCB, 0x{sub_op_hl:02X}")
                     #fmt = fmt_hl.replace("(HL)", f"({index_reg}{offset_signed:+d})")
                     fmt = fmt_hl.replace("(HL)", f"({index_reg}" f"{'-' if offset_signed < 0 else '+'}" f"0x{abs(offset_signed):02X})")
                     
@@ -231,7 +277,7 @@ class z80disasm:
                     if self.CAUTION_UNOFFICIAL_INSTRUCTION:
                         fmt += " ;*非公式：メモリとレジスタ双方に書き出し*"
                 else:
-                    fmt = self.cb_table.get(sub_op, f"DB CB, {sub_op:02X}")
+                    fmt = self.cb_table.get(sub_op, f"DB 0xCB, 0x{sub_op:02X}")
                     # フォーマット内の (HL) を (IX+d) または (IY+d) に書き換える
                     #fmt = fmt.replace("(HL)", f"({index_reg}{offset_signed:+d})")
                     fmt = fmt.replace("(HL)", f"({index_reg}"f"{'-' if offset_signed < 0 else '+'}"f"0x{abs(offset_signed):02X})")
@@ -242,7 +288,7 @@ class z80disasm:
                 # 通常のCBプレフィックス命令 (例: CB C7 -> SET 0, A)
                 sub_op = fetch_byte()
                 if sub_op is None: return fetch_error()
-                fmt = self.cb_table.get(sub_op, f"DB CB, {sub_op:02X}")
+                fmt = self.cb_table.get(sub_op, f"DB 0xCB, 0x{sub_op:02X}")
 
         elif op == 0xED:
             # EDプレフィックスではDD/FDが無効なので、無効命令扱いとする
@@ -255,17 +301,17 @@ class z80disasm:
             if index_reg:
                 if not self.ALLOW_UNOFFICIAL_INSTRUCTION:
                     return ignore_prefix() # プレフィックスの1バイトだけ消費する
-                fmt = self.ed_table.get(sub_op, f"DB ED, {sub_op:02X}")
+                fmt = self.ed_table.get(sub_op, f"DB 0xED, 0x{sub_op:02X}")
                 if self.CAUTION_UNOFFICIAL_INSTRUCTION:
                     fmt += " ;*非公式：IX/IY指定無効*"
                 # ハードウェアの挙動を再現するため、IX/IY化フラグを無効化する
                 index_reg = None
             else:
-                fmt = self.ed_table.get(sub_op, f"DB ED, {sub_op:02X}")
+                fmt = self.ed_table.get(sub_op, f"DB 0xED, 0x{sub_op:02X}")
 
         else:
             # プレフィックスを持たない通常の命令
-            fmt = self.base_table.get(op, f"DB {op:02X}")
+            fmt = self.base_table.get(op, f"DB 0x{op:02X}")
 
         # ==========================================
         # IX / IY レジスタの置換
@@ -341,29 +387,27 @@ class z80disasm:
 
         return [asm, bytes(op_bytes)]
 
+    #------------------------------------------------------
+    # アドレスを検出
+    #------------------------------------------------------
+    def extract_address_immidiate(self, str):
+        if COMMENT_DELIM in str:
+            str = str.split(';', 1)[0]
+        # (0xXXXX)
+        match_indirect = re.search(r'\((0x[0-9A-Fa-f]{4})\)', str, re.IGNORECASE)
+        if match_indirect:
+            return match_indirect.group(1)
+        # JP/JR/DJNZ/CALL
+        match_jump = re.search(r'\b(JP|JR|DJNZ|CALL|)\b.*\s+(0x[0-9A-Fa-f]{4})', str, re.IGNORECASE)
+        if match_jump:
+            return match_jump.group(2)
+        return None
+
+    #======================================================
     # 渡されたデータを全て逆アセンブル
+    #======================================================
     def disasm(self, data: bytes, address: int) -> list:
         if not data: return ''
-
-        address_delim = ":"
-        body_delim = ">"
-        comment_delim = ";"
-
-        def _extract_address_immidiate(str):
-            if comment_delim in str:
-                str = str.split(';', 1)[0]
-            # (0xXXXX)
-            match_indirect = re.search(r'\((0x[0-9A-Fa-f]{4})\)', str, re.IGNORECASE)
-            if match_indirect:
-                return match_indirect.group(1)
-            # JP/JR/DJNZ/CALL
-            match_jump = re.search(r'\b(JP|JR|DJNZ|CALL|)\b.*\s+(0x[0-9A-Fa-f]{4})', str, re.IGNORECASE)
-            if match_jump:
-                return match_jump.group(2)
-            return None
-        
-        def _hex_label(adr):
-            return f"X{adr:04X}"
 
         # 一旦 0xXXXX形式で すべて逆アセンブルしながら、アドレス参照リスト作成
         lines = []
@@ -380,7 +424,7 @@ class z80disasm:
             bin_len = len(asm_bin)
 
             # アドレス指定があれば抽出
-            if (adr_imm := _extract_address_immidiate(asm_str)) is not None:
+            if (adr_imm := self.extract_address_immidiate(asm_str)) is not None:
                 try:
                     # アドレス一覧に登録
                     adr = int(adr_imm, 16)
@@ -389,7 +433,7 @@ class z80disasm:
                     pass
 
             lines.append(
-                f"{cur_address:04X}{address_delim} {asm_bin.hex(' ').upper().ljust(11)}{body_delim}{asm_str}"
+                f"{cur_address:04X}{ADDRESS_DELIM} {asm_bin.hex(' ').upper().ljust(11)}{BODY_DELIM}{asm_str}"
             )
             idx += bin_len
             cur_address += bin_len
@@ -407,8 +451,8 @@ class z80disasm:
         for line_str in lines:
 
             # アドレス取得
-            if address_delim in line_str:
-                adr_str = line_str.split(address_delim, 1)[0]
+            if ADDRESS_DELIM in line_str:
+                adr_str = line_str.split(ADDRESS_DELIM, 1)[0]
                 try:
                     cur_address = int(adr_str, 16)
                 except ValueError:
@@ -418,34 +462,41 @@ class z80disasm:
             label = "        "
             for a in range(pre_address, cur_address+1):
                 if cur_address in jump_adr_set:
-                    label = (_hex_label(cur_address)+address_delim).ljust(8)
+                    label = (to_hex_label(cur_address)+ADDRESS_DELIM).ljust(8)
 
             # コメントの分離
-            if comment_delim in line_str:
-                body, comment = line_str.split(comment_delim, 1)
+            if COMMENT_DELIM in line_str:
+                body, comment = line_str.split(COMMENT_DELIM, 1)
             else:
                 body = line_str
                 comment = ""
 
-            # アドレス＋HEX の分離
-            if body_delim in body:
-                byte_info, asm_str = body.split(body_delim, 1)
+            # "アドレス: HEXリスト"部 の分離
+            if BODY_DELIM in body:
+                byte_info, asm_str = body.split(BODY_DELIM, 1)
             else:
                 byte_info = ""
                 asm_str = line_str
 
             # アドレス指定からラベルへの変換
-            if adr_imm := _extract_address_immidiate(asm_str):
+            if adr_imm := self.extract_address_immidiate(asm_str):
                 try:
                     # アドレス一覧にあればラベル化
                     adr = int(adr_imm, 16)
                     if adr in jump_adr_set:
-                        asm_str = asm_str.replace(adr_imm, _hex_label(adr))
+                        asm_str = asm_str.replace(adr_imm, to_hex_label(adr))
                 except ValueError:
                     pass
 
             # 0XXXXH形式に変更
             asm_str = format_asm_to_h_style(asm_str)
+
+            # オペコードとオペランドの間を桁揃え
+            asm_str = asm_str.strip()
+            if ' ' in asm_str:
+                parts = asm_str.split(' ', 1)
+                if len(parts):
+                    asm_str = parts[0].ljust(5) + parts[1]
 
             output.append(
                 f"{label}{asm_str.ljust(28)}; {byte_info.ljust(20)} {comment}" 
@@ -454,7 +505,7 @@ class z80disasm:
         # ラベルの出力(末尾)
         for a in range(cur_address, end_address+1):
             if a in jump_adr_set:
-                output.append(_hex_label(a))
+                output.append(to_hex_label(a))
 
         return "\n".join(output) + "\n"
 

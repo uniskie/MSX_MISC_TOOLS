@@ -1,8 +1,11 @@
+import os
 import sys
 import tkinter as tk
 from tkinter import font, ttk
 
-FONT_DEBUG = False
+FONT_DEBUG = True
+
+TK_DEFAULT_FONT_LINESPACE = 10
 
 tk_root = None
 font_name_ui      = ""
@@ -11,12 +14,12 @@ font_name_mono    = ""
 font_name_program = ""
 font_pt = 10
 
-# setup_default_fontで調査される、デフォルトフォントの高さ(px)
-TK_DEFAULT_FONT_LINESPACE = 12 # 仮の値
 
 #--------------------------------------------------------------------------
 # Font helper
 #--------------------------------------------------------------------------
+
+# 余白の扱いが近いフォントをなるべく採用するようにしたい
 
 # 日本語 プログラム向け等幅フォント優先順
 jp_programming_fonts = [
@@ -34,50 +37,52 @@ jp_programming_fonts = [
 ]
 # 日本語 テキスト向け等幅フォント優先順
 jp_mono_fonts = [
-    'BIZ UDGothic', 
-    'BIZ UDゴシック', 
     'UDEV Gothic',
     'HackGen', 
     'VL Gothic',
     'VL ゴシック',
-    'MS Gothic',
-    'ＭＳ ゴシック',
     'osaka mono',
     'Osaka－等幅',
+    'BIZ UDGothic', 
+    'BIZ UDゴシック', 
+    'MS Gothic',
+    'ＭＳ ゴシック',
     'monotype',
     'monospace '
 ]
 # 日本語 テキスト向けプロポーショナルフォント優先順
 jp_sans_fonts = [
-    'BIZ UDPGothic',
-    'BIZ UDPゴシック',
     'VL PGothic',
     'VL Pゴシック',
+    'Osaka-UI',
+    'osaka unicode',
+    'osaka',
     'YU Gothic',
     '游ゴシック',
     'Meiryo',
     'MS UI Gothic',
     'MS PGothic',
     'ＭＳ Ｐゴシック',
-    'Osaka-UI',
-    'osaka unicode',
-    'osaka',
+    'BIZ UDPGothic',
+    'BIZ UDPゴシック',
     'sans',
     'sansserif',
     'sans-serif'
 ]
 # 日本語 UI向けプロポーショナルフォント優先順
 jp_sans_ui_fonts = [
-    'BIZ UDPGothic', 
-    'BIZ UDPゴシック', 
-    'Yu Gothic UI',
-    'meiryo',
-    'メイリオ',
-    'MS UI Gothic',
-    'Osaka-UI',
     'VL PGothic',
     'VL Pゴシック',
+    'meiryo',
+    'メイリオ',
+    'Yu Gothic UI',
+    'YU Gothic',
+    '游ゴシック',
+    'MS UI Gothic',
+    'Osaka-UI',
     'osaka unicode',
+    'BIZ UDPGothic', 
+    'BIZ UDPゴシック', 
     'MS PGothic',
     'ＭＳ Ｐゴシック',
     'osaka'
@@ -101,7 +106,11 @@ tk_font_names = [
 
 # 指定した高さ(px)に一番近くてそれ以下のサイズのフォントを得る
 # OSごとにずれるので非推奨
-def get_font_with_pixel_height(target_height:int, font_family:str='TkDefaultFont'):
+def get_font_with_pixel_height(target_height: int, font_family: str = 'TkDefaultFont'):
+
+    # Linuxは上下余白が広い説
+    if os.name == 'posix' and sys.platform != 'darwin':
+        target_height += 1
 
     if font_family in tk.font.names():
         # Tk***Font
@@ -111,28 +120,25 @@ def get_font_with_pixel_height(target_height:int, font_family:str='TkDefaultFont
 
     test_font = font.Font(**base_options)
 
-    # サイズ指定がプラス：ポイント指定
     # サイズ指定がマイナス：ピクセル指定（高精度）
-    d = -1
-    if 0 < d:
-        low = 1
-        high = target_height * 2
-        best_size = low
-    else:
-        low = - (target_height * 2)
-        high = -1
-        best_size = high
+    # 探索範囲を設定（フォントサイズはマイナス値）
+    low = - (target_height * 4)  # 念のため探索範囲を大きめに
+    high = -1
+    best_size = high
 
-    min_diff = float('inf') # 最小誤差を記録するための変数
+    min_diff = float('inf') # 最小誤差を記録
 
     while low <= high:
         mid = (low + high) // 2
         
         test_font.configure(size=mid)
-        current_height = test_font.metrics('linespace')
+        #current_height = test_font.metrics('linespace') # OS差がある
+        current_height = test_font.metrics('ascent') + test_font.metrics('descent')
+
 
         diff = abs(current_height - target_height)
 
+        # 純粋に誤差が最小のものを記録
         if diff < min_diff:
             min_diff = diff
             best_size = mid
@@ -140,22 +146,21 @@ def get_font_with_pixel_height(target_height:int, font_family:str='TkDefaultFont
             if diff == 0:
                 break
         
-        if 0 < d:
-            if current_height <= target_height:
-                best_size = mid
-                low = mid + 1
-            else:
-                high = mid - 1
+        # 二分探索の方向制御：
+        # Tkinterではサイズが負のとき、値が小さいほど文字が大きい
+        if current_height > target_height:
+            # 現在の高さが目標より高い ＝ 文字が大きすぎる
+            # ＝ フォントサイズを小さくしたい ＝ 値を0に近づけたい（大きくしたい）
+            low = mid + 1
         else:
-            if current_height < target_height:
-                high = mid - 1
-            else:
-                low = mid + 1
+            # 現在の高さが目標より低い ＝ 文字が小さすぎる
+            # ＝ フォントサイズを大きくしたい ＝ 値をマイナス方向に遠ざけたい（小さくしたい）
+            high = mid - 1
             
     final_options = base_options.copy()
     final_options['size'] = best_size
-    #print(f'{font_family} : family={final_options["family"]} size={best_size}')
     return tk.font.Font(**final_options)
+
 
 # フォントを名前で探してフォント設定を返す
 def get_font_config(font_name):
@@ -202,23 +207,26 @@ def search_font_list(font_list):
     return None
 
 #
-def setup_default_font(root:tk):
+def setup_default_font(root:tk, font_size=0):
     global tk_root
     global font_name_ui, font_name_sans, font_name_mono, font_name_program
     global font_pt
 
     tk_root = root
 
-    font_pt = 10
+    if font_size:
+        font_pt = font_size
+    else:
+        font_pt = TK_DEFAULT_FONT_LINESPACE
 
     font_name_ui      = find_font_first(jp_sans_ui_fonts)
     font_name_sans    = find_font_first(jp_sans_fonts)
     font_name_mono    = find_font_first(jp_mono_fonts)
     font_name_program = find_font_first(jp_programming_fonts)
 
-    tk.font.nametofont('TkDefaultFont').configure(family=font_name_mono, size=font_pt)
-    tk.font.nametofont('TkMenuFont'   ).configure(family=font_name_ui,   size=font_pt)
-    tk.font.nametofont('TkHeadingFont').configure(family=font_name_ui,   size=font_pt)
+    tk.font.nametofont('TkDefaultFont').configure(family=font_name_sans, size=font_pt, weight='bold')
+    tk.font.nametofont('TkMenuFont'   ).configure(family=font_name_ui,   size=font_pt, weight='bold')
+    tk.font.nametofont('TkHeadingFont').configure(family=font_name_ui,   size=font_pt, weight='bold')
     tk.font.nametofont('TkCaptionFont').configure(family=font_name_ui,   size=font_pt)
     tk.font.nametofont('TkTextFont'   ).configure(family=font_name_mono, size=font_pt)
     tk.font.nametofont('TkFixedFont'  ).configure(family=font_name_mono, size=font_pt)
