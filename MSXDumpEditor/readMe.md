@@ -1,6 +1,7 @@
 # MSX Dump Editor
 
 ![](screenshot_win.png)
+![](screenshot_linux.png)
 
 MSXバイナリ向けのエディターです。  
 自分が欲しい機能を付けました。
@@ -9,7 +10,6 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 
 一応WSL2経由のUbuntuで動作ができるように調整はしました。
 
-![](screenshot_linux.png)
 
 
 このドキュメントは実装メモのような物です。
@@ -19,17 +19,30 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 日本語フォントが無いと結構酷いことになります。  
 推奨フォントを優先して使用するようにしています。
 
-- VLゴシック フォント  
-  マルチプラットフォーム向けに、VLゴシックがインストールされていれば使用します。
 
-- HackGen フォント 
-  HEX表示とASM表示でHackGenがインストールされていればVLゴシックより優先して使用します。
+### フォントの入手
+
+- UDEV Gothic：https://github.com/yuru7/udev-gothic
+- HackGen：https://github.com/yuru7/HackGen
+- VLゴシック：https://github.com/daisukesuzuki/VLGothic
+- BIZ UDゴシック：https://fonts.google.com/specimen/BIZ+UDGothic
+
+### MSX-FONT
 
 - MSX-FONT、MSX-FONT-Wide  
   bugfireさんのDumpListEditorに同梱されている、
   "MSX-FONT.tff"や"MSX-FONT-Wide.tff"がOSにインストールされていれば、
   文字表示欄がMSXフォントで表示されます。  
-  URL: https://bugfire2009.ojaru.jp/download.html
+  https://bugfire2009.ojaru.jp/download.html
+
+
+### フォントの優先順
+
+font_helper.py で定義
+
+- HEXエディタ：jp_programming_fonts
+- UIフォント：jp_sans_ui_fonts
+- デフォルトフォント：jp_mono_fonts
 
 ## 起動方法
 
@@ -45,14 +58,22 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 ### 表示機能
 
 - HEX表示
+  - 1行は16バイト単位
 
-- アスキー文字表示（MSX-FONTがインストールされていればそれを使用）
+- アスキー文字表示
+  - MSX-FONTがインストールされていればそれを使用
 
 - スプライトプレビュー
+  - カーソル位置から32バイトを16x16スプライトとして表示
 
 - 1ライン逆アセンブラ
-  カーソル位置から1命令逆アセンブル表示
-  （データのオフセット指定とそれに対応するMSXアドレスの設定あり）
+  - カーソル位置から1命令逆アセンブル表示  
+    （データのオフセット指定とそれに対応するMSXアドレスの設定あり）
+  - [ENTER]/[F4] で次の命令へ移動
+
+- アセンブリコードビュー
+  - 選択範囲の逆アセンブルの場合、ビューウィンドウを開いて表示
+  - 構文色分けあり
 
 ※ テスト用のダミーデータありで起動しますが、困らないと思うのでそのままにしてます。
 
@@ -237,25 +258,31 @@ PythonとtkInterによるGUIプログラミングの学習・復習用に作っ�
 
   `pip3 install -r requirements.txt --break-system-packages`
 
-## 謝辞
+## 最後に
 
 練習確認用に適当に作ったものなので、改変はご自由に。
 
-Python+tkInterでは自前でスクロールやら入力やら表示などの
-WIN32プログラミングと変わらない手順で、
-データサイズが増えても速度が落ちない定番の工夫
-（仮想スクロールなど）が必要なのも一緒ですね。
+Python+tkInterでは
+重い動作を回避するために
+自前で仮想スクロールやら入力やら表示、
+キー処理も自前でのカスタマイズが必要になりますね。
+これはWIN32プログラミングと変わらない部分ですが
+より重くなりやすい感じであるのと、
+tkinterの内部動作や仕様の問題も多々。
 
-プロパティである程度用意されていて一括指定しやすいのは良い所。
+（VSCode+python拡張機能で作業するなら）
+プロパティでアクセスしやすいのは良い所。
 
 Pythonって時々構文書式が気持ち悪いし
-構文がややこしいのも遅さの要因なのではないかと思いますが
+構文がややこしいのも遅さの要因になりそうですが
 どうなんでしょうね。
-
-速度はWwin95時代のCPU並みの速度に感じます。
 
 tkinterでのGUIプログラミングですが、
 OSによってtkInterの挙動やフォントの処理が違うので
 色々諦めた妥協案にしています。
 
-フォントは大事。
+pythonに限らず、どの環境で作るにしても
+デザインにおいてのフォントは大事なので
+そのあたりも毎回悩まされます。
+
+仕事の社内ツールを作る時ならフォントも含めたインストーラを作るのですが。

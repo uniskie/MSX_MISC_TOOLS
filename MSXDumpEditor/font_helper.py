@@ -11,6 +11,8 @@ font_name_mono    = ""
 font_name_program = ""
 font_pt = 10
 
+# setup_default_fontで調査される、デフォルトフォントの高さ(px)
+TK_DEFAULT_FONT_LINESPACE = 12 # 仮の値
 
 #--------------------------------------------------------------------------
 # Font helper
@@ -18,37 +20,47 @@ font_pt = 10
 
 # 日本語 プログラム向け等幅フォント優先順
 jp_programming_fonts = [
-    'hackgen', 
-    'vl gothic',
-    'vl ゴシック',
-    'biz udgothic',
+    'UDEV Gothic',
+    'VL Gothic',
+    'VL ゴシック',
+    'HackGen', 
+    'BIZ UDGothic',
     'osaka mono', 
-    'ms gothic',
-    'ｍｓ ゴシック',
+    'Osaka－等幅',
+    'MS Gothic',
+    'ＭＳ ゴシック',
     'monotype',
     'monospace '
 ]
 # 日本語 テキスト向け等幅フォント優先順
 jp_mono_fonts = [
-    'vl gothic',
-    'vl ゴシック',
-    'biz udgothic', 
-    'ms gothic',
-    'ｍｓ ゴシック',
+    'BIZ UDGothic', 
+    'BIZ UDゴシック', 
+    'UDEV Gothic',
+    'HackGen', 
+    'VL Gothic',
+    'VL ゴシック',
+    'MS Gothic',
+    'ＭＳ ゴシック',
     'osaka mono',
+    'Osaka－等幅',
     'monotype',
     'monospace '
 ]
 # 日本語 テキスト向けプロポーショナルフォント優先順
 jp_sans_fonts = [
-    'biz udpgothic', 
-    'vl pゴシック',
-    'vl pgothic',
-    'yu gothic',
-    'meiryo',
-    'ms ui gothic',
-    'ms pgothic',
-    'osaka ui',
+    'BIZ UDPGothic',
+    'BIZ UDPゴシック',
+    'VL PGothic',
+    'VL Pゴシック',
+    'YU Gothic',
+    '游ゴシック',
+    'Meiryo',
+    'MS UI Gothic',
+    'MS PGothic',
+    'ＭＳ Ｐゴシック',
+    'Osaka-UI',
+    'osaka unicode',
     'osaka',
     'sans',
     'sansserif',
@@ -56,14 +68,18 @@ jp_sans_fonts = [
 ]
 # 日本語 UI向けプロポーショナルフォント優先順
 jp_sans_ui_fonts = [
-    'vl pgothic',
-    'vl pゴシック',
-    'biz udpgothic', 
-    'yu gothic ui',
+    'BIZ UDPGothic', 
+    'BIZ UDPゴシック', 
+    'Yu Gothic UI',
     'meiryo',
-    'ms ui gothic',
-    'ms pgothic',
-    'osaka ui',
+    'メイリオ',
+    'MS UI Gothic',
+    'Osaka-UI',
+    'VL PGothic',
+    'VL Pゴシック',
+    'osaka unicode',
+    'MS PGothic',
+    'ＭＳ Ｐゴシック',
     'osaka'
     'sans',
     'sansserif',
@@ -83,36 +99,58 @@ tk_font_names = [
     'TkTooltipFont'            # ツールチップ用のフォント。
 ]
 
-# setup_default_fontで調査される、デフォルトフォントの高さ(px)
-TK_DEFAULT_FONT_LINESPACE = 12 # 仮の値
-
 # 指定した高さ(px)に一番近くてそれ以下のサイズのフォントを得る
 # OSごとにずれるので非推奨
-def get_font_for_pixel_height(target_height:int, font_family:str='TkDefaultFont'):
+def get_font_with_pixel_height(target_height:int, font_family:str='TkDefaultFont'):
 
-    low = 1
-    high = target_height * 2
-    best_size = low
-    
     if font_family in tk.font.names():
         # Tk***Font
         base_options = tk.font.nametofont(font_family).configure()
     else:
         base_options = {'family': font_family}
 
+    test_font = font.Font(**base_options)
+
+    # サイズ指定がプラス：ポイント指定
+    # サイズ指定がマイナス：ピクセル指定（高精度）
+    d = -1
+    if 0 < d:
+        low = 1
+        high = target_height * 2
+        best_size = low
+    else:
+        low = - (target_height * 2)
+        high = -1
+        best_size = high
+
+    min_diff = float('inf') # 最小誤差を記録するための変数
+
     while low <= high:
         mid = (low + high) // 2
-        current_options = base_options.copy()
-        current_options['size'] = mid
-        test_font = tk.font.Font(**current_options)
         
+        test_font.configure(size=mid)
         current_height = test_font.metrics('linespace')
-        
-        if current_height <= target_height:
+
+        diff = abs(current_height - target_height)
+
+        if diff < min_diff:
+            min_diff = diff
             best_size = mid
-            low = mid + 1
+
+            if diff == 0:
+                break
+        
+        if 0 < d:
+            if current_height <= target_height:
+                best_size = mid
+                low = mid + 1
+            else:
+                high = mid - 1
         else:
-            high = mid - 1
+            if current_height < target_height:
+                high = mid - 1
+            else:
+                low = mid + 1
             
     final_options = base_options.copy()
     final_options['size'] = best_size

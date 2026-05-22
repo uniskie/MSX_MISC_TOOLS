@@ -41,7 +41,14 @@ ASM_DELIM = ">"
 # フォントヘルパーの組み込み
 import font_helper as fh
 
-EDIT_FONT_HEIGHT    = 18                      # HEX/ASIIエディット：フォントの高さ(px)
+#--------------------------------------------------------------------------
+# アセンブリビューの組み込み
+import asm_view as av
+from asm_view import DisasmWindow
+
+# HEX/ASIIエディット：フォントの高さ(px)
+# フォントとサイズの組み合わせによっては機種で誤差が出る
+EDIT_FONT_HEIGHT    = 20 
 
 #--------------------------------------------------------------------------
 # MSX-FONTがインストールされているか調べる
@@ -172,6 +179,8 @@ class HexDumpEditor:
         else:
             self.data = bytearray()
         
+        self.APP_NAME = APP_NAME
+
         # 状態管理
         self.cursor           = 0     # 現在のカーソル位置
         self.anchor           = 0     # 範囲選択時のアンカー位置
@@ -328,13 +337,13 @@ class HexDumpEditor:
     def build_ui(self):
         sans_font_name  = fh.font_name_sans
         fixed_font_name = fh.font_name_program
-        font_style_fix = fh.get_font_for_pixel_height(self.line_space, fixed_font_name)
-        font_style_sans= fh.get_font_for_pixel_height(self.line_space, sans_font_name )
+        font_style_fix = fh.get_font_with_pixel_height(self.line_space, fixed_font_name)
+        font_style_sans= fh.get_font_with_pixel_height(self.line_space, sans_font_name )
 
         font_px_size = EDIT_FONT_HEIGHT
-        hex_font_style = fh.get_font_for_pixel_height(font_px_size, fh.font_name_program)
+        hex_font_style = fh.get_font_with_pixel_height(font_px_size, fh.font_name_program)
         if HAS_MSX_FONT:
-            msx_font_style = fh.get_font_for_pixel_height(font_px_size, MSX_FONT)
+            msx_font_style = fh.get_font_with_pixel_height(font_px_size, MSX_FONT)
         else:
             msx_font_style = hex_font_style
 
@@ -1192,7 +1201,8 @@ class HexDumpEditor:
         # 画面に見えている範囲のみタグ計算する
         draw_start = max(start, visible_start_idx)
         draw_end = min(end, visible_end_idx, data_len)
-        
+
+        hex_sel_size = 3
         for i in range(draw_start, draw_end + 1):
             data_line = i // self.LINE_BYTES
             text_line = data_line - self.top_line + 1 # Text上の行番号(1～)
@@ -1201,8 +1211,9 @@ class HexDumpEditor:
             col_hex = self.COL_S_HEX + (i % self.LINE_BYTES) * 3
             col_ascii = self.COL_S_ASCII + (i % self.LINE_BYTES)
             
+            if draw_end <= i: hex_sel_size = 2
             sel_ranges.extend([
-                f"{text_line}.{col_hex}", f"{text_line}.{col_hex+2}"
+                f"{text_line}.{col_hex}", f"{text_line}.{col_hex+hex_sel_size}"
             ])
             if i < data_len:
                 sel_ranges.extend([
@@ -1370,7 +1381,7 @@ class HexDumpEditor:
 
         if 0 < len(disasm_list):
             if (self.log_window is None) or (not self.log_window.is_alive()):
-                self.log_window = DisasmWindow(self.root)
+                self.log_window = DisasmWindow(self.root, APP_NAME)
                 self.log_window.window.lift()
                 self.log_window.window.focus_force()
 
@@ -1835,113 +1846,6 @@ class HexDumpEditor:
             self.set_file_path(path)
             messagebox.showinfo("Success", "Saved.")
         except Exception as e: messagebox.showerror("Error", str(e))
-
-#--------------------------------------------------------------------------
-# Log Window
-#--------------------------------------------------------------------------
-#--------------------------------------------------------------------------
-# Log Window
-#--------------------------------------------------------------------------
-class DisasmWindow:
-    def __init__(self, master):
-        # Toplevelで新しいウィンドウを作成
-        self.window = tk.Toplevel(master)
-        self.window.title(APP_NAME + ": DisAssemble View")
-        #self.window.geometry("560x600")
-
-        if sys.platform == "win32":
-            self.window.attributes("-toolwindow", True)
-        else:
-            # Linuxで "-type utility" はフォーカス喪失やフリーズの原因になるため "dialog" または設定なしが安全
-            try:
-                self.window.attributes("-type", "dialog")
-            except Exception:
-                pass
-
-        container = tk.Frame(self.window)
-        container.pack(expand=True, fill='both', padx=5, pady=5)
-
-        v_scroll = tk.Scrollbar(container, orient=tk.VERTICAL)
-        v_scroll.pack(side=tk.RIGHT, fill=tk.Y)
-
-        h_scroll = tk.Scrollbar(container, orient=tk.HORIZONTAL)
-        h_scroll.pack(side=tk.BOTTOM, fill=tk.X)
-
-        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        # ESCキーでも閉じる
-        self.window.bind("<Escape>", self.on_close)
-
-        font_px_size = tk.font.nametofont("TkDefaultFont").metrics('linespace')
-        asm_font_style = fh.get_font_for_pixel_height(font_px_size, fh.font_name_program)
-
-        #コントロールの配置
-        self.log_text = tk.Text(container 
-            , exportselection=False
-            , wrap='none'  # 自動改行なし
-            , yscrollcommand=v_scroll.set # 縦スクロールを連動
-            , xscrollcommand=h_scroll.set  # 横スクロールを連動
-            , font=asm_font_style
-            , width=80
-            , height=40
-        )
-        self.log_text.pack(expand=True, fill='both', side=tk.LEFT)
-
-        # 書き換え不能に
-        self.log_text.bind("<Key>", self.block_input)
-        self.log_text.bind("<BackSpace>", lambda e: "break")
-        self.log_text.bind("<Delete>", lambda e: "break")
-
-        v_scroll.config(command=self.log_text.yview)
-        h_scroll.config(command=self.log_text.xview)
-
-    def is_alive(self):
-        return (self.window is not None) and tk.Toplevel.winfo_exists(self.window)
-
-    def on_close(self, event=None):
-        if self.window:
-            #self.window.destroy()
-            self.window.withdraw() 
-            self.window.after(1, self.window.destroy)
-            self.window = None
-
-    def block_input(self, event):
-        # 矢印キー、Home、End、PageUp/Down、Ctrlキーなどは通過させる（カーソル移動やコピーを許可）
-        if event.keysym in [
-            'Left', 'Right', 'Up', 'Down', 
-            'Home', 'End', 'Prior', 'Next', 
-            'Control_L', 'Control_R',
-            'Escape','F4'
-        ]:
-            return None # 通常の挙動（移動）を許可
-            
-        # Ctrl+C (コピー) や Ctrl+A (全選択) も許可
-        if event.state & 0x0004: # Ctrlキーが押されている状態
-            if event.keysym.lower() in ['c', 'a','f4','w']:
-                return None # 許可
-
-        # それ以外の文字入力、BackSpace、Delete、Enterなどはすべてブロック（書き換え禁止）
-        return "break"
-
-    def put(self, message):
-        """すべて書き換え"""
-        if not self.is_alive(): return
-        self.log_text.delete("1.0", tk.END)
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.mark_set("insert", "1.0")
-        self.log_text.see("1.0")
-        
-        # 毎回lift()を呼ぶとLinux環境でウィンドウイベントが詰まるため、削除
-        self.log_text.focus_set()
-
-    def log(self, message):
-        """末尾に追加"""
-        if not self.is_alive(): return
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
-        
-        # 毎回lift()を呼ぶとLinux環境でウィンドウイベントが詰まるため、削除
-        self.log_text.focus_set()
 
 #--------------------------------------------------------------------------
 # main
