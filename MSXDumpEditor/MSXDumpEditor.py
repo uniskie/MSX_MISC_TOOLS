@@ -353,10 +353,11 @@ class HexDumpEditor:
         sans_font_name  = fh.font_name_sans
         fixed_font_name = fh.font_name_program
         if sys.platform == "win32":
-            font_style_fix = fh.get_font_with_pixel_height(self.line_space + 1, fixed_font_name)
+            font_style_fix = fh.get_font_with_pixel_height(self.line_space - 1, fixed_font_name)
+            font_style_sans= fh.get_font_with_pixel_height(self.line_space, sans_font_name )
         else:
             font_style_fix = fh.get_font_with_pixel_height(self.line_space + 2, fixed_font_name)
-        font_style_sans= fh.get_font_with_pixel_height(self.line_space, sans_font_name )
+            font_style_sans= fh.get_font_with_pixel_height(self.line_space - 1, sans_font_name )
 
         font_px_size = EDIT_FONT_HEIGHT
         if sys.platform == "win32":
@@ -594,7 +595,7 @@ class HexDumpEditor:
             , pady=0, padx=0
         )
         #self.disasm_label.bind("<FocusIn>", self.block_focus)
-        tk.Label(disasm_bar_frame, text=" [Enter]/[F4]:次の命令へ移動 "
+        tk.Label(disasm_bar_frame, text=" [Enter]/[F4]:次の命令へ "
             , fg=self.NEXT_INST_HELP_FG, bg=self.NEXT_INST_HELP_BG
             , bd=1, relief=tk.GROOVE, font=font_style_sans
         ).pack(side=tk.LEFT, pady=0, padx=(0, 2))
@@ -1341,7 +1342,7 @@ class HexDumpEditor:
             if delim in asm_str:
                 body, comment = asm_str.split(delim,1)
                 asm_str = body.ljust(20) + ";" + comment.strip()
-            asm_info = f"[Z80] {address:08X}:{asm_bin.hex(' ').upper().ljust(11)}{ASM_DELIM} {asm_str} " 
+            asm_info = f"{address:08X}:{asm_bin.hex(' ').upper().ljust(11)}{ASM_DELIM} {asm_str} " 
         else:
             asm_info = "(Z80逆アセンブラ無効：z80disAssembler.pyが必要)"
         self.disasm_var.set(asm_info)
