@@ -24,7 +24,7 @@ HTML5+javascript ES6 で動作
 ## Windows向けMSX用お役立ちデータ
 |ファイル|説明|
 |---|---|
-| [OpenMSX custom data](openMSX_custom) | ![](openMSX_custom/osd_setting_2.png)openMSX用のカスタムスクリプトサンプルと小さめのOSDアイコン |
+| [OpenMSX custom data](openMSX_custom) | 1. openMSX用のカスタムスクリプトサンプル<br>2. 小さめのOSDアイコン<br>3. TV風フィルタ<br>4. softwaredb.xmlへのROM情報追加ツール<br> |
 
 ## MSXで動作するプログラム
 

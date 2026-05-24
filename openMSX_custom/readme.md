@@ -2,6 +2,7 @@
 
 | folder | items  |
 |---|---|
+|[msx_softwaredb_xml_merge](msx_softwaredb_xml_merge)|`softearedb.xml`の加工（追加合成）ツールです。足りないROM情報を追加したいときに使います。|
 |[share/scripts](share/scripts)| カスタムコマンド追加サンプルです。 |
 |[share/skins](share/skins)| skins/uni-set ... 少し小さめのOnScreenDisplayアイコンセットです。 |
 |[share/shader](share/shader)| TVシェーダーをNTSC滲み風に変えるシェーダーです。|
@@ -70,7 +71,7 @@ OpenMSXコマンドコンソールから使用したいものは、
 
 ## shader 解説
 
-### tv shader custom
+### TV Shader Custom
 
 公式版のTVフィルタをNTSC（Compsite VIDEO）風のにじみのある映像に変更するshaderです。  
 Themaister's NTSC shaderベースの処理を移植したもので、アナログテレビ風のにじみに少し近くなります。

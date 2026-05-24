@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE softwaredb SYSTEM "softwaredb1.dtd">
+<softwaredb>
+<![CDATA[
+
+... and additinal roms.
+
+]]>
+  <software title="Hydlide 3 - The Space Memories" system="MSX2" company="T&amp;ESOFT" year="1987" country="JP" genmsxid="992">
+    <rom sha1="391d07c3772f7245b2c11236f67929c9e499e56f" type="ASCII8" remark="Revision 8809D" />
+  </software>
+  <software title="Pachicom" system="MSX" company="Toshiba-EMI" year="1985" country="JP" genmsxid="592">
+    <rom sha1="39913a574e5c4ff316852868f179dbf3a80d514c" type="Mirrored" remark="Revision 2" />
+  </software>
+
+</softwaredb>
