@@ -1,16 +1,18 @@
 import re
 
-# 区切り文字
+import msx_symbols
+
+# 区切り文字（このモジュール内では速度の為、直書き）
 ADDRESS_DELIM = ':'
 BODY_DELIM    = '>'
 COMMENT_DELIM = ';'
 
-# アドレスラベル
-LABEL_PREFIX  = 'X'
+# アドレスラベル（このモジュール内では速度の為、直書き）
+LABEL_PREFIX  = '.X'
 LABEL_ADDR_FMT = '04X'
 LABEL_PATTERN = (
     rf"(?<![a-zA-Z0-9_])"         # 直前が英数字やアンダースコアではない
-    rf"{re.escape(LABEL_PREFIX)}" # プレフィックス ('X')
+    rf"{re.escape('.X')}" # プレフィックス ('.X')
     rf"([0-9A-Fa-f]{{4}})"        # 16進数4桁を抽出（f-string内なので波括弧は二重 {{}}
     rf"(?![a-zA-Z0-9_])"          # 直後が英数字やアンダースコアではない
 )
@@ -19,7 +21,7 @@ LABEL_PATTERN = (
 # ヘルパー：アドレスをラベルに変換
 # ==========================================
 def to_hex_label(adr):
-    return f"{LABEL_PREFIX}{adr:{LABEL_ADDR_FMT}}"
+    return f"{'.X'}{adr:04X}"
 
 # ==========================================
 # ヘルパー：ラベルからアドレスに変換
@@ -251,6 +253,7 @@ class z80disasm:
                 #「FD CB <オフセット> <オペコード>」
                 offset = fetch_byte()
                 sub_op = fetch_byte()
+                if offset is None: return fetch_error()
                 if sub_op is None: return fetch_error()
                 
                 # オフセットは符号付き8ビット (2の補数)
@@ -391,14 +394,14 @@ class z80disasm:
     # アドレスを検出
     #------------------------------------------------------
     def extract_address_immidiate(self, str):
-        if COMMENT_DELIM in str:
+        if ';' in str:
             str = str.split(';', 1)[0]
         # (0xXXXX)
         match_indirect = re.search(r'\((0x[0-9A-Fa-f]{4})\)', str, re.IGNORECASE)
         if match_indirect:
             return match_indirect.group(1)
         # JP/JR/DJNZ/CALL
-        match_jump = re.search(r'\b(JP|JR|DJNZ|CALL|)\b.*\s+(0x[0-9A-Fa-f]{4})', str, re.IGNORECASE)
+        match_jump = re.search(r'\b^(JP|JR|DJNZ|CALL|)\b.*\s+(0x[0-9A-Fa-f]{4})', str, re.IGNORECASE)
         if match_jump:
             return match_jump.group(2)
         return None
@@ -406,7 +409,7 @@ class z80disasm:
     #======================================================
     # 渡されたデータを全て逆アセンブル
     #======================================================
-    def disasm(self, data: bytes, address: int) -> list:
+    def disasm(self, data: bytes, address: int) -> str:
         if not data: return ''
 
         # 一旦 0xXXXX形式で すべて逆アセンブルしながら、アドレス参照リスト作成
@@ -415,8 +418,10 @@ class z80disasm:
         adr_imm_set = set()
         
         idx=0
-        cur_address = address
+        big_address = address
         while idx < len(data):
+            cur_address = big_address & 0xFFFF # MSXアドレス空間
+            
             address_set.add(cur_address)
 
             # 命令を一つでコード
@@ -433,47 +438,57 @@ class z80disasm:
                     pass
 
             lines.append(
-                f"{cur_address:04X}{ADDRESS_DELIM} {asm_bin.hex(' ').upper().ljust(11)}{BODY_DELIM}{asm_str}"
+                f"{big_address:08X}{'|'}"
+                f"{cur_address:04X}{':'} {asm_bin.hex(' ').upper().ljust(11)}{'>'}{asm_str}"
             )
             idx += bin_len
-            cur_address += bin_len
+            big_address += bin_len
         
-        end_address = cur_address
-        address_set.add(cur_address)
+        end_address = big_address
+        address_set.add(big_address & 0xFFFF)
 
         # アドレスラベルの為に、命令が存在したアドレスに限定
         jump_adr_set = {addr for addr in adr_imm_set if addr in address_set}
 
         # 最終整形
-        cur_address = address
-        pre_address = address
+        big_address = address
+        cur_address = big_address & 0xFFFF # MSXアドレス空間
+        pre_address = cur_address
         output = []
         for line_str in lines:
+            # BIGアドレス取得
+            if len(parts := line_str.split('|', 1)) == 2:
+                big_address = int(parts[0], 16)
+                line_str = parts[1]
 
-            # アドレス取得
-            if ADDRESS_DELIM in line_str:
-                adr_str = line_str.split(ADDRESS_DELIM, 1)[0]
-                try:
-                    cur_address = int(adr_str, 16)
-                except ValueError:
-                    pass
+            # MSXアドレス取得
+            if ':' in line_str:
+                adr_str = line_str.split(':', 1)[0]
+                cur_address = int(adr_str, 16)
 
             # ラベルの出力
+            for adr in range(pre_address + 1, cur_address):
+                if len(msx_sym := msx_symbols.search_labels(adr)) > 0:
+                    output.append((msx_sym[0] + ':').ljust(10))
+                elif adr in jump_adr_set:
+                    output.append((to_hex_label(cur_address) + ':').ljust(10))
+
             label = "        "
-            for a in range(pre_address, cur_address+1):
-                if cur_address in jump_adr_set:
-                    label = (to_hex_label(cur_address)+ADDRESS_DELIM).ljust(8)
+            if len(msx_sym := msx_symbols.search_labels(cur_address)) > 0:
+                label = msx_sym[0] + ':'
+            elif cur_address in jump_adr_set:
+                label = to_hex_label(cur_address) + ':'
 
             # コメントの分離
-            if COMMENT_DELIM in line_str:
-                body, comment = line_str.split(COMMENT_DELIM, 1)
+            if ';' in line_str:
+                body, comment = line_str.split(';', 1)
             else:
                 body = line_str
                 comment = ""
 
             # "アドレス: HEXリスト"部 の分離
-            if BODY_DELIM in body:
-                byte_info, asm_str = body.split(BODY_DELIM, 1)
+            if '>' in body:
+                byte_info, asm_str = body.split('>', 1)
             else:
                 byte_info = ""
                 asm_str = line_str
@@ -481,9 +496,12 @@ class z80disasm:
             # アドレス指定からラベルへの変換
             if adr_imm := self.extract_address_immidiate(asm_str):
                 try:
-                    # アドレス一覧にあればラベル化
                     adr = int(adr_imm, 16)
-                    if adr in jump_adr_set:
+                    # シンボル一覧にあればラベル化
+                    if len(msx_sym := msx_symbols.search_labels(adr)) > 0:
+                        asm_str = asm_str.replace(adr_imm, msx_sym[0])
+                    # アドレス一覧にあればラベル化
+                    elif adr in jump_adr_set:
                         asm_str = asm_str.replace(adr_imm, to_hex_label(adr))
                 except ValueError:
                     pass
@@ -499,15 +517,20 @@ class z80disasm:
                     asm_str = parts[0].ljust(5) + parts[1]
 
             output.append(
-                f"{label}{asm_str.ljust(28)}; {byte_info.ljust(20)} {comment}" 
+                f"{label.ljust(10)}{asm_str.ljust(28)}; {byte_info.ljust(20)} {comment}" 
             )
 
-        # ラベルの出力(末尾)
-        for a in range(cur_address, end_address+1):
-            if a in jump_adr_set:
-                output.append(to_hex_label(a))
+            pre_address = cur_address
 
-        return "\n".join(output) + "\n"
+        # ラベルの出力(末尾)
+        for b_adr in range(big_address + 1, end_address + 1):
+            adr = b_adr & 0xFFFF # MSXアドレス空間
+            if len(msx_sym := msx_symbols.search_labels(adr)) > 0:
+                output.append(msx_sym[0] + ':') 
+            if adr in jump_adr_set:
+                output.append(to_hex_label(adr) + ':') 
+
+        return "\n".join(output)
 
 # ==========================================
 # 実行テスト
@@ -542,17 +565,17 @@ if __name__ == "__main__":
         
         for hex_conv in [False, True]:
             pos = 0
-            curr_address = address
+            cur_address = address
             print(f"{'Address':<8} | {'Bytes':<16} | {'Assembly'}")
             print("-" * 55)
         
             while pos < len(test_code):
-                asm, consumed_bytes = z80.decode(test_code[pos:], curr_address)
+                asm, consumed_bytes = z80.decode(test_code[pos:], cur_address)
                 hex_bytes = " ".join([f"{b:02X}" for b in consumed_bytes])
                 if hex_conv:
                     asm = format_asm_to_h_style(asm)
                 asm = format_str(asm)
-                print(f"{curr_address:04X}     | {hex_bytes:<16} | {asm}")
+                print(f"{cur_address:04X}     | {hex_bytes:<16} | {asm}")
                 length = len(consumed_bytes)
-                curr_address += length
+                cur_address += length
                 pos += length

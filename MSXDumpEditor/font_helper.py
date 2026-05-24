@@ -1,7 +1,7 @@
 import os
 import sys
 import tkinter as tk
-from tkinter import font, ttk
+from tkinter import font as tkfont
 
 FONT_DEBUG = True
 
@@ -23,10 +23,10 @@ font_pt = 10
 
 # 日本語 プログラム向け等幅フォント優先順
 jp_programming_fonts = [
+    'HackGen', 
     'UDEV Gothic',
     'VL Gothic',
     'VL ゴシック',
-    'HackGen', 
     'BIZ UDGothic',
     'osaka mono', 
     'Osaka－等幅',
@@ -112,13 +112,10 @@ def get_font_with_pixel_height(target_height: int, font_family: str = 'TkDefault
     if os.name == 'posix' and sys.platform != 'darwin':
         target_height += 1
 
-    if font_family in tk.font.names():
-        # Tk***Font
-        base_options = tk.font.nametofont(font_family).configure()
+    if font_family in tkfont.names():
+        test_font = tkfont.Font(font=font_family)
     else:
-        base_options = {'family': font_family}
-
-    test_font = font.Font(**base_options)
+        test_font = tkfont.Font(family=font_family)
 
     # サイズ指定がマイナス：ピクセル指定（高精度）
     # 探索範囲を設定（フォントサイズはマイナス値）
@@ -157,10 +154,10 @@ def get_font_with_pixel_height(target_height: int, font_family: str = 'TkDefault
             # ＝ フォントサイズを大きくしたい ＝ 値をマイナス方向に遠ざけたい（小さくしたい）
             high = mid - 1
             
-    final_options = base_options.copy()
-    final_options['size'] = best_size
-    return tk.font.Font(**final_options)
-
+    if font_family in tkfont.names():
+        return tkfont.Font(font=font_family, size=best_size)
+    else:
+        return tkfont.Font(family=font_family, size=best_size)
 
 # フォントを名前で探してフォント設定を返す
 def get_font_config(font_name):
@@ -168,10 +165,10 @@ def get_font_config(font_name):
         root = tk.Tk()
         root.withdraw()
 
-    if font_name in tk.font.names():
-        result = tk.font.nametofont(font_name).configure()
+    if font_name in tkfont.names():
+        result = tkfont.nametofont(font_name).configure()
     else:
-        font_list = tk.font.families()
+        font_list = tkfont.families()
         result =  font_name in font_list
 
     if tk_root is None:
@@ -185,13 +182,13 @@ def find_font_first(list):
         root.withdraw()
 
     # 小文字で比較用リスト作成
-    available = [f.lower() for f in tk.font.families()]
+    available = [f.lower() for f in tkfont.families()]
     candidates = [f.lower() for f in list]
 
     font_name = ""
     for c in candidates:
         if c in available:
-            font_name = tk.font.families()[available.index(c)]
+            font_name = tkfont.families()[available.index(c)]
             break
 
     if tk_root is None:
@@ -207,7 +204,7 @@ def search_font_list(font_list):
     return None
 
 #
-def setup_default_font(root:tk, font_size=0):
+def setup_default_font(root, font_size=0):
     global tk_root
     global font_name_ui, font_name_sans, font_name_mono, font_name_program
     global font_pt
@@ -224,14 +221,14 @@ def setup_default_font(root:tk, font_size=0):
     font_name_mono    = find_font_first(jp_mono_fonts)
     font_name_program = find_font_first(jp_programming_fonts)
 
-    tk.font.nametofont('TkDefaultFont').configure(family=font_name_sans, size=font_pt, weight='bold')
-    tk.font.nametofont('TkMenuFont'   ).configure(family=font_name_ui,   size=font_pt, weight='bold')
-    tk.font.nametofont('TkHeadingFont').configure(family=font_name_ui,   size=font_pt, weight='bold')
-    tk.font.nametofont('TkCaptionFont').configure(family=font_name_ui,   size=font_pt)
-    tk.font.nametofont('TkTextFont'   ).configure(family=font_name_mono, size=font_pt)
-    tk.font.nametofont('TkFixedFont'  ).configure(family=font_name_mono, size=font_pt)
+    tkfont.nametofont('TkDefaultFont').configure(family=font_name_sans, size=font_pt, weight='bold')
+    tkfont.nametofont('TkMenuFont'   ).configure(family=font_name_ui,   size=font_pt, weight='bold')
+    tkfont.nametofont('TkHeadingFont').configure(family=font_name_ui,   size=font_pt, weight='bold')
+    tkfont.nametofont('TkCaptionFont').configure(family=font_name_ui,   size=font_pt)
+    tkfont.nametofont('TkTextFont'   ).configure(family=font_name_mono, size=font_pt)
+    tkfont.nametofont('TkFixedFont'  ).configure(family=font_name_mono, size=font_pt)
     
-    default_font = tk.font.nametofont('TkDefaultFont')
+    default_font = tkfont.nametofont('TkDefaultFont')
 
     root.option_add('*TCombobox*Listbox.font', default_font)
     root.option_add('*Button.font', default_font)
@@ -255,7 +252,7 @@ def setup_default_font(root:tk, font_size=0):
 def print_all_fonts():
     print("=== Installed Fonts ".ljust(40,'='))
     font_count = 0
-    for f in tk.font.families():
+    for f in tkfont.families():
         print( f, end=", " )
         font_count+=1
     print("")
@@ -267,7 +264,7 @@ def print_tkfont_info():
     for font_name in tk_font_names:
         print(f"=== {font_name} ".ljust(40, '='))
 
-        font = tk.font.nametofont(font_name)
+        font = tkfont.nametofont(font_name)
         if font is None:
             print( " * not exists.")
             pass

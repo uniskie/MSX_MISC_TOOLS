@@ -4,8 +4,9 @@
 # need python modlue: tkinterdnd2
 # need font: MSX-FONT, MSX-FONT-Wide
 #==========================================================================
-import tkinter as tk
-from tkinter import filedialog, messagebox, font, ttk
+import tkinter
+from tkinter import filedialog, messagebox, ttk
+from tkinter import font as tkfont
 import re
 import sys
 import os
@@ -73,7 +74,7 @@ def check_msx_font():
 # 一文字目が表示用 (for MSX-FONT.ttf by DumpListEditor)
 # 2文字目以降はMSX文字コードへの変換用
 ALTERNATIVE_MSX_CHAR_MAP = [
-	# 00-1F : GRAPHIC文字
+	# 00-1F : GRAPHIC文字 （╳ は SJISにない）
 	"." ,"月","火","水","木","金","土","日",    "年","円","時","分","秒","百","千","万",
 	"π","┴","┬","┤","├","┼","│","─",	"┌","┐","└","┘","╳×","大","中","小",
 	# 20-7F : ASCII文字
@@ -84,7 +85,7 @@ ALTERNATIVE_MSX_CHAR_MAP = [
 	"`｀","aａ","bｂ"  ,"cｃ","dｄ","eｅ","fｆ","gｇ",	"hｈ","iｉ","jｊ","kｋ","lｌ" ,"mｍ","nｎ","oｏ",
 	"pｐ","qｑ","rｒ"  ,"sｓ","tｔ","uｕ","vｖ","wｗ",	"xｘ","yｙ","zｚ","{｛","|｜" ,"}｝","~～","\u007F",
     
-	# 80-9F ひらがな1
+	# 80-9F ひらがな1 （トランプマーク♠♥♣♦はSJISにない）
 	"♠","♥","♣","♦","○","●","を","ぁ",	"ぃ","ぅ","ぇ","ぉ","ゃ","ゅ","ょ","っ",
 	"\u0090","あ","い","う","え","お","か","き",	"く","け","こ","さ","し","す","せ","そ",
 	# A0-DF : カタカナ
@@ -114,9 +115,21 @@ def convert_str_to_msx_characters(input_text):
     )
 
 # 検索コマンド（先頭の一文字）
-PRE_FIND_BIN = "#" # バイナリサーチ #xx xx xx
-PRE_FIND_GO = ">"  # アドレスジャンプ >xxxxxx
-FIND_PLACEHOLDER = f"{PRE_FIND_BIN}xx xx ...：BIN / {PRE_FIND_GO}xxxxx ... :GO"
+PRE_FIND_GO  = '>' # アドレスジャンプ >xxxxxx
+PRE_FIND_BIN = '#' # バイナリサーチ   #xx xx xx
+PRE_FIND_STR = '"' # 文字列サーチ     "？？？？？？
+FIND_PLACEHOLDER = f"{PRE_FIND_BIN}xx xx :BIN / {PRE_FIND_STR}? :STR / {PRE_FIND_GO}xxxxx :GO"
+FIND_HELP = (
+    f"文字検索  ：      {PRE_FIND_STR}で始める。\n"
+    f"                  例） {PRE_FIND_STR}なんのこと？\n"
+    f"16進数検索：      {PRE_FIND_BIN}で始める。\n"
+    f"                  16進数2文字ずつスペースで区切る。\n"
+    f"                  例） {PRE_FIND_BIN}CD 24 00\n"
+    f"アドレスジャンプ: {PRE_FIND_GO}で始める。\n"
+    f"                  16進数（最大8文字）で指定する。\n"
+    f"                  例） {PRE_FIND_GO}003FFF\n"
+)
+
 
 #--------------------------------------------------------------------------
 # Hex Dump Editor
@@ -133,6 +146,7 @@ class HexDumpEditor:
 
     HEADER_LINES       = 1                        # ヘッダ部の行数
     EDIT_LINES_DEFAULT = 32                       # 初期表示の行数
+    EDIT_LINES_MIN     = 16                       # 最小表示の行数
 
     COL_S_HEX      = ADDRESS_PAD1 + ADDRESS_DIGITS + ADDRESS_PAD2  # バイトデータ開始位置 (1+8+2=10)
     COL_E_HEX      = COL_S_HEX + LINE_BYTES * 3   # バイトデータ終端位置+1 (10+16*3=10+48=58)
@@ -208,7 +222,7 @@ class HexDumpEditor:
         self.log_window = None      # ログ表示ウィンドウ
 
         # デフォルトフォントの高さ(px)
-        self.line_space = tk.font.nametofont('TkDefaultFont').metrics()['linespace'] 
+        self.line_space = tkfont.nametofont('TkDefaultFont').metrics()['linespace'] 
 
         # 描画物セットアップ
         self.build_menu()
@@ -231,6 +245,11 @@ class HexDumpEditor:
         self.init_height = self.root.winfo_height()
         self.root.wm_minsize(width=self.keep_width, height=self.init_height)
         self.root.wm_maxsize(width=self.keep_width, height=root.winfo_screenheight())
+
+        raw_font = self.text_editor.cget("font")
+        text_font = tkfont.Font(font=raw_font)
+        default_height = self.init_height + (self.EDIT_LINES_DEFAULT-self.EDIT_LINES_MIN) * text_font.metrics("linespace")
+        self.root.geometry(f"{self.keep_width}x{default_height}")
 
         # 左右リサイズを禁止
         self.root.resizable(False, True)
@@ -273,10 +292,10 @@ class HexDumpEditor:
         self.update_status()
 
     def build_menu(self):
-        menubar = tk.Menu(self.root)
+        menubar = tkinter.Menu(self.root)
         
         # File Menu
-        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu = tkinter.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Load BIN", accelerator="Ctrl+O", command=self.load_bin, underline=0)
         file_menu.add_command(label="Save BIN", accelerator="Ctrl+S", command=self.save_bin, underline=0)
         file_menu.add_separator()
@@ -284,7 +303,7 @@ class HexDumpEditor:
         menubar.add_cascade(label="File", menu=file_menu, underline=0)
         
         # Search Menu
-        search_menu = tk.Menu(menubar, tearoff=0)
+        search_menu = tkinter.Menu(menubar, tearoff=0)
         search_menu.add_command(label="Find", accelerator="Ctrl+F", command=self.focus_search, underline=0)
         search_menu.add_command(label="Search Current Data", accelerator="Ctrl+F3", command=self.search_current, underline=7)
         search_menu.add_command(label="Search Next", accelerator="F3", command=self.search_next, underline=7)
@@ -302,7 +321,7 @@ class HexDumpEditor:
         menubar.add_cascade(label="Search", menu=search_menu, underline=0)
         
         # Help Menu
-        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu = tkinter.Menu(menubar, tearoff=0)
         help_menu.add_command(label="About", command=self.show_about, underline=0)
         menubar.add_cascade(label="Help", menu=help_menu, underline=0)
         
@@ -350,6 +369,9 @@ class HexDumpEditor:
         messagebox.showinfo(title, message)
 
     def build_ui(self):
+
+        # フォントの定義
+        # フォント本体のサイズを合わせる為、linuxではOSが追加する余白を考慮
         sans_font_name  = fh.font_name_sans
         fixed_font_name = fh.font_name_program
         if sys.platform == "win32":
@@ -363,9 +385,12 @@ class HexDumpEditor:
         if sys.platform == "win32":
             hex_font_style = fh.get_font_with_pixel_height(font_px_size + 2, fh.font_name_program)
         else:
-            hex_font_style = fh.get_font_with_pixel_height(font_px_size + 3, fh.font_name_program)
+            hex_font_style = fh.get_font_with_pixel_height(font_px_size + 2, fh.font_name_program)
         if HAS_MSX_FONT:
-            msx_font_style = fh.get_font_with_pixel_height(font_px_size, MSX_FONT)
+            if sys.platform == "win32":
+                msx_font_style = fh.get_font_with_pixel_height(font_px_size + 0, MSX_FONT)
+            else:
+                msx_font_style = fh.get_font_with_pixel_height(font_px_size + 0, MSX_FONT)
         else:
             msx_font_style = hex_font_style
 
@@ -373,10 +398,10 @@ class HexDumpEditor:
         #----------------------------------------
         # ツールバー
         #----------------------------------------
-        toolbar = tk.Frame(self.root)
-        toolbar.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-        tk.Button(toolbar, text="Load", command=self.load_bin).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar, text="Save", command=self.save_bin).pack(side=tk.LEFT, padx=2)
+        toolbar = tkinter.Frame(self.root)
+        toolbar.pack(side=tkinter.TOP, fill=tkinter.X, padx=5, pady=5)
+        tkinter.Button(toolbar, text="Load", command=self.load_bin).pack(side=tkinter.LEFT, padx=2)
+        tkinter.Button(toolbar, text="Save", command=self.save_bin).pack(side=tkinter.LEFT, padx=2)
 
         #----------------------------------------
         # ベースアドレス コンボボックス
@@ -403,39 +428,39 @@ class HexDumpEditor:
         baseofs_max_length = len(max(baseofs_options, key=len))
         asmbase_max_length = len(max(asmbase_options, key=len))
 
-        tk.Label(toolbar, text="Data Offset:").pack(side=tk.LEFT, padx=(6, 2))
+        tkinter.Label(toolbar, text="Data Offset:").pack(side=tkinter.LEFT, padx=(6, 2))
         self.baseofs_combo = ttk.Combobox(toolbar
             , values=baseofs_options, state="normal"
             , width=baseofs_max_length
             , style="Normal.TCombobox"
         )
-        self.baseofs_combo.pack(side=tk.LEFT)
+        self.baseofs_combo.pack(side=tkinter.LEFT)
         self.baseofs_combo.current(0) # 0x0000
         self.baseofs_combo.bind("<FocusOut>", self.on_baseofs_combo_focus_out)
         self.baseofs_combo.bind("<<ComboboxSelected>>", self.on_baseofs_combo_change)
         self.baseofs_combo.bind("<KeyRelease>", self.on_baseofs_combo_change)
         self.baseofs_combo.bind("<Map>", self.change_dropdown_font)
 
-        tk.Label(toolbar, text="-> Asm:").pack(side=tk.LEFT, padx=(2, 2))
+        tkinter.Label(toolbar, text="-> Asm:").pack(side=tkinter.LEFT, padx=(2, 2))
         self.asmbase_combo = ttk.Combobox(toolbar
             , values=asmbase_options, state="readonly"
             , width=asmbase_max_length
             , style="Normal.TCombobox"
         )
-        self.asmbase_combo.pack(side=tk.LEFT)
+        self.asmbase_combo.pack(side=tkinter.LEFT)
         self.asmbase_combo.current(1) # 0x4000
         self.asmbase_combo.bind("<Map>", self.change_dropdown_font)
 
         #----------------------------------------
         # 検索ボックス
         #----------------------------------------
-        search_frame = tk.Frame(toolbar)
-        search_frame.pack(side=tk.RIGHT, padx=5)
-        tk.Label(search_frame, text="Search:").pack(side=tk.LEFT, padx=(6, 2))
+        search_frame = tkinter.Frame(toolbar)
+        search_frame.pack(side=tkinter.RIGHT, padx=5)
+        tkinter.Label(search_frame, text="Search:").pack(side=tkinter.LEFT, padx=(6, 2))
         
-        self.search_var = tk.StringVar()
-        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, width=35, font=font_style_fix)
-        self.search_entry.pack(side=tk.LEFT)
+        self.search_var = tkinter.StringVar()
+        self.search_entry = tkinter.Entry(search_frame, textvariable=self.search_var, width=35, font=font_style_fix)
+        self.search_entry.pack(side=tkinter.LEFT)
         self.search_entry.bind("<Return>", self.search_decide)
         self.search_entry.bind("<Shift-Return>", self.search_decide)
         self.search_entry.bind("<Escape>", self.focus_set_editor)
@@ -467,10 +492,10 @@ class HexDumpEditor:
         hex_font_base = hex_font_style.measure("0")
         text_edit_width = self.COL_S_ASCII + ((ascii_width + hex_font_base - 1) // hex_font_base)
 
-        editor_parent = tk.Frame(self.root, bd=2, relief=tk.SUNKEN)
-        editor_parent.pack(side=tk.TOP, fill=tk.Y, expand=True, padx=5, pady=0)
+        editor_parent = tkinter.Frame(self.root, bd=2, relief=tkinter.SUNKEN)
+        editor_parent.pack(side=tkinter.TOP, fill=tkinter.Y, expand=True, padx=5, pady=0)
 
-        self.header = tk.Label(editor_parent
+        self.header = tkinter.Label(editor_parent
             , font=hex_font_style
             , width=text_edit_width
             , height=1
@@ -485,14 +510,14 @@ class HexDumpEditor:
 
         # ビュー設定 (HexとASCIIを1つのTextで表示)
         self.line_height = hex_font_style.metrics("linespace") # フォントの実際の高さを記憶
-        self.text_editor = tk.Text(editor_parent
+        self.text_editor = tkinter.Text(editor_parent
             , font=hex_font_style
             , width=text_edit_width
-            , height=self.EDIT_LINES_DEFAULT
+            , height=self.EDIT_LINES_MIN
             , bd=0, highlightthickness=0
             , undo=False
             , exportselection=False
-            , wrap=tk.NONE
+            , wrap=tkinter.NONE
             , bg=self.HEX_BG_COLOR
             , fg=self.HEX_FG_COLOR
             , pady=0
@@ -515,7 +540,7 @@ class HexDumpEditor:
             self.top_line = max(0, min(self.top_line, total_lines - 1))
             self.render()
 
-        self.scrollbar = tk.Scrollbar(editor_parent, command=virtual_scroll, takefocus=False)
+        self.scrollbar = tkinter.Scrollbar(editor_parent, command=virtual_scroll, takefocus=False)
         self.scrollbar.grid(row=1, column=1, sticky="ns")
         
         editor_parent.columnconfigure(0, weight=1)
@@ -541,48 +566,48 @@ class HexDumpEditor:
         #----------------------------------------
         # ステータスバー
         #----------------------------------------
-        status_frame = tk.Frame(self.root)
-        status_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        status_frame = tkinter.Frame(self.root)
+        status_frame.pack(side=tkinter.BOTTOM, fill=tkinter.X)
 
         # 左側
-        left_frame = tk.Frame(status_frame)
-        left_frame.pack(side=tk.LEFT, padx=2, pady=1, fill=tk.X, expand=True)
+        left_frame = tkinter.Frame(status_frame)
+        left_frame.pack(side=tkinter.LEFT, padx=2, pady=1, fill=tkinter.X, expand=True)
 
         # 左側の上から1つ目：コンテナ
-        status_bar_frame = tk.Frame(left_frame, bd=0)
-        status_bar_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, pady=0, padx=2)
+        status_bar_frame = tkinter.Frame(left_frame, bd=0)
+        status_bar_frame.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True, pady=0, padx=2)
 
         # 左側の上から1つ目 の 左から1つ目：位置
-        self.status_pos_var = tk.StringVar()
-        status_pos_label = tk.Label(status_bar_frame, textvariable=self.status_pos_var
-            , width=28 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style_fix)
-        status_pos_label.pack(side=tk.LEFT, fill=tk.BOTH, pady=0, padx=0)
+        self.status_pos_var = tkinter.StringVar()
+        status_pos_label = tkinter.Label(status_bar_frame, textvariable=self.status_pos_var
+            , width=28 ,anchor=tkinter.W, justify=tkinter.LEFT, bd=1, relief=tkinter.GROOVE, font=font_style_fix)
+        status_pos_label.pack(side=tkinter.LEFT, fill=tkinter.BOTH, pady=0, padx=0)
 
         # 左側の上から1つ目 の 左から2つ目：選択範囲
-        self.status_sel_var = tk.StringVar()
-        status_sel_label = tk.Label(status_bar_frame, textvariable=self.status_sel_var
-            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style_sans)
-        status_sel_label.pack(side=tk.LEFT, fill=tk.BOTH, pady=0, padx=0)
+        self.status_sel_var = tkinter.StringVar()
+        status_sel_label = tkinter.Label(status_bar_frame, textvariable=self.status_sel_var
+            , width=18 ,anchor=tkinter.W, justify=tkinter.LEFT, bd=1, relief=tkinter.GROOVE, font=font_style_sans)
+        status_sel_label.pack(side=tkinter.LEFT, fill=tkinter.BOTH, pady=0, padx=0)
 
         # 左側の上から1つ目 の 右から1つ目：上書き/挿入/入力モード
-        self.status_mode_var = tk.StringVar()
-        status_mode_label = tk.Label(status_bar_frame, textvariable=self.status_mode_var
-            , width=14 ,anchor=tk.CENTER, justify=tk.CENTER, bd=1, relief=tk.GROOVE, font=font_style_sans)
-        status_mode_label.pack(side=tk.RIGHT, fill=tk.BOTH, pady=0, padx=0)
+        self.status_mode_var = tkinter.StringVar()
+        status_mode_label = tkinter.Label(status_bar_frame, textvariable=self.status_mode_var
+            , width=14 ,anchor=tkinter.CENTER, justify=tkinter.CENTER, bd=1, relief=tkinter.GROOVE, font=font_style_sans)
+        status_mode_label.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, pady=0, padx=0)
 
         # 左側の上から1つ目 の 右から2つ目：合計サイズ
-        self.status_total_var = tk.StringVar()
-        status_total_label = tk.Label(status_bar_frame, textvariable=self.status_total_var
-            , width=18 ,anchor=tk.W, justify=tk.LEFT, bd=1, relief=tk.GROOVE, font=font_style_sans)
-        status_total_label.pack(side=tk.RIGHT, fill=tk.BOTH, pady=0, padx=0)
+        self.status_total_var = tkinter.StringVar()
+        status_total_label = tkinter.Label(status_bar_frame, textvariable=self.status_total_var
+            , width=18 ,anchor=tkinter.W, justify=tkinter.LEFT, bd=1, relief=tkinter.GROOVE, font=font_style_sans)
+        status_total_label.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, pady=0, padx=0)
 
         # 左側の上から2つ目：逆アセンブラ
-        disasm_bar_frame = tk.Frame(left_frame, bd=0)
-        disasm_bar_frame.pack(side=tk.TOP, fill=tk.X, expand=True, pady=0, padx=0)
-        self.disasm_var = tk.StringVar()
-        self.disasm_label = tk.Entry(disasm_bar_frame, textvariable=self.disasm_var
+        disasm_bar_frame = tkinter.Frame(left_frame, bd=0)
+        disasm_bar_frame.pack(side=tkinter.TOP, fill=tkinter.X, expand=True, pady=0, padx=0)
+        self.disasm_var = tkinter.StringVar()
+        self.disasm_label = tkinter.Entry(disasm_bar_frame, textvariable=self.disasm_var
             , width=5+8+2+(2*4+3)+3+23+12
-            , bd=1, relief=tk.GROOVE
+            , bd=1, relief=tkinter.GROOVE
             , font=font_style_fix
             , highlightthickness=0
             , exportselection=False
@@ -590,27 +615,27 @@ class HexDumpEditor:
             , takefocus=False
             , readonlybackground=self.DISASM_BAR_BG, fg=self.DISASM_BAR_FG
         )
-        self.disasm_label.pack(side=tk.LEFT,  anchor=tk.W
-            , fill=tk.X, expand=True
+        self.disasm_label.pack(side=tkinter.LEFT,  anchor=tkinter.W
+            , fill=tkinter.X, expand=True
             , pady=0, padx=0
         )
         #self.disasm_label.bind("<FocusIn>", self.block_focus)
-        tk.Label(disasm_bar_frame, text=" [Enter]/[F4]:次の命令へ "
+        tkinter.Label(disasm_bar_frame, text=" [Enter]/[F4]:次の命令へ "
             , fg=self.NEXT_INST_HELP_FG, bg=self.NEXT_INST_HELP_BG
-            , bd=1, relief=tk.GROOVE, font=font_style_sans
-        ).pack(side=tk.LEFT, pady=0, padx=(0, 2))
+            , bd=1, relief=tkinter.GROOVE, font=font_style_sans
+        ).pack(side=tkinter.LEFT, pady=0, padx=(0, 2))
 
         # 左側の上から3つ目：ファイルパス
-        self.info_var = tk.StringVar()
-        self.info_label = tk.Label(left_frame, textvariable=self.info_var, anchor=tk.W, justify=tk.LEFT
-            , bd=1, relief=tk.GROOVE, font=font_style_sans)
-        self.info_label.pack(side=tk.TOP, fill=tk.X, expand=True, pady=(0,2), padx=2)
+        self.info_var = tkinter.StringVar()
+        self.info_label = tkinter.Label(left_frame, textvariable=self.info_var, anchor=tkinter.W, justify=tkinter.LEFT
+            , bd=1, relief=tkinter.GROOVE, font=font_style_sans)
+        self.info_label.pack(side=tkinter.TOP, fill=tkinter.X, expand=True, pady=(0,2), padx=2)
 
         # 16x16 ビットパターン表示用 Canvas（1ドット=3x3ピクセルで描画）
         self.bit_cell_size = 3
         canvas_size = 16 * self.bit_cell_size
-        self.bit_canvas = tk.Canvas(status_frame, width=canvas_size, height=canvas_size, bg="white", highlightthickness=0)
-        self.bit_canvas.pack(side=tk.RIGHT, padx=6, pady=(0,4))
+        self.bit_canvas = tkinter.Canvas(status_frame, width=canvas_size, height=canvas_size, bg="white", highlightthickness=0)
+        self.bit_canvas.pack(side=tkinter.RIGHT, padx=6, pady=(0,4))
         
         # スプライトビュー
         # 16x16の矩形オブジェクトをあらかじめ作成しておく
@@ -628,7 +653,7 @@ class HexDumpEditor:
             self.bit_rects.append(row_rects)
         
         self.text_editor.focus_set()
-        self.text_editor.config(state=tk.DISABLED)
+        self.text_editor.config(state=tkinter.DISABLED)
 
     # ドロップダウンリストのフォント変更
     def change_dropdown_font(self, event):
@@ -680,7 +705,7 @@ class HexDumpEditor:
     def off_placeholder(self):
         """検索ボックスのプレースホルダーを消す"""
         if self.search_var.get() == self.placeholder_text:
-            self.search_entry.delete(0, tk.END)
+            self.search_entry.delete(0, tkinter.END)
             self.search_entry.config(fg=self.default_fg_color)
 
     def on_search_focus_in(self, event):
@@ -717,7 +742,7 @@ class HexDumpEditor:
                 str += f"{adr:08X}"
 
         self.search_var.set(str)
-        self.search_entry.icursor(tk.END)
+        self.search_entry.icursor(tkinter.END)
     
     def focus_set_editor(self, event=None):
         self.text_editor.focus_set()
@@ -730,10 +755,10 @@ class HexDumpEditor:
         if str != self.placeholder_text:
             # ジャンプモードならクリアする
             if str[:1] == PRE_FIND_GO:
-                self.search_entry.delete(0, tk.END)
+                self.search_entry.delete(0, tkinter.END)
             # 文字列があれば全選択する
             else:
-                self.search_entry.select_range(0, tk.END)
+                self.search_entry.select_range(0, tkinter.END)
 
     def search_current(self, event=None):
         """現在位置の値を拾って次の結果を検索"""
@@ -746,7 +771,7 @@ class HexDumpEditor:
         self.off_placeholder()
 
         self.search_var.set("#" + hex)
-        self.search_entry.icursor(tk.END)
+        self.search_entry.icursor(tkinter.END)
         if event:
             shift = (event.state & 0x0001) != 0
             if shift:
@@ -774,19 +799,23 @@ class HexDumpEditor:
 
     def _execute_search(self, forward=True):
         """検索のコア処理（forward=Trueで順方向、Falseで逆方向）"""
-        query = self.search_var.get().strip()
+
+        query = self.search_var.get()
+
         # 未入力またはプレースホルダー状態の場合は検索しない
         if not query or query == self.placeholder_text:
             return "break"
         
+
+        search_bytes = None
         ascii_search = False
+        show_find_help = False
+
         try:
             if query.startswith(PRE_FIND_GO):
                 # 2文字以上で1文字目がPRE_FIND_GOの場合はアドレスジャンプ
                 hex_str = query[1:].strip()
-                if not hex_str:
-                    ascii_search = True
-                else:
+                if hex_str:
                     jump_addr = int(hex_str, 16)
                     
                     # アドレスの範囲をデータサイズ内に制限
@@ -812,17 +841,27 @@ class HexDumpEditor:
                     # HEXエディットにフォーカスを移動
                     self.text_editor.focus_set()
                     return "break"
+                #else:
+                #    #ascii_search = True
+                #    show_find_help = True
 
             elif query.startswith(PRE_FIND_BIN):
                 # 2文字以上で1文字目が{PRE_FIND_BIN}の場合は16進数バイナリ検索（スペース区切り）
                 hex_str = query[1:].strip()
-                if not hex_str:
-                    ascii_search = True
-                else:
+                if hex_str:
                     search_bytes = bytearray(int(x, 16) for x in hex_str.split())
-            
-            else:
+                #else:
+                #    #ascii_search = True
+                #    show_find_help = True
+
+            elif query.startswith(PRE_FIND_STR):
+                # 2文字以上で1文字目が{PRE_FIND_STR}の場合は文字検索
+                query = query[1:]
                 ascii_search = True
+
+            else: 
+                #ascii_search = True
+                show_find_help = True
 
         except ValueError:
             if query.startswith(PRE_FIND_GO):
@@ -831,7 +870,8 @@ class HexDumpEditor:
             elif query.startswith(PRE_FIND_BIN):
                 #messagebox.showwarning("検索エラー", f"バイトデータ指定にエラーがあります\n例） {PRE_FIND_BIN}1A 2B 3C")
                 pass
-            ascii_search = True
+            #ascii_search = True
+            show_find_help = True
 
         if ascii_search:
             # ASCII文字列検索
@@ -843,6 +883,10 @@ class HexDumpEditor:
                 messagebox.showwarning("検索エラー", "検索に使用できない文字があります。")
                 return "break"
             
+        if show_find_help:
+            messagebox.showinfo("検索ガイド", FIND_HELP)
+            return "break"
+        
         if not search_bytes:
             return "break"
             
@@ -977,12 +1021,12 @@ class HexDumpEditor:
 
     def on_text_editor_focus_in(self, event):
         self.blink_cursor()
-        self.text_editor.config(state=tk.DISABLED)
+        self.text_editor.config(state=tkinter.DISABLED)
 
     def on_text_editor_focus_out(self, event):
         self.blink_cursor_stop()
         if self.commit_half_byte_if_needed(): self.render()
-        self.text_editor.config(state=tk.NORMAL)
+        self.text_editor.config(state=tkinter.NORMAL)
 
     # --- マウス操作と自前の自動スクロール制御 ---
     #     (組み込みの自動スクロールを回避)
@@ -1163,8 +1207,8 @@ class HexDumpEditor:
         start_line = self.top_line
         end_line = min(total_lines, self.top_line + self.page_lines)
 
-        self.text_editor.config(state=tk.NORMAL)
-        self.text_editor.delete("1.0", tk.END)
+        self.text_editor.config(state=tkinter.NORMAL)
+        self.text_editor.delete("1.0", tkinter.END)
         
         content = []
         
@@ -1200,7 +1244,7 @@ class HexDumpEditor:
             
         self.text_editor.insert("1.0", "\n".join(content))
         if self.root.focus_get() == self.text_editor: 
-            self.text_editor.config(state=tk.DISABLED)
+            self.text_editor.config(state=tkinter.DISABLED)
 
         # 仮想スクロールバーのノブ位置更新
         first = start_line / total_lines
@@ -1276,7 +1320,7 @@ class HexDumpEditor:
             address_ranges.extend([f"{text_line}.0", f"{text_line}.{self.COL_S_HEX-1}"])
 
         # Tclスクリプトの組み立て: 既存タグの削除と追加を一括処理
-        w = self.text_editor._w
+        w = self.text_editor._w # type: ignore
         tcl_script = [
              f"{w} tag remove address 1.0 end"
             ,f"{w} tag remove msx_font 1.0 end"
@@ -1410,7 +1454,8 @@ class HexDumpEditor:
 
         if 0 < len(disasm_list):
             if (self.log_window is None) or (not self.log_window.is_alive()):
-                self.log_window = DisAsmWindow(self.root, APP_NAME, self.current_file_name)
+                self.log_window  = DisAsmWindow(self.root, APP_NAME, self.current_file_name)
+                assert self.log_window.window is not None
                 self.log_window.window.lift()
                 self.log_window.window.focus_force()
 
@@ -1719,7 +1764,7 @@ class HexDumpEditor:
 
     def paste(self):
         try: text = self.root.clipboard_get()
-        except tk.TclError: return
+        except tkinter.TclError: return
             
         text = re.sub(r'[^0-9a-fA-F]', '', text)
         if not text: return
@@ -1883,11 +1928,16 @@ if __name__ == "__main__":
     if HAS_DND:
         root = TkinterDnD.Tk()
     else:
-        root = tk.Tk()
+        root = tkinter.Tk()
+
+    # TkinterのベースDPIを全OS共通で96 DPI（標準解像度）に強制統一する
+    # 96 DPI のとき、Tcl/Tkの内部スケール値は「96 / 72 = 1.3333...」
+    tcl_scaling_factor = 96.0 / 72.0
+    root.tk.call('tk', 'scaling', tcl_scaling_factor)
 
     if sys.platform == 'darwin':
         # Macの標準72DPIをWindows基準の96DPI相当(約1.33倍)に引き上げる
-        root.tk.call('tk', 'scaling', 1.3333333333333333)
+        root.tk.call('tkinter', 'scaling', 1.3333333333333333)
         
     fh.setup_default_font(root)
     check_msx_font()

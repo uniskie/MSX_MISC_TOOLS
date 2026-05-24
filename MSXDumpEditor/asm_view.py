@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, font, ttk
+#from tkinter import filedialog, messagebox, font, ttk
 import re
 import sys
 
 # ワンラインZ80逆アセンブラの組み込み
-from z80_disAssembler import z80disasm
+#from z80_disAssembler import z80disasm
 import z80_disAssembler as z80disAssembler
 
 # フォントヘルパーの組み込み
@@ -19,7 +19,7 @@ class DisAsmWindow:
     def __init__(self, parent, APP_NAME, file_name):
 
         # Toplevelで新しいウィンドウを作成
-        self.window = tk.Toplevel(parent)
+        self.window : tk.Toplevel | None = tk.Toplevel(parent)
         self.window.title(APP_NAME 
                           + ": DisAssemble View"
                           + (f" - {file_name}" if file_name is not None else ""))
@@ -127,27 +127,30 @@ class DisAsmWindow:
         self.log_text.tag_configure("sel", background="#e0f0e0", foreground="#001100")
 
         # Z80 ASM 構文色分け
-        self.log_text.tag_configure("comment",  foreground="#b00000")   # コメント
-        self.log_text.tag_configure("label",    foreground="#843683")   # ラベル
-        self.log_text.tag_configure("opcode",   foreground="#565ca6")   # 命令
-        self.log_text.tag_configure("register", foreground="#908222")   # レジスタ
-        self.log_text.tag_configure("number",   foreground="#234623")   # 数値
+        self.log_text.tag_configure("comment",   foreground="#b00000")   # コメント
+        self.log_text.tag_configure("label",     foreground="#843683")   # ラベル
+        self.log_text.tag_configure("opcode",    foreground="#565ca6")   # 命令
+        self.log_text.tag_configure("directive", foreground="#a656a6")   # 疑似命令
+        self.log_text.tag_configure("register",  foreground="#908222")   # レジスタ
+        self.log_text.tag_configure("number",    foreground="#234623")   # 数値
 
         # 色分け優先度 （低→高）
         self.log_text.tag_raise("current_line") # カーソル行
         self.log_text.tag_raise("sel")          # 選択範囲
         self.log_text.tag_raise("register")     # レジスタ
         self.log_text.tag_raise("opcode")       # 命令
+        self.log_text.tag_raise("directive")    # 疑似命令
         self.log_text.tag_raise("number")       # 数値
         self.log_text.tag_raise("label")        # ラベル
         self.log_text.tag_raise("comment")      # コメント
 
         self.rules = [
-            ("comment",  r";.*"),                                                # ; から始まるコメント
-            ("label",    r"^[a-zA-Z_.][a-zA-Z0-9_.]*:?"),                        # 行頭のラベル
-            ("opcode",   r"\b(ld|add|sub|adc|sbc|and|or|xor|cp|inc|dec|inc_dec|bit|set|res|jp|jr|call|ret|rst|push|pop|in|out|nop|halt|di|ei|ex|exx)\b"), # 命令
-            ("register", r"\b(a|f|b|c|d|e|h|l|af|bc|de|hl|ix|iy|sp|pc|i|r)\b"),  # レジスタ
-            ("number",   r"\b(\d+[hH]?|[0-9a-fA-F]+[hH]|\$[0-9a-fA-F]+)\b")       # 16進数($FF, 0FFh)や10進数
+            ("comment",  fr"{z80disAssembler.COMMENT_DELIM}.*"),                               # ; から始まるコメント
+            ("label",    fr"^[a-zA-Z_.][a-zA-Z0-9_.]*{z80disAssembler.ADDRESS_DELIM}?"),       # 行頭のラベル
+            ("opcode",   r"\b(adc|add|and|bit|call|ccf|cp|cpd|cpdr|cpi|cpir|cpl|daa|dec|di|djnz|ei|ex|exx|halt|im|in|inc|ind|indir|ini|inir|jp|jr|ld|ldd|lddr|ldi|ldir|neg|nop|or|otdr|otir|out|outd|outi|pop|push|res|ret|reti|retn|rl|rla|rlc|rlca|rld|rr|rra|rrc|rrca|rrd|rst|sbc|scf|set|sla|sll|sra|srl|sub|xor)\b"), # 命令
+            ("register", r"\b(a|f|b|c|d|e|h|l|af|bc|de|hl|ix|ixh|ixliy|iyh|iyl|sp|pc|i|r)\b"), # レジスタ
+            ("number",   r"\b(\d+[hH]?|[0-9a-fA-F]+[hH]|\$[0-9a-fA-F]+)\b"),                   # 16進数($FF, 0FFh)や10進数
+            ("directive", r"\b(db|dm|ds|dw|defb|defm|defs|defm|macro|if|endif|else|elif)\b"),  # 疑似命令
         ]
 
     def apply_color_tags(self):
@@ -157,7 +160,8 @@ class DisAsmWindow:
             "label": [],
             "opcode": [],
             "register": [],
-            "number": []
+            "number": [],
+            "directive": [],
         }
 
         #タグ消し
@@ -352,7 +356,7 @@ class DisAsmWindow:
 
     def execute_jump(self, address):
         """指定アドレスを検索して履歴に登録しつつ移動する"""
-        label_str = f"{z80disAssembler.LABEL_PREFIX}{address:{z80disAssembler.LABEL_ADDR_FMT}}"
+        label_str = f"{z80disAssembler.to_hex_label(address)}"
         
         dest_index = self.log_text.search(label_str + ":", "1.0", tk.END)
         if not dest_index:
