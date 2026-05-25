@@ -31,7 +31,8 @@ msx_softwaredb_xml_merge.exe softwaredb.xml softwaredb.xml softwaredb.addition.x
 
 ## 添付の softwaredb.addition.xml
 
-添付の `softwaredb.addition.xml` には私の所有する未登録ROMが記述してあります
+添付の `softwaredb.addition.xml` には私の所有する未登録ROMが記述してありますが
+本家でとりこみが終わっていますので、これらは追加不要です。
 
 - ハイドライド3 MSX2版 後期ロム（銀製の剣、暴走バグ、ミスタイプ修正版）
 - パチコン 後期ロム（ROM埋め込みメッセージ削除版）

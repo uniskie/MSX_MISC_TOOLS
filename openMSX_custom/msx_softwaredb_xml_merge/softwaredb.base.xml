@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE softwaredb SYSTEM "softwaredb1.dtd">
-<softwaredb timestamp="1779596319">
+<softwaredb timestamp="1779652482">
 <!-- Credits -->
 <![CDATA[
 The softwaredb.xml file contains information about rom mapper types
@@ -1578,6 +1578,7 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="bb1a6c90f409301d120415844409ad2643f233ca" type="KonamiSCC" status="Bad" />
     <rom sha1="45669cfe60ba4d7c35c0e73154749f7e24fa4ff9" type="Mirrored" status="Translated" remark="Russian" />
     <rom sha1="43100f034ef87dcd70bbcdc3f6b72ef15e3ba788" type="Mirrored" />
+    <rom sha1="1c3a2f7ea7753db775fc0063260b75f444322f0b" type="Mirrored" status="Verified" remark="Korean 128 Total Version" />
   </software>
   <software title="Cannon Fighter" system="MSX" company="Policy" year="1984" country="JP" genmsxid="2922">
     <rom sha1="31d80470c8d23ec8b14256aa32f3d54dbc532d76" type="Mirrored" />
@@ -2501,7 +2502,9 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="6fa235e88298a563de6b3f8900b796057821ebcf" type="Mirrored" remark="D4 Release" />
   </software>
   <software title="Devwill Too" system="MSX" company="Amaweks" year="2021" country="BR">
-    <rom sha1="7e02078f8051db51e70e309cd515aca8280803a0" type="Mirrored" status="Author" remark="Portugese" />
+    <rom sha1="700944da02040e7a0b9571f7339a7ac99989adb9" type="Mirrored" status="Author" remark="English - Final PAL Version" />
+    <rom sha1="9cc702da45024e74e61826fd99ad94d7b88174d4" type="Mirrored" status="Author" remark="PT-BR Final PAL Version" />
+    <rom sha1="7e02078f8051db51e70e309cd515aca8280803a0" type="Mirrored" status="Author" remark="PT-BR" />
     <rom sha1="8e3c928bb8d5e64540b877ae9b64dcc472ac6203" type="Mirrored" status="Author" remark="English" />
   </software>
   <software title="Dial Number" system="MSX" company="Colpax" year="1985" country="JP">
@@ -7242,6 +7245,7 @@ The Database is located at https://romdb.vampier.net/
   <software title="Pachicom" system="MSX" company="Toshiba-EMI" year="1985" country="JP" genmsxid="592">
     <rom sha1="a2e144546a191da8829b9ca9fa019884fe95156c" type="Mirrored" status="GoodMSX" />
     <rom sha1="22e8e217e96cd8229462c58ca7ead1ae33088fc4" type="Mirrored" status="Hack" remark="Boram Soft" />
+    <rom sha1="39913a574e5c4ff316852868f179dbf3a80d514c" type="Mirrored" status="Verified" remark="Revison 2" />
   </software>
   <software title="Pachinko U.F.O" system="MSX" company="Casio" year="1984" country="JP" genmsxid="268">
     <rom sha1="cad653766b597a4aa130a9a1956ece77ba4d52bc" type="Mirrored" status="GoodMSX" />
@@ -8002,6 +8006,7 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="9b6cb224f2a7a4af69221f1280d3344a5c88450e" type="R-Type" />
     <rom sha1="9c886fff02779267041efe45dadefc5fd7f4b9a2" type="R-Type" />
     <rom sha1="0b379610cb7085005a56b24a0890b79dd5a7e817" type="R-Type" />
+    <rom sha1="77caeccd08eb558b727350fdd278ab0d7315e968" type="R-Type" />
     <rom sha1="1af18369c1237f96b8a54c515f5c204b37f54749" type="R-Type" />
     <rom sha1="96c84bfc2756313a6a2e1d09319f4aa85e815127" type="R-Type" status="Hack" remark="FM-PAC Version Fix" />
     <rom sha1="a8b45a7789c039133594e20172beaef266205427" type="KonamiSCC" status="Bad" />
@@ -9327,6 +9332,7 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="480d85e5325c8902966fdf226868eafc62de4663" />
     <rom sha1="2ebd7b784094097d9f0fbebe4e69be8ba9a08a5c" type="Mirrored" status="Overdump" />
     <rom sha1="b3370cdf4707d9c38afc0f42c11cba5e745ead6a" type="Mirrored" />
+    <rom sha1="1109ec3d53e4aa5b739641e15fb32fe6b6a4f79e" type="Mirrored" status="Verified" remark="Korean 128 Total Version" />
   </software>
   <software title="Stepper" system="MSX" company="ASCII" year="1985" country="JP" genmsxid="527">
     <rom sha1="1fa7398005fb0bd7075141035e8d888197162030" type="Mirrored" status="GoodMSX" />
@@ -9754,6 +9760,9 @@ The Database is located at https://romdb.vampier.net/
   </software>
   <software title="Tech Demo - Cross" system="MSX" company="Fabrizio Caruso" year="2020" country="ES">
     <rom sha1="751318169568bfd3f89f79d8b1780426e03c52eb" type="Mirrored" status="Author" />
+  </software>
+  <software title="Tech Demo - Destroyer (VDP Test)" system="MSX" company="">
+    <rom sha1="a129b0b03d3a7feccc15a8339938f618cd7bed0e" type="Mirrored" />
   </software>
   <software title="Tech Demo - Field Of View" system="MSX" company="Artrag" year="2009" country="IT">
     <rom sha1="6d800787f5f5d63827b841aa29fe26ed89ea2cef" type="ASCII8" />
@@ -12322,6 +12331,7 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="a06b5aa78d8ba6891bad81913bc7938ceabaf665" type="ASCII8" status="Hack" remark="FM+SCC Voice (use SCC in Slot 2)" />
     <rom sha1="b4d48e555adead1921023e4a3000ea5ad67d60ac" type="ASCII8" status="Hack" remark="FM Music + SCC Voice - English TPYE B" />
     <rom sha1="98853f2c976a4e41b9303f99e83013cf4c933e2e" type="ASCII8" status="Hack" remark="FM Music + SCC Voice - English TPYE A" />
+    <rom sha1="391d07c3772f7245b2c11236f67929c9e499e56f" type="ASCII8" status="Verified" remark="Revision 2" />
   </software>
   <software title="Hyper Soumen" system="MSX2" company="Konami" year="1989" country="JP" genmsxid="1376">
     <rom sha1="b0e526b6ea68cc53f116846d8decafc698448d0d" type="KonamiSCC" status="Hack" remark="SCC" />
@@ -12976,7 +12986,6 @@ The Database is located at https://romdb.vampier.net/
   </software>
   <software title="Quinpl" system="MSX2" company="BIT2" year="1988" country="JP" genmsxid="1098">
     <rom sha1="c82c6e054313f4c8864e64897baea8b63776020d" type="ASCII8" status="GoodMSX" />
-    <rom sha1="77caeccd08eb558b727350fdd278ab0d7315e968" type="R-Type" />
     <rom sha1="cec9f58b9ce61ada4baa24611c8353038415d173" type="ASCII8" status="Translated" remark="English" />
     <rom sha1="33a26e3c43bfc677849d137cfef1aaf281084841" type="ASCII8" />
   </software>
@@ -15225,6 +15234,6 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="b6dd7af36c8d16b04fca4963f081db534e91b360" type="Mirrored" remark="SD-003C" />
   </software>
 
-<!-- Roms in this XML file: 8639 - Created on Sun May 24 2026 - 04:18:39
-      Per platform: ColecoVision: 692 | MSX: 6546 | MSX Turbo-R: 11 | MSX2: 1375 | MSX2Plus: 4 | SVI: 11 -->
+<!-- Roms in this XML file: 8646 - Created on Sun May 24 2026 - 19:54:42
+      Per platform: ColecoVision: 692 | MSX: 6553 | MSX Turbo-R: 11 | MSX2: 1375 | MSX2Plus: 4 | SVI: 11 -->
 </softwaredb>
