@@ -12,9 +12,13 @@ import sys
 import os
 
 APP_NAME = "MSX Dump Editor"
-VERSION = "0.8.6"
+VERSION = "0.8.7"
 
 IS_TEST = True # ダミーデータの有無
+
+IS_MAC = (sys.platform == "darwin")
+IS_WIN = (sys.platform == "win32")
+IS_LINUX = (sys.platform == "linux")
 
 #--------------------------------------------------------------------------
 # ドラッグ＆ドロップ対応ライブラリの読み込み
@@ -294,27 +298,33 @@ class HexDumpEditor:
     def build_menu(self):
         menubar = tkinter.Menu(self.root)
         
+        # プラットフォーム別メニューショートカット名表示切り替え
+        cmd_key_label = "Cmd+" if IS_MAC else "Ctrl+"
+        quit_key_label = "Cmd+Q" if IS_MAC else "Alt+F4"
+        back_key_label = "Cmd+[" if IS_MAC else "Alt+Left"
+        fwd_key_label = "Cmd+]" if IS_MAC else "Alt+Right"
+
         # File Menu
         file_menu = tkinter.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Load BIN", accelerator="Ctrl+O", command=self.load_bin, underline=0)
-        file_menu.add_command(label="Save BIN", accelerator="Ctrl+S", command=self.save_bin, underline=0)
+        file_menu.add_command(label="Load BIN", accelerator=f"{cmd_key_label}O", command=self.load_bin, underline=0)
+        file_menu.add_command(label="Save BIN", accelerator=f"{cmd_key_label}S", command=self.save_bin, underline=0)
         file_menu.add_separator()
-        file_menu.add_command(label="Quit", accelerator="Alt+F4", command=self.quit_app, underline=0)
+        file_menu.add_command(label="Quit", accelerator=quit_key_label, command=self.quit_app, underline=0)
         menubar.add_cascade(label="File", menu=file_menu, underline=0)
         
         # Search Menu
         search_menu = tkinter.Menu(menubar, tearoff=0)
-        search_menu.add_command(label="Find", accelerator="Ctrl+F", command=self.focus_search, underline=0)
-        search_menu.add_command(label="Search Current Data", accelerator="Ctrl+F3", command=self.search_current, underline=7)
+        search_menu.add_command(label="Find", accelerator=f"{cmd_key_label}F", command=self.focus_search, underline=0)
+        search_menu.add_command(label="Search Current Data", accelerator=f"{cmd_key_label}F3", command=self.search_current, underline=7)
         search_menu.add_command(label="Search Next", accelerator="F3", command=self.search_next, underline=7)
         search_menu.add_command(label="Search Prev", accelerator="Shift+F3", command=self.search_prev, underline=7)
         search_menu.add_separator()
-        search_menu.add_command(label="Go Address", accelerator="Ctrl+G", command=self.focus_search_go, underline=0)
-        search_menu.add_command(label="History Go Back", accelerator="Alt+Left", command=self.nav_back, underline=11)
-        search_menu.add_command(label="History Go Forward", accelerator="Alt+Right", command=self.nav_forward, underline=14)
+        search_menu.add_command(label="Go Address", accelerator=f"{cmd_key_label}G", command=self.focus_search_go, underline=0)
+        search_menu.add_command(label="History Go Back", accelerator=back_key_label, command=self.nav_back, underline=11)
+        search_menu.add_command(label="History Go Forward", accelerator=fwd_key_label, command=self.nav_forward, underline=14)
         search_menu.add_separator()
         search_menu.add_command(label="Next Z80 Instruction", accelerator="F4", command=self.next_z80inst, underline=5)
-        search_menu.add_command(label="Disassemble Selection", accelerator="Ctrl+Return", command=self.disasm_selection, underline=0)
+        search_menu.add_command(label="Disassemble Selection", accelerator=f"{cmd_key_label}Return", command=self.disasm_selection, underline=0)
         search_menu.add_separator()
         search_menu.add_command(label="Toggle Input (Hex/Ascii)", accelerator="F2", command=self.toggle_input_area, underline=0)
 
@@ -374,7 +384,7 @@ class HexDumpEditor:
         # フォント本体のサイズを合わせる為、linuxではOSが追加する余白を考慮
         sans_font_name  = fh.font_name_sans
         fixed_font_name = fh.font_name_program
-        if sys.platform == "win32":
+        if IS_WIN:
             font_style_fix = fh.get_font_with_pixel_height(self.line_space - 1, fixed_font_name)
             font_style_sans= fh.get_font_with_pixel_height(self.line_space, sans_font_name )
         else:
@@ -382,12 +392,12 @@ class HexDumpEditor:
             font_style_sans= fh.get_font_with_pixel_height(self.line_space - 1, sans_font_name )
 
         font_px_size = EDIT_FONT_HEIGHT
-        if sys.platform == "win32":
+        if IS_WIN:
             hex_font_style = fh.get_font_with_pixel_height(font_px_size + 2, fh.font_name_program)
         else:
             hex_font_style = fh.get_font_with_pixel_height(font_px_size + 2, fh.font_name_program)
         if HAS_MSX_FONT:
-            if sys.platform == "win32":
+            if IS_WIN:
                 msx_font_style = fh.get_font_with_pixel_height(font_px_size + 0, MSX_FONT)
             else:
                 msx_font_style = fh.get_font_with_pixel_height(font_px_size + 0, MSX_FONT)
@@ -971,7 +981,13 @@ class HexDumpEditor:
         self.text_editor.bind("<Shift-ISO_Left_Tab>", self.handle_shift_tab)
             
         self.root.bind("<Key>", self.dispatch_key_event)
-        self.root.bind("<Alt-F4>", self.quit_app)
+        
+        # プラットフォームに合わせたシステムレベル終了キーバインド
+        if IS_MAC:
+            self.root.bind("<Command-q>", self.quit_app)
+            self.root.bind("<Command-w>", self.quit_app)
+        else:
+            self.root.bind("<Alt-F4>", self.quit_app)
 
         # ドラッグ＆ドロップイベントのバインド
         if HAS_DND:
@@ -1120,15 +1136,25 @@ class HexDumpEditor:
             self.auto_scroll_id = None
 
     def on_text_editor_mouse_whee(self, event):
+        # Linux (event.num が 4 または 5 として届く)
         if hasattr(event, 'num') and event.num != '??':
             delta = -1 if event.num == 4 else 1
+            scroll_lines = 3
+            
+        # macOS (MouseWheel)
+        elif IS_MAC:
+            raw_delta = event.delta
+            delta = -1 if raw_delta > 0 else 1
+            scroll_lines = max(1, int(abs(raw_delta)))
+            
+        # Windows (MouseWheel)
         else:
-            delta = -1 if event.delta > 0 else 1
-            if sys.platform == "darwin":
-                delta = -delta
-                
-        # ホイール回転で3行ずつ仮想スクロール
-        self.top_line += delta * 3
+            raw_delta = event.delta
+            delta = -1 if raw_delta > 0 else 1
+            scroll_lines = max(1, int(abs(raw_delta) / 40))
+                                
+        # 仮想スクロール位置を更新
+        self.top_line += delta * scroll_lines
         total_lines = (len(self.data) // self.LINE_BYTES) + 1
         self.top_line = max(0, min(self.top_line, total_lines - 1))
         self.render()
@@ -1510,16 +1536,23 @@ class HexDumpEditor:
 
     def dispatch_key_event(self, event):
         keysym, state, char = event.keysym, event.state, event.char
-        is_mac = sys.platform == "darwin"
-        is_win = sys.platform == "win32"
+        is_win = IS_WIN
         shift = (state & 1) != 0
-        ctrl_cmd = ((state & 8) != 0 or (state & 0x100) != 0 or (state & 4) != 0) if is_mac else (state & 4) != 0
+        
+        # プラットフォーム別にCommandキーとControlキーを別判定
+        if IS_MAC:
+            # macOSのCommandキーは state の 0x8 (Mod2) または 0x10 (Mod1)、環境によっては 0x100 などのビットが立つ
+            ctrl_cmd = bool(state & (0x8 | 0x10 | 0x100 | 0x1000))
+        else:
+            # Win/LinuxのControlキーは state の 0x4
+            ctrl_cmd = bool(state & 4)
+            
         is_alt = (
             "Alt" in keysym or 
             "Option" in keysym or 
             (is_win and bool(state & 0x20000)) or  # Windows
             #is_lnx and bool(state & 0x0008)) or   # Linux -> tkInterのバグで他の要因で立ちっぱなしになる
-            (is_mac and bool(state & 0x0010))      # Mac
+            (IS_MAC and bool(state & 0x0010))      # Mac
         )
 
         # グローバルショートカットの判定 (フォーカス位置に関係なく動作させる)
@@ -1537,6 +1570,7 @@ class HexDumpEditor:
         if keysym == 'F4':
             self.navigate( keysym, shift, ctrl_cmd)
             return "break"
+            
         if ctrl_cmd:
             sym_lower = keysym.lower()
             if sym_lower == 's':
@@ -1551,9 +1585,16 @@ class HexDumpEditor:
             elif sym_lower == 'g':
                 self.focus_search_go()
                 return "break"
+            elif IS_MAC:
+                if sym_lower == 'bracketleft':
+                    self.nav_back()
+                    return "break"
+                elif sym_lower == 'bracketright':
+                    self.nav_forward()
+                    return "break"
                 
         # ALTナビゲーション（グローバル）
-        if is_alt:
+        if is_alt and not IS_MAC:
             if keysym == 'Left':
                 self.nav_back()
                 return "break"
@@ -1930,14 +1971,13 @@ if __name__ == "__main__":
     else:
         root = tkinter.Tk()
 
-    # TkinterのベースDPIを全OS共通で96 DPI（標準解像度）に強制統一する
+    # TkinterのベースDPIを全OS共通で96 DPI（標準解像度）に統一する
     # 96 DPI のとき、Tcl/Tkの内部スケール値は「96 / 72 = 1.3333...」
     tcl_scaling_factor = 96.0 / 72.0
-    root.tk.call('tk', 'scaling', tcl_scaling_factor)
-
-    if sys.platform == 'darwin':
-        # Macの標準72DPIをWindows基準の96DPI相当(約1.33倍)に引き上げる
-        root.tk.call('tkinter', 'scaling', 1.3333333333333333)
+    try:
+        root.tk.call('tk', 'scaling', tcl_scaling_factor)
+    except tkinter.TclError:
+        pass
         
     fh.setup_default_font(root)
     check_msx_font()

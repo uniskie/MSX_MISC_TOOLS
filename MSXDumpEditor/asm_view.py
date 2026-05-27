@@ -11,6 +11,9 @@ import z80_disAssembler as z80disAssembler
 import font_helper as fh
 
 FONT_HEIGHT = 16
+IS_MAC = (sys.platform == "darwin")
+IS_WIN = (sys.platform == "win32")
+IS_LINUX = (sys.platform == "linux")
 
 #--------------------------------------------------------------------------
 # Log Window
@@ -25,10 +28,9 @@ class DisAsmWindow:
                           + (f" - {file_name}" if file_name is not None else ""))
         self.window.geometry(f"+{parent.winfo_x()}+{parent.winfo_y()}")
 
-        if sys.platform == "win32":
+        if IS_WIN:
             self.window.attributes("-toolwindow", True)
-        else:
-            # Linuxで "-type utility" はフォーカス喪失やフリーズの原因になるため "dialog" または設定なしが安全
+        elif IS_LINUX:
             try:
                 self.window.attributes("-type", "dialog")
             except Exception:
@@ -73,16 +75,30 @@ class DisAsmWindow:
         self._select_start_index = None
 
         # 移動・選択キー操作の一括バインド
-        for key in [
+        keys_to_bind = [
             "<Up>", "<Down>", "<Shift-Up>", "<Shift-Down>",
             "<Left>", "<Right>", "<Shift-Left>", "<Shift-Right>",
-            "<Control-Left>", "<Control-Right>", "<Control-Shift-Left>", "<Control-Shift-Right>",
-            "<Shift-Control-Left>", "<Shift-Control-Right>",
             "<Prior>", "<Next>", "<Shift-Prior>", "<Shift-Next>",
             "<Home>", "<End>", "<Shift-Home>", "<Shift-End>",
             "<Control-Home>", "<Control-End>", "<Control-Shift-Home>", "<Control-Shift-End>",
             "<Shift-Control-Home>", "<Shift-Control-End>"
-        ]:
+        ]
+        
+        if IS_MAC:
+            # Macでの単語単位の移動 (Option + 矢印キー)
+            keys_to_bind.extend([
+                "<Option-Left>", "<Option-Right>",
+                "<Shift-Option-Left>", "<Shift-Option-Right>"
+            ])
+        else:
+            # Windows/Linuxでの単語単位の移動 (Control + 矢印キー)
+            keys_to_bind.extend([
+                "<Control-Left>", "<Control-Right>",
+                "<Control-Shift-Left>", "<Control-Shift-Right>",
+                "<Shift-Control-Left>", "<Shift-Control-Right>"
+            ])
+
+        for key in keys_to_bind:
             self.log_text.bind(key, self._on_key_move_or_select)
 
         # マウス操作
@@ -94,14 +110,21 @@ class DisAsmWindow:
         # ジャンプ機能と履歴移動のキーバインド
         self.log_text.bind("G", self.cmd_jump_to_address)
         self.log_text.bind("g", self.cmd_jump_to_address)
-        self.log_text.bind("<Control-g>", self.cmd_jump_to_address)
         self.log_text.bind("<F4>", self.cmd_jump_to_address)
         self.log_text.bind("B", self.cmd_history_back)
         self.log_text.bind("b", self.cmd_history_back)
-        self.log_text.bind("<Alt-Left>", self.cmd_history_back)
         self.log_text.bind("F", self.cmd_history_forward)
         self.log_text.bind("f", self.cmd_history_forward)
-        self.log_text.bind("<Alt-Right>", self.cmd_history_forward)
+        
+        if IS_MAC:
+            # macOS 標準の進む・戻る (Cmd+[ , Cmd+]) および ジャンプ (Cmd+G)
+            self.log_text.bind("<Command-bracketleft>", self.cmd_history_back)
+            self.log_text.bind("<Command-bracketright>", self.cmd_history_forward)
+            self.log_text.bind("<Command-g>", self.cmd_jump_to_address)
+        else:
+            self.log_text.bind("<Control-g>", self.cmd_jump_to_address)
+            self.log_text.bind("<Alt-Left>", self.cmd_history_back)
+            self.log_text.bind("<Alt-Right>", self.cmd_history_forward)
         
         # ジャンプ履歴管理用変数
         self.history = []
@@ -222,17 +245,39 @@ class DisAsmWindow:
             state = event.state
             
             has_shift = bool(state & 0x0001) or "Shift" in keysym
-            has_ctrl = bool(state & 0x0004) or "Control" in keysym
+            
+            # プラットフォーム別に単語移動用の修飾キーとCommandキーを特定する
+            if IS_MAC:
+                has_word_modifier = bool(state & 0x0010) or "Option" in keysym
+                has_ctrl = bool(state & (0x8 | 0x100 | 0x1000))
+            else:
+                has_word_modifier = bool(state & 0x0004) or "Control" in keysym
+                has_ctrl = has_word_modifier
             
             # 各キーごとの移動仕様マッピング
             direction = -1 if keysym in ["Up", "Left", "Prior", "Home"] else 1
             op = "+" if direction > 0 else "-"
+
+            #new_index = None
+            modifier = None
             
             if keysym in ["Up", "Down"]:
                 modifier = f"insert {op} 1 lines"
             elif keysym in ["Left", "Right"]:
-                unit = "words" if has_ctrl else "chars"
-                modifier = f"insert {op} 1 {unit}"
+                if not has_word_modifier:
+                    modifier = f"insert {op} 1 chars"
+                else:
+                    current_idx = self.log_text.index("insert")
+                    line, char = map(int, current_idx.split('.'))
+                    line_text = self.log_text.get(f"{line}.0", f"{line}.end")
+                    
+                    is_right = (keysym == "Right")
+                    target_char = self._get_next_word_char_pos(line_text, char, is_right)
+                    
+                    if target_char == -1:
+                        modifier = "insert + 1 lines linestart" if is_right else "insert - 1 lines lineend"
+                    else:
+                        modifier = f"{line}.{target_char}"
             elif keysym in ["Prior", "Next"]:
                 text_height = int(self.log_text.cget("height"))
                 move_lines = text_height if text_height > 0 else 40
@@ -255,7 +300,8 @@ class DisAsmWindow:
 
             # インデックスを絶対座標（行.桁）に変えてから適用
             # （行は1開始、桁は0開始）
-            new_index = self.log_text.index(modifier)
+            if modifier is not None:
+                new_index = self.log_text.index(modifier)
             self.log_text.mark_set("insert", new_index)
             self.log_text.see("insert")
 
@@ -275,6 +321,45 @@ class DisAsmWindow:
         self.highlight_current_line()
 
         return "break"
+
+    # 単語単位でのカーソル移動
+    # 組み込みだと上手く動作しない為
+    # 英数字記号のみ対応だがこちらの方がまだマシかもしれない
+    def _get_next_word_char_pos(self, text, start_char, is_right):
+        text_len = len(text)
+        
+        def get_type(c):
+            return 0 if c in " \t" else (1 if (c.isalnum() or c == "_") else 2)
+            
+        if is_right:
+            if start_char >= text_len:
+                return -1
+                
+            pos = start_char
+            current_type = get_type(text[pos])
+            
+            if current_type != 0:
+                while pos < text_len and get_type(text[pos]) == current_type:
+                    pos += 1
+                return pos
+            else:
+                while pos < text_len and get_type(text[pos]) == 0:
+                    pos += 1
+                return pos if pos < text_len else text_len
+        else:
+            if start_char <= 0:
+                return -1
+                
+            pos = start_char - 1
+            if get_type(text[pos]) == 0:
+                while pos >= 0 and get_type(text[pos]) == 0:
+                    pos -= 1
+                return pos + 1
+            else:
+                current_type = get_type(text[pos])
+                while pos >= 0 and get_type(text[pos]) == current_type:
+                    pos -= 1
+                return pos + 1
 
     def _on_mouse_press(self, event):
         """マウスドラッグ開始時の起点インデックス記録処理"""
@@ -391,7 +476,7 @@ class DisAsmWindow:
             self.history_index = len(self.history) - 1
 
     def cmd_history_back(self, event=None):
-        """Alt+Left: 履歴を戻る"""
+        """履歴を戻る"""
         if self.history_index >= 0:
             self.history_index -= 1
             if self.history_index >= 0:
@@ -399,7 +484,7 @@ class DisAsmWindow:
         return "break"
 
     def cmd_history_forward(self, event=None):
-        """Alt+Right: 履歴を進む"""
+        """履歴を進む"""
         if self.history_index < len(self.history) - 1:
             self.history_index += 1
             self._go_to_index(self.history[self.history_index])
@@ -428,26 +513,35 @@ class DisAsmWindow:
             self.window = None
 
     def block_input(self, event):
-        # 矢印キー、Home、End、PageUp/Down、Ctrlキーなどは通過させる（カーソル移動やコピーを許可）
+        # 矢印キー、Home、End、PageUp/Down、修飾キーなどは通過させる（カーソル移動を許可）
         if event.keysym in [
             'Left', 'Right', 'Up', 'Down', 
             'Home', 'End', 'Prior', 'Next', 
-            'Control_L', 'Control_R',
+            'Control_L', 'Control_R', 'Meta_L', 'Meta_R',
             'Escape','F4'
         ]:
             return None # 通常の挙動（移動）を許可
             
-        # Ctrl+C (コピー) や Ctrl+A (全選択) も許可
-        if event.state & 0x0004: # Ctrlキーが押されている状態
-            if event.keysym.lower() in ['c', 'a', 'f4', 'w', 'g']:
+        state = event.state
+        
+        # Command(Mac) または Control(Win/Linux) のキー修飾判定
+        if IS_MAC:
+            ctrl_cmd = bool(state & (0x8 | 0x10 | 0x100 | 0x1000))
+        else:
+            ctrl_cmd = bool(state & 0x0004)
+
+        # コピー、全選択、終了などのショートカット許可
+        if ctrl_cmd:
+            if event.keysym.lower() in ['c', 'a', 'f4', 'w', 'g', 'Left', 'Right', 'bracketleft', 'bracketright']:
                 return None # 許可
 
-        # Altキーの操作(Alt+Left/Right)は許可
-        if event.state & 0x0008 or event.state & 0x20000: # Alt(Mod1)キーの状態
+        # Alt (Option) キーの操作
+        is_alt = bool(state & 0x0010) if IS_MAC else bool(state & (0x0008 | 0x20000))
+        if is_alt:
             if event.keysym in ['Left', 'Right']:
                 return None
 
-        # キー単体（大文字・小文字両方）の入力を許可する
+        # キー単体（大文字・小文字両方）の履歴・ジャンプショートカット入力を許可する
         if event.keysym.lower() in ['g', 'b', 'f']:
             return None
 

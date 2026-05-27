@@ -3,7 +3,7 @@ import sys
 import tkinter as tk
 from tkinter import font as tkfont
 
-FONT_DEBUG = True
+FONT_DEBUG = False
 
 TK_DEFAULT_FONT_LINESPACE = 10
 
