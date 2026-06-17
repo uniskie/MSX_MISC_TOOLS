@@ -409,7 +409,7 @@ class z80disasm:
     #======================================================
     # 渡されたデータを全て逆アセンブル
     #======================================================
-    def disasm(self, data: bytes, address: int) -> str:
+    def disasm(self, data: bytes, address: int, head_use_symbol=False) -> str:
         if not data: return ''
 
         # 一旦 0xXXXX形式で すべて逆アセンブルしながら、アドレス参照リスト作成
@@ -468,13 +468,13 @@ class z80disasm:
 
             # ラベルの出力
             for adr in range(pre_address + 1, cur_address):
-                if len(msx_sym := msx_symbols.search_labels(adr)) > 0:
+                if head_use_symbol and (len(msx_sym := msx_symbols.search_labels(adr)) > 0):
                     output.append((msx_sym[0] + ':').ljust(10))
                 elif adr in jump_adr_set:
                     output.append((to_hex_label(cur_address) + ':').ljust(10))
 
             label = "        "
-            if len(msx_sym := msx_symbols.search_labels(cur_address)) > 0:
+            if head_use_symbol and (len(msx_sym := msx_symbols.search_labels(cur_address)) > 0):
                 label = msx_sym[0] + ':'
             elif cur_address in jump_adr_set:
                 label = to_hex_label(cur_address) + ':'
@@ -525,7 +525,7 @@ class z80disasm:
         # ラベルの出力(末尾)
         for b_adr in range(big_address + 1, end_address + 1):
             adr = b_adr & 0xFFFF # MSXアドレス空間
-            if len(msx_sym := msx_symbols.search_labels(adr)) > 0:
+            if head_use_symbol and (len(msx_sym := msx_symbols.search_labels(adr)) > 0):
                 output.append(msx_sym[0] + ':') 
             if adr in jump_adr_set:
                 output.append(to_hex_label(adr) + ':') 

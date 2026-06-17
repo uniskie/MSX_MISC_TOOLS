@@ -434,9 +434,7 @@ class HexDumpEditor:
         )
 
         baseofs_options = [f"0x{addr:06X}" for addr in range(0, 4 * 1024 * 1024, 0x4000)]
-        asmbase_options = ["0x0000", "0x4000", "0x8000", "0xC000"]
         baseofs_max_length = len(max(baseofs_options, key=len))
-        asmbase_max_length = len(max(asmbase_options, key=len))
 
         tkinter.Label(toolbar, text="Data Offset:").pack(side=tkinter.LEFT, padx=(6, 2))
         self.baseofs_combo = ttk.Combobox(toolbar
@@ -451,14 +449,20 @@ class HexDumpEditor:
         self.baseofs_combo.bind("<KeyRelease>", self.on_baseofs_combo_change)
         self.baseofs_combo.bind("<Map>", self.change_dropdown_font)
 
+        asmbase_options = ["0x100", "0x0000", "0x4000", "0x8000", "0xC000"]
+        asmbase_max_length = len(max(asmbase_options, key=len))
+
         tkinter.Label(toolbar, text="-> Asm:").pack(side=tkinter.LEFT, padx=(2, 2))
         self.asmbase_combo = ttk.Combobox(toolbar
-            , values=asmbase_options, state="readonly"
+            , values=asmbase_options, state="normal"
             , width=asmbase_max_length
             , style="Normal.TCombobox"
         )
         self.asmbase_combo.pack(side=tkinter.LEFT)
-        self.asmbase_combo.current(1) # 0x4000
+        self.asmbase_combo.current(2) # 0x4000
+        self.asmbase_combo.bind("<FocusOut>", self.on_asmbase_combo_focus_out)
+        self.asmbase_combo.bind("<<ComboboxSelected>>", self.on_asmbase_combo_change)
+        self.asmbase_combo.bind("<KeyRelease>", self.on_asmbase_combo_change)
         self.asmbase_combo.bind("<Map>", self.change_dropdown_font)
 
         #----------------------------------------
@@ -701,9 +705,30 @@ class HexDumpEditor:
 
     def on_baseofs_combo_focus_out(self, event=None):
         self.get_baseofs()
+        self.update_status()
 
     def on_baseofs_combo_change(self, event=None):
         self.get_baseofs()
+        self.update_status()
+
+    def get_asmbase(self):
+        """ asmbase_combo からベースアドレス（16進数）を取得する """
+        user_input = self.asmbase_combo.get()
+        try:
+            address_int = int(user_input, 16)
+            self.asmbase_combo.config(style="Normal.TCombobox")
+        except ValueError:
+            self.asmbase_combo.config(style="Error.TCombobox")
+            address_int = 0
+        return address_int
+
+    def on_asmbase_combo_focus_out(self, event=None):
+        self.get_asmbase()
+        self.update_status()
+
+    def on_asmbase_combo_change(self, event=None):
+        self.get_asmbase()
+        self.update_status()
 
     def set_placeholder(self):
         """検索ボックスからフォーカスが外れた時、空ならプレースホルダーを表示する"""
@@ -772,7 +797,6 @@ class HexDumpEditor:
 
     def search_current(self, event=None):
         """現在位置の値を拾って次の結果を検索"""
-
         hex = self.get_selected_hex()
         if len(hex) == 0:
             return "break" # 範囲外
@@ -793,7 +817,6 @@ class HexDumpEditor:
         if len(self.search_var.get()) == 0:
             self.text_editor.focus_set()
             return "break"
-        
         return self.search_next(event)
 
     def search_next(self, event=None):
@@ -809,14 +832,12 @@ class HexDumpEditor:
 
     def _execute_search(self, forward=True):
         """検索のコア処理（forward=Trueで順方向、Falseで逆方向）"""
-
         query = self.search_var.get()
 
         # 未入力またはプレースホルダー状態の場合は検索しない
         if not query or query == self.placeholder_text:
             return "break"
         
-
         search_bytes = None
         ascii_search = False
         show_find_help = False
@@ -838,7 +859,6 @@ class HexDumpEditor:
                     
                     # ナビゲーション履歴の保存（ジャンプ前）
                     self.save_nav_history_before_jump()
-                    
                     self.cursor = self.anchor = jump_addr
                     
                     # 画面をスクロールしてカーソル位置を更新
@@ -942,7 +962,6 @@ class HexDumpEditor:
 
         # HEXエディットにフォーカスを移動
         self.text_editor.focus_set()
-
         return "break"
 
     def next_z80inst(self):
@@ -951,7 +970,6 @@ class HexDumpEditor:
 
     def setup_text_edit_events(self):
         """Textウィジェットのデフォルト動作をすべて排除して自前でコントロールする"""
-        
         bindtags = list(self.text_editor.bindtags())
         if "Text" in bindtags:
             bindtags.remove("Text")
@@ -1182,7 +1200,6 @@ class HexDumpEditor:
         return False
 
     def set_cursor_color(self, is_focus = None):
-
         if is_focus is None:
             is_focus = bool(self.root.focus_get() != self.text_editor)
 
@@ -1395,16 +1412,15 @@ class HexDumpEditor:
         self.status_total_var.set(f"Total: {len(self.data)} Bytes")
         self.status_mode_var.set (f"{mode_str}")
 
-        # 逆アセンブラ
+        # 1命令逆アセンブル
         self.update_status_disasm()
 
         # ファイル情報
         self.update_status_file()
-
         self.update_1bpp_image()
 
     def update_status_disasm(self):
-        """ ステータスバー：逆アセンブラ更新 """
+        """ ステータスバー：逆アセンブル更新 """
         if HAS_Z80DIS:
             address = self.get_asm_address()
             asm_str, asm_bin = self.disasm_one(self.cursor, address)
@@ -1440,9 +1456,7 @@ class HexDumpEditor:
     def get_address_offset(self):
         """ 逆アセンブラ用アドレスオフセットを計算 """
         ofs = -self.get_baseofs()
-        asmbase_str = self.asmbase_combo.get()
-        if asmbase_str:
-            ofs += int(asmbase_str, 16)
+        ofs += self.get_asmbase()
         return ofs
 
     def get_asm_address(self, address=None):
@@ -1463,7 +1477,7 @@ class HexDumpEditor:
         else:
             return "", bytes()
 
-    def disasm_selection(self):
+    def disasm_selection(self, head_use_symbol=False):
         if self.cursor != self.anchor:
             start, end = min(self.cursor, self.anchor), max(self.cursor, self.anchor)
         else:
@@ -1476,7 +1490,7 @@ class HexDumpEditor:
             )
         
         asm_address = self.get_asm_address(start)
-        disasm_list = z80disasm.disasm(self.data[start:end + 1], asm_address)
+        disasm_list = z80disasm.disasm(self.data[start:end + 1], asm_address, head_use_symbol)
 
         if 0 < len(disasm_list):
             if (self.log_window is None) or (not self.log_window.is_alive()):
@@ -1636,7 +1650,7 @@ class HexDumpEditor:
                 self.render()
                 return "break"
             elif keysym in ('Home', 'End'): pass # スルーしてnavigateの実行へ
-            elif keysym == 'Return': self.disasm_selection(); return "break"
+            elif keysym == 'Return': self.disasm_selection(shift); return "break"
             else: return
                 
         nav_keys = {'Up', 'Down', 'Left', 'Right', 'Home', 'End', 'Prior', 'Next', 'Return'}
