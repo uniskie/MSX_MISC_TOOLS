@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build ASM use AILZ80ASM",
+            "type": "shell",
+            "command": [
+                "if \"${fileExtname}\"==\".asm\" (",
+                "AILZ80ASM \"${relativeFile}\" -f -bin \"${relativeFileDirname}\\${fileBasenameNoExtension}.rom\"",
+                "-sm minimal-equ",
+                "-sym \"${relativeFileDirname}\\${fileBasenameNoExtension}.SYM\"",
+                "-lst \"${relativeFileDirname}\\${fileBasenameNoExtension}.LST\"",
+                "-err \"${relativeFileDirname}\\${fileBasenameNoExtension}.ERR\"",
+                "--gap-default 0",
+                "-oh sym",
+                "--define-label _AILZ80ASM_=0xBEEF",
+                "--disable-warning W9005",
+                ")"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "runOn": "default"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            }
+        }
+    ]
+}
