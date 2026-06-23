@@ -20,7 +20,7 @@
             "args": "${command:pickArgs}"
         },
         {
-            "name": "Python デバッガー: 引数 RAMコピーモード指定",
+            "name": "Python デバッガー: 引数 RAMコピーモード",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -28,7 +28,7 @@
             "args": "-c -o indev_rom_ramcopy.asm"
         },
         {
-            "name": "Python デバッガー: 引数 通常モード指定",
+            "name": "Python デバッガー: 引数 通常モード/パッチあり",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -36,7 +36,7 @@
             "args": "-n -o indev_rom_normal.asm"
         },
         {
-            "name": "Python デバッガー: 引数 通常モード/パッチ無し指定",
+            "name": "Python デバッガー: 引数 通常モード/パッチなし",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",

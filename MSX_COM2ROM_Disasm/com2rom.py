@@ -16,6 +16,8 @@ import argparse
 import re
 import msx_symbols  # msx_symbols.py から search_labels_dos および search_labels を使用
 
+APP_VESRSION = "v15.4"
+
 # =====================================================================
 #  グローバルシステム設定（定数パラメータ定義）
 # =====================================================================
@@ -41,17 +43,23 @@ USE_SMC_PATCH       = True       # (通常モード時に)特定の自己書き�
 COPY_CODE_TO_RAM    = False      # True = 有効 (CODEをRAMへコピーして実行), False = 無効 (CODEをROM上で直接実行)
 RAM_MAX_LIMIT       = 0xEFFF     # Page 3 RAMの上限アドレス（システム領域との衝突防止）
 
-# WORKに続く無参照ブロックのマージ最大範囲（デフォルト上限: 3バイト）
-# 0にすれば無効になる
-MAX_STATIC_MERGE_LIMIT = 3
+# WORKに続く無参照ブロックのマージ最大範囲（デフォルト上限: 2バイト）
+# 0にすれば無効になる 
+# 文字列の末尾文字などがあるので1か2を推奨
+MAX_STATIC_MERGE_LIMIT = 2
+
+# （通常モードのみ）CODEに挟まれた無参照ブロックをCODEに統合するフラグ
+USE_CODE_MERGE = True
 
 # パス1を軽い簡易探索にするかどうか
 # 簡易的な構造探索：アドレスのみをキーにして重複探索を判定
 # 深めの実行経路探索：アドレスだけでなくレジスタ状態もキーにする
 PASS1_USE_SIMPLE_PASS = True
 
-# （通常モードのみ）CODEに挟まれた無参照ブロックをCODEに統合するフラグ
-USE_CODE_MERGE = False
+# 簡単なレジスタ計算をする
+# 【実験機能】不完全な実装であるため重くなるだけの可能性が高い
+USE_REGISTER_CALCULATIONS = False
+
 
 # アセンブラ種類に応じたシンタックス指定 (1: sjasmplus, 2: AILZ80ASM)
 ASSEMBLER_TYPE      = 2          # 1 = .phase / .dephase 形式 (sjasmplus)
@@ -1174,8 +1182,6 @@ class Z80FlowAnalyser:
             self.logger.log(center_text("解析 Pass 1 （CODE/DATA/WORK属性分け）を実行中...", 70))
             self.logger.log("="*70)
         self.analyze_flow_from_entries([self.config.old_start], db, logger, reset_sections=True, simple_pass=PASS1_USE_SIMPLE_PASS)
-        if self.pointer_work_addresses:
-            self.logger.log(f"[*] アドレス格納用ワークエリアの検出: {['0x%04X' % addr for addr in sorted(list(self.pointer_work_addresses))]}")
 
         # パス2: 特定されたアドレス格納用ワークエリアに初期値（即値アドレス）をロードしている箇所を逆引き追跡
         if self.logger is not None:
@@ -1216,22 +1222,25 @@ class Z80FlowAnalyser:
                 continue
             stack.append((entry, {
                 'regs': {
-                    'BC':  {'val': 0, 'source_pc': None},
-                    'DE':  {'val': 0, 'source_pc': None},
-                    'HL':  {'val': 0, 'source_pc': None},
-                    'IX':  {'val': 0, 'source_pc': None},
-                    'IY':  {'val': 0, 'source_pc': None},
-                    'A':   {'val': 0, 'source_pc': None},
-                    'B':   {'val': 0, 'source_pc': None},
-                    'C':   {'val': 0, 'source_pc': None},
-                    'D':   {'val': 0, 'source_pc': None},
-                    'E':   {'val': 0, 'source_pc': None},
-                    'H':   {'val': 0, 'source_pc': None},
-                    'L':   {'val': 0, 'source_pc': None},
-                    'IXH': {'val': 0, 'source_pc': None},
-                    'IXL': {'val': 0, 'source_pc': None},
-                    'IYH': {'val': 0, 'source_pc': None},
-                    'IYL': {'val': 0, 'source_pc': None},
+                    # val : 現在のレジスタ値
+                    # source_pc: 最後の則値ロード実行アドレス
+                    # source_val: 最後の即値ロード実行時の値
+                    'BC':  {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'DE':  {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'HL':  {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IX':  {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IY':  {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'A':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'B':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'C':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'D':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'E':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'H':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'L':   {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IXH': {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IXL': {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IYH': {'val': 0, 'source_pc': None, 'source_val':0 },
+                    'IYL': {'val': 0, 'source_pc': None, 'source_val':0 },
                 },
                 'mem_loads': {}  # ワークエリアのアドレスとロード先レジスタの対応関係マップ
             }))
@@ -1347,6 +1356,54 @@ class Z80FlowAnalyser:
                 local_stack.append(pc + length)
                 
         return False
+    
+    def _set_reg8_val(self, reg8, val, pc=None):
+        self.register_tracker[reg8]['val'] = val
+        if pc is not None:
+            self.register_tracker[reg8]['source_val'] = val
+            self.register_tracker[reg8]['source_pc'] = pc
+
+        reg16t = None
+        high = False
+        if reg8[:2] in ['IX', 'IY']:
+            reg16t = self.register_tracker[reg8[:2]]
+            high = (reg8[2:3] == 'H')
+        else:
+            for rp in ['BC', 'DE', 'HL']:
+                if reg8 in rp:
+                    reg16t = self.register_tracker[rp]
+                    high = (rp.find(reg8) == 0)
+                    break
+
+        if reg16t is not None:
+            val16 = reg16t['val']
+            if high:
+                reg16t['val'] = (val << 8) | (val16 & 0xFF)
+            else:
+                reg16t['val'] = (val16 & 0xFF00) | val
+
+    def _set_reg16_val(self, reg16, val, pc=None):
+        self.register_tracker[reg16]['val'] = val
+        if pc is not None:
+            self.register_tracker[reg16]['source_val'] = val
+            self.register_tracker[reg16]['source_pc'] = pc
+
+        if reg16 == 'SP':
+            return
+
+        if reg16 in ['IX', 'IY']:
+            reg8h = reg16 + 'H'
+            reg8l = reg16 + 'L'
+        else:
+            reg8h = reg16[0]
+            reg8l = reg16[1]
+        self.register_tracker[reg8h]['val'] = val >> 8
+        self.register_tracker[reg8l]['val'] = val & 0xFF
+        if pc is not None:
+            self.register_tracker[reg8h]['source_val'] = val
+            self.register_tracker[reg8l]['source_val'] = val
+            self.register_tracker[reg8h]['source_pc'] = pc
+            self.register_tracker[reg8l]['source_pc'] = pc
 
     def _trace_instruction(self, pc, stack):
         """シミュレータ本体。命令がレジスタや仮想メモリに与える影響を追跡する"""
@@ -1378,10 +1435,10 @@ class Z80FlowAnalyser:
         if opcode == 0xE9:  # jp (hl)
             self._register_pointer_access("HL", pc)
             return
-        if opcode == 0xDD and self.mem.get_byte(pc + 1) == 0xE9:  # jp (ix)
+        elif opcode == 0xDD and self.mem.get_byte(pc + 1) == 0xE9:  # jp (ix)
             self._register_pointer_access("IX", pc)
             return
-        if opcode == 0xFD and self.mem.get_byte(pc + 1) == 0xE9:  # jp (iy)
+        elif opcode == 0xFD and self.mem.get_byte(pc + 1) == 0xE9:  # jp (iy)
             self._register_pointer_access("IY", pc)
             return
 
@@ -1411,32 +1468,25 @@ class Z80FlowAnalyser:
         if inst_type == "LD_REG16":
             reg = get_reg16_rp(opcode)
             if reg != "SP" and reg != "":
-                self.register_tracker[reg] = {'val': target, 'source_pc': pc}
-                self.register_tracker[reg[0]] = {'val': target >> 8, 'source_pc': pc}
-                self.register_tracker[reg[1]] = {'val': target & 0xFF, 'source_pc': pc}
+                self._set_reg16_val(reg, target, pc)
                 self.memory_load_tracker.pop(reg, None)  # 即値が代入されたため、ワークエリアからの読み込み履歴はクリアする
         elif inst_type == "INDEX_LD" and opcode == 0xDD:
-            self.register_tracker['IX'] = {'val': target, 'source_pc': pc}
-            self.register_tracker['IXH'] = {'val': target >> 8, 'source_pc': pc}
-            self.register_tracker['IXL'] = {'val': target & 0xFF, 'source_pc': pc}
-            self.memory_load_tracker.pop('IX', None)
+            self._set_reg16_val('IX', target, pc)
+            self.memory_load_tracker.pop('IX', None)  # 即値が代入されたため、ワークエリアからの読み込み履歴はクリアする
         elif inst_type == "INDEX_LD" and opcode == 0xFD:
-            self.register_tracker['IY'] = {'val': target, 'source_pc': pc}
-            self.register_tracker['IYH'] = {'val': target >> 8, 'source_pc': pc}
-            self.register_tracker['IYL'] = {'val': target & 0xFF, 'source_pc': pc}
-            self.memory_load_tracker.pop('IY', None)
+            self._set_reg16_val('IY', target, pc)
+            self.memory_load_tracker.pop('IY', None)  # 即値が代入されたため、ワークエリアからの読み込み履歴はクリアする
         
         # 8ビットレジスタへの即値ロード
         elif opcode in [0x06,0x0e,0x16,0x1e,0x26,0x2e,0x3e]:  # ld r, n
-            # 00rrr110
+            # 00ddd110
             reg8 = get_reg8_ddd(opcode)
-            reg16 = get_reg16_rp(opcode)
             if reg8 != "":
                 val = self.mem.get_byte(pc + 1)
-                self.register_tracker[reg8] = {'val': val, 'source_pc': pc}
-                if reg16 != "SP" and reg16 != "":
-                    self.register_tracker[reg16]['source_pc'] = None
-                    self.memory_load_tracker.pop(reg16, None)
+                self._set_reg8_val(reg8, val, pc)
+            reg16 = get_reg16_rp(opcode)
+            if reg16 != '' and reg16 != 'SP':
+                self.memory_load_tracker.pop(reg16, None)  # 即値が代入されたため、ワークエリアからの読み込み履歴はクリアする
         elif inst_type == "INDEX_OTHER" and opcode in [0xDD, 0xFD]: # ld ixh/ixh/iyh/iyl, n
             # LD IXH, n：DD 26 n
             # LD IXL, n：DD 2E n
@@ -1446,14 +1496,24 @@ class Z80FlowAnalyser:
             if op is not None and op in [0x26, 0x2e]:
                 reg16 = "IX" if opcode == 0xDD else "IY"
                 reg8 = reg16 + get_reg8_ddd(opcode)
-                self.register_tracker[reg8] = {'val': target, 'source_pc': pc}
-                self.register_tracker[reg]['source_pc'] = None
-                self.memory_load_tracker.pop(reg, None)
+                val = self.mem.get_byte(pc + 2)
+                self._set_reg8_val(reg8, val, pc)
+                self.memory_load_tracker.pop(reg16, None)  # 即値が代入されたため、ワークエリアからの読み込み履歴はクリアする
 
-        if opcode == 0x7D:  # ld a, l
-            self.register_tracker['A'] = {'val': self.register_tracker['HL']['val'] & 0xFF, 'source_pc': pc}
-        elif opcode == 0x7C:  # ld a, h
-            self.register_tracker['A'] = {'val': (self.register_tracker['HL']['val'] >> 8) & 0xFF, 'source_pc': pc}
+        # 8ビットレジスタ間のロード
+        elif opcode in [
+            0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47, # ld b, r
+            0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4F, # ld c, r
+            0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x57, # ld d, r
+            0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5F, # ld e, r
+            0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x67, # ld h, r
+            0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6F, # ld l, r
+            0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7F, # ld a, r
+        ]: # ld rd,rs:
+            rd = self.register_tracker[get_reg8_ddd(opcode)]
+            rs = self.register_tracker[get_reg8_sss(opcode)]
+            rd['val'] = rs['val']
+            rd['source_pc'] = rs['source_pc']
 
         # pop
         elif opcode in [0xC1, 0xD1, 0xE1, 0xF1]: # pop bc/de/hl/af
@@ -1477,33 +1537,11 @@ class Z80FlowAnalyser:
             # （メモリや演算のエミュレーションを実装するのが望ましい）
             self._stack_reg_transfer_tracker(opcode, pc)
 
-        # 16ビット演算によるレジスタ変化の追跡
-        # 読み込み元は変更しない。
-        # 値の更新は簡単な計算のみ簡易的に行う。（全対応が望ましい）
-        elif opcode in [0x03, 0x13, 0x23, 0x33]: # inc rp
-            reg16 = get_reg16_rp(opcode)
-            if reg16 != "":
-                val = self.register_tracker[reg16]['val']
-                self.register_tracker[reg16]['val'] = (val + 1) & 0xFFFF
-        elif opcode in [0x05, 0x15, 0x25, 0x35]: # dec rp
-            reg16 = get_reg16_rp(opcode)
-            if reg16 != "":
-                val = self.register_tracker[reg16]['val']
-                self.register_tracker[reg16]['val'] = (val - 1) & 0xFFFF
-        if opcode in [0x09, 0x19, 0x29, 0x39]: # add hl,rp
-            #self.memory_load_tracker.pop('HL', None)
-            pass # 計算省略
-        elif opcode == 0xDD:
-            sub_op = self.mem.get_byte(pc + 1)
-            if sub_op in [0x09, 0x19, 0x29, 0x39]: # add ix,rp
-                #self.memory_load_tracker.pop('IX', None)
-                pass # 計算省略
-        elif opcode == 0xFD:
-            sub_op = self.mem.get_byte(pc + 1)
-            if sub_op in [0x09, 0x19, 0x29, 0x39]: # add iy,rp
-                #self.memory_load_tracker.pop('IY', None)
-                pass # 計算省略
-        
+        #----------------------------------------------------------------
+        # レジスタ演算の追跡
+        #----------------------------------------------------------------
+        self._track_calcukations(pc, opcode, inst_type) # レジスタ演算のチェック
+
         #----------------------------------------------------------------
         # メモリへの書き込み追跡
         #----------------------------------------------------------------
@@ -1573,7 +1611,7 @@ class Z80FlowAnalyser:
                 ix_source_pc = ix_state['source_pc']
                 if ix_source_pc is not None:
                     self.pointer_load_commands.add(ix_source_pc)
-                    self._check_and_register_ram(ix_val)
+                    #self._check_and_register_ram(ix_val)
                     if self.db is not None:
                         self.db.register_bios_address(ix_val, ix_source_pc)
 
@@ -1581,7 +1619,7 @@ class Z80FlowAnalyser:
                 self._analyse_bdos_call(pc)
                 #fn_code = self.bdos_fn_map.get(pc)
                 if True: #fn_code is not None:
-                    self._check_and_register_ram(target)
+                    #self._check_and_register_ram(target)
                     stack.append((target, {
                         'regs': copy.deepcopy(self.register_tracker),
                         'mem_loads': copy.deepcopy(self.memory_load_tracker)
@@ -1589,7 +1627,7 @@ class Z80FlowAnalyser:
                 return
 
             if target == 0x0000:
-                self._check_and_register_ram(target)
+                #self._check_and_register_ram(target)
                 stack.append((target, {
                     'regs': copy.deepcopy(self.register_tracker),
                     'mem_loads': copy.deepcopy(self.memory_load_tracker)
@@ -1610,7 +1648,7 @@ class Z80FlowAnalyser:
                         source_cmd_pc = reg_state['source_pc']
                         if source_cmd_pc is not None:
                             self.pointer_load_commands.add(source_cmd_pc)
-                            self._check_and_register_ram(reg_state['val'])
+                            #self._check_and_register_ram(reg_state['val'])
             
             stack.append((target, {
                 'regs': copy.deepcopy(self.register_tracker),
@@ -1636,7 +1674,7 @@ class Z80FlowAnalyser:
             return
 
         elif inst_type in ["JP_COND", "CALL_COND"]:
-            self._check_and_register_ram(target)
+            #self._check_and_register_ram(target)
             
             is_actual_call = (inst_type == "CALL_COND")
             if is_actual_call and target is not None:
@@ -1650,7 +1688,7 @@ class Z80FlowAnalyser:
                         source_cmd_pc = reg_state['source_pc']
                         if source_cmd_pc is not None:
                             self.pointer_load_commands.add(source_cmd_pc)
-                            self._check_and_register_ram(reg_state['val'])
+                            #self._check_and_register_ram(reg_state['val'])
 
             stack.append((target, {
                 'regs': copy.deepcopy(self.register_tracker),
@@ -1663,7 +1701,7 @@ class Z80FlowAnalyser:
             return
 
         elif inst_type in ["JR", "DJNZ"]:
-            self._check_and_register_ram(target)
+            #self._check_and_register_ram(target)
             stack.append((target, {
                 'regs': copy.deepcopy(self.register_tracker),
                 'mem_loads': copy.deepcopy(self.memory_load_tracker)
@@ -1680,6 +1718,122 @@ class Z80FlowAnalyser:
             'regs': copy.deepcopy(self.register_tracker),
             'mem_loads': copy.deepcopy(self.memory_load_tracker)
         }))
+
+    def _track_calcukations(self, pc, opcode, inst_type):
+        """レジスタ演算を処理する。（不完全な実験機能につき非推奨）"""
+        # 読み込み元は変更しない。
+        # TODO: 簡易的な対応は問題が多いので、やるなら全対応が良い
+
+        if not USE_REGISTER_CALCULATIONS:
+            return
+
+        # 16ビット演算によるレジスタ変化の追跡
+        if opcode in [0x03, 0x13, 0x23, 0x33]: # inc rp
+            reg16 = get_reg16_rp(opcode)
+            if reg16 != "":
+                val = self.register_tracker[reg16]['val']
+                self._set_reg16_val(reg16, (val + 1) & 0xFFFF)
+        elif opcode in [0x05, 0x15, 0x25, 0x35]: # dec rp
+            reg16 = get_reg16_rp(opcode)
+            if reg16 != "":
+                val = self.register_tracker[reg16]['val']
+                self._set_reg16_val(reg16, (val - 1) & 0xFFFF)
+        elif opcode in [0x09, 0x19, 0x29, 0x39]: # add hl,rp
+            #self.memory_load_tracker.pop('HL', None)
+            dst = 'HL'
+            reg16 = get_reg16_rp(opcode)
+            val = self.register_tracker['HL']['val']
+            par = self.register_tracker[reg16]['val']
+            self._set_reg16_val('HL', (val + par) & 0xFFFF)
+        elif opcode == 0xDD:
+            sub_op = self.mem.get_byte(pc + 1)
+            if sub_op == [0x23, 0x2B]: # inc ix / dec ix
+                #self.memory_load_tracker.pop('IX', None)
+                val = self.register_tracker['IX']['val']
+                diff = -1 if sub_op & 8 else 1
+                self._set_reg16_val(reg16, (val + diff) & 0xFFFF)
+            elif sub_op in [0x09, 0x19, 0x29, 0x39]: # add ix,rp
+                #self.memory_load_tracker.pop('IX', None)
+                reg16 = get_reg16_rp(opcode)
+                val = self.register_tracker['IX']['val']
+                par = self.register_tracker[reg16]['val']
+                self._set_reg16_val('IX', (val + par) & 0xFFFF)
+        elif opcode == 0xFD:
+            sub_op = self.mem.get_byte(pc + 1)
+            if sub_op == [0x23, 0x2B]: # inc iy / dec iy
+                #self.memory_load_tracker.pop('IY', None)
+                val = self.register_tracker['IY']['val']
+                diff = -1 if sub_op & 8 else 1
+                self._set_reg16_val(reg16, (val + diff) & 0xFFFF)
+            elif sub_op in [0x09, 0x19, 0x29, 0x39]: # add iy,rp
+                #self.memory_load_tracker.pop('IY', None)
+                reg16 = get_reg16_rp(opcode)
+                val = self.register_tracker['IY']['val']
+                par = self.register_tracker[reg16]['val']
+                self._set_reg16_val('IY', (val + par) & 0xFFFF)
+
+        # 8ビット演算によるレジスタ変化の追跡
+        elif opcode in [0x04, 0x0c, 0x14, 0x1c, 0x24, 0x2c, 0x34, 0x3c, 0x4c]: # inc r
+            reg8 = get_reg8_ddd(opcode)
+            reg16 = get_reg16_af(opcode)
+            if reg8 != "":
+                val = self.register_tracker[reg8]['val']
+                self._set_reg8_val(reg8, (val + 1) & 0xFF)
+        elif opcode in [0x05, 0x15, 0x25, 0x35]: # dec rp
+            reg8 = get_reg8_ddd(opcode)
+            if reg8 != "":
+                val = self.register_tracker[reg8]['val']
+                self._set_reg8_val(reg8, (val - 1) & 0xFF)
+        elif opcode == 0xC6: # add a,n
+            #self.memory_load_tracker.pop('A', None)
+            reg8 = get_reg8_sss(opcode)
+            val = self.register_tracker['A']['val']
+            par = self.mem.get_byte(pc + 1)
+            self._set_reg8_val('A', (val + par) & 0xFF)
+        elif opcode == 0xCE: # adc a,n
+            #self.memory_load_tracker.pop('A', None)
+            reg8 = get_reg8_sss(opcode)
+            val = self.register_tracker['A']['val']
+            par = self.mem.get_byte(pc + 1)
+            cy = 0 # self.register_tracker['F']['val'] & 1
+            self._set_reg8_val('A', (val + par + cy) & 0xFF)
+        elif opcode in [0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x87]: # add a, r
+            #self.memory_load_tracker.pop('A', None)
+            reg8 = get_reg8_sss(opcode)
+            val = self.register_tracker['A']['val']
+            par = self.register_tracker[reg8]['val']
+            self._set_reg8_val('A', (val + par) & 0xFF)
+        elif opcode in [0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8F]: # adc a, r
+            #self.memory_load_tracker.pop('A', None)
+            reg8 = get_reg8_sss(opcode)
+            val = self.register_tracker['A']['val']
+            par = self.register_tracker[reg8]['val']
+            cy = 0 # self.register_tracker['F']['val'] & 1
+            self._set_reg8_val('A', (val + par + cy) & 0xFF)
+        elif opcode == 0xDD:
+            sub_op = self.mem.get_byte(pc + 1)
+            if sub_op in [0x84, 0x85, 0x8c, 0x8d]: # add a, ixh/ixl / adc
+                #self.memory_load_tracker.pop('IX', None)
+                reg8 = 'IX'+ 'HL'[sub_op & 1]
+                val = self.register_tracker['A']['val']
+                par = self.register_tracker[reg8]['val']
+                if (sub_op & 15) > 7:
+                    self._set_reg8_val('A', (val + par) & 0xFF)
+                else:
+                    cy = 0 # self.register_tracker['F']['val'] & 1
+                    self._set_reg8_val('A', (val + par + cy) & 0xFF)
+        elif opcode == 0xFD:
+            sub_op = self.mem.get_byte(pc + 1)
+            if sub_op in [0x84, 0x85, 0x8c, 0x8d]: # add a, iyh/iyl / adc
+                #self.memory_load_tracker.pop('IY', None)
+                reg8 = 'I'+ 'HL'[sub_op & 1]
+                val = self.register_tracker['A']['val']
+                par = self.register_tracker[reg8]['val']
+                if (sub_op & 15) > 7:
+                    self._set_reg8_val('A', (val + par) & 0xFF)
+                else:
+                    cy = 0 # self.register_tracker['F']['val'] & 1
+                    self._set_reg8_val('A', (val + par + cy) & 0xFF)
 
     def _track_memory_loads(self, pc, opcode, inst_type):
         """ワークエリアからレジスタへのポインタデータのロード処理を追跡する"""
@@ -1746,27 +1900,27 @@ class Z80FlowAnalyser:
 
     def _check_pointer_work_write(self, target_work, reg_name, pc):
         """ポインタとして機能しているワークエリアへの書き込みを検知し、ロード元のデータアドレスを抽出する"""
-        if self.simple_pass:
-            return # simple_passモードでは処理しない
+        #if self.simple_pass:
+        #    return # simple_passモードでは処理しない
         if target_work in self.pointer_work_addresses:
             reg_state = self.register_tracker[reg_name]
             source_pc = reg_state['source_pc']
             if source_pc is not None:
-                loaded_val = reg_state['val']
-                if self.config.old_start <= loaded_val < self.config.old_end:
-                    
-                    log_key = (target_work, loaded_val, source_pc, pc) # ログ出力の重複防止
+                source_val = reg_state['source_val'] # 即値ロード時の値
+                if self.config.old_start <= source_val < self.config.old_end:
+
+                    self.db.register_address(source_val, source_pc, is_code=False)
+                    self.pointer_load_commands.add(source_pc)
+
+                    #log_key = (target_work, source_val, source_pc, pc) # ログ出力の抑制
+                    log_key = (target_work, source_val, source_pc) # ログ出力の抑制
                     if log_key not in self.logged_pointer_writes:
                         self.logged_pointer_writes.add(log_key)
-                        if self.db is not None:
-                            self.db.register_address(loaded_val, source_pc, is_code=False)
-                        self.pointer_load_commands.add(source_pc)
-                        if self.logger is not None:
-                            self.logger.log(
-                                f"[+] 間接参照アドレス用WORKへの代入を検知: WORK: {format_hex(target_work)} "
-                                f"<- 代入値: {format_hex(loaded_val)} "
-                                f"(レジスタへのロード: {format_hex(source_pc)}, WORK書込: {format_hex(pc)})"
-                            )
+                        self.logger.log(
+                            f"[+] 間接参照アドレス用WORKへの代入を検知: WORK: {format_hex(target_work)} "
+                            f"<- ロード値: {format_hex(source_val)} "
+                            f"(ロード位置: {format_hex(source_pc)}, WORK書込: {format_hex(pc)})"
+                        )
 
     def _mark_memory_write(self, target, pc):
         """メモリへのデータ書き込みイベントをマークする。CODE領域への書き込みはSMC（自己書き換え）として処理する"""
@@ -1912,7 +2066,9 @@ class Z80FlowAnalyser:
         # ロード元のアドレスがワークエリア（ワークエリア）であれば、そのアドレスをポインタワークエリアとして登録する
         if reg_name in self.memory_load_tracker:
             source_work = self.memory_load_tracker[reg_name]
-            self.pointer_work_addresses.add(source_work)
+            if source_work not in self.pointer_work_addresses:
+                self.pointer_work_addresses.add(source_work)
+                self.logger.log(f"[*] アドレス格納用ワークエリアの検出: [{source_work:04X}H] ... reg: {reg_name} pc: {pc:04X}H")
 
         if ptr_val > 0 and source_cmd_pc is not None:
             self.pointer_load_commands.add(source_cmd_pc)
@@ -2905,6 +3061,9 @@ class MsxComToRomRelocator:
         """WORK領域に隣接する、ラベル参照のないDATA領域をマージ（結合）する"""
         for pc in range(self.config.old_start, self.config.old_end):
             self.mem.discard_attribute(pc, 'MERGE')
+        
+        if MAX_STATIC_MERGE_LIMIT < 1:
+            return
             
         for pc in range(self.config.old_start, self.config.old_end):
             if self.mem.has_attribute(pc, 'WORK'):
@@ -3030,7 +3189,8 @@ class MsxComToRomRelocator:
         self.logger.log(f"    - 命令コード（CODE）サイズ総計   : {code_bytes:6} = {code_bytes:4X}H Bytes")
         self.logger.log(f"    - 静的データ（DATA）サイズ総計   : {data_bytes:6} = {data_bytes:4X}H Bytes")
         self.logger.log(f"    - ワークエリア（WORK）サイズ総計 : {work_bytes:6} = {work_bytes:4X}H Bytes")
-        self.logger.log(f"    - 無名DATA統合（MERGE）サイズ総計: {merge_data_bytes:6} = {merge_data_bytes:4X}H Bytes (上限設定: {MAX_STATIC_MERGE_LIMIT} Bytes)")
+        if MAX_STATIC_MERGE_LIMIT:
+            self.logger.log(f"    - 無名DATA統合（MERGE）サイズ総計: {merge_data_bytes:6} = {merge_data_bytes:4X}H Bytes (上限設定: {MAX_STATIC_MERGE_LIMIT} Bytes)")
         self.logger.log(f"    - パッチによるサイズ差分総計     : {patch_delta_size:6} = {patch_delta_size:4X}H Bytes")
         self.logger.log(f"    - BDOS互換ルーチンサイズ総計     : {bdos_rutine_bytes:6} = {bdos_rutine_bytes:4X}H Bytes")
         self.logger.log(f"    - 実行時RAM使用サイズ総計        : {total_ram_used:6} = {total_ram_used:4X}H Bytes")
@@ -3088,7 +3248,7 @@ def parse_hex_string(value):
 def parse_arguments():
     """コマンドライン引数を解析し、パースされた引数オブジェクトを返す"""
     parser = argparse.ArgumentParser(
-        description="COMバイナリ to ROM(32KB page1-2) リロケータ逆アセンブラ v0.15.3",
+        description="COMバイナリ to ROM(32KB page1-2) リロケータ逆アセンブラ " + APP_VESRSION,
         add_help=False
     )
     parser.add_argument("-i", "--input", type=str, default=INPUT_PATH, help="入力ファイルパス (16進数テキストまたはバイナリ)")
@@ -3152,6 +3312,6 @@ if __name__ == "__main__":
 
     if args.asm_type is not None:
         ASSEMBLER_TYPE = args.asm_type
-        
+
     engine = MsxComToRomRelocator()
     engine.execute()
