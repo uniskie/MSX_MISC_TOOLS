@@ -28,13 +28,13 @@ class DisAsmWindow:
                           + (f" - {file_name}" if file_name is not None else ""))
         self.window.geometry(f"+{parent.winfo_x()}+{parent.winfo_y()}")
 
-        if IS_WIN:
-            self.window.attributes("-toolwindow", True)
-        elif IS_LINUX:
-            try:
-                self.window.attributes("-type", "dialog")
-            except Exception:
-                pass
+        #if IS_WIN:
+        #    self.window.attributes("-toolwindow", True)
+        #elif IS_LINUX:
+        #    try:
+        #        self.window.attributes("-type", "dialog")
+        #    except Exception:
+        #        pass
 
         container = tk.Frame(self.window)
         container.pack(expand=True, fill='both', padx=2, pady=2)
