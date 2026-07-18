@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# MSX_ROM_Scanner.py - MSX ROM File Scanner & DB Matcher
+# MSXCR_ROM_Scanner.py - MSX ROM File Scanner & DB Matcher
 # Purpose: Scan ROM files in a specified directory, calculate SHA-1,
 #          match with XML DB, and output/append to dump_list_log.csv.
 
@@ -11,7 +11,7 @@ import csv
 import html
 
 # ============================================================================
-# Utilities copied from MSXCR_ROMDUMPER.py (Unchanged for compatibility)
+# Utility Functions (same as MSXCR_ROMDumper.py)
 # ============================================================================
 
 def GetDirectoryFromPath(path: str) -> str:
@@ -52,9 +52,17 @@ def SanitizeFileName(name: str) -> str:
     return out_str
 
 
+# ============================================================================
+# SHA-1
+# ============================================================================
+
 def CalcSHA1Hex(data: bytes) -> str:
     return hashlib.sha1(data).hexdigest()
 
+
+# ============================================================================
+# XML DB Search
+# ============================================================================
 
 def ExtractFirstElement(block: str, tag: str) -> str:
     open_tag = "<" + tag
@@ -150,6 +158,112 @@ def FindROMInfoBySha1(xml_path: str, target_sha1: str) -> dict:
     info["found"] = False
     return info
 
+
+# ============================================================================
+# File & CSV Operations
+# ============================================================================
+
+def ContainsABorCDAtOffset(romData: bytes, offset: int) -> bool:
+    if not romData:
+        return False
+
+    if offset + 1 >= len(romData):
+        return False
+
+    val_0 = chr(romData[offset])
+    val_1 = chr(romData[offset + 1])
+
+    return (val_0 == 'A' and val_1 == 'B') or (val_0 == 'C' and val_1 == 'D')
+
+
+def IsSuccessfulROMImage(romData: bytes) -> bool:
+    return (ContainsABorCDAtOffset(romData, 0x0000) or
+            ContainsABorCDAtOffset(romData, 0x4000) or
+            ContainsABorCDAtOffset(romData, 0x8000) or
+            ContainsABorCDAtOffset(romData, 0x3C000))
+
+
+def EscapeCsvField(s: str) -> str:
+    return s.replace('"', '""')
+
+
+def GetCurrentDateTimeString() -> str:
+    now = datetime.datetime.now()
+    return now.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def AppendDumpListLogCsvWithIgnore(outputDir: str, dbStatus: str, romFileStatus: str, status: str,
+                                    title: str, company: str, year: str, system: str, remark: str,
+                                    romType: str, romSize: int, sha1: str, dumpDateTime: str) -> bool:
+    """
+    CSVファイルを一度メモリに読み込み、ヘッダーの有無や整合性をチェックします。
+    同一のSHA-1値と同一のダンプ日時の両方を持つ行が存在する場合は無視し、
+    存在しない場合はヘッダーを正常な状態に整えてから安全に一括保存します。
+    """
+    csvPath = JoinPath(outputDir if outputDir else ".", "dump_list_log.csv")
+    
+    # 想定される正しいヘッダー定義
+    header_fields = [
+        "DBステータス", "ROMファイルの状態", "ステータス", "タイトル",
+        "メーカ", "年", "システム", "備考", "ROMタイプ", "容量", "SHA1値", "ダンプ日時"
+    ]
+
+    existing_rows = []
+    has_valid_header = False
+
+    # 1. 既存のCSVを完全に読み込んで解析（ヘッダーとデータ行を分解して格納）
+    if os.path.exists(csvPath) and os.path.getsize(csvPath) > 0:
+        try:
+            with open(csvPath, "r", newline="", encoding="utf-8-sig") as f:
+                reader = csv.reader(f)
+                
+                # 1行目を検証
+                first_row = next(reader, None)
+                if first_row and len(first_row) >= 12 and first_row[0] == "DBステータス":
+                    has_valid_header = True
+                    existing_rows.append(first_row)
+                
+                # 2行目以降のデータ行を検証しながら追加
+                for row in reader:
+                    if len(row) >= 12:
+                        existing_rows.append(row)
+        except Exception as e:
+            print(f"CSV read warning: {e}")
+
+    # 2. 重複チェック（データ行が存在する場合のみ実行）
+    if has_valid_header and len(existing_rows) > 1:
+        for row in existing_rows[1:]: # ヘッダー行を避けてデータ行のみループ
+            existing_sha1 = row[10].strip().lower()
+            existing_datetime = row[11].strip()
+
+            # 有効な40文字ハッシュのデータ行のみを比較対象とする
+            if len(existing_sha1) == 40:
+                if existing_sha1 == sha1.strip().lower() and existing_datetime == dumpDateTime.strip():
+                    print(f"  -> Already exists in log (SHA1: {sha1}, DateTime: {dumpDateTime}). Skipped.")
+                    return True
+
+    # 3. 書き込み用データの構築
+    new_row = [
+        dbStatus, romFileStatus, status, title, company, year,
+        system, remark, romType, str(romSize), sha1, dumpDateTime
+    ]
+
+    # 有効なヘッダーが存在しなかった場合は、先頭にヘッダーを強制挿入して再構成
+    if not has_valid_header:
+        existing_rows = [header_fields]
+    
+    # データを末尾に追加
+    existing_rows.append(new_row)
+
+    # 4. "w"モード（上書き保存）で一括して綺麗に書き出し
+    try:
+        with open(csvPath, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerows(existing_rows)
+        return True
+    except Exception as e:
+        print(f"CSV write error: {e}")
+        return False
 
 def CalcFileSHA1Hex(filePath: str) -> tuple[bool, str]:
     if not os.path.exists(filePath):
@@ -307,57 +421,60 @@ def FindROMInfoWithPriority(sha1: str) -> tuple[dict, str]:
     return dbInfo, usedXmlPath
 
 
-def ContainsABorCDAtOffset(romData: bytes, offset: int) -> bool:
-    if not romData:
-        return False
-
-    if offset + 1 >= len(romData):
-        return False
-
-    val_0 = chr(romData[offset])
-    val_1 = chr(romData[offset + 1])
-
-    return (val_0 == 'A' and val_1 == 'B') or (val_0 == 'C' and val_1 == 'D')
-
-
-def IsSuccessfulROMImage(romData: bytes) -> bool:
-    return (ContainsABorCDAtOffset(romData, 0x0000) or
-            ContainsABorCDAtOffset(romData, 0x4000) or
-            ContainsABorCDAtOffset(romData, 0x8000) or
-            ContainsABorCDAtOffset(romData, 0x3C000))
-
-
-def GetCurrentDateTimeString() -> str:
-    now = datetime.datetime.now()
-    return now.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def AppendDumpListLogCsv(outputDir: str, dbStatus: str, romFileStatus: str, status: str,
-                           title: str, company: str, year: str, system: str, remark: str,
-                           romType: str, romSize: int, sha1: str, dumpDateTime: str) -> bool:
-    
-    csvPath = JoinPath(outputDir if outputDir else ".", "dump_list_log.csv")
-    needHeader = not os.path.exists(csvPath)
-
-    try:
-        with open(csvPath, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-            if needHeader:
-                writer.writerow([
-                    "DBステータス", "ROMファイルの状態", "ステータス", "タイトル",
-                    "メーカ", "年", "システム", "備考", "ROMタイプ", "容量", "SHA1値", "ダンプ日時"
-                ])
-            writer.writerow([
-                dbStatus, romFileStatus, status, title, company, year,
-                system, remark, romType, str(romSize), sha1, dumpDateTime
-            ])
+def IsIgnorableTagValue(value: str) -> bool:
+    if not value:
         return True
-    except Exception as e:
-        print(f"CSV write error: {e}")
-        return False
+    val_lower = value.lower()
+    if val_lower in ("unknown", "n/a", "none", "-"):
+        return True
+    return False
+
+
+def BuildAutoFileName(dbInfo: dict) -> str:
+    titleW = SanitizeFileName(dbInfo["title"])
+    systemW = SanitizeFileName(dbInfo["system"])
+    companyW = SanitizeFileName(dbInfo["company"])
+    yearW = SanitizeFileName(dbInfo["year"])
+    statusW = SanitizeFileName(dbInfo["status"])
+    remarkW = SanitizeFileName(dbInfo["remark"])
+
+    if dbInfo.get("has_different_system_duplicate", False):
+        renamedFile = f"{titleW}({systemW})-{companyW}({yearW})"
+    else:
+        renamedFile = f"{titleW}-{companyW}({yearW})"
+
+    if not IsIgnorableTagValue(statusW):
+        renamedFile += f"[{statusW}]"
+
+    if not IsIgnorableTagValue(remarkW):
+        renamedFile += f"[{remarkW}]"
+
+    renamedFile += ".rom"
+    return renamedFile
+
+
+def SanitizeMapperNameForFileName(mapperName: str) -> str:
+    if not mapperName:
+        return "UnknownMapper"
+
+    result = []
+    for ch in mapperName:
+        if ch in "\\/:*?\"<>|":
+            result.append('_')
+        elif ch.isspace():
+            result.append('_')
+        else:
+            result.append(ch)
+
+    res_str = "".join(result)
+    if not res_str:
+        res_str = "UnknownMapper"
+
+    return res_str
+
 
 # ============================================================================
-# Scanning Logic
+# Core Directory Scanner
 # ============================================================================
 
 def ScanDirectory(targetDir: str) -> int:
@@ -403,45 +520,85 @@ def ScanDirectory(targetDir: str) -> int:
             print(f"  Failed to read file: {e}")
             continue
 
-        # ヘッダー検証
-        if IsSuccessfulROMImage(romData):
-            romFileStatus = "OK"
-        else:
-            romFileStatus = "Unsuccessful"
+        # --------------------------------------------------------------------
+        # ログ判定
+        # --------------------------------------------------------------------
+        romFileStatus = "New"
 
-        # XMLデータベース照合
+        # XMLデータベース突合
         dbInfo, usedXmlPath = FindROMInfoWithPriority(sha1)
 
-        dbStatus = "Unknown"
-        title = ""
-        company = ""
-        year = ""
-        system = ""
-        status = ""
-        remark = ""
-        romType = "Standard ROM" # ファイルからマッパー自動判別は困難なため、既定値として設定
+        # 本来あるべきファイル名（最終保存名）の決定
+        if usedXmlPath:
+            if dbInfo["found"]:
+                renamedFile = BuildAutoFileName(dbInfo)
+            else:
+                mapperW = SanitizeMapperNameForFileName("Standard ROM")
+                renamedFile = f"Unknown_{sha1}[{mapperW}].rom"
+        else:
+            mapperW = SanitizeMapperNameForFileName("Standard ROM")
+            renamedFile = f"Unknown_{sha1}[{mapperW}].rom"
 
+        finalName = renamedFile
+
+        # ヘッダー検証
+        if not IsSuccessfulROMImage(bytes(romData)):
+            finalName = "[unsuccessful]" + finalName
+            romFileStatus = "Unsuccessful"
+
+        finalOutputPath = JoinPath(targetDir, finalName)
+
+        # 現在スキャンしているファイルが、想定出力ファイルと異なる場合のみ衝突判定
+        if os.path.normpath(filePath) != os.path.normpath(finalOutputPath):
+            if os.path.exists(finalOutputPath):
+                success_exist, existingSha1 = CalcFileSHA1Hex(finalOutputPath)
+                if success_exist:
+                    if existingSha1 == sha1:
+                        romFileStatus = "Same"
+                    else:
+                        romFileStatus = "Other"
+                else:
+                    romFileStatus = "Same"
+            else:
+                if not IsSuccessfulROMImage(bytes(romData)):
+                    romFileStatus = "Unsuccessful"
+                else:
+                    romFileStatus = "New"
+        else:
+            # 既に正しい名前で存在している場合
+            if not IsSuccessfulROMImage(bytes(romData)):
+                romFileStatus = "Unsuccessful"
+            else:
+                romFileStatus = "New"
+
+        # --------------------------------------------------------------------
+        # 各種メタデータ準備
+        # --------------------------------------------------------------------
+        dbStatus = "MATCH" if dbInfo["found"] else "Unknown"
+        title = dbInfo["title"]
+        company = dbInfo["company"]
+        year = dbInfo["year"]
+        system = dbInfo["system"]
+        status = dbInfo["status"]
+        remark = dbInfo["remark"]
+        romType = "Standard ROM"
+
+        print(f"  -> SHA1: {sha1}")
         if dbInfo["found"]:
-            dbStatus = "MATCH"
-            title = dbInfo["title"]
-            company = dbInfo["company"]
-            year = dbInfo["year"]
-            system = dbInfo["system"]
-            status = dbInfo["status"]
-            remark = dbInfo["remark"]
             print(f"  -> DB MATCH: {title} ({system})")
         else:
             print("  -> DB MATCH: No match found")
+        print(f"  -> romFileStatus: {romFileStatus}")
 
-        # ファイル作成/更新日時（または現在日時）
+        # 日時判定 (ファイル更新日時を優先)
         try:
             mtime = os.path.getmtime(filePath)
             dumpDateTime = datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
             dumpDateTime = GetCurrentDateTimeString()
 
-        # CSVに追記 (CSVファイルは targetDir に出力)
-        csv_success = AppendDumpListLogCsv(
+        # CSVに追記（同一ファイル：SHA-1と日時の一致する物が既にあれば無視）
+        csv_success = AppendDumpListLogCsvWithIgnore(
             targetDir,
             dbStatus,
             romFileStatus,
@@ -482,8 +639,8 @@ def main():
         print()
         print("Description:")
         print("  Scans all '.rom' files in the specified directory, calculates SHA-1,")
-        print("  queries softwaredb.xml / msxromdb.xml, and creates or appends results")
-        print("  to 'dump_list_log.csv' inside the target directory.")
+        print("  queries softwaredb.xml / msxromdb.xml, and creates/append results")
+        print("  to 'dump_list_log.csv' inside the target directory (ignores duplicates).")
         sys.exit(1)
 
     targetDir = args[0]
