@@ -1,4 +1,4 @@
-# MSX_MISC_TOOLS javascript編
+# MSX BASIC Token Converter javascript編
 
 ## BASICリスト変換
 
