@@ -1091,9 +1091,9 @@ def DetectKONAMI_SCC(ser: serial.Serial, romInfo: dict) -> bool:
         romInfo['mapperName'] = "KONAMI SCC"
         romInfo['bankCount'] = last_bank_num
         romInfo['romSize'] = romInfo['bankCount'] * 0x2000
-        romInfo['mapperAddress'] = 0x9000
+        romInfo['mapperAddress'] = 0xB000 #0x9000でのスイッチ(0x8000～0x9FFF)は 512KBタイプの最終バンクが化ける
         romInfo['readBankSize'] = 0x2000
-        romInfo['readAreaStart'] = 0x8000
+        romInfo['readAreaStart'] = 0xA000 #0x8000～0x9FFF は 512KBタイプの最終バンクが化ける
         romInfo['readAreaSize'] = 0x2000
         print(f"Bank count: {romInfo['bankCount']}, ROM size: {romInfo['romSize']} (0x{romInfo['romSize']:X})")
         return True
