@@ -131,7 +131,7 @@ proc save2bmp {filename start dx dy {convert_mode 0} {neg_height 1}} {
 	puts -nonewline $file "\x00" 
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biXPelsPerMeter
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biYPelsPerMeter
-	puts -nonewline $file [format %c [$pal_num]]
+	puts -nonewline $file [format %c [expr {$pal_num & 0xff}]]
 	puts -nonewline $file "\x00\x00\x00"						;#biClrUsed
 	puts -nonewline $file "\x00\x00\x00\x00"						;#biClrImportant
 
