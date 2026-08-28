@@ -2521,7 +2521,7 @@ class VDP {
             }
             // パターン一覧
             pgofs += 256 - 1; // スプライトが1ライン下に表示される処理を無効化
-            pal = vdp.pal_bf;
+            rgba = vdp.pal_bf.rgba; // 白黒2値カラー
             chr_step = chr_count;
             write0bit = 1;
             spr_count = pat_count;
@@ -4360,7 +4360,7 @@ function openGsFile( target_file )
         bmp_file = LogFile( target_file );
         vdp.cls();
     } else 
-    if ((ext_info.interlace < 0) || (ext_info.interlace < 0)) {
+    if ((ext_info.interlace < 0) || (ext_info.screen_no < 0)) {
         // 現在とフォーマットが違う場合はクリア
         if (((ext_info.screen_no >= 0) && (vdp.screen_no != ext_info.screen_no)) ||
             ((ext_info.interlace >= 0) && (vdp.interlace_mode != ext_info.interlace)))

@@ -79,7 +79,7 @@
 	font-weight: bold;
 }
 </style>
-<link rel="stylesheet" href="file:///d%3A/github/_uniskie/MSX_MISC_TOOLS/GSRLE/html/img/markdown.css" type="text/css">
+<link rel="stylesheet" href="file://d:\github\_uniskie\MSX_MISC_TOOLS\docs\GSRLE\img\markdown.css" type="text/css">
 <script src=""></script>
 </head>
 <body>
@@ -93,34 +93,36 @@
   </script>
 <h1 id="html5-msx-graphics-viewer">HTML5 MSX GRAPHICS Viewer</h1>
 <p>ブラウザ版 MSX画像ビューア</p>
-<p>グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。</p>
+<p>各種MSX画像を表示・変換保存可能なツールです。</p>
+<h2 id="使用方法">使用方法</h2>
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_032.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_033.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
-<p>ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。</p>
+<p>ローカル実行用ファイル一式をダウンロード・展開して使用するのをお勧めします。</p>
 <hr>
-<h2 id="%E6%A6%82%E8%A6%81">概要</h2>
+<h2 id="概要">概要</h2>
 <p><img src="img/gsrle_html_preview.png" alt="プレビュー"></p>
 <ul>
-<li>SCREEN 0～SCREEN 12のMSX画像ファイルに対応</li>
-<li>BSAVE形式、グラフサウルス圧縮形式の読み書き表示</li>
-<li>インターレース画像対応（SCREEN5以上）</li>
-<li>openMSXコンソールから<code>vram2bmp ファイル名.bmp 0 256 1024</code>で保存したBMPに対応</li>
-<li>スプライト(モード1&amp;2)に対応</li>
+<li>BSAVE形式、グラフサウルス圧縮形式の読み込みと書き出しに対応</li>
 <li>COPY文での範囲保存（グラフサウルスではGL?）ファイルに対応</li>
+<li>SCREEN 0～SCREEN 12のMSX画像ファイルに対応</li>
+<li>インターレース画像（2枚組画像）に対応（SCREEN5以上）</li>
+<li>openMSXコンソールから<code>vram2bmp ファイル名.bmp 0 256 1024</code>で保存したBMPに対応</li>
+<li>スプライト（モード1&amp;2）に対応</li>
+<li>BMPファイル出力機能あり</li>
 </ul>
-<p>メインターゲットはスクリーン5～12のMSX画像です。</p>
+<p>メインターゲットはスクリーン5～12のMSX画像でしたが、結局SCREEN0～4のMSX画像も一通り対応しています。</p>
 <p>HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。</p>
 <p><img src="img/gsrle_html_default.png" alt="プレビュー"></p>
-<h2 id="%E4%BD%BF%E3%81%84%E6%96%B9">使い方</h2>
-<p>ファイルをウィンドウにドロップするか<br>
-ファイルボタンを使用してファイルを開いてください。</p>
-<p>インターレースモード用画像かどうかは拡張子で判定されます。<br>
+<h2 id="使い方">使い方</h2>
+<p><strong>ファイルをウィンドウにドロップ</strong>するか、<br>
+<strong>ファイルボタン</strong>でファイルを開いてください。</p>
+<p><strong>インターレースモード用画像</strong>かどうかは拡張子で判定されます。<br>
 （<a href="#%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">拡張子一覧</a>）</p>
-<p>メイン画像ファイルと判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。</p>
+<p><strong>メイン画像ファイルと</strong>判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。</p>
 <p>その為、複数ファイルで構成された画像の場合は順番に開く必要があります。</p>
 <p>順番は</p>
 <ol>
@@ -130,24 +132,51 @@
 </ol>
 <p>です。</p>
 <p>この順番でドロップするか、まとめてドロップしてください。</p>
-<p>まとめてドロップした場合は自動的に読み込む順番を整えて読み込みます。<br>
+<p><strong>まとめてドロップ</strong>した場合は<strong>自動的に読み込む順番を整えて読み込みます。</strong><br>
 この時、1～3の分類それぞれにつき、各1個だけ読み込みます。</p>
 <p>また、ファイルボタンから開くことも可能です。<br>
 （その場合も複数ファイル指定可能です）</p>
 <hr>
-<h2 id="msx%E5%AE%9F%E6%A9%9F%E3%81%A7%E3%81%AE%E3%83%AD%E3%83%BC%E3%83%89%E3%82%B0%E3%83%A9%E3%83%95%E3%82%B5%E3%82%A6%E3%83%AB%E3%82%B9%E5%9C%A7%E7%B8%AE%E5%BD%A2%E5%BC%8F">MSX実機でのロード(グラフサウルス圧縮形式)</h2>
-<p>ローダーのサンプルがあります。</p>
-<p><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a></p>
+<h2 id="msx実機でのロードグラフサウルス圧縮形式">MSX実機でのロード(グラフサウルス圧縮形式)</h2>
+<p>グラフサウルスでCOMPRES保存した画像形式に対応しています。</p>
+<p>ローダーのサンプルは
+<a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a>
+にありますが、Javascriptで見た方が分かりやすいかと思ったのが、このビューアーが生まれるきっかけでした。</p>
 <p>ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。</p>
-<p>画像ファイルの再利用はご遠慮ください。</p>
+<p>ただし、<strong>画像ファイルの再利用はご遠慮ください。</strong></p>
 <hr>
-<h2 id="msx%E7%94%BB%E5%83%8F%E3%81%AE%E5%9C%A7%E7%B8%AE%E3%83%BB%E5%B1%95%E9%96%8B-%E4%BF%9D%E5%AD%98%E6%A9%9F%E8%83%BD">MSX画像の圧縮・展開 保存機能</h2>
-<p>読み込み済みファイルがあれば保存・圧縮保存が可能です。</p>
+<hr>
+<h2 id="スプライトキャラジェネの表示ベースアドレス指定">スプライト・キャラジェネの表示ベースアドレス指定</h2>
+<ul>
+<li>
+<p>スクリーン0～4ではキャラクタジェネレータ欄が表示されます。<br>
+<img src="img/gsrle_html_chrgen.png" alt="キャラクタジェネレータ"></p>
+</li>
+<li>
+<p>スクリーン1～12ではスプライト欄が表示されます。<br>
+<img src="img/gsrle_html_sprgen.png" alt="スプライトジェネレータ"></p>
+</li>
+</ul>
+<h3 id="各ベースアドレス">各ベースアドレス</h3>
+<p>VDPで設定可能な値がドロップダウンリストに登録されていますので、そこから選択可能です。</p>
+<ul>
+<li>PATNAM (キャラクターパターンネームテーブル)</li>
+<li>PATGEN (キャラクターパターンジェネレータテーブル)</li>
+<li>PATCOL (キャラクターパターンカラーテーブル)</li>
+<li>SPRATR (スプライトアトリビュートテーブル)</li>
+<li>SPRPAT (スプライトパターンテーブル)</li>
+</ul>
+<p>※ SPRCOL (スプライトカラーテーブル) は<code>SPRATR (スプライトアトリビュートテーブル) - 512</code>にVDPが自動決定します。</p>
+<hr>
+<h2 id="ファイル出力機能ベタ画像データ圧縮画像データパレットファイルbmpファイル">ファイル出力機能（ベタ画像データ・圧縮画像データ・パレットファイル・BMPファイル）</h2>
+<p>読み込み済みファイルがあればベタデータ保存・圧縮保存が可能です。</p>
 <p>また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。</p>
-<h3 id="%E5%85%A8%E4%BD%93%E4%BF%9D%E5%AD%98--plt%E4%BF%9D%E5%AD%98--%E3%83%9A%E3%83%BC%E3%82%B8%E4%BF%9D%E5%AD%98">全体保存 / PLT保存 / ページ保存</h3>
-<p><img src="img/gsrle_html_savebutton.png" alt="プレビュー"></p>
-<p><img src="img/gsrle_html_savebutton2.png" alt="プレビュー"></p>
+<h3 id="全体保存--plt保存--ページ保存--パターンジェネレータ保存">全体保存 / PLT保存 / ページ保存 / パターンジェネレータ保存</h3>
+<p><img src="img/gsrle_html_savebutton.png" alt="保存ボタンプレビュー1"></p>
+<p><img src="img/gsrle_html_savebutton2.png" alt="保存ボタンプレビュー2"></p>
+<p><img src="img/gsrle_html_savebutton3.png" alt="保存ボタンプレビュー3"></p>
+<p><img src="img/gsrle_html_savebutton4.png" alt="保存ボタンプレビュー3"></p>
 <table>
 <thead>
 <tr>
@@ -164,13 +193,23 @@
 </tr>
 <tr>
 <td>BSAVE (VRAMパレット書込)</td>
-<td>VRAMのカラーパレットテーブルを含む範囲でBSAVEベタ形式保存</td>
+<td>VRAMカラーパレットテーブル含めてBSAVEベタ形式保存</td>
 <td>VRAMパレットテーブルに現在のパレットを書き込みます。</br>保存サイズがVRAMパレットテーブルより小さければ、テーブルを含む領域まで保存します。</td>
 </tr>
 <tr>
 <td>BSAVE (画素のみ)</td>
 <td>カラーパレットを含まない BSAVEベタ形式保存</td>
 <td>VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。</td>
+</tr>
+<tr>
+<td>GS圧縮 (画素のみ)</td>
+<td>カラーパレットを含まない グラフサウルス圧縮形式保存</td>
+<td>VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。</td>
+</tr>
+<tr>
+<td>BMP出力</td>
+<td>BMPファイルとして書き出し</td>
+<td>SCREENモードがインデックスカラーであればなるべくインデックスカラーで保存。</br>SCREEN8はフルカラー（スプライトが違うパレットなので）/VRAMページなら256色で保存</td>
 </tr>
 <tr>
 <td>GS圧縮 (画素のみ)</td>
@@ -189,23 +228,7 @@
 <li>設定に読み込み後自動保存機能があります</li>
 <li>ファイルを何も読み込んでいないと保存ボタンは動作しません。</li>
 </ul>
-<hr>
-<h2 id="%E8%A8%AD%E5%AE%9A%E4%BF%9D%E5%AD%98%E3%83%BB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF">設定保存・読み込み</h2>
-<p><img src="img/gsrle_html_config.png" alt="プレビュー"></p>
-<p>各種設定を保存、読み込み出来ます。</p>
-<p>保存時には <code>gsrle_html_config.json</code> というJSONファイルが保存されます。<br>
-任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。</p>
-<p>読み込み時はJSONファイルを開くかドロップしてください。</p>
-<p>保存・読み込みされる設定内容：</p>
-<ul>
-<li>スクリーンモード番号、インターレースモード、表示ページ</li>
-<li>スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）</li>
-<li>キャラクタジェネレータ・ベースアドレス</li>
-<li>スプライト・ベースアドレス</li>
-<li>画面縦サイズ設定、DotAspect比、読み込み後自動保存設定</li>
-<li>カラーパレットVRAM読み込み設定、TMS9918風カラー設定</li>
-</ul>
-<h3 id="%E6%B3%A8bsave%E4%BF%9D%E5%AD%98%E6%99%82%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%98%E3%83%83%E3%83%80%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">注：BSAVE保存時のファイルヘッダについて</h3>
+<h3 id="注bsave保存時のファイルヘッダについて">注：BSAVE保存時のファイルヘッダについて</h3>
 <p>BLOADで読み込むときに、サイズ&amp;hFFFFを越えるファイルは読みだしたデータが化けます。</p>
 <blockquote>
 <p>例)<br>
@@ -241,8 +264,113 @@ BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
 ファイルサイズを見て読みだすようにすれば、<br>
 データの最後まで読み込むことが出来ます。</p>
 <p>( <a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD">https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD</a> など)</p>
+<h3 id="保存範囲について">保存範囲について</h3>
+<ol>
+<li>保存時は現在表示の表示縦サイズ指定に従って保存します。</li>
+<li>BMPをロードした場合、全体出力保存時はロードしたサイズと同じ範囲を出力します。<br>
+例えばVRAM128KB分のデータをロードしていたら、出力ファイルも128KBです。<br>
+（BINファイルヘッダでは<code>0000H</code>-<code>FFFEH</code>ですが、実ファイルサイズはそれを超える128KBを出力します）</li>
+</ol>
+<h3 id="bmp出力について">BMP出力について</h3>
+<p>全体出力の表示範囲は読み込んだファイル形式に関係なく、画面イメージになります。</p>
+<h4 id="bmp出力の種類">BMP出力の種類</h4>
+<ul>
+<li><strong>全体保存</strong><br>
+BMP出力の場合は画面イメージを出力
+<ul>
+<li>SCREEN8の場合32ビットカラーで出力</li>
+</ul>
+</li>
+<li><strong>VRAMページ (PAGE0/PAGE1)</strong>
+<ul>
+<li>SCREEN8の場合でもインデックスカラーで出力</li>
+</ul>
+</li>
+<li><strong>キャラクタジェネレータ（SCREEN0～4）</strong></li>
+<li><strong>スプライト</strong>
+<ul>
+<li>SCREEN8の場合でもインデックスカラーで出力</li>
+<li><strong>スプライト横並び制限</strong>の設定が「<strong>半透明</strong>」の場合：<br>
+インデックスカラー出力が難しいため
+一時的に「<strong>網掛</strong>」に変更して出力します。</li>
+</ul>
+</li>
+</ul>
+<h4 id="bmp出力の画像サイズ">BMP出力の画像サイズ</h4>
+<p>どの画面モードでも<strong>横512</strong>、<strong>縦2倍</strong>での出力です。<br>
+最大サイズであるインターレースモード、横512ドットモードに合わせて拡大されます。</p>
+<ul>
+<li><strong>SCREEN 0（WIDTH 40）、1、2、3、4、5、8、10、11</strong>：縦横2倍。</li>
+<li><strong>SCREEN 0（WIDTH 80） 6、7</strong>：縦2倍。</li>
+<li><strong>インターレースモード</strong>の場合は縦1倍。</li>
+<li><strong>縦の範囲</strong>は表示設定に従います。</li>
+</ul>
+<p><strong>ドットアスペクト比</strong>は1:1で出力します。</p>
+<h4 id="bmp出力のカラー形式">BMP出力のカラー形式</h4>
+<p>可能な限りインデックスカラーで出力します。
+無理な場合は32ビットカラーで出力します。</p>
+<p>ただし、RGB888での表示用レンダリングバッファから、
+パレット逆引きでインデックスカラーに戻すので、
+パレットに同一色がある場合は正確な出力とはなりません。</p>
+<ul>
+<li><strong>SCREEN8</strong>：<br>
+スプライトが別パレットの為、全体出力は32ビットGBで出力します。<br>
+8ビットインデックスカラーの出力が欲しい場合は、VRAMページビューのBMP出力を使ってください。</li>
+<li><strong>SCREEN6,9</strong>：<br>
+4ビットカラーモードでの出力になります。<br>
+（BMPに2bpp形式は存在しないのと、スプライトが16色なので）</li>
+<li><strong>自然画モード</strong>：<br>
+32ビットカラーで出力します。</li>
+<li>グレースケール表示時：
+グレースケールで出力します。</li>
+</ul>
+<h2 id="画像読み込み後の自動保存設定">画像読み込み後の自動保存設定</h2>
+<p>画像の読み込みが終わった後に指定の形式で自動保存するオプション</p>
+<p><img src="img/gsrle_html_autosave.png" alt="プレビュー"></p>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>内容</th>
+<th>パレットデータ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BSAVE(VRAMパレット書込)</td>
+<td>BSAVE形式（VRAMカラーパレットテーブルを含む）画像ファイル</td>
+<td>BSAVEファイルに含む</td>
+</tr>
+<tr>
+<td>BSAVE+PLT分離</td>
+<td>BSAVE形式（VRAMカラーパレットテーブルを含まない）画像ファイルと、PLTファイルのセット</td>
+<td>PLTファイル</td>
+</tr>
+<tr>
+<td>GS圧縮+PLT分離</td>
+<td>グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット</td>
+<td>PLTファイル</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2 id="openmsx-vram2bmp%E5%87%BA%E5%8A%9B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A1%A8%E7%A4%BA">openMSX vram2bmp出力ファイルの表示</h2>
+<h2 id="表示同さ設定の保存と読み込み">表示・同さ設定の保存と読み込み</h2>
+<p><img src="img/gsrle_html_config.png" alt="プレビュー"></p>
+<p>表示や動作に関する各種設定をまとめて保存、読み込み出来ます。</p>
+<p>保存時には <code>gsrle_html_config.json</code> というJSONファイルが保存されます。<br>
+任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。</p>
+<p>読み込み時はJSONファイルを開くかドロップしてください。</p>
+<p>対象となる設定内容：</p>
+<ul>
+<li>スクリーンモード番号、インターレースモード、表示ページ</li>
+<li>スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）</li>
+<li>キャラクタジェネレータ・ベースアドレス</li>
+<li>スプライト・ベースアドレス</li>
+<li>画面縦サイズ設定、DotAspect比、読み込み後自動保存設定</li>
+<li>カラーパレットVRAM読み込み設定、TMS9918風カラー設定</li>
+</ul>
+<hr>
+<h2 id="openmsx-vram2bmp出力ファイルの読み込み表示">openMSX vram2bmp出力ファイルの読み込み表示</h2>
 <p>openMSXでは<code>vram2bmp</code>でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。</p>
 <ol>
 <li>openMSXでF10キーを押してコンソールを表示</li>
@@ -274,64 +402,12 @@ BLOADでは&amp;h0000～&amp;hFFFEまでしか読み込めません。</p>
 <p>当ビューアではそのVRAM RAWイメージを読み込んで、MSX上での見え方で表示することが可能です。<br>
 （画面モードや、ベースアドレスは自分で指定してください）</p>
 <p>自分向け遊び機能ですが、内容確認などの使い道はあるかもしれません。</p>
-<h3 id="%E8%A1%A8%E7%A4%BA%E4%BE%8B">表示例</h3>
+<h3 id="表示例">表示例</h3>
 <p><img src="img/gsrle_html_raw_bmp_preview.png" alt="display RAW BMP"></p>
 <p><img src="img/gsrle_html_raw_bmp_preview2.png" alt="display RAW BMP"></p>
 <p>HYDLIDE3 (C) T&amp;E SOFT / D4 Enterprise</p>
 <hr>
-<h2 id="%E3%82%B9%E3%83%97%E3%83%A9%E3%82%A4%E3%83%88%E3%83%BB%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%B8%E3%82%A7%E3%83%8D%E3%81%AE%E8%A1%A8%E7%A4%BA%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9%E6%8C%87%E5%AE%9A">スプライト・キャラジェネの表示ベースアドレス指定</h2>
-<ul>
-<li>
-<p>スクリーン0～4ではキャラクタジェネレータ欄が表示されます。<br>
-<img src="img/gsrle_html_chrgen.png" alt="キャラクタジェネレータ"></p>
-</li>
-<li>
-<p>スクリーン1～12ではスプライト欄が表示されます。<br>
-<img src="img/gsrle_html_sprgen.png" alt="スプライトジェネレータ"></p>
-</li>
-</ul>
-<h3 id="%E5%90%84%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9">各ベースアドレス</h3>
-<p>VDPで設定可能な値がドロップダウンリストに登録されていますので、そこから選択可能です。</p>
-<ul>
-<li>PATNAM (キャラクターパターンネームテーブル)</li>
-<li>PATGEN (キャラクターパターンジェネレータテーブル)</li>
-<li>PATCOL (キャラクターパターンカラーテーブル)</li>
-<li>SPRATR (スプライトアトリビュートテーブル)</li>
-<li>SPRPAT (スプライトパターンテーブル)</li>
-</ul>
-<p>※ SPRCOL (スプライトカラーテーブル) は<code>SPRATR (スプライトアトリビュートテーブル) - 512</code>にVDPが自動決定します。</p>
-<hr>
-<h2 id="%E8%A8%AD%E5%AE%9A%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E5%BE%8C%E8%87%AA%E5%8B%95%E4%BF%9D%E5%AD%98">設定：読み込み後自動保存</h2>
-<p>画像の読み込みが終わった後に指定の形式で自動保存するオプション</p>
-<p><img src="img/gsrle_html_autosave.png" alt="プレビュー"></p>
-<table>
-<thead>
-<tr>
-<th>形式</th>
-<th>内容</th>
-<th>パレットデータ</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>BSAVE(VRAMパレット書込)</td>
-<td>BSAVE形式（VRAMカラーパレットテーブルを含む）画像ファイル</td>
-<td>BSAVEファイルに含む</td>
-</tr>
-<tr>
-<td>BSAVE+PLT分離</td>
-<td>BSAVE形式（VRAMカラーパレットテーブルを含まない）画像ファイルと、PLTファイルのセット</td>
-<td>PLTファイル</td>
-</tr>
-<tr>
-<td>GS圧縮+PLT分離</td>
-<td>グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット</td>
-<td>PLTファイル</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<h2 id="%E3%81%8A%E3%81%BE%E3%81%91%E7%B8%A6%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB%EF%BC%8F%E6%A8%AA%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB">おまけ：縦スクロール／横スクロール</h2>
+<h2 id="おまけ縦スクロール横スクロール">おまけ：縦スクロール／横スクロール</h2>
 <p>VDPシミュレートの検証で付けている処理です。</p>
 <p><img src="img/gsrle_html_scroll.png" alt="スクロール機能"></p>
 <ol>
@@ -369,7 +445,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </ul>
 </li>
 </ol>
-<h2 id="%E8%A3%9C%E8%B6%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9%EF%BC%86%E3%83%95%E3%83%AA%E3%83%83%E3%83%97%E3%83%A2%E3%83%BC%E3%83%89">補足：インターレース＆フリップモード</h2>
+<h2 id="補足インターレースフリップモード">補足：インターレース＆フリップモード</h2>
 <p>インターレースモードで2ページをフリップさせて疑似的に424ライン表示する機能</p>
 <p><img src="img/gsrle_html_topbar.png" alt="interlace button"></p>
 <p><code>Interlace</code>にチェックを付けるとインターレース＆フリップモードになります。<br>
@@ -377,16 +453,18 @@ VDP R#25 bit0：2画面横スクロール<br>
 <p>※ SCREEN0～4では使用できません</p>
 <p>※ <code>2Page HScroll</code>と同様に強制的に表示ページを奇数ページに変更します。</p>
 <hr>
-<h2 id="%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">対応拡張子</h2>
+<h2 id="対応する拡張子について">対応する拡張子について</h2>
 <p>拡張子で判定して、インターレースモードでの読込先ページを決定します。</p>
 <ol>
 <li>パレットの有無、画面サイズ、圧縮などはデータの内容を見て判定します。</li>
+<li>画面モードが特定できる拡張子は自動で画面モードを変更します。<br>
+（既に合致する画面モードであれば変更しません）</li>
+<li>BINやVRMは画面モードを変更しません。</li>
 <li>SC1はSSCREEN12のインターレース画像として扱います。</li>
 <li>SCREEN1画像の場合、SC1の代わりにSR1を使用してみてください。</li>
 <li>SCREEN 9は未テストです。</li>
-<li>保存時は現在表示している縦サイズで保存します。</li>
 </ol>
-<h3 id="%E3%83%8E%E3%83%B3%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B9-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">ノンインターレース ビットマップ画像</h3>
+<h3 id="ノンインターレース通常ビットマップ系画面screen512データ">ノンインターレース（通常）：ビットマップ系画面（SCREEN5～12）データ</h3>
 <table>
 <thead>
 <tr>
@@ -505,7 +583,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%BC%E3%82%B92%E6%9E%9A%E7%B5%84-%E3%83%93%E3%83%83%E3%83%88%E3%83%9E%E3%83%83%E3%83%97%E7%94%BB%E5%83%8F">インターレース（2枚組） ビットマップ画像</h3>
+<h3 id="インターレース2枚組ビットマップ系画面画面screen512データ">インターレース（2枚組）：ビットマップ系画面画面（SCREEN5～12）データ</h3>
 <table>
 <thead>
 <tr>
@@ -712,7 +790,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%8D%E3%83%AC%E3%83%BC%E3%82%BF%E7%B3%BBscreen-04">キャラクタージェネレータ系（SCREEN 0～4）</h3>
+<h3 id="キャラクタージェネレータpcgタイプの画面データscreen-04">キャラクタージェネレータ(PCG)タイプの画面データ（SCREEN 0～4）</h3>
 <table>
 <thead>
 <tr>
@@ -815,7 +893,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E7%89%B9%E6%AE%8A-%E3%83%90%E3%82%A4%E3%83%8A%E3%83%AA%E3%83%95%E3%82%A1%E3%82%A4%E3%83%ABbsavebload">特殊 バイナリファイル（BSAVE/BLOAD）</h3>
+<h3 id="特殊バイナリファイルbsavebload">特殊：バイナリファイル（BSAVE/BLOAD）</h3>
 <table>
 <thead>
 <tr>
@@ -948,7 +1026,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E7%89%B9%E6%AE%8A-raw%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 RAWイメージ</h3>
+<h3 id="特殊rawイメージ">特殊：RAWイメージ</h3>
 <table>
 <thead>
 <tr>
@@ -983,7 +1061,7 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tr>
 </tbody>
 </table>
-<h3 id="%E7%89%B9%E6%AE%8A-%E7%AF%84%E5%9B%B2%E4%BF%9D%E5%AD%98%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8">特殊 範囲保存イメージ</h3>
+<h3 id="特殊範囲保存イメージ">特殊：範囲保存イメージ</h3>
 <table>
 <thead>
 <tr>
@@ -1096,9 +1174,9 @@ VDP R#25 bit0：2画面横スクロール<br>
 </tbody>
 </table>
 <hr>
-<h2 id="png%E3%82%84bmp%E3%81%8B%E3%82%89msx%E7%94%A8%E7%94%BB%E5%83%8F%E3%81%B8%E3%81%AE%E5%A4%89%E6%8F%9B%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">PNGやBMPからMSX用画像への変換について</h2>
+<h2 id="pngやbmpからmsx用画像への変換について">PNGやBMPからMSX用画像への変換について</h2>
 <p>本ツールにはMSX画像形式からの圧縮や展開のみをサポートしています。<br>
-PNGなどからの変換機能が欲しい場合は他のツールを使用してください。</p>
+PNGなどからの変換（読み込み）機能が欲しい場合は他のツールを使用してください。</p>
 <p>(※vram2bmpで保存したbmpはVRAMのRAWイメージなので特別にそのまま表示可能です。)</p>
 <ul>
 <li>
@@ -1112,36 +1190,32 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 </li>
 </ul>
 <hr>
-<h2 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">ドットアスペクト比について</h2>
+<h2 id="ドットアスペクト比について">ドットアスペクト比について</h2>
 <p>縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。</p>
-<h3 id="%E3%83%89%E3%83%83%E3%83%88%E3%82%A2%E3%82%B9%E3%83%9A%E3%82%AF%E3%83%88%E6%AF%94-%E8%A8%AD%E5%AE%9A%E5%80%A4%E3%83%AA%E3%82%B9%E3%83%88">ドットアスペクト比 設定値リスト</h3>
-<ol>
-<li>
-<p><strong>「1.177 : 1」</strong> (1 : 0.850)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (Realistic)</strong>。</p>
-<p>Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。</p>
-</li>
-<li>
-<p><strong>「1.166 : 1」</strong>  (1 : 0.858)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
-<p>MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。
-約1.15～約1.17で諸説あり、一旦、中間値を採用した物。</p>
+<h3 id="ドットアスペクト比-設定値リスト">ドットアスペクト比 設定値リスト</h3>
+<p><img src="img/gsrle_html_config_dot_aspect.png" alt="ドットアスペクト比設定"></p>
+<h4 id="1177--1-1--0850"><strong>「1.177 : 1」</strong> (1 : 0.850)</h4>
+<pre><code> openMSXの**Horisontal stretch**で設定するなら **272 (Realistic)**。
+
+ Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。
+</code></pre>
+<h4 id="1166--1--1--0858"><strong>「1.166 : 1」</strong>  (1 : 0.858)</h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
+<p>MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。</p>
+<p>約1.15～約1.17で諸説あり、一旦、中間値を採用した物。</p>
 <p>MSXの解像度をそのまま4:3を覆うように広げた形。
 当時そのような基準で調整していた人が多いかもしれない。</p>
-</li>
-<li>
-<p><strong>「1.154 : 1」</strong>  (1 : 0.8866)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>277</strong></p>
+<h4 id="1154--1--1--08866"><strong>「1.154 : 1」</strong>  (1 : 0.8866)</h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>277</strong></p>
 <p><a href="https://www.msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">TomHさんの計算</a>をもとにした設定値。</p>
 <blockquote>
 <p>TSCラインは227.5カラークロックの長さで、これは水平同期間の周期です。TMSとV99x8はどちらも水平同期間のカラークロックは228&quot;</p>
 <p>256サイクルのピクセル、1ピクセルあたり2/3の色サイクルは、ライン全体の75%に非常に近いピクセル数です。つまり、各ピクセルはラインの1/(227.5 * 1.5)です。ラインの約52/64が見えるということは、64 / (227.5 * 1.5 * 52) = 64 / 17745となります。&quot;</p>
 </blockquote>
 <p><code>(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693</code></p>
-</li>
-<li>
-<p><strong>「1.133 : 1」</strong>  (1 : 0.882)<br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong>か<strong>283</strong></p>
+<h4 id="1133--1--1--0882"><strong>「1.133 : 1」</strong>  (1 : 0.882)</h4>
+<pre><code> openMSXの**Horisontal stretch**で設定するなら **282**か**283**
+</code></pre>
 <p><a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">FRS氏の計算</a>を元にした設定値。</p>
 <blockquote>
 <ol>
@@ -1152,36 +1226,66 @@ openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</
 <p>右境界の最後の 4.647799 ピクセルがオーバースキャンとして画面から外れてしまいます</p>
 </blockquote>
 <p><code>(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756</code></p>
-<p>他にPAL信号をベースに計算した1.1375:1(1:0.879)という説もあるようです。<br>
+<h4 id="113751-">1.1375:1 ？</h4>
+<p>他にPAL信号をベースに計算した1.1375:1(1:0.879)という<a href="https://x.com/spacemoai/status/1928869425014251590?s=20">説</a>もあるようです。<br>
 （openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>281</strong>か<strong>282</strong>）</p>
-<p>https://x.com/spacemoai/status/1928869425014251590?s=20</p>
 <blockquote>
 <p>284.75ピクセル×243ラインは4:3のアスペクト比に収まらなければならないので、(284.75:4) : (243:3) ≈ 1.1375:1 となります。</p>
 </blockquote>
 <p><code>(284.75:4) : (243:3) ≈ 1.1375:1</code></p>
-</li>
-<li>
-<p><strong>「1 : 1」</strong><br>
-openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>320</strong>。</p>
-<p>いわゆるドットバイドット。<br>
-モアレを除去したい場合に利用することがあるので用意。</p>
-</li>
-</ol>
+<h4 id="1--1"><strong>「1 : 1」</strong></h4>
+<pre><code>openMSXの**Horisontal stretch**で設定するなら **320**。
+
+いわゆるドットバイドット。  
+モアレを除去したい場合に利用することがあるので用意。
+</code></pre>
 <p>現在、リストからの選択になっています。</p>
 <p>要望が在れば任意の値を指定できるようにするかもしれませんが、各自でgsrle.htmlを弄って頂いた方が早いかと思います。</p>
 <hr>
-<h2 id="%E4%BD%BF%E7%94%A8%E8%A8%B1%E8%AB%BE">使用許諾</h2>
-<h3 id="%E7%A6%81%E6%AD%A2%E4%BA%8B%E9%A0%85">禁止事項</h3>
-<p>音楽データや画像ファイルの再利用はご遠慮ください。（全体的に）</p>
-<h3 id="%E5%86%8D%E5%88%A9%E7%94%A8%E5%8F%AF%E8%83%BD%E3%81%AA%E3%82%82%E3%81%AE">再利用可能なもの</h3>
-<p>画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。
-改変なども可能です。</p>
-<h3 id="%E5%BC%95%E8%B2%AC%E4%BA%8B%E9%A0%85">引責事項</h3>
-<p>転載や改変についてサポートは致しかねます。<br>
-また、このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。</p>
+<h2 id="使用許諾">使用許諾</h2>
+<h3 id="再利用可能なもの">再利用可能なもの</h3>
+<p>画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。<br>
+改変も自由です。<br>
+著作権表示なども不要です。</p>
+<h3 id="禁止事項">禁止事項</h3>
+<p>音楽データや画像ファイルの再利用は禁止とします。（全体に）</p>
+<h3 id="引責事項">引責事項</h3>
+<p>このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。</p>
+<p>また、転載や改変をされたものついて当方ではサポート致しません。</p>
 <hr>
-<h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
+<h2 id="更新履歴">更新履歴</h2>
 <ul>
+<li>
+<p>2026/08/25 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z">ver.0.33</a></p>
+<ul>
+<li>スプライトパターンジェネレータ部の色が白黒になっていなかったバグの修正。</li>
+<li>グレースケールをRGB独立ガンマを使用した自然な計算式に変更。</li>
+<li>BMP出力ボタンを追加。
+<ul>
+<li>画面サイズはどの画面モードでも横512、縦2倍での出力です。<br>
+最大サイズであるインターレースモード、横512ドットモードに合わせて拡大されます。
+<ul>
+<li>SCREEN 0（WIDTH 40）、1、2、3、4、5、8、10、11：縦横2倍</li>
+<li>SCREEN 0（WIDTH 80） 6、7：縦2倍</li>
+<li>インターレースモードの場合は縦1倍</li>
+</ul>
+</li>
+<li>可能であれば元のインデックスカラー形式で出力。
+<ul>
+<li>ただし、RGB888での表示用レンダリングバッファから、
+パレット逆引きでインデックスカラーに戻すので、
+パレットに同一色がある場合は正確な出力とはなりません。</li>
+<li>SCREEN8はスプライトが別パレットの為、全体出力は32ビットGBで出力します。<br>
+8ビットインデックスカラーの出力が欲しい場合は、VRAMページビューのBMP出力を使ってください。</li>
+<li>SCREEN6,9は4ビットカラーモードでの出力になります。<br>
+BMPに2bpp形式は存在しないのと、スプライトが16色なので。</li>
+<li>自然画モードは32ビットRGBで出力します。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li>
 <p>2026/02/02 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z">ver.0.32</a></p>
 <ul>

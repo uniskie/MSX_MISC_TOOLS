@@ -13,7 +13,7 @@
             HTML5 MSX GRAPHICS Viewer
         </summary>
         <div class="guide">
-            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.32 - 
+            <div id="log_text">HTML5 MSX GRAPHICS Viewer ver.0.33 - 
                 <a href="index.html" target="_blank">【 説明ページ 】</a>
                 <br>使い方：画像ファイルをドロップ（複数可）</div>
         </div>
@@ -83,6 +83,7 @@
                 <button type="button" class="save_button" id="all_save_bsave">BSAVE(VRAMパレット書込)</button>
                 <button type="button" class="save_button" id="all_save_bsave_np">BSAVE+PLT分離</button>
                 <button type="button" class="save_button" id="all_save_gsrle">GS圧縮+PLT分離</button>
+                <button type="button" class="save_button" id="all_save_bmp">BMP出力</button>
             </div>
             <div class="details">
                 <span id="detail_pal" class="detail_group round100">
@@ -114,6 +115,7 @@
                             <button type="button" class="save_button" id="page0_save_bsave">BSAVE(VRAMパレット書込)</button>
                             <button type="button" class="save_button" id="page0_save_bsave_np">BSAVE(画素のみ)</button>
                             <button type="button" class="save_button" id="page0_save_gsrle">GS圧縮(画素のみ)</button>
+                            <button type="button" class="save_button" id="page0_save_bmp">BMP出力</button>
                         </div>
                     </div>
                     <canvas id="canvas_page0" class="canvas_area" width="512px" height="424px"></canvas>
@@ -131,6 +133,7 @@
                             <button type="button" class="save_button" id="page1_save_bsave">BSAVE(VRAMパレット書込)</button>
                             <button type="button" class="save_button" id="page1_save_bsave_np">BSAVE(画素のみ)</button>
                             <button type="button" class="save_button" id="page1_save_gsrle">GS圧縮(画素のみ)</button>
+                            <button type="button" class="save_button" id="page1_save_bmp">BMP出力</button>
                         </div>
                     </div>
                     <canvas id="canvas_page1" class="canvas_area" width="512px" height="424px"></canvas>
@@ -148,6 +151,7 @@
                             <button type="button" class="save_button" id="page2_save_bsave">BSAVE(VRAMパレット書込)</button>
                             <button type="button" class="save_button" id="page2_save_bsave_np">BSAVE(画素のみ)</button>
                             <button type="button" class="save_button" id="page2_save_gsrle">GS圧縮(画素のみ)</button>
+                            <button type="button" class="save_button" id="page2_save_bmp">BMP出力</button>
                         </div>
                     </div>
                     <canvas id="canvas_page2" class="canvas_area" width="512px" height="424px"></canvas>
@@ -165,6 +169,7 @@
                             <button type="button" class="save_button" id="page3_save_bsave">BSAVE(VRAMパレット書込)</button>
                             <button type="button" class="save_button" id="page3_save_bsave_np">BSAVE(画素のみ)</button>
                             <button type="button" class="save_button" id="page3_save_gsrle">GS圧縮(画素のみ)</button>
+                            <button type="button" class="save_button" id="page3_save_bmp">BMP出力</button>
                         </div>
                     </div>
                     <canvas id="canvas_page3" class="canvas_area" width="512px" height="424px"></canvas>
@@ -182,6 +187,7 @@
                         <div class="label_text" id="patgen_id">
                             <span>【CHARACTER GENERATOR】</span>
                             <span id="detail_chrgen_spec" class="gen_spec"></span>
+                            <button type="button" class="save_button" id="chrgen_save_bmp">BMP出力</button>
                         </div>
                         <span class="select_group">
                             Name
@@ -217,6 +223,7 @@
                         <div class="label_text" id="sprgen_id">
                             <span>【SPRITE GENERATOR】</span>
                             <span id="detail_sprgen_spec" class="gen_spec"></span>
+                            <button type="button" class="save_button" id="spr_save_bmp">BMP出力</button>
                         </div>
                         <span class="select_group">
                             Atr
@@ -232,7 +239,7 @@
                             <input type="checkbox" id="transparent_bg_chk" checked>
                             暗い格子背景&nbsp;
                         </label>
-                            </div>
+                    </div>
                     <canvas id="canvas_sprgen" class="canvas_area" width="512px" height="256px"></canvas>
                 </span>
             </div>
@@ -296,12 +303,13 @@
                     SCREEN 4以下で0x0000～0x3FFF全体保存
                 </label>
             </span>
-            <span class="select_group" id="qick_save">
+            <span class="select_group" id="quick_save">
                 <label class="label">読み込み後：自動保存</label>
-                <label class="click"><input type="radio" name="qick_save" value="none" checked>なし</label>
-                <label class="click"><input type="radio" name="qick_save" value="bsave_full"  >BSAVE(VRAMパレット書込)</label>
-                <label class="click"><input type="radio" name="qick_save" value="bsave_mini"  >BSAVE+PLT分離</label>
-                <label class="click"><input type="radio" name="qick_save" value="gsrle_save"  >GS圧縮+PLT分離</label>
+                <label class="click"><input type="radio" name="quick_save" value="none" checked>なし</label>
+                <label class="click"><input type="radio" name="quick_save" value="bsave_full"  >BSAVE(VRAMパレット書込)</label>
+                <label class="click"><input type="radio" name="quick_save" value="bsave_mini"  >BSAVE+PLT分離</label>
+                <label class="click"><input type="radio" name="quick_save" value="gsrle_save"  >GS圧縮+PLT分離</label>
+                <label class="click"><input type="radio" name="quick_save" value="bmp_save"  >BMP</label>
             </span>
             <span class="select_group" id="sprite_limit_mode">
                 <label class="label">スプライト横並び制限</label>

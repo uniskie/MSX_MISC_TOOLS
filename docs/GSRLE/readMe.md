@@ -2,14 +2,16 @@
 
  ブラウザ版 MSX画像ビューア
 
-グラサウルス画像対応の、SCREEN0～SCREEN12の画像を表示・変換保存可能なツールです。
+各種MSX画像を表示・変換保存可能なツールです。
+
+## 使用方法
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_032.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_033.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
-ローカル実行用ファイル一式をダウンロード・展開して使用することをお勧めします。
+ローカル実行用ファイル一式をダウンロード・展開して使用するのをお勧めします。
 
 ----
 
@@ -17,14 +19,15 @@
 
 ![プレビュー](img/gsrle_html_preview.png)
 
-- SCREEN 0～SCREEN 12のMSX画像ファイルに対応
-- BSAVE形式、グラフサウルス圧縮形式の読み書き表示
-- インターレース画像対応（SCREEN5以上）
-- openMSXコンソールから```vram2bmp ファイル名.bmp 0 256 1024```で保存したBMPに対応
-- スプライト(モード1&2)に対応
+- BSAVE形式、グラフサウルス圧縮形式の読み込みと書き出しに対応
 - COPY文での範囲保存（グラフサウルスではGL?）ファイルに対応
+- SCREEN 0～SCREEN 12のMSX画像ファイルに対応
+- インターレース画像（2枚組画像）に対応（SCREEN5以上）
+- openMSXコンソールから`vram2bmp ファイル名.bmp 0 256 1024`で保存したBMPに対応
+- スプライト（モード1&2）に対応
+- BMPファイル出力機能あり
 
-メインターゲットはスクリーン5～12のMSX画像です。
+メインターゲットはスクリーン5～12のMSX画像でしたが、結局SCREEN0～4のMSX画像も一通り対応しています。
 
 HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。
 
@@ -32,13 +35,13 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 
 ## 使い方
 
-ファイルをウィンドウにドロップするか  
-ファイルボタンを使用してファイルを開いてください。
+**ファイルをウィンドウにドロップ**するか、  
+**ファイルボタン**でファイルを開いてください。
 
-インターレースモード用画像かどうかは拡張子で判定されます。  
+**インターレースモード用画像**かどうかは拡張子で判定されます。  
 （[拡張子一覧](#%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90)）
 
-メイン画像ファイルと判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。
+**メイン画像ファイルと**判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。
 
 その為、複数ファイルで構成された画像の場合は順番に開く必要があります。
 
@@ -52,7 +55,7 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 
 この順番でドロップするか、まとめてドロップしてください。
 
-まとめてドロップした場合は自動的に読み込む順番を整えて読み込みます。  
+**まとめてドロップ**した場合は**自動的に読み込む順番を整えて読み込みます。**  
 この時、1～3の分類それぞれにつき、各1個だけ読み込みます。
 
 また、ファイルボタンから開くことも可能です。  
@@ -62,144 +65,18 @@ HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつ�
 
 ## MSX実機でのロード(グラフサウルス圧縮形式)
 
-ローダーのサンプルがあります。
+グラフサウルスでCOMPRES保存した画像形式に対応しています。
 
+ローダーのサンプルは
 [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD)
+にありますが、Javascriptで見た方が分かりやすいかと思ったのが、このビューアーが生まれるきっかけでした。
 
 ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。
 
-画像ファイルの再利用はご遠慮ください。
+ただし、**画像ファイルの再利用はご遠慮ください。**
 
 ----
-
-## MSX画像の圧縮・展開 保存機能
-
-読み込み済みファイルがあれば保存・圧縮保存が可能です。
-
-また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。
-
-### 全体保存 / PLT保存 / ページ保存
-
-![プレビュー](img/gsrle_html_savebutton.png)
-
-![プレビュー](img/gsrle_html_savebutton2.png)
-
-| ボタン名 | 説明 | 補足 |
-|---|---|---|
-| PLT保存 | カラーパレットデータを保存します | グラフサウルスと違い、スロット1本分の32バイトのファイルです。 |
-| BSAVE (VRAMパレット書込) | VRAMのカラーパレットテーブルを含む範囲でBSAVEベタ形式保存 | VRAMパレットテーブルに現在のパレットを書き込みます。</br>保存サイズがVRAMパレットテーブルより小さければ、テーブルを含む領域まで保存します。|
-| BSAVE (画素のみ) | カラーパレットを含まない BSAVEベタ形式保存 | VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。|
-| GS圧縮 (画素のみ) | カラーパレットを含まない グラフサウルス圧縮形式保存 | VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。|
-| PLT保存 | カラーパレットデータを保存します | グラフサウルスと違い、スロット1本分の32バイトのファイルです。 |
-
-- 画像保存ボタンは全体保存とページ毎保存があります。
-- 設定に読み込み後自動保存機能があります
-- ファイルを何も読み込んでいないと保存ボタンは動作しません。
-
-----
-
-## 設定保存・読み込み
-
-![プレビュー](img/gsrle_html_config.png)
-
-各種設定を保存、読み込み出来ます。
-
-保存時には ```gsrle_html_config.json``` というJSONファイルが保存されます。  
-任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。
-
-読み込み時はJSONファイルを開くかドロップしてください。
-
-保存・読み込みされる設定内容：
-
-- スクリーンモード番号、インターレースモード、表示ページ
-- スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）
-- キャラクタジェネレータ・ベースアドレス
-- スプライト・ベースアドレス
-- 画面縦サイズ設定、DotAspect比、読み込み後自動保存設定
-- カラーパレットVRAM読み込み設定、TMS9918風カラー設定
-
-### 注：BSAVE保存時のファイルヘッダについて
-
-BLOADで読み込むときに、サイズ&hFFFFを越えるファイルは読みだしたデータが化けます。
-
-> 例)  
-> ```START=0, END=FFFF``` を越えるファイル  
-> ファイル全体では```&h10007```バイト以上
->
-> - VRAM全体セーブ
-> - SCREEN7,8,10,12での1ページ丸ごと保存
-
-そのため、BSAVEファイルヘッダのENDエントリはサイズが&hFFFFを越えない値を書き出します。
-ファイル自体は最後まで書き込まれまます。
-
-> 例)
->
-> - VRAM全体セーブ
->
->   ```START=0, END=FFFE``` → ```START=0, END=FFFE```  
->   実際にファイルに書きだされるVRAMの範囲は```&h0000～&hFFFF```  
->   ファイル全体のサイズは```&h10007```バイト
->
-> - SCREEN7,8,10,12での1ページ丸ごと保存
->
->   ```START=0, END=FFFE``` → ```START=0, END=FFFE```  
->   実際にファイルに書きだされるVRAMの範囲は```&h0000～&hFFFF```  
->   ファイル全体のサイズは```&h10007```バイト
-
-この対策によりデータは化けなくなりますが  
-BLOADでは&h0000～&hFFFEまでしか読み込めません。
-
-全体を読みだしたいときは独自のローダーを使用し、  
-ファイルサイズを見て読みだすようにすれば、  
-データの最後まで読み込むことが出来ます。
-
-( [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD) など)
-
-----
-
-## openMSX vram2bmp出力ファイルの表示
-
-openMSXでは```vram2bmp```でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。
-
-1. openMSXでF10キーを押してコンソールを表示
-2. コンソールで ```vram2bmp ファイル名.bmp 0 256 1024```でVRAM全体保存
-   ![openMSX console](img/openmsx_console.png)
-
-> **Note**: 保存先について
->
-> カレントフォルダは
-> 基本的にOpenMSXを起動した実行ファイルと同じ場所になっています。
->
-> 1. OpenMSX Catapultから実行した場合は ```OpenMSX\Catapult\bin```
-> 2. openmsx.exeを直接実行した場合は ```OpenMSX\```
-> ```cd```（チェンジディレクトリ）コマンドでカレントディレクトリを変えておくとファイルが整理しやすくて良いかもしれません。
->
-> **Note**: 保存先の変更例
->
-> 1. ```マイドキュメント\openMSX\``` に ```bmp``` フォルダを作成
-> 2. コンソールから ```cd $env(OPENMSX_USER_DATA)/bmp```
->
-> → マイドキュメント\openMSX\bmp\ に保存されるようになる
->
->> openMSX起動時に自動的に実行されるスクリプトに  
->> ```cd $env(OPENMSX_USER_DATA)``` を書いておけば良いかもしれません。  
->> （自分はユーザーフォルダに自動実行スクリプトを配置する方法が分からないのでやっていません）
-
-```vram2bmp```で保存されるのはRAWイメージなので普通のBMPとして表示すると実際の画面に表示されている映像とは異なる見た目になります。
-
-当ビューアではそのVRAM RAWイメージを読み込んで、MSX上での見え方で表示することが可能です。  
-（画面モードや、ベースアドレスは自分で指定してください）
-
-自分向け遊び機能ですが、内容確認などの使い道はあるかもしれません。
-
-### 表示例
-
-![display RAW BMP](img/gsrle_html_raw_bmp_preview.png)
-
-![display RAW BMP](img/gsrle_html_raw_bmp_preview2.png)
-
-HYDLIDE3 (C) T&E SOFT / D4 Enterprise
 
 ----
 
@@ -221,11 +98,135 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 - SPRATR (スプライトアトリビュートテーブル)
 - SPRPAT (スプライトパターンテーブル)
 
-※ SPRCOL (スプライトカラーテーブル) は```SPRATR (スプライトアトリビュートテーブル) - 512```にVDPが自動決定します。
+※ SPRCOL (スプライトカラーテーブル) は`SPRATR (スプライトアトリビュートテーブル) - 512`にVDPが自動決定します。
 
 ----
 
-## 設定：読み込み後自動保存
+## ファイル出力機能（ベタ画像データ・圧縮画像データ・パレットファイル・BMPファイル）
+
+読み込み済みファイルがあればベタデータ保存・圧縮保存が可能です。
+
+また、表示されている画像を右クリックすると、ブラウザの機能を使ってPNGなどの画像として保存できます。
+
+### 全体保存 / PLT保存 / ページ保存 / パターンジェネレータ保存
+
+![保存ボタンプレビュー1](img/gsrle_html_savebutton.png)
+
+![保存ボタンプレビュー2](img/gsrle_html_savebutton2.png)
+
+![保存ボタンプレビュー3](img/gsrle_html_savebutton3.png)
+
+![保存ボタンプレビュー3](img/gsrle_html_savebutton4.png)
+
+| ボタン名 | 説明 | 補足 |
+| --- | --- | --- |
+| PLT保存 | カラーパレットデータを保存します | グラフサウルスと違い、スロット1本分の32バイトのファイルです。 |
+| BSAVE (VRAMパレット書込) | VRAMカラーパレットテーブル含めてBSAVEベタ形式保存 | VRAMパレットテーブルに現在のパレットを書き込みます。</br>保存サイズがVRAMパレットテーブルより小さければ、テーブルを含む領域まで保存します。 |
+| BSAVE (画素のみ) | カラーパレットを含まない BSAVEベタ形式保存 | VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。 |
+| GS圧縮 (画素のみ) | カラーパレットを含まない グラフサウルス圧縮形式保存 | VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。 |
+| BMP出力 | BMPファイルとして書き出し | SCREENモードがインデックスカラーであればなるべくインデックスカラーで保存。</br>SCREEN8はフルカラー（スプライトが違うパレットなので）/VRAMページなら256色で保存 |
+| GS圧縮 (画素のみ) | カラーパレットを含まない グラフサウルス圧縮形式保存 | VRAMパレットテーブルにパレットを書き込みません。</br>VRAMパレットテーブルを考慮せず、ピクセルデータの範囲までを保存します。 |
+| PLT保存 | カラーパレットデータを保存します | グラフサウルスと違い、スロット1本分の32バイトのファイルです。 |
+
+- 画像保存ボタンは全体保存とページ毎保存があります。
+- 設定に読み込み後自動保存機能があります
+- ファイルを何も読み込んでいないと保存ボタンは動作しません。
+
+### 注：BSAVE保存時のファイルヘッダについて
+
+BLOADで読み込むときに、サイズ&hFFFFを越えるファイルは読みだしたデータが化けます。
+
+> 例)  
+> `START=0, END=FFFF` を越えるファイル  
+> ファイル全体では`&h10007`バイト以上
+>
+> - VRAM全体セーブ
+> - SCREEN7,8,10,12での1ページ丸ごと保存
+
+そのため、BSAVEファイルヘッダのENDエントリはサイズが&hFFFFを越えない値を書き出します。
+ファイル自体は最後まで書き込まれまます。
+
+> 例)
+>
+> - VRAM全体セーブ
+>
+>   `START=0, END=FFFE` → `START=0, END=FFFE`  
+>   実際にファイルに書きだされるVRAMの範囲は`&h0000～&hFFFF`  
+>   ファイル全体のサイズは`&h10007`バイト
+>
+> - SCREEN7,8,10,12での1ページ丸ごと保存
+>
+>   `START=0, END=FFFE` → `START=0, END=FFFE`  
+>   実際にファイルに書きだされるVRAMの範囲は`&h0000～&hFFFF`  
+>   ファイル全体のサイズは`&h10007`バイト
+
+この対策によりデータは化けなくなりますが  
+BLOADでは&h0000～&hFFFEまでしか読み込めません。
+
+全体を読みだしたいときは独自のローダーを使用し、  
+ファイルサイズを見て読みだすようにすれば、  
+データの最後まで読み込むことが出来ます。
+
+( [https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/LOADSRD) など)
+
+### 保存範囲について
+
+1. 保存時は現在表示の表示縦サイズ指定に従って保存します。
+2. BMPをロードした場合、全体出力保存時はロードしたサイズと同じ範囲を出力します。  
+   例えばVRAM128KB分のデータをロードしていたら、出力ファイルも128KBです。  
+   （BINファイルヘッダでは`0000H`-`FFFEH`ですが、実ファイルサイズはそれを超える128KBを出力します）
+
+### BMP出力について
+
+全体出力の表示範囲は読み込んだファイル形式に関係なく、画面イメージになります。
+
+#### BMP出力の種類
+
+- **全体保存**  
+  BMP出力の場合は画面イメージを出力
+  - SCREEN8の場合32ビットカラーで出力
+- **VRAMページ (PAGE0/PAGE1)**
+  - SCREEN8の場合でもインデックスカラーで出力
+- **キャラクタジェネレータ（SCREEN0～4）**
+- **スプライト**
+  - SCREEN8の場合でもインデックスカラーで出力
+  - **スプライト横並び制限**の設定が「**半透明**」の場合：  
+    インデックスカラー出力が難しいため
+    一時的に「**網掛**」に変更して出力します。
+
+#### BMP出力の画像サイズ
+
+どの画面モードでも**横512**、**縦2倍**での出力です。  
+最大サイズであるインターレースモード、横512ドットモードに合わせて拡大されます。
+
+- **SCREEN 0（WIDTH 40）、1、2、3、4、5、8、10、11**：縦横2倍。
+- **SCREEN 0（WIDTH 80） 6、7**：縦2倍。
+- **インターレースモード**の場合は縦1倍。
+- **縦の範囲**は表示設定に従います。
+
+**ドットアスペクト比**は1:1で出力します。
+
+#### BMP出力のカラー形式
+
+可能な限りインデックスカラーで出力します。
+無理な場合は32ビットカラーで出力します。
+
+ただし、RGB888での表示用レンダリングバッファから、
+パレット逆引きでインデックスカラーに戻すので、
+パレットに同一色がある場合は正確な出力とはなりません。
+
+- **SCREEN8**：  
+  スプライトが別パレットの為、全体出力は32ビットGBで出力します。  
+  8ビットインデックスカラーの出力が欲しい場合は、VRAMページビューのBMP出力を使ってください。
+- **SCREEN6,9**：  
+  4ビットカラーモードでの出力になります。  
+  （BMPに2bpp形式は存在しないのと、スプライトが16色なので）
+- **自然画モード**：  
+  32ビットカラーで出力します。
+- グレースケール表示時：
+  グレースケールで出力します。
+
+## 画像読み込み後の自動保存設定
 
 画像の読み込みが終わった後に指定の形式で自動保存するオプション
 
@@ -236,6 +237,73 @@ VDPで設定可能な値がドロップダウンリストに登録されてい�
 | BSAVE(VRAMパレット書込) | BSAVE形式（VRAMカラーパレットテーブルを含む）画像ファイル | BSAVEファイルに含む ||
 | BSAVE+PLT分離 | BSAVE形式（VRAMカラーパレットテーブルを含まない）画像ファイルと、PLTファイルのセット | PLTファイル |
 | GS圧縮+PLT分離 | グラフサウルス圧縮形式画像ファイルと、PLTファイルのセット | PLTファイル |
+
+----
+
+## 表示・同さ設定の保存と読み込み
+
+![プレビュー](img/gsrle_html_config.png)
+
+表示や動作に関する各種設定をまとめて保存、読み込み出来ます。
+
+保存時には `gsrle_html_config.json` というJSONファイルが保存されます。  
+任意の名前.jsonに変更して保管しておくと、必要なときに素早く設定を変更できます。
+
+読み込み時はJSONファイルを開くかドロップしてください。
+
+対象となる設定内容：
+
+- スクリーンモード番号、インターレースモード、表示ページ
+- スプライト表モード（8x8、16x16、2倍表示、スプライト表示/非表示）
+- キャラクタジェネレータ・ベースアドレス
+- スプライト・ベースアドレス
+- 画面縦サイズ設定、DotAspect比、読み込み後自動保存設定
+- カラーパレットVRAM読み込み設定、TMS9918風カラー設定
+
+----
+
+## openMSX vram2bmp出力ファイルの読み込み表示
+
+openMSXでは`vram2bmp`でVRAM全体のRAWファイルに相当するBMPファイルを出力できます。
+
+1. openMSXでF10キーを押してコンソールを表示
+2. コンソールで `vram2bmp ファイル名.bmp 0 256 1024`でVRAM全体保存
+   ![openMSX console](img/openmsx_console.png)
+
+> **Note**: 保存先について
+>
+> カレントフォルダは
+> 基本的にOpenMSXを起動した実行ファイルと同じ場所になっています。
+>
+> 1. OpenMSX Catapultから実行した場合は `OpenMSX\Catapult\bin`
+> 2. openmsx.exeを直接実行した場合は `OpenMSX\`
+> `cd`（チェンジディレクトリ）コマンドでカレントディレクトリを変えておくとファイルが整理しやすくて良いかもしれません。
+>
+> **Note**: 保存先の変更例
+>
+> 1. `マイドキュメント\openMSX\` に `bmp` フォルダを作成
+> 2. コンソールから `cd $env(OPENMSX_USER_DATA)/bmp`
+>
+> → マイドキュメント\openMSX\bmp\ に保存されるようになる
+>
+>> openMSX起動時に自動的に実行されるスクリプトに  
+>> `cd $env(OPENMSX_USER_DATA)` を書いておけば良いかもしれません。  
+>> （自分はユーザーフォルダに自動実行スクリプトを配置する方法が分からないのでやっていません）
+
+`vram2bmp`で保存されるのはRAWイメージなので普通のBMPとして表示すると実際の画面に表示されている映像とは異なる見た目になります。
+
+当ビューアではそのVRAM RAWイメージを読み込んで、MSX上での見え方で表示することが可能です。  
+（画面モードや、ベースアドレスは自分で指定してください）
+
+自分向け遊び機能ですが、内容確認などの使い道はあるかもしれません。
+
+### 表示例
+
+![display RAW BMP](img/gsrle_html_raw_bmp_preview.png)
+
+![display RAW BMP](img/gsrle_html_raw_bmp_preview2.png)
+
+HYDLIDE3 (C) T&E SOFT / D4 Enterprise
 
 ----
 
@@ -268,8 +336,8 @@ VDPシミュレートの検証で付けている処理です。
    表示ページは奇数を指定する
 
    1ページのVRAMサイズ
-   - SCREEN0～6,9は```0x8000```
-   - SCREEN7,8,10～12は```0x10000```
+   - SCREEN0～6,9は`0x8000`
+   - SCREEN7,8,10～12は`0x10000`
 
 ## 補足：インターレース＆フリップモード
 
@@ -277,143 +345,145 @@ VDPシミュレートの検証で付けている処理です。
 
 ![interlace button](img/gsrle_html_topbar.png)
 
-```Interlace```にチェックを付けるとインターレース＆フリップモードになります。  
+`Interlace`にチェックを付けるとインターレース＆フリップモードになります。  
 市販ソフトではDPSSGがSCREEN7で使用して、VGAに近い解像度を実現していました。
 
 ※ SCREEN0～4では使用できません
 
-※ ```2Page HScroll```と同様に強制的に表示ページを奇数ページに変更します。
+※ `2Page HScroll`と同様に強制的に表示ページを奇数ページに変更します。
 
 ----
 
-## 対応拡張子
+## 対応する拡張子について
 
 拡張子で判定して、インターレースモードでの読込先ページを決定します。
 
 1. パレットの有無、画面サイズ、圧縮などはデータの内容を見て判定します。
-2. SC1はSSCREEN12のインターレース画像として扱います。
-3. SCREEN1画像の場合、SC1の代わりにSR1を使用してみてください。
-4. SCREEN 9は未テストです。
-5. 保存時は現在表示している縦サイズで保存します。
+2. 画面モードが特定できる拡張子は自動で画面モードを変更します。  
+   （既に合致する画面モードであれば変更しません）
+3. BINやVRMは画面モードを変更しません。
+4. SC1はSSCREEN12のインターレース画像として扱います。
+5. SCREEN1画像の場合、SC1の代わりにSR1を使用してみてください。
+6. SCREEN 9は未テストです。
 
-### ノンインターレース ビットマップ画像
-
-| 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|---|---|---|---|---|
-| .SC5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | BSAVE
-| .SC6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | BSAVE
-| .SC7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | BSAVE
-| .SC8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | BSAVE
-| .S10 | SCREEN 10 | non-interlace    | .S10 |.SRA | BSAVE
-| .S12 | SCREEN 12 | non-interlace    | .S12 |.SRC | BSAVE
-| .SR5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | GRAPH SAURUS
-| .SR6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | GRAPH SAURUS
-| .SR7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | GRAPH SAURUS
-| .SR8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | GRAPH SAURUS
-| .SRA | SCREEN 10 | non-interlace    | .S10 |.SRA | GRAPH SAURUS
-| .SRC | SCREEN 12 | non-interlace    | .S12 |.SRC | GRAPH SAURUS
-| .SRS | SCREEN 12 | non-interlace    | .S12 |.SRS | GRAPH SAURUS
-
-### インターレース（2枚組） ビットマップ画像
+### ノンインターレース（通常）：ビットマップ系画面（SCREEN5～12）データ
 
 | 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|---|---|---|---|---|
-| .S50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | BSAVE interlace
-| .S51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | BSAVE interlace
-| .S60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | BSAVE interlace
-| .S61 | SCREEN  6 | interlace page:1 | .S61 |.R61 | BSAVE interlace
-| .S70 | SCREEN  7 | interlace page:0 | .S70 |.R70 | BSAVE interlace
-| .S71 | SCREEN  7 | interlace page:1 | .S71 |.R71 | BSAVE interlace
-| .S80 | SCREEN  8 | interlace page:0 | .S80 |.R80 | BSAVE interlace
-| .S81 | SCREEN  8 | interlace page:1 | .S81 |.R81 | BSAVE interlace
-| .SA0 | SCREEN 10 | interlace page:0 | .SA0 |.RA0 | BSAVE interlace
-| .SA1 | SCREEN 10 | interlace page:1 | .SA1 |.RA1 | BSAVE interlace
-| .SC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | BSAVE interlace
-| .SC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | BSAVE interlace
-| .R50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | GRAPH SAURUS interlace
-| .R51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | GRAPH SAURUS interlace
-| .R60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | GRAPH SAURUS interlace
-| .R61 | SCREEN  6 | interlace page:1 | .S61 |.R61 | GRAPH SAURUS interlace
-| .R70 | SCREEN  7 | interlace page:0 | .S70 |.R70 | GRAPH SAURUS interlace
-| .R71 | SCREEN  7 | interlace page:1 | .S71 |.R71 | GRAPH SAURUS interlace
-| .R80 | SCREEN  8 | interlace page:0 | .S80 |.R80 | GRAPH SAURUS interlace
-| .R81 | SCREEN  8 | interlace page:1 | .S81 |.R81 | GRAPH SAURUS interlace
-| .RA0 | SCREEN 10 | interlace page:0 | .SA0 |.RA0 | GRAPH SAURUS interlace
-| .RA1 | SCREEN 10 | interlace page:1 | .SA1 |.RA1 | GRAPH SAURUS interlace
-| .RC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | GRAPH SAURUS interlace
-| .RC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | GRAPH SAURUS interlace
+| --- | --- | --- | --- | --- | --- |
+| .SC5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | BSAVE |
+| .SC6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | BSAVE |
+| .SC7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | BSAVE |
+| .SC8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | BSAVE |
+| .S10 | SCREEN 10 | non-interlace    | .S10 |.SRA | BSAVE |
+| .S12 | SCREEN 12 | non-interlace    | .S12 |.SRC | BSAVE |
+| .SR5 | SCREEN  5 | non-interlace    | .SC5 |.SR5 | GRAPH SAURUS |
+| .SR6 | SCREEN  6 | non-interlace    | .SC6 |.SR6 | GRAPH SAURUS |
+| .SR7 | SCREEN  7 | non-interlace    | .SC7 |.SR7 | GRAPH SAURUS |
+| .SR8 | SCREEN  8 | non-interlace    | .SC8 |.SR8 | GRAPH SAURUS |
+| .SRA | SCREEN 10 | non-interlace    | .S10 |.SRA | GRAPH SAURUS |
+| .SRC | SCREEN 12 | non-interlace    | .S12 |.SRC | GRAPH SAURUS |
+| .SRS | SCREEN 12 | non-interlace    | .S12 |.SRS | GRAPH SAURUS |
 
-### キャラクタージェネレータ系（SCREEN 0～4）
+### インターレース（2枚組）：ビットマップ系画面画面（SCREEN5～12）データ
 
 | 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|---|---|---|---|---|
-| .TX1 | SCREEN 0 WIDTH 40 | non-interlace    | .TX1 |.TX1 | BSAVE / GS
-| .TX2 | SCREEN 0 WIDTH 80 | non-interlace    | .TX2 |.TX2 | BSAVE / GS
-| .GR1 | SCREEN 1          | non-interlace    | .GR1 |.GR1 | BSAVE / GS
-| .SR0 | SCREEN 0 WIDTH 40 | non-interlace    | .SR0 |.SR0 | BSAVE / GS
-| .SR1 | SCREEN 1          | non-interlace    | .SR1 |.SR1 | BSAVE / GS
-| .SC2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | BSAVE
-| .SC3 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | BSAVE
-| .SC4 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | BSAVE
-| .SR2 | SCREEN  2 | non-interlace    | .SC2 |.SR2 | GRAPH SAURUS
-| .SR4 | SCREEN  3 | non-interlace    | .SC3 |.SR4 | GRAPH SAURUS
-| .SR3 | SCREEN  4 | non-interlace    | .SC4 |.SR3 | GRAPH SAURUS
+| --- | --- | --- | --- | --- | --- |
+| .S50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | BSAVE interlace |
+| .S51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | BSAVE interlace |
+| .S60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | BSAVE interlace |
+| .S61 | SCREEN  6 | interlace page:1 | .S61 |.R61 | BSAVE interlace |
+| .S70 | SCREEN  7 | interlace page:0 | .S70 |.R70 | BSAVE interlace |
+| .S71 | SCREEN  7 | interlace page:1 | .S71 |.R71 | BSAVE interlace |
+| .S80 | SCREEN  8 | interlace page:0 | .S80 |.R80 | BSAVE interlace |
+| .S81 | SCREEN  8 | interlace page:1 | .S81 |.R81 | BSAVE interlace |
+| .SA0 | SCREEN 10 | interlace page:0 | .SA0 |.RA0 | BSAVE interlace |
+| .SA1 | SCREEN 10 | interlace page:1 | .SA1 |.RA1 | BSAVE interlace |
+| .SC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | BSAVE interlace |
+| .SC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | BSAVE interlace |
+| .R50 | SCREEN  5 | interlace page:0 | .S50 |.R50 | GRAPH SAURUS interlace |
+| .R51 | SCREEN  5 | interlace page:1 | .S51 |.R51 | GRAPH SAURUS interlace |
+| .R60 | SCREEN  6 | interlace page:0 | .S60 |.R60 | GRAPH SAURUS interlace |
+| .R61 | SCREEN  6 | interlace page:1 | .S61 |.R61 | GRAPH SAURUS interlace |
+| .R70 | SCREEN  7 | interlace page:0 | .S70 |.R70 | GRAPH SAURUS interlace |
+| .R71 | SCREEN  7 | interlace page:1 | .S71 |.R71 | GRAPH SAURUS interlace |
+| .R80 | SCREEN  8 | interlace page:0 | .S80 |.R80 | GRAPH SAURUS interlace |
+| .R81 | SCREEN  8 | interlace page:1 | .S81 |.R81 | GRAPH SAURUS interlace |
+| .RA0 | SCREEN 10 | interlace page:0 | .SA0 |.RA0 | GRAPH SAURUS interlace |
+| .RA1 | SCREEN 10 | interlace page:1 | .SA1 |.RA1 | GRAPH SAURUS interlace |
+| .RC0 | SCREEN 12 | interlace page:0 | .SC0 |.RC0 | GRAPH SAURUS interlace |
+| .RC1 | SCREEN 12 | interlace page:1 | .SC1 |.RC1 | GRAPH SAURUS interlace |
 
-### 特殊 バイナリファイル（BSAVE/BLOAD）
+### キャラクタージェネレータ(PCG)タイプの画面データ（SCREEN 0～4）
+
+| 拡張子 | SCREEN番号 | インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
+| --- | --- | --- | --- | --- | --- |
+| .TX1 | SCREEN 0 WIDTH 40 | non-interlace | .TX1 |.TX1 | BSAVE / GS |
+| .TX2 | SCREEN 0 WIDTH 80 | non-interlace | .TX2 |.TX2 | BSAVE / GS |
+| .GR1 | SCREEN 1          | non-interlace | .GR1 |.GR1 | BSAVE / GS |
+| .SR0 | SCREEN 0 WIDTH 40 | non-interlace | .SR0 |.SR0 | BSAVE / GS |
+| .SR1 | SCREEN 1          | non-interlace | .SR1 |.SR1 | BSAVE / GS |
+| .SC2 | SCREEN  2 | non-interlace | .SC2 |.SR2 | BSAVE |
+| .SC3 | SCREEN  3 | non-interlace | .SC3 |.SR4 | BSAVE |
+| .SC4 | SCREEN  4 | non-interlace | .SC4 |.SR3 | BSAVE |
+| .SR2 | SCREEN  2 | non-interlace | .SC2 |.SR2 | GRAPH SAURUS |
+| .SR4 | SCREEN  3 | non-interlace | .SC3 |.SR4 | GRAPH SAURUS |
+| .SR3 | SCREEN  4 | non-interlace | .SC4 |.SR3 | GRAPH SAURUS |
+
+### 特殊：バイナリファイル（BSAVE/BLOAD）
 
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|------|---|---|---|
-| .BIN | 現在の画面モード | .BIN | .BIN | 汎用
-| .VRM | 現在の画面モード | .VRM | .GSR | BSAVE RAWイメージ - 新10倍で読み込み変換したもの等
-| .SPR | 現在の画面モード | .SPR | .SPR | スプライト
-| .SPC | 現在の画面モード | .SPC | .SPC | スプライトカラー
-| .NAM | 現在の画面モード | .NAM | .NAM | SC2 パターンネーム
-| .COL | 現在の画面モード | .COL | .COL | SC2 パターンカラー
-| .GEN | 現在の画面モード | .GEN | .GEN | SC2 パターンジェネレータ
-| .PAT | 現在の画面モード | .PAT | .PAT | SC2 パターンジェネレータ
-| .NM  | 現在の画面モード | .NM' | .NM' | SC2 パターンネーム
-| .CL  | 現在の画面モード | .CL' | .CL' | SC2 パターンカラー
-| .GN  | 現在の画面モード | .GN' | .GN' | SC2 パターンジェネレータ
-| .CL0 | 現在の画面モード | .CL0 | .CL0 | SC2 パターンカラー
-| .CL1 | 現在の画面モード | .CL1 | .CL1 | SC2 パターンカラー
-| .CL2 | 現在の画面モード | .CL2 | .CL2 | SC2 パターンカラー
-| .GN0 | 現在の画面モード | .GN0 | .GN0 | SC2 パターンジェネレータ
-| .GN1 | 現在の画面モード | .GN1 | .GN1 | SC2 パターンジェネレータ
-| .GN2 | 現在の画面モード | .GN2 | .GN2 | SC2 パターンジェネレータ
+| --- | ------ | --- | --- | --- |
+| .BIN | 現在の画面モード | .BIN | .BIN | 汎用 |
+| .VRM | 現在の画面モード | .VRM | .GSR | BSAVE RAWイメージ - 新10倍で読み込み変換したもの等 |
+| .SPR | 現在の画面モード | .SPR | .SPR | スプライト |
+| .SPC | 現在の画面モード | .SPC | .SPC | スプライトカラー |
+| .NAM | 現在の画面モード | .NAM | .NAM | SC2 パターンネーム |
+| .COL | 現在の画面モード | .COL | .COL | SC2 パターンカラー |
+| .GEN | 現在の画面モード | .GEN | .GEN | SC2 パターンジェネレータ |
+| .PAT | 現在の画面モード | .PAT | .PAT | SC2 パターンジェネレータ |
+| .NM  | 現在の画面モード | .NM' | .NM' | SC2 パターンネーム |
+| .CL  | 現在の画面モード | .CL' | .CL' | SC2 パターンカラー |
+| .GN  | 現在の画面モード | .GN' | .GN' | SC2 パターンジェネレータ |
+| .CL0 | 現在の画面モード | .CL0 | .CL0 | SC2 パターンカラー |
+| .CL1 | 現在の画面モード | .CL1 | .CL1 | SC2 パターンカラー |
+| .CL2 | 現在の画面モード | .CL2 | .CL2 | SC2 パターンカラー |
+| .GN0 | 現在の画面モード | .GN0 | .GN0 | SC2 パターンジェネレータ |
+| .GN1 | 現在の画面モード | .GN1 | .GN1 | SC2 パターンジェネレータ |
+| .GN2 | 現在の画面モード | .GN2 | .GN2 | SC2 パターンジェネレータ |
 
-### 特殊 RAWイメージ
-
-| 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|------|---|---|---|
-| .BMP | 現在の画面モード | .SCR | .GSR | BMPヘッダ+RAWイメージ - OpenMSX vram2bmp の非圧縮BMP
-| .SCR | 現在の画面モード | .SCR | .GSR | RAWイメージ
-| .GSR | 現在の画面モード | .SCR | .GSR | RAWイメージ
-
-### 特殊 範囲保存イメージ
+### 特殊：RAWイメージ
 
 | 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
-|---|------|---|---|---|
-| .CPY | 現在の画面モード | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CP5 | SCREEN  5 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CP6 | SCREEN  6 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CP7 | SCREEN  7 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CP8 | SCREEN  8 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CPA | SCREEN 10 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .CPC | SCREEN 12 | .VRM | .GSR | 範囲画像（BASIC COPY文）
-| .GL5 | SCREEN  5 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
-| .GL6 | SCREEN  6 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
-| .GL7 | SCREEN  7 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
-| .GL8 | SCREEN  8 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
-| .GLA | SCREEN 10 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
-| .GLC | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風）
-| .GLS | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子）
+| --- | ------ | --- | --- | --- |
+| .BMP | 現在の画面モード | .SCR | .GSR | BMPヘッダ+RAWイメージ - OpenMSX vram2bmp の非圧縮BMP |
+| .SCR | 現在の画面モード | .SCR | .GSR | RAWイメージ |
+| .GSR | 現在の画面モード | .SCR | .GSR | RAWイメージ |
+
+### 特殊：範囲保存イメージ
+
+| 拡張子 | SCREEN番号 & インターレースモード | BSAVE拡張子 | GS拡張子 | 補足 |
+| --- | ------ | --- | --- | --- |
+| .CPY | 現在の画面モード | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CP5 | SCREEN  5 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CP6 | SCREEN  6 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CP7 | SCREEN  7 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CP8 | SCREEN  8 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CPA | SCREEN 10 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .CPC | SCREEN 12 | .VRM | .GSR | 範囲画像（BASIC COPY文） |
+| .GL5 | SCREEN  5 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子） |
+| .GL6 | SCREEN  6 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風） |
+| .GL7 | SCREEN  7 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子） |
+| .GL8 | SCREEN  8 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子） |
+| .GLA | SCREEN 10 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風） |
+| .GLC | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子風） |
+| .GLS | SCREEN 12 | .VRM | .CPR | 範囲画像（BASIC COPY文/グラフサウルス拡張子） |
 
 ----
 
 ## PNGやBMPからMSX用画像への変換について
 
 本ツールにはMSX画像形式からの圧縮や展開のみをサポートしています。  
-PNGなどからの変換機能が欲しい場合は他のツールを使用してください。
+PNGなどからの変換（読み込み）機能が欲しい場合は他のツールを使用してください。
 
 (※vram2bmpで保存したbmpはVRAMのRAWイメージなので特別にそのまま表示可能です。)
 
@@ -432,21 +502,24 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 
 ### ドットアスペクト比 設定値リスト
 
-1. **「1.177 : 1」** (1 : 0.850)  
+![ドットアスペクト比設定](img/gsrle_html_config_dot_aspect.png)
+
+#### **「1.177 : 1」** (1 : 0.850)  
      openMSXの**Horisontal stretch**で設定するなら **272 (Realistic)**。
 
      Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。
 
-2. **「1.166 : 1」**  (1 : 0.858)  
+#### **「1.166 : 1」**  (1 : 0.858)  
    openMSXの**Horisontal stretch**で設定するなら **274**。
 
    MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。
+   
    約1.15～約1.17で諸説あり、一旦、中間値を採用した物。
    
    MSXの解像度をそのまま4:3を覆うように広げた形。 
    当時そのような基準で調整していた人が多いかもしれない。  
 
-3. **「1.154 : 1」**  (1 : 0.8866)  
+#### **「1.154 : 1」**  (1 : 0.8866)  
    openMSXの**Horisontal stretch**で設定するなら **277**  
 
    [TomHさんの計算](https://www.msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)をもとにした設定値。
@@ -455,9 +528,9 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
    >
    >256サイクルのピクセル、1ピクセルあたり2/3の色サイクルは、ライン全体の75%に非常に近いピクセル数です。つまり、各ピクセルはラインの1/(227.5 * 1.5)です。ラインの約52/64が見えるということは、64 / (227.5 * 1.5 * 52) = 64 / 17745となります。"
     
-   ```(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693```
+   `(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693`
 
-4. **「1.133 : 1」**  (1 : 0.882)  
+#### **「1.133 : 1」**  (1 : 0.882)  
      openMSXの**Horisontal stretch**で設定するなら **282**か**283**
 
    [FRS氏の計算](https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par)を元にした設定値。
@@ -469,18 +542,18 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
    >
    >右境界の最後の 4.647799 ピクセルがオーバースキャンとして画面から外れてしまいます
 
-   ```(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756```  
+   `(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756`  
    
-   他にPAL信号をベースに計算した1.1375:1(1:0.879)という説もあるようです。  
+#### 1.1375:1 ？
+
+   他にPAL信号をベースに計算した1.1375:1(1:0.879)という[説](https://x.com/spacemoai/status/1928869425014251590?s=20)もあるようです。  
    （openMSXの**Horisontal stretch**で設定するなら **281**か**282**）
    
-   https://x.com/spacemoai/status/1928869425014251590?s=20
-
    >284.75ピクセル×243ラインは4:3のアスペクト比に収まらなければならないので、(284.75:4) : (243:3) ≈ 1.1375:1 となります。
 
-   ```(284.75:4) : (243:3) ≈ 1.1375:1```
+   `(284.75:4) : (243:3) ≈ 1.1375:1`
 
-5. **「1 : 1」**  
+#### **「1 : 1」**  
     openMSXの**Horisontal stretch**で設定するなら **320**。
 
     いわゆるドットバイドット。  
@@ -494,23 +567,44 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
 
 ## 使用許諾
 
-### 禁止事項
-
-音楽データや画像ファイルの再利用はご遠慮ください。（全体的に）
-
 ### 再利用可能なもの
 
-画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。
-改変なども可能です。
+画像ファイル以外のHTML、CSS、JSファイルはご自由に利用してください。  
+改変も自由です。  
+著作権表示なども不要です。
+
+### 禁止事項
+
+音楽データや画像ファイルの再利用は禁止とします。（全体に）
 
 ### 引責事項
 
-転載や改変についてサポートは致しかねます。  
-また、このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。
+このツールの使用による問題が起きた場合に、当方は責任を負わないものとします。
+
+また、転載や改変をされたものついて当方ではサポート致しません。
 
 ----
 
 ## 更新履歴
+
+- 2026/08/25 [ver.0.33](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z)
+  - スプライトパターンジェネレータ部の色が白黒になっていなかったバグの修正。
+  - グレースケールをRGB独立ガンマを使用した自然な計算式に変更。
+  - BMP出力ボタンを追加。
+    - 画面サイズはどの画面モードでも横512、縦2倍での出力です。  
+      最大サイズであるインターレースモード、横512ドットモードに合わせて拡大されます。
+      - SCREEN 0（WIDTH 40）、1、2、3、4、5、8、10、11：縦横2倍
+      - SCREEN 0（WIDTH 80） 6、7：縦2倍
+      - インターレースモードの場合は縦1倍
+    - 可能であれば元のインデックスカラー形式で出力。
+      - ただし、RGB888での表示用レンダリングバッファから、
+        パレット逆引きでインデックスカラーに戻すので、
+        パレットに同一色がある場合は正確な出力とはなりません。
+      - SCREEN8はスプライトが別パレットの為、全体出力は32ビットGBで出力します。  
+        8ビットインデックスカラーの出力が欲しい場合は、VRAMページビューのBMP出力を使ってください。
+      - SCREEN6,9は4ビットカラーモードでの出力になります。  
+        BMPに2bpp形式は存在しないのと、スプライトが16色なので。
+      - 自然画モードは32ビットRGBで出力します。
 
 - 2026/02/02 [ver.0.32](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_032.7z)
   - デフォルトのピクセル縦横比を1.228:1から1.166:1に変更。  
@@ -611,7 +705,7 @@ PNGなどからの変換機能が欲しい場合は他のツールを使用し�
   - 仮に HTML5 MSX GRAPHICS Viewer ver.0.12 とした。
   - 画面モードの変更や各種画面設定を変更できるようにUIや処理追加。
   - スプライトモード1と2に対応。表示サイズモードやスプライト非表示スイッチも追加。
-  - openMSXで ```VRAM2bmp filename.bmp 0 256 1024``` として保存したBMPに対応
+  - openMSXで `VRAM2bmp filename.bmp 0 256 1024` として保存したBMPに対応
     （画面モードやベースアドレスは自分で指定）
   - SCREEN0～12まで正式対応。
   - SCREEN0 WIDTH80でのブリンクは非対応
