@@ -1,12 +1,12 @@
-#  Binary Editor Bz 1.9.9.1 for MSX
+#  Binary Editor Bz 1.9.9.4 MSX user cusctom
 
 Binary Editor Bzは
 構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。 
 
 Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
 
-  - インストーラ―版 [BzEditor-1.9.9.1-for-msx.exe](BzEditor-1.9.9.1-for-msx.exe)
-  - ポータブル版 [Bz1991Portable-for-MSX.zip](Bz1991Portable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.4-for-msx.exe](BzEditor-1.9.9.4-for-msx.exe)
+  - ポータブル版 [Bz1994Portable-for-MSX.zip](Bz1994Portable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
@@ -14,13 +14,54 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
   https://devil-tamachan.github.io/BZDoc/
 
 
-### ビットマップ表示の追加機能
+![1bit color 8x8 tile](../img/BzEditor_for_msx.png)
+
+
+## テキストエンコード
+
+右側の文字表示エリアは文字エンコードが選べます。
+本カスタム版ではMSX ANK文字への対応を追加しています。
+
+文字列検索時は表示中のエンコードに従ってバイナリに変換し検索します。
+
+| タイプ | 解説                                   |
+| ------ | -------------------------------------- |
+| ASCII  | ASCIIコードで表示します。              |
+| SJIS   | シフトJISコードで表示します。          |
+| UTF-16 | Unicode (UTF-16)で表示します。         |
+| JIS    | JISコードで表示します。                |
+| EUC    | EUCコードで表示します。                |
+| UTF8   | Unicode (UTF-8)で表示します。          |
+| EBCDIC | EBCDICコードで表示します。             |
+| EPWING | EPWING(電子ブック)コードで表示します。 |
+| MSX    | MSX ANKコードで表示します。            |
+
+![MSX Character encode](../img/BzEditor_for_msx_ank.png)
+
+### MSX-FONT
+
+文字エンコードが **MSX** の時、
+- bugfireさんの
+  [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
+  に同梱されている、
+  **MSX-FONT.tff**がOSにインストールされていれば、
+  自動的に **MSX-FONT** に切り替わります。
+
+- **MSX-FONT**がインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
+- 他のエンコードでは設定で指定したフォントになります。
+
+## ビットマップ表示の追加機能
 
 ビットマップビューにMSX向けの機能を追加拡張しました。  
 他に、ビットマップビュー周りのバグを修正しています。
 
+- ※ ビットマップビューは**表示**→**ビットマップ表示**
 
-![1bit color 8x8 tile](../img/BzEditor_for_msx.png)
+- ※ ビットマップビューのオプション変更はビットマップビュー上で右クリックを押したときに出るコンテキストメニューから
+
+- ※ Address Tooltipはマウスと被るとコンテキストメニューが出せないなど邪魔な時があるので、ストレスを感じたらOFFにしてみてください。
+
+### MSX向けビットマップ表示の概要
 
 - 1bit color 8x8 （フォントやキャラ用） ... SCREEN 0,1,2,4 / SPRITE / FONT
 - 2bit color ... SCREEN 6,9
@@ -47,13 +88,14 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 
 （Address Tooltipは意外と邪魔な時があるので、イラっとしたらOFFにすると良いです）
 
-![8bit color YJK](../img/BzEditor_for_msx_2.png)
+![8bit color YJK](../img/BzEditor_for_msx_2.png)  
 
 | カラー形式 | カラーパレット | 表示幅 | 表示用途 |
 |---|---|---|---|
 | tile/1bit color 8x8   | ---      | width 256 | SCREEN 0/1/2/4、SPRITE、FONT等 8x8ドットキャラ表示 |
 | tile/1bit color 8x16  | ---      | width 256 | 16x16 SPRITE等 |
 | tile/1bit color 16x16 | ---      | width 256 | 漢字ROM等 |
+| tile/1bit color 16x8  | ---      | width 256 | ハイドライド3 MSX2版 漢字フォント |
 | 2bit color            | MSX_logo |width 512 | SCREEN 6/9、MSX起動ロゴ等 |
 | 4bit color            | MSX16    | width 256 | SCREEN 5 |
 | 4bit color            | MSX16    | width 512 | SCREEN 7 |
@@ -61,8 +103,10 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 | 8bit color YJK/RGB    | MSX16    | width 256 | SCREEN 10/11 |
 | 8bit color YJK         | ---     | width 256 | SCREEN 12 |
 
+![1bit color 16x8 tile](../img/BzEditor_for_msx_1bpp_16x8.png)  
 
 ### おまけ：特殊タイルモード
+
 ![Hierarchical menu](../img/BzEditor_for_msx_4.png)
 
 | カラー形式 | カラーパレット | 変換処理 | 表示用途 |
@@ -128,6 +172,12 @@ javascript対応ブラウザで使用してください。
 （バイナリエディタによってダンプリストのフォーマットがまちまちなので）
 
 ## 変更履歴
+
+- 2026/09/09
+  - テキストビューのエンコードに「MSX」（MSXのANK文字）を追加
+  - 内部をUNICODEベースに変更
+  - ソースコードのエンコードをUTF-8に変更（SJISではトランプ記号等が書けないので）
+  - ビットマップビューに 1bpp 16x8 (ハイドライド3 MSX2版 漢字フォント用)を追加
 
 - 2025/08/03  
   - パレット変換ツールをダンプリストにも対応
