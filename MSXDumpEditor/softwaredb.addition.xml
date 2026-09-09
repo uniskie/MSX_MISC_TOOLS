@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE softwaredb SYSTEM "softwaredb1.dtd">
+<softwaredb>
+<![CDATA[
+
+... and additinal roms.
+
+]]>
+  <!-- software title="Hydlide 3 - The Space Memories" system="MSX2" company="T&amp;ESOFT" year="1987" country="JP" genmsxid="992">
+    <rom sha1="391d07c3772f7245b2c11236f67929c9e499e56f" type="ASCII8" remark="Revision 8809D" />
+  </software -->
+
+  <!-- software title="Pachicom" system="MSX" company="Toshiba-EMI" year="1985" country="JP" genmsxid="592">
+    <rom sha1="39913a574e5c4ff316852868f179dbf3a80d514c" type="Mirrored" remark="Revision 2" />
+  </software -->
+
+  <software title="XeGraDeR" system="MSX2" company="Naito Tokihiro" year="2025" country="JP" genmsxid="xxx">
+    <rom sha1="dba98d2b999bb9d5c77f33a6f03146d8ca8fb9fa" type="ASCII8_MOD" remark="Protected" />
+  </software>
+
+  <software title="MUGI" system="MSX2" company="Hando no Game Channel" year="2026" country="JP" genmsxid="xxx">
+    <rom sha1="ec3e101059ee73761f900260b045e2fd5dca28ad" type="48KB" remark="" />
+  </software>
+
+  <software title="MSX Diagnosis Cartridg" system="MSX" company="Illegal function call" year="2025" country="JP" genmsxid="xxx">
+    <rom sha1="c6e2765affae97d96f8ea17033eb92c5145fb40f" type="32KB" remark="V1.2.3J" />
+  </software>
+
+  <software title="Shogun" system="MSX" company="Nippon Dexter" year="1987" country="JP" genmsxid="950">
+    <rom sha1="16351e6a7d7fc38c23b54ee15ac6f0275621ba96" type="ASCII8SRAM8" status="GoodMSX" />
+  </software>
+
+  <software title="The Castle" system="MSX" company="ASCII" year="1986" country="JP" genmsxid="752">
+    <rom sha1="2F9B35F92BD61B65CB51EBD7926D470D57C60C42" type="Mirrored" status="Author" remark="Demo Version" />
+  </software>
+
+  <software title="Boulder Dash" system="MSX" company="First Star Software" year="1986" country="GB" genmsxid="2697">
+    <rom sha1="14fae375b81c86f71e872adca792c23aafac66a0" type="Mirrored" status="GoodMSX missed" remark="Champion Edition JP" />
+  </software>
+
+  <software title="The Black Bass" system="MSX" company="GAMU/HOT-B" year="1985" country="JP">
+    <rom sha1="4ebe0d87f11cb669779b8ddbfcda631fc43e71f6" type="Mirrored" remark="TAKERU ROM" status="Author" />
+  </software>
+
+</softwaredb>
