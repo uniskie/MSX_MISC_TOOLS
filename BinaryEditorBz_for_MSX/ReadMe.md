@@ -1,12 +1,17 @@
-#  Binary Editor Bz 1.9.9.4 MSX user cusctom
+#  Binary Editor Bz / MSX User Custom
 
-Binary Editor Bzは
+Binary Editor Bz for MSX Version 1.9.9.6
+
+[c.mosさん](http://www.vcraft.jp/)作、[Binary Editor Bz](http://www.vcraft.jp/soft/bz.html)の[tamachanさんの改造版](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加した物です。
+
+Windows版のみの提供です。
+
 構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。 
 
 Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
 
-  - インストーラ―版 [BzEditor-1.9.9.4-for-msx.exe](BzEditor-1.9.9.4-for-msx.exe)
-  - ポータブル版 [Bz1994Portable-for-MSX.zip](Bz1994Portable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.6-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.6-for-msx.exe)
+  - ポータブル版 [Bz1996Portable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1996Portable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
@@ -35,6 +40,7 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 | EBCDIC | EBCDICコードで表示します。             |
 | EPWING | EPWING(電子ブック)コードで表示します。 |
 | MSX    | MSX ANKコードで表示します。            |
+| CUSTOM | ユーザー定義コードで表示します。       |
 
 ![MSX Character encode](../img/BzEditor_for_msx_ank.png)
 
@@ -49,6 +55,95 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 
 - **MSX-FONT**がインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
 - 他のエンコードでは設定で指定したフォントになります。
+
+### CUSTOM ユーザー定義 キャラセット
+
+独自のマルチバイトエンコードを定義して使用できます。
+
+パス：`%APPDATA%BzEditor\CUSTOM.def`
+（ `C:\ユーザー\ユーザー名\AppData\Roaming\BzEditor\CUSTOM.def` ）
+にファイルを置いてください。
+
+エンコードタイプに`CUSTOM`を選択するたびにファイルから読み直します。
+
+
+#### CUSTOM.def 書式
+
+```
+; コメント
+先頭キャラクタコード(16進数) (TABコード) 文字列
+...
+先頭キャラクタコード(16進数) (TABコード) 文字列
+
+
+[マルチバイトの最初のキャラクタコード(16進数)]
+先頭キャラクタコード(16進数) (TABコード) 文字列
+先頭キャラクタコード(16進数) (TABコード) 文字列
+...
+先頭キャラクタコード(16進数) (TABコード) 文字列
+```
+
+#### CUSTOMキャラセット定義サンプル
+
+パス：`%APPDATA%BzEditor\`
+（ `C:\ユーザー\ユーザー名\AppData\Roaming\BzEditor\` ）
+
+には、サンプルファイルもインストールされています。
+内容をCUSTOM.defにコピーして使用してください。
+
+#### CUSTOM_HYDLIDE3_MAIN.def
+
+```
+; ハイドライド3 メインメッセージ
+
++20	 !"#$%&'()*+,-./0123456789:;<=>?
++40	@ABCDEFGHIJKLMNOPQRSTUVWXYZ[¥]^
++60	`abcdefghijklmnopqrstuvwxyz{|}～-
++80	♠♥♣♦○●をぁぃぅぇぉゃゅょっ
++90	❼あいうえおかきくけこさしすせそ
++A0	Ⅲ。「」、・ヲァィゥェォャュョッ
++B0	ーアイウエオカキクケコサシスセソ
++C0	タチツテトナニヌネノハヒフヘホマ
++D0	ミムメモヤユヨラリルレロワン゛゜
++E0	たちつてとなにぬねのはひふへほま
++F0	みむめもやゆよらりるれろわん　　
+
+[FE]
++00	悪宿扱安暗闇以偉慰異移敵一印飲院
++10	隠宇噂運雲栄英衛越炎奥応王屋俺下
++20	何加可家果架貨過我牙会解回怪界開
++30	階外街覚角革楽■割活巻完感慣換敢
++40	■管間関館危器棄機帰気記■議休宮
++50	弓急求許強恐教響驚業近金銀具空偶
++60	窟係刑兄型形経計撃剣堅建見険験元
++70	幻現言古呼己庫湖御語誤光功効口好
++80	幸広攻更航行貢鋼■高合告込今困差
++90	査鎖座再最裁際剤在罪作参残■使士
++A0	姿子師思支止死私事字寺持時次治示
++B0	自郎失室■実捨者邪主取守手■酒受
++C0	呪授修終住十重銃出準盾■所緒書助
++D0	商唱小少招消証上丈城場常状飾職食
++E0	信寝心振新森深真神身針人吹水睡酔
++F0	世制成星正生精聖声製西昔石積切接
+
+[FF]
++00	説先戦線船選前然全素僧創倉想早総
++10	草装送像造側足速賊続存他太駄体■
++20	待態替代大択達脱誰探短弾段■値知
++30	地置遅築■中宙懲聴調超長直沈珍追
++40	通清底笛天店転伝殿田電登途都度奴
++50	倒塔盗当■到闘動洞道得■毒読内■
++60	南二日入任熱■能波破引■敗杯配培
++70	買売泊爆箱発飯疲皮■飛備美必標■
++80	表■敏不夫怖普浮武部封風復服物分
++90	文聞平閉別変■保捕歩墓暮報宝放方
++A0	法棒冒防北本魔埋毎抹慢味未魅■眠
++B0	務夢無名命明滅面目戻■夜役薬勇友
++C0	由遊雄予与預妖様用要陽養欲来頼落
++D0	理■立■侶旅了両料量力礼霊裂録和
++E0	話惑腕木…々湧岩跡拾騎殺巨軍隊吸
++F0	０１２３４５６７８９血護影獄樹鬼
+```
 
 ## ビットマップ表示の追加機能
 
@@ -82,7 +177,7 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 
 1bit color 8x8 モードではカーソル位置とアドレスの関係もそれっぽくしています。  
 
-### ビットマップ表示 指定例
+### ビットマップ表示：MSX向け指定例
 
 ビットマップ表示： 表示(V)→ビットマップ表示(B)
 
@@ -173,13 +268,20 @@ javascript対応ブラウザで使用してください。
 
 ## 変更履歴
 
-- 2026/09/09
+- 2026/09/13 version 1.9.9.6
+  - CUSTOMキャラセットを追加  
+    CUSTOM.defで独自のマルチバイトエンコードを定義可能  
+  - フォント実測による文字表示処理と文字クリック処理に全面改修
+  - 描画処理のちらつき対策でダブルバッファ化
+  - サブカレットのバグ修正
+
+- 2026/09/09 version 1.9.9.4
   - テキストビューのエンコードに「MSX」（MSXのANK文字）を追加
   - 内部をUNICODEベースに変更
   - ソースコードのエンコードをUTF-8に変更（SJISではトランプ記号等が書けないので）
   - ビットマップビューに 1bpp 16x8 (ハイドライド3 MSX2版 漢字フォント用)を追加
 
-- 2025/08/03  
+- 2025/08/03 version 1.9.9.1 
   - パレット変換ツールをダンプリストにも対応
 
 - 2025/08/02  
