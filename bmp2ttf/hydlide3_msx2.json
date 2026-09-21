@@ -1,0 +1,35 @@
+{
+  "name": "Hydlide3-MSX2",
+  "em": 2048,
+  "baseline": "1/8",
+  "margin": "1/8",
+  "sets": [
+    {
+      "image": "hydlide3_msx2_font.bmp",
+      "bbox": [0, 0, 256, 48],
+      "step_size": [8, 16],
+      "start_cp": "0xE020",
+    },
+    {
+      "image": "hydlide3_msx2_font.bmp",
+      "bbox": [0, 48, 256, 176],
+      "step_size": [16, 16],
+      "start_cp": "0xE080",
+    },
+    {
+      "image": "hydlide3_msx2_font.bmp",
+      "bbox": [0, 176, 256, 432],
+      "step_size": [16, 16],
+      "start_cp": "0xE100",
+    },
+    {
+      "image": "hydlide3_msx2_font.bmp",
+      "bbox": [0, 432, 256, 432],
+      "step_size": [16, 16],
+      "start_cp": "0xE200",
+    },
+  ],
+  "enable_charmap": true,
+  "charmap_file": "char_map_hydlide3_main.def",
+  "charmap_source": "0xE000",
+}

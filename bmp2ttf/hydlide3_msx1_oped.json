@@ -1,0 +1,30 @@
+{
+  "name": "Hydlide3-MSX1-OpEd",
+  "em": 2048,
+  "baseline": "1/8",
+  "margin": "1/8",
+  "sets": [
+    {
+      "image": "hydlide3_msx1_font.bmp",
+      "bbox": [0, 0, 256, 24],
+      "step_size": [8, 8],
+      "glyph_size": [4, 8],
+      "start_cp": "0xE020",
+    },
+    {
+      "image": "hydlide3_msx1_font.bmp",
+      "bbox": [0, 24, 256, 56],
+      "step_size": [8, 8],
+      "start_cp": "0xE080",
+    },
+    {
+      "image": "hydlide3_msx1_font.bmp",
+      "bbox": [0, 56, 256, 96],
+      "step_size": [8, 8],
+      "start_cp": "0xE120",
+    },
+  ],
+  "enable_charmap": true,
+  "charmap_file": "char_map_hydlide3_oped.def",
+  "charmap_source": "0xE000",
+}
