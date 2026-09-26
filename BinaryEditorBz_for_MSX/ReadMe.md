@@ -1,6 +1,6 @@
-#  Binary Editor Bz / MSX User Custom
+#  Binary Editor Bz - MSX Custom
 
-Binary Editor Bz for MSX Version 1.9.9.6
+Binary Editor Bz - MSX Users Custom Version 1.9.9.7
 
 [c.mosさん](http://www.vcraft.jp/)作、[Binary Editor Bz](http://www.vcraft.jp/soft/bz.html)の[tamachanさんの改造版](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加した物です。
 
@@ -10,64 +10,63 @@ Windows版のみの提供です。
 
 Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
 
-  - インストーラ―版 [BzEditor-1.9.9.6-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.6-for-msx.exe)
-  - ポータブル版 [Bz1996Portable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1996Portable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.7-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.7-for-msx.exe)
+  - ポータブル版 [Bz1997Portable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1997Portable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
-- 追加機能以外の使い方ヘルプ  
+- **追加機能以外の使い方/ オリジナルヘルプ**  
   https://devil-tamachan.github.io/BZDoc/
 
+![](img/msx_sample.png)
 
-![1bit color 8x8 tile](../img/BzEditor_for_msx.png)
+## 文字コード（テキストエンコード）
 
+右側の文字表示エリアは**文字コード**が選べます。
 
-## テキストエンコード
-
-右側の文字表示エリアは文字エンコードが選べます。
-本カスタム版ではMSX ANK文字への対応を追加しています。
+本カスタム版ではMSX ANK文字とユーザー定義エンコードを追加しています。
 
 文字列検索時は表示中のエンコードに従ってバイナリに変換し検索します。
 
-| タイプ | 解説                                   |
-| ------ | -------------------------------------- |
-| ASCII  | ASCIIコードで表示します。              |
-| SJIS   | シフトJISコードで表示します。          |
-| UTF-16 | Unicode (UTF-16)で表示します。         |
-| JIS    | JISコードで表示します。                |
-| EUC    | EUCコードで表示します。                |
-| UTF8   | Unicode (UTF-8)で表示します。          |
-| EBCDIC | EBCDICコードで表示します。             |
-| EPWING | EPWING(電子ブック)コードで表示します。 |
-| MSX    | MSX ANKコードで表示します。            |
-| CUSTOM | ユーザー定義コードで表示します。       |
+| タイプ     | 解説                                   |
+| ---------- | -------------------------------------- |
+| ASCII      | ASCIIコードで表示します。              |
+| SJIS       | シフトJISコードで表示します。          |
+| UTF-16     | Unicode (UTF-16)で表示します。         |
+| JIS        | JISコードで表示します。                |
+| EUC        | EUCコードで表示します。                |
+| UTF8       | Unicode (UTF-8)で表示します。          |
+| EBCDIC     | EBCDICコードで表示します。             |
+| EPWING     | EPWING(電子ブック)コードで表示します。 |
+| **MSX**    | MSX ANKコードで表示します。            |
+| **CUSTOM** | ユーザー定義エンコードで表示します。   |
 
-![MSX Character encode](../img/BzEditor_for_msx_ank.png)
+## MSXエンコード用フォント
 
-### MSX-FONT
+テキストエンコードが **MSX** の時、**FontForDump**か**MSX-FONT**で表示されます。
 
-文字エンコードが **MSX** の時、
-- bugfireさんの
-  [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
-  に同梱されている、
-  **MSX-FONT.tff**がOSにインストールされていれば、
-  自動的に **MSX-FONT** に切り替わります。
+### MSX風フォントファイル
 
-- **MSX-FONT**がインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
+- **FontForDump.ttf**は、インストーラで当ソフトと一緒にインストールされます。  
+  ![](Fonts/font_for_bz_msx_k.bmp)  
+  ![](Fonts/font_for_bz_msx.bmp)
+  - ポータブル版の場合は同梱されている**Fonts/FontForDump.ttf**を手動でインストールしてください。
+- **MSX-FONT**は**FontForDump**が存在しない場合に使用されます。
+- **FontForDump**も**MSX-FONT**もがインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
 - 他のエンコードでは設定で指定したフォントになります。
+- **MSX-FONT.tff**はbugfireさんの [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
+に同梱されています。
 
-### CUSTOM ユーザー定義 キャラセット
+## CUSTOM：ユーザー定義エンコード
 
-独自のマルチバイトエンコードを定義して使用できます。
+独自のマルチバイトエンコード形式を定義して使用できます。
 
-パス：`%APPDATA%BzEditor\CUSTOM.def`
-（ `C:\ユーザー\ユーザー名\AppData\Roaming\BzEditor\CUSTOM.def` ）
-にファイルを置いてください。
+ `*.def` ファイルを作成し、`%APPDATA%BzEditor\CustomEncodes`  (ポータブル版は`CustomEncodes`) に配置してください。
 
-エンコードタイプに`CUSTOM`を選択するたびにファイルから読み直します。
+メニューの「表示」 → 「文字コード」 → 「CUSTOM」 または、ミニツールバーの一番右にあるボタンから選べるようになります。
 
 
-#### CUSTOM.def 書式
+#### def ファイル 書式
 
 ```
 ; コメント
@@ -83,99 +82,48 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 先頭キャラクタコード(16進数) (TABコード) 文字列
 ```
 
-#### CUSTOMキャラセット定義サンプル
+#### CUSTOMエンコード定義サンプル定義サンプル
 
-パス：`%APPDATA%BzEditor\`
-（ `C:\ユーザー\ユーザー名\AppData\Roaming\BzEditor\` ）
+`%APPDATA%BzEditor\CustomEncodes` (ポータブル版は`CustomEncodes`) には、サンプルファイルもインストールされています。
 
-には、サンプルファイルもインストールされています。
-内容をCUSTOM.defにコピーして使用してください。
+##### 例） HYDLIDE3_MAIN.def
 
-#### CUSTOM_HYDLIDE3_MAIN.def
-
-```
-; ハイドライド3 メインメッセージ
-
-+20	 !"#$%&'()*+,-./0123456789:;<=>?
-+40	@ABCDEFGHIJKLMNOPQRSTUVWXYZ[¥]^
-+60	`abcdefghijklmnopqrstuvwxyz{|}～-
-+80	♠♥♣♦○●をぁぃぅぇぉゃゅょっ
-+90	❼あいうえおかきくけこさしすせそ
-+A0	Ⅲ。「」、・ヲァィゥェォャュョッ
-+B0	ーアイウエオカキクケコサシスセソ
-+C0	タチツテトナニヌネノハヒフヘホマ
-+D0	ミムメモヤユヨラリルレロワン゛゜
-+E0	たちつてとなにぬねのはひふへほま
-+F0	みむめもやゆよらりるれろわん　　
-
-[FE]
-+00	悪宿扱安暗闇以偉慰異移敵一印飲院
-+10	隠宇噂運雲栄英衛越炎奥応王屋俺下
-+20	何加可家果架貨過我牙会解回怪界開
-+30	階外街覚角革楽■割活巻完感慣換敢
-+40	■管間関館危器棄機帰気記■議休宮
-+50	弓急求許強恐教響驚業近金銀具空偶
-+60	窟係刑兄型形経計撃剣堅建見険験元
-+70	幻現言古呼己庫湖御語誤光功効口好
-+80	幸広攻更航行貢鋼■高合告込今困差
-+90	査鎖座再最裁際剤在罪作参残■使士
-+A0	姿子師思支止死私事字寺持時次治示
-+B0	自郎失室■実捨者邪主取守手■酒受
-+C0	呪授修終住十重銃出準盾■所緒書助
-+D0	商唱小少招消証上丈城場常状飾職食
-+E0	信寝心振新森深真神身針人吹水睡酔
-+F0	世制成星正生精聖声製西昔石積切接
-
-[FF]
-+00	説先戦線船選前然全素僧創倉想早総
-+10	草装送像造側足速賊続存他太駄体■
-+20	待態替代大択達脱誰探短弾段■値知
-+30	地置遅築■中宙懲聴調超長直沈珍追
-+40	通清底笛天店転伝殿田電登途都度奴
-+50	倒塔盗当■到闘動洞道得■毒読内■
-+60	南二日入任熱■能波破引■敗杯配培
-+70	買売泊爆箱発飯疲皮■飛備美必標■
-+80	表■敏不夫怖普浮武部封風復服物分
-+90	文聞平閉別変■保捕歩墓暮報宝放方
-+A0	法棒冒防北本魔埋毎抹慢味未魅■眠
-+B0	務夢無名命明滅面目戻■夜役薬勇友
-+C0	由遊雄予与預妖様用要陽養欲来頼落
-+D0	理■立■侶旅了両料量力礼霊裂録和
-+E0	話惑腕木…々湧岩跡拾騎殺巨軍隊吸
-+F0	０１２３４５６７８９血護影獄樹鬼
-```
+![](img/msx_sample2.png)
 
 ## ビットマップ表示の追加機能
 
 ビットマップビューにMSX向けの機能を追加拡張しました。  
 他に、ビットマップビュー周りのバグを修正しています。
 
-- ※ ビットマップビューは**表示**→**ビットマップ表示**
+- ビットマップビューは**表示**→**ビットマップ表示** で表示切替
 
-- ※ ビットマップビューのオプション変更はビットマップビュー上で右クリックを押したときに出るコンテキストメニューから
+- ビットマップビュー設定は**ツール**→**ビットマップ設定** または、**ビットマップビュー上で右クリック**
 
-- ※ Address Tooltipはマウスと被るとコンテキストメニューが出せないなど邪魔な時があるので、ストレスを感じたらOFFにしてみてください。
+![](img/msx_sample4.png)
 
 ### MSX向けビットマップ表示の概要
 
-- 1bit color 8x8 （フォントやキャラ用） ... SCREEN 0,1,2,4 / SPRITE / FONT
+- 1bit color 8x8 ... SCREEN 0,1,2,4 / SPRITE 8x8 / ANK FONT
+- 1bit color 8x16  ... SPRITE 61x16
+- 1bit color 16x8  ... ハイドライドⅢ MSX2版 FONT
+- 1bit color 16x16(Z-Swizzle)  ... 漢字ロム
+- 1bit color 12x12  ... MSX-Viewフォント
+- 1bit color 12x8  ... MSX-Viewフォント
 - 2bit color ... SCREEN 6,9
 - 4bit color ... SCREEN 5,7
 - 8bit coolor YJK ... SCREEN 10,11
 - 8bit coolor YJK/RGB ... SCREEN 12
-- width 512
+- width 256 / 512
 - MSX16 (パレット)
 - MSX256 (パレット)
 - MSX_logo (パレット)
 
-実験で以下のモードも追加しました。
+実験で以下のモードも実装しています。
 
 - 2bit color FC
 - 2bit color GB
 - 4BIT color SFC/PCE
 - 8BIT color SFC
-
-1bit color 8x8 モードではカーソル位置とアドレスの関係もそれっぽくしています。  
 
 ### ビットマップ表示：MSX向け指定例
 
@@ -183,26 +131,22 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 
 （Address Tooltipは意外と邪魔な時があるので、イラっとしたらOFFにすると良いです）
 
-![8bit color YJK](../img/BzEditor_for_msx_2.png)  
-
 | カラー形式 | カラーパレット | 表示幅 | 表示用途 |
 |---|---|---|---|
-| tile/1bit color 8x8   | ---      | width 256 | SCREEN 0/1/2/4、SPRITE、FONT等 8x8ドットキャラ表示 |
-| tile/1bit color 8x16  | ---      | width 256 | 16x16 SPRITE等 |
-| tile/1bit color 16x16 | ---      | width 256 | 漢字ROM等 |
-| tile/1bit color 16x8  | ---      | width 256 | ハイドライド3 MSX2版 漢字フォント |
-| 2bit color            | MSX_logo |width 512 | SCREEN 6/9、MSX起動ロゴ等 |
-| 4bit color            | MSX16    | width 256 | SCREEN 5 |
-| 4bit color            | MSX16    | width 512 | SCREEN 7 |
-| 8bit color            | MSX256   | width 256 | SCREEN 8 |
-| 8bit color YJK/RGB    | MSX16    | width 256 | SCREEN 10/11 |
-| 8bit color YJK         | ---     | width 256 | SCREEN 12 |
-
-![1bit color 16x8 tile](../img/BzEditor_for_msx_1bpp_16x8.png)  
+| tile/1bit color 8x8               | ---      | width 256 | SCREEN 0/1/2/4、8x8 SPRITE、FONT 8x8キャラ |
+| tile/1bit color 8x16              | ---      | width 256 | 16x16 SPRITE |
+| tile/1bit color 16x16 (Z-Swizzle) | ---      | width 256 | 漢字ROM |
+| tile/1bit color 12x12 (Packed)    | ---      | width 192 | MSX-Viewフォント |
+| tile/1bit color 12x8  (Packed)    | ---      | width 192 | MSX-Viewフォント |
+| tile/1bit color 16x8              | ---      | width 256 | ハイドライド3 MSX2版 全角フォント |
+| 2bit color                        | MSX_logo |width 512 | SCREEN 6/9、MSX起動ロゴ等 |
+| 4bit color                        | MSX16    | width 256 | SCREEN 5 |
+| 4bit color                        | MSX16    | width 512 | SCREEN 7 |
+| 8bit color                        | MSX256   | width 256 | SCREEN 8 |
+| 8bit color YJK/RGB                | MSX16    | width 256 | SCREEN 10/11 |
+| 8bit color YJK                    | ---      | width 256 | SCREEN 12 |
 
 ### おまけ：特殊タイルモード
-
-![Hierarchical menu](../img/BzEditor_for_msx_4.png)
 
 | カラー形式 | カラーパレット | 変換処理 | 表示用途 |
 |---|---|---|---|
@@ -222,51 +166,53 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 | tile/8bit color 8x16  (SFC)     | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン BG/スプライト |
 | tile/8bit color 16x16 (SFC)     | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン BG/スプライト |
 
-![GB 8x8 preview](../img/BzEditor_for_msx_3.png)
-
 ### ビットマップ表示の表示更新について
 
 バイナリデータの編集時、ビットマップビューがリアルタイムで更新されるようにしました。
 重い場合はビットマップビューを閉じて編集してください。
 
+### ビットマップ表示のアドレスオフセットについて
+
+**Bitmap Offset**ボタンやその横にあるスピンボタンで、ビットマップとして表示するアドレスのオフセットが可能です。
+
+![](img/msx_sample3.png)
+
+**Bitmap Offset**ボタンを押すとポップアップメニューから
+- 現在のカーソル位置で設定
+- リセット
+- 直接数値入力
+を選択できます。
+
 ### パレットの編集
 
 メニューの「ツール(T)」→「カスタムパレットの編集」  
-で開くフォルダーにあるテキストファイル が、  
-カラーパレット定義ファイルです。
+で開くフォルダーにあるテキストファイル が、カラーパレット定義ファイルです。
 
 （置いてあるファイル名がBITMAPビューの右クリックメニューから選べます。）
 
 MSX向けに`MSX16.txt`、`MSX256.txt`、`MSX_logo.txt`を用意しましたが、
 各自お好きな定義ファイルをを追加してください。
 
-![](../img/BZ_MSX_PALETTE.png)
-
-[追加パレットのみのセット](BZPalettes-for-MSX.zip)
-
-### おまけ：パレット変換ツール
-
-[ブラウザで実行](../docs/BzTool/palette.html)
-
-[ソースファイルまたはオフライン実行](./palette.html)
-
-javascript対応ブラウザで使用してください。  
-ちゃんとテストしてません。  
-
-対応パレットは
-- SFC16bit(RGB555)パレット
-- MSX16bit(RGB333)パレット
-
-対応形式は
-- 16ビット値リスト
-- 8ビット値リスト（ダンプ）
-
-が選べます。
-
-ダンプリストの場合は、アドレス部と文字表示部は取り除いてください。  
-（バイナリエディタによってダンプリストのフォーマットがまちまちなので）
+[追加パレットのみのセット](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BZPalettes-for-MSX.zip)
 
 ## 変更履歴
+
+- 2026/09/26 version 1.9.9.7
+  - (追加)ビットマップビューの設定をメニュー：ツールからアクセスできるようにした
+  - (変更)Contens(ヘルプ)をReadMe.htmlに変更
+  - (追加)MSX ANK文字専用フォントの追加
+  - (追加)ビットマップビューで開始オフセット指定機能追加
+  - (追加)ビットマップビューで12x12、12x8のMSX Viewフォント対応を追加
+  - (追加)CUSTOMキャラセット（エンコード）のファイル置き場を`%AppData%\BzEditor\CustomEncodes`に変更し、フォルダに格納されたファイルをメニューから選択可能に
+  - (調整)ダンプビューのスクロールバーの移動量修正
+  - (調整)ビットマップビューでのマウスホイール移動量を8pxまたは文字サイズ基準に変更
+  - (調整)ビットマップビューでアドレスツールチップが邪魔にならない位置に移動
+  - (調整)カスタムパレットをサブメニュー化
+  - (調整)CUSTOMキャラセット（エンコード）をサブメニュー化
+  - (調整)一部の長いコードをhファイルからcppファイルに移動
+  - (バグ修正)クリップボードコピー処理修正（ダンプリストコピー、バイナリコピー、文字列コピーが機能しなくなっていた）
+  - (バグ修正)クリップボード貼り付け処理修正（上書き時に追加になっていたり選択解除がされてなかったりした）
+  - (バグ修正)テキストビュー幅の決定前に表示バッファを確保していたことによるメモリリークの修正
 
 - 2026/09/13 version 1.9.9.6
   - CUSTOMキャラセットを追加  
@@ -281,13 +227,7 @@ javascript対応ブラウザで使用してください。
   - ソースコードのエンコードをUTF-8に変更（SJISではトランプ記号等が書けないので）
   - ビットマップビューに 1bpp 16x8 (ハイドライド3 MSX2版 漢字フォント用)を追加
 
-- 2025/08/03 version 1.9.9.1 
-  - パレット変換ツールをダンプリストにも対応
-
-- 2025/08/02  
-  - パレット変換ツールを適当に作ったので追加
-
-- 2025/05/27  
+- 2025/05/27 version 1.9.9.1 
   - ビットマップビューにSFC用8bitタイル形式追加
   - カラータイプのタイル形式をサブメニューに移動
   - 4bit SFCタイル形式はPCEと共通なので文言変更
@@ -328,7 +268,8 @@ javascript対応ブラウザで使用してください。
 ## 謝辞
 
 元ソースコードはご厚意によって公開されている物です。  
-使用ライセンスは以下の通りです。
+
+[オリジナル版Readme](ReadMe_org.md)
 
 Binary Editor BZ - original version -  
 [Binary Editor BZ 1.6.2 Win](http://www.vcraft.jp/soft/bz.html) (New BSD License) --- Copyright (c) 1996-2004 [c.mos](https://www.vcraft.jp/index.html)
@@ -336,8 +277,6 @@ Binary Editor BZ - original version -
 Binary Editor BZ - 改造版 -  
 [Binary Editor BZ 1.9.8 Win](https://gitlab.com/devill.tamachan/binaryeditorbz/) (New BSD License) --- modify 1996-2004, 2012-2022 [tamachan](https://devil-tamachan.github.io/BZDoc/)
 
-私が変更した部分のソースコードについては一切の責任を持ちません。
-改変は自由です。（私の名前は記載も不要です）
+### ライセンス
 
-
-
+当ソフトも継承元に準じて New BSD License で提供されます。

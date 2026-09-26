@@ -12,12 +12,9 @@ import sys
 # 組み込みデフォルト定義 (外部設定ファイル未指定時に使用)
 # =============================================================================
 DEFAULT_FONT_DEFINITIONS = [
+    # MSX BIOS フォント
     # [開始アドレス, 文字数, ビット形式]
-    [0x2B400, 96, "8x8"],        # ASCII 20H～7FH (96文字)
-    [0x2B700, 94, "16x8"],       # MSX ASCII 80H～DDH (94文字)
-    [0x2BCE0, 2, "8x8x2"],       # MSX ASCII DEH～DFH (濁点・半濁点: 2文字)
-    [0x2BD00, 32, "16x8"],       # MSX ASCII E0H～FFH (32文字)
-    [0x7E000, 256 * 2, "16x8"],  # 漢字ブロック (512文字)
+    ["(0004H)", 256, "8x8"],       # 0004Hに書かれたアドレスを参照。MSX ASCII 00H～FFH (256文字)
 ]
 
 
@@ -49,29 +46,69 @@ def parse_value(val):
     return int(s, 0)
 
 
+def parse_address_spec(val):
+    """
+    アドレス指定をパースするヘルパー。
+    '()' で囲まれている場合は ('indirect16', オフセット) のタプルを返す。
+    それ以外は整数のアドレス値を返す。
+    """
+    if isinstance(val, int):
+        return val
+
+    s = str(val).strip()
+    if s.startswith("(") and s.endswith(")"):
+        inner = s[1:-1].strip()
+        offset = parse_value(inner)
+        return ("indirect16", offset)
+
+    return parse_value(s)
+
+
+def strip_comments(json_text):
+    """
+    文字列リテラル内部を保護しつつ、// 行コメントおよび /* ... */ ブロックコメントを空白に置換する。
+    改行を保持し文字長を変えずに空白置換することで、構文エラー発生時の行・桁番号のズレを防ぐ。
+    """
+    pattern = r'("(?:\\.|[^"\\])*")|(/\*[\s\S]*?\*/)|(//[^\r\n]*)'
+
+    def replacer(match):
+        if match.group(1) is not None:
+            return match.group(1)
+        if match.group(2) is not None:
+            # ブロックコメント: 改行は保持し、それ以外の文字を空白に置換
+            return re.sub(r"[^\r\n]", " ", match.group(2))
+        if match.group(3) is not None:
+            # 行コメント: 全体を同文字数の空白に置換
+            return " " * len(match.group(3))
+        return match.group(0)
+
+    return re.sub(pattern, replacer, json_text)
+
+
 def strip_trailing_commas(json_text):
     """
     文字列リテラル内部を保護しつつ、リストやオブジェクト末尾の余分なカンマを空白に置換する。
     文字長を変えずに空白置換することで、構文エラー発生時の行・桁番号のズレを防ぐ。
     """
-    # group(1): 文字列リテラル ("...")
-    # group(2): リスト/辞書の閉じカッコ直前にあるカンマ
-    # group(3): 閉じカッコまでの空白文字
-    # group(4): 閉じカッコ (] または })
     pattern = r'("(?:\\.|[^"\\])*")|(,)(\s*([\]\}]))'
 
     def replacer(match):
         if match.group(1) is not None:
             return match.group(1)
-        # カンマを空白1文字に置換し、後ろの空白と閉じカッコをそのまま連結
         return " " + match.group(3)
 
     return re.sub(pattern, replacer, json_text)
 
 
+def normalize_fmt(fmt):
+    """フォーマット文字列の揺らぎを正規化する内部ヘルパー。"""
+    return str(fmt).strip().upper().replace("-", "").replace("_", "")
+
+
 def load_json_config(file_path):
     """
     JSON設定ファイルを読み込む。
+    ・// および /* ... */ コメントを許容
     ・リスト/オブジェクト末尾の余分なカンマを許容
     ・構文エラー時に該当箇所の行・桁・ポインタを表示
     """
@@ -86,7 +123,8 @@ def load_json_config(file_path):
         print(f"エラー: ファイルのオープンに失敗しました ({file_path}): {e}", file=sys.stderr)
         sys.exit(1)
 
-    cleaned_content = strip_trailing_commas(raw_content)
+    cleaned_content = strip_comments(raw_content)
+    cleaned_content = strip_trailing_commas(cleaned_content)
 
     try:
         data = json.loads(cleaned_content)
@@ -95,7 +133,6 @@ def load_json_config(file_path):
         print(f"詳細: {e.msg} ({e.lineno}行目, {e.colno}文字目)", file=sys.stderr)
         print("-" * 55, file=sys.stderr)
 
-        # エラー発生行の前後を表示
         lines = raw_content.splitlines()
         start_line = max(0, e.lineno - 2)
         end_line = min(len(lines), e.lineno + 1)
@@ -106,7 +143,6 @@ def load_json_config(file_path):
             prefix = f"{curr_lineno:4d} | "
             print(f"{prefix}{line_str}", file=sys.stderr)
 
-            # エラー行の直下にキャレット (^) を表示
             if curr_lineno == e.lineno:
                 caret_pos = len(prefix) + max(0, e.colno - 1)
                 print(" " * caret_pos + "^", file=sys.stderr)
@@ -125,7 +161,7 @@ def load_json_config(file_path):
                 if len(item) < 3:
                     print(f"警告: {idx}番目の要素をスキップ (要素数不足): {item}", file=sys.stderr)
                     continue
-                addr = parse_value(item[0])
+                addr = parse_address_spec(item[0])
                 count = parse_value(item[1])
                 fmt = str(item[2]).strip()
             elif isinstance(item, dict):
@@ -134,13 +170,14 @@ def load_json_config(file_path):
                 if not addr_key or "count" not in item or not fmt_key:
                     print(f"警告: {idx}番目の要素をスキップ (必須キー不足): {item}", file=sys.stderr)
                     continue
-                addr = parse_value(item[addr_key])
+                addr = parse_address_spec(item[addr_key])
                 count = parse_value(item["count"])
                 fmt = str(item[fmt_key]).strip()
             else:
                 print(f"警告: 不明な形式の要素をスキップ: {item}", file=sys.stderr)
                 continue
 
+            get_char_byte_size(fmt)
             definitions.append([addr, count, fmt])
         except Exception as ex:
             print(f"警告: {idx}番目の要素のパースに失敗したためスキップ: {item} ({ex})", file=sys.stderr)
@@ -182,11 +219,17 @@ def load_cfg(file_path):
                     )
                     continue
 
-                addr = parse_value(parts[0])
-                count = parse_value(parts[1])
-                fmt = parts[2].strip()
-
-                definitions.append([addr, count, fmt])
+                try:
+                    addr = parse_address_spec(parts[0])
+                    count = parse_value(parts[1])
+                    fmt = parts[2].strip()
+                    get_char_byte_size(fmt)
+                    definitions.append([addr, count, fmt])
+                except Exception as ex:
+                    print(
+                        f"警告: {file_path}:{line_num} 行のパースに失敗したためスキップ: {line} ({ex})",
+                        file=sys.stderr,
+                    )
 
     except Exception as e:
         print(f"エラー: 設定ファイル ({file_path}) の読み込みに失敗しました: {e}", file=sys.stderr)
@@ -208,12 +251,49 @@ def load_config(file_path):
 
 def decode_glyph(data, fmt):
     """文字バイナリを 0/1 のピクセルマトリックス (高さh, 幅w) に展開する。"""
-    if fmt == "8x8":
+    key = normalize_fmt(fmt)
+
+    if key == "8X8":
         w, h = 8, 8
         pixels = [[(data[y] >> (7 - x)) & 1 for x in range(8)] for y in range(8)]
         return w, h, pixels
 
-    elif fmt == "16x8":
+    if key == "8X16":
+        w, h = 8, 16
+        pixels = [[(data[y] >> (7 - x)) & 1 for x in range(8)] for y in range(16)]
+        return w, h, pixels
+
+    elif key in ("12X8", "12X8VIEW"):
+        w, h = 12, 8
+        pixels = []
+        for p in range(4):
+            b0, b1, b2 = data[p * 3], data[p * 3 + 1], data[p * 3 + 2]
+            row0 = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
+                (b1 >> (7 - x)) & 1 for x in range(4)
+            ]
+            row1 = [(b1 >> (3 - x)) & 1 for x in range(4)] + [
+                (b2 >> (7 - x)) & 1 for x in range(8)
+            ]
+            pixels.append(row0)
+            pixels.append(row1)
+        return w, h, pixels
+
+    elif key in ("12X12", "12X12VIEW"):
+        w, h = 12, 12
+        pixels = []
+        for p in range(6):
+            b0, b1, b2 = data[p * 3], data[p * 3 + 1], data[p * 3 + 2]
+            row0 = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
+                (b1 >> (7 - x)) & 1 for x in range(4)
+            ]
+            row1 = [(b1 >> (3 - x)) & 1 for x in range(4)] + [
+                (b2 >> (7 - x)) & 1 for x in range(8)
+            ]
+            pixels.append(row0)
+            pixels.append(row1)
+        return w, h, pixels
+
+    elif key in ("16X8", "16X8L"):
         w, h = 16, 8
         pixels = []
         for y in range(8):
@@ -224,11 +304,49 @@ def decode_glyph(data, fmt):
             pixels.append(row)
         return w, h, pixels
 
-    elif fmt == "8x8x2":
+    elif key in ("8X8X2", "16X8H"):
         w, h = 16, 8
         pixels = []
         for y in range(8):
             b0, b1 = data[y], data[8 + y]
+            row = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
+                (b1 >> (7 - x)) & 1 for x in range(8)
+            ]
+            pixels.append(row)
+        return w, h, pixels
+
+    elif key in ("8X16X2", "16X16H", "16X16SPRITE"):
+        w, h = 16, 16
+        pixels = []
+        for y in range(16):
+            b0, b1 = data[y], data[16 + y]
+            row = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
+                (b1 >> (7 - x)) & 1 for x in range(8)
+            ]
+            pixels.append(row)
+        return w, h, pixels
+
+    elif key in ("16X16", "16X16L"):
+        w, h = 16, 16
+        pixels = []
+        for y in range(16):
+            b0, b1 = data[y * 2], data[y * 2 + 1]
+            row = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
+                (b1 >> (7 - x)) & 1 for x in range(8)
+            ]
+            pixels.append(row)
+        return w, h, pixels
+
+    elif key in ("16X16Z", "16X16KANJI"):
+        w, h = 16, 16
+        pixels = []
+        for y in range(16):
+            if y < 8:
+                b0 = data[y]       # 左上
+                b1 = data[8 + y]   # 右上
+            else:
+                b0 = data[16 + (y - 8)]  # 左下
+                b1 = data[24 + (y - 8)]  # 右下
             row = [(b0 >> (7 - x)) & 1 for x in range(8)] + [
                 (b1 >> (7 - x)) & 1 for x in range(8)
             ]
@@ -241,15 +359,42 @@ def decode_glyph(data, fmt):
 
 def get_char_byte_size(fmt):
     """ビット形式から1文字あたりのバイトサイズを取得する。"""
-    if fmt == "8x8":
+    key = normalize_fmt(fmt)
+
+    if key == "8X8":
         return 8
-    elif fmt in ("16x8", "8x8x2"):
+    elif key in ("12X8", "12X8VIEW"):
+        return 12
+    elif key in ("8X16", "16X8", "16X8L", "8X8X2", "16X8H"):
         return 16
+    elif key in ("12X12", "12X12VIEW"):
+        return 18
+    elif key in ("16X16", "16X16L", "8X16X2", "16X16H", "16X16SPRITE", "16X16Z", "16X16KANJI"):
+        return 32
     else:
         raise ValueError(f"未対応のビット形式です: {fmt}")
 
 
-def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definitions, cfg_path=None):
+def resolve_address(addr_spec, rom_data):
+    """アドレス定義を解決し、(実アドレス, 参照元オフセットまたはNone) を返す。"""
+    if isinstance(addr_spec, str):
+        addr_spec = parse_address_spec(addr_spec)
+    if isinstance(addr_spec, tuple) and addr_spec[0] == "indirect16":
+        ptr_offset = addr_spec[1]
+        if ptr_offset + 2 > len(rom_data):
+            print(
+                f"エラー: 間接参照オフセットがROMサイズを超えています "
+                f"(指定: 0x{ptr_offset:X}, ROMサイズ: 0x{len(rom_data):X})",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        resolved_addr = struct.unpack_from("<H", rom_data, ptr_offset)[0]
+        return resolved_addr, ptr_offset
+
+    return addr_spec, None
+
+
+def extract_fonts(rom_path, output_bmp_path, canvas_width, hscale, vscale, font_definitions, cfg_path=None):
     if not os.path.isfile(rom_path):
         print(f"エラー: ROMファイルが見つかりません: {rom_path}", file=sys.stderr)
         sys.exit(1)
@@ -263,25 +408,33 @@ def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definiti
         print(f"設定ファイル     : {cfg_path}")
     else:
         print("設定ファイル     : (組み込みデフォルト定義を使用)")
-    print(f"設定画像横幅     : {canvas_width} px")
+    print(f"配置基準横幅     : {canvas_width} px")
+    print(f"横拡大倍率       : {hscale}倍")
     print(f"縦拡大倍率       : {vscale}倍")
     print("-" * 55)
 
     canvas = []
     cur_x = 0
     cur_y = 0
+    row_max_h = 0  # 現在の行の最大高さを追跡
 
     def ensure_height(target_h):
         while len(canvas) < target_h:
             canvas.append([0] * canvas_width)
 
-    for idx, (start_addr, count, fmt) in enumerate(font_definitions, 1):
+    for idx, (addr_spec, count, fmt) in enumerate(font_definitions, 1):
+        start_addr, ptr_offset = resolve_address(addr_spec, rom_data)
         char_bytes = get_char_byte_size(fmt)
         block_bytes = count * char_bytes
         end_addr = start_addr + block_bytes
 
+        if ptr_offset is not None:
+            addr_info = f"開始 0x{start_addr:05X} (間接参照 @0x{ptr_offset:05X}) - 終了 0x{end_addr:05X}"
+        else:
+            addr_info = f"開始 0x{start_addr:05X} - 終了 0x{end_addr:05X}"
+
         print(
-            f"ブロック #{idx:02d}: 開始 0x{start_addr:05X} - 終了 0x{end_addr:05X} | "
+            f"ブロック #{idx:02d}: {addr_info} | "
             f"{count:4d}文字 | 形式: {fmt:<6s}"
         )
 
@@ -297,10 +450,13 @@ def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definiti
             c_data = rom_data[offset : offset + char_bytes]
             char_w, char_h, glyph = decode_glyph(c_data, fmt)
 
+            # 横幅を超えたら、その行の最大高さ分だけYを進めて折り返す
             if cur_x + char_w > canvas_width:
                 cur_x = 0
-                cur_y += char_h
+                cur_y += row_max_h
+                row_max_h = 0
 
+            row_max_h = max(row_max_h, char_h)
             ensure_height(cur_y + char_h)
 
             for gy in range(char_h):
@@ -309,18 +465,24 @@ def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definiti
 
             cur_x += char_w
 
+    original_width = canvas_width
     original_height = len(canvas)
     if original_height == 0:
         print("警告: 描画されたフォントデータがありません。", file=sys.stderr)
         return
 
+    # 横拡大および縦拡大を適用
     scaled_canvas = []
     for row in canvas:
+        if hscale == 1:
+            scaled_row = row
+        else:
+            scaled_row = [px for px in row for _ in range(hscale)]
         for _ in range(vscale):
-            scaled_canvas.append(row)
+            scaled_canvas.append(scaled_row)
 
-    output_width = canvas_width
-    output_height = len(scaled_canvas)
+    output_width = original_width * hscale
+    output_height = original_height * vscale
 
     row_bytes_unpadded = (output_width + 7) // 8
     row_stride = (output_width + 31) // 32 * 4
@@ -373,12 +535,19 @@ def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definiti
         f.write(bmp_palette)
         f.write(pixel_data)
 
-    scale_text = "等倍" if vscale == 1 else f"縦{vscale}倍"
+    if hscale == 1 and vscale == 1:
+        scale_text = "等倍"
+    elif hscale > 1 and vscale == 1:
+        scale_text = f"横{hscale}倍"
+    elif hscale == 1 and vscale > 1:
+        scale_text = f"縦{vscale}倍"
+    else:
+        scale_text = f"横{hscale}倍・縦{vscale}倍"
 
     print("-" * 55)
     print(f"出力ファイル     : {output_bmp_path}")
     print(f"形式             : 1bpp BMP (idx0: 黒, idx1: 白)")
-    print(f"原寸サイズ       : {output_width} x {original_height}")
+    print(f"原寸サイズ       : {original_width} x {original_height}")
     print(f"出力画像サイズ   : {output_width} x {output_height} ({scale_text})")
     print(f"1行パディング    : {padding_len} bytes (Stride: {row_stride} bytes)")
     print(f"BMP総ファイル容量: {total_file_size:,} bytes")
@@ -387,10 +556,16 @@ def extract_fonts(rom_path, output_bmp_path, canvas_width, vscale, font_definiti
 
 def main():
     parser = argparse.ArgumentParser(
-        description="ROMファイルからフォントデータを抽出し、1bpp BMP画像を出力します。"
+        description="ROMファイルからフォントデータを抽出し、1bpp BMP画像を出力します。",
+        add_help=False,  # -h を --hscale で使用できるように標準の -h ヘルプを無効化
+    )
+    parser.add_argument(
+        "--help",
+        action="help",
+        help="ヘルプメッセージを表示して終了します",
     )
     parser.add_argument("rom_file", help="入力ROMファイルパス")
-    parser.add_argument("output_bmp", help="出力BMPファイルパス")
+    parser.add_argument("output_bmp", nargs="?", default=None, help="出力BMPファイルパス (省略時は input.bmp)")
     parser.add_argument(
         "-c",
         "--config",
@@ -403,7 +578,16 @@ def main():
         "--width",
         type=int,
         default=256,
-        help="出力BMP画像の横幅ピクセル数 (デフォルト: 256)",
+        help="フォント配置基準の横幅ピクセル数 (デフォルト: 256)",
+    )
+    parser.add_argument(
+        "-h",
+        "--hscale",
+        "--scale-x",
+        dest="hscale",
+        type=int,
+        default=1,
+        help="横方向の拡大倍率 (整数、デフォルト: 1 (等倍))",
     )
     parser.add_argument(
         "-v",
@@ -420,6 +604,10 @@ def main():
         print("エラー: 横幅は16ピクセル以上を指定してください。", file=sys.stderr)
         sys.exit(1)
 
+    if args.hscale < 1:
+        print("エラー: 横の拡大倍率は1以上の整数を指定してください。", file=sys.stderr)
+        sys.exit(1)
+
     if args.vscale < 1:
         print("エラー: 縦の拡大倍率は1以上の整数を指定してください。", file=sys.stderr)
         sys.exit(1)
@@ -429,10 +617,17 @@ def main():
     else:
         font_definitions = DEFAULT_FONT_DEFINITIONS
 
+    if args.output_bmp is None:
+        if args.cfg_file:
+            args.output_bmp = os.path.splitext(args.cfg_file)[0] + ".bmp"
+        else:
+            args.output_bmp = os.path.splitext(args.rom_file)[0] + ".bmp"
+
     extract_fonts(
         args.rom_file,
         args.output_bmp,
         args.width,
+        args.hscale,
         args.vscale,
         font_definitions,
         args.cfg_file,
