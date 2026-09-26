@@ -1,8 +1,8 @@
 # bmp2ttf2 取扱説明書
 
-画像（BMP / PNG等）に並べられたビットマップパターンから等幅の TrueType フォント（`.ttf`）を生成するツールです。
+画像（BMP / PNG等）に並べられたビットマップパターンから等幅およびプロポーショナルの TrueType フォント（`.ttf`）を生成するツールです。
 
-一般的な画像グリッドからの文字切り出し機能に加え、Unicode の私用領域（外字領域）へ独自のフォントを取り込み、定義ファイル（`.def`）を用いて任意の通常文字（ASCII、ひらがな、カタカナ、漢字等）へマッピングして利用できる機能を備えています。
+一般的な画像グリッドからの文字切り出し機能に加え、Unicode の私用領域（外字領域）へ独自のフォントを取り込み、定義ファイル（`.def`）を用いて任意の通常文字（ASCII、ひらがな、カタカナ、漢字等）へマッピングして利用できる機能を備えています。また、文字幅に応じたプロポーショナルフォントの生成と、ゲームプログラム等で利用可能なメトリクスデータ（`_proportional.txt`）の自動出力に対応しています。
 
 ---
 
@@ -29,7 +29,11 @@
 
 ### CLI から直接実行する
 ```bash
+# 等幅フォントの生成
 bmp2ttf2.exe -o output.ttf -s "font.png:0,0,256,48:8,16:0x0020" -s "font.png:0,48,256,688:16,16:0x3040"
+
+# プロポーショナルフォントの生成 (-p / --proportional)
+bmp2ttf2.exe -o output.ttf -s "font.png:0,0,256,48:8,16:0x0020" -p
 ```
 
 ### JSON 設定ファイルを指定して実行する（推奨）
@@ -47,16 +51,89 @@ bmp2ttf2.exe -c config.json -o output.ttf
 - **書式（JSON）**: `"step_size": [16, 16], "glyph_size": [8, 16]`
 
 ```text
-■: セル間隔 (step_size: 16x16)
-□: 有効サイズ (glyph_size: 8x16)
+- セル間隔 (step_size: 16x16) : 外枠 [+] (1文字あたりの配置ピッチ)
+- 有効サイズ (glyph_size: 8x16): 左側 [#] (実際の切り出し幅)
 
-┌───────┬───────┐
-│□□□□  │       │  ← 16x16 の枠の左側 8x16 のみを取得し、
-│□□□□  │       │     フォントの送り幅（Advance Width）も
-│□□□□  │       │     半角幅（全角の50%）として登録
-└───────┴───────┘
++----+----+
+|####|    |  <- 16x16 のセル枠から左側 8x16 のみを取得
+|####|    |     送り幅 (Advance Width) はセル間隔 (16)
+|####|    |     ではなく指定した有効幅 (8) となる
++----+----+
 ```
 - 間隔と有効サイズが同一の場合は有効サイズの指定を省略できます（`glyph_size` を省略すると `step_size` と同じになります）。
+
+---
+
+## プロポーショナルフォント生成機能
+
+`-p`（または `--proportional`）を指定すると、文字ごとにドットが存在する実幅を自動検出し、可変幅（プロポーショナル）フォントを生成します。
+
+```text
+|<--- (送り幅) --->|
+|[ ### ]           |
+|[#   #]           |
+|[#   #]           |
+|[#####]           |
+|[#   #]           |
+|<---->|<--------->|
+文字実幅 右マージン(字間)
+(width)  (char_spacing)
+ ※ LSB = 0 (左詰め)
+```
+
+- **グリフ配置**: 文字内のドットが存在する最小X位置を原点（`X=0`, `LSB=0`）に揃えて左詰めで配置します。
+- **文字送り幅（Advance Width）**: `(文字実幅 + 字間スペース) × dot_scale` で計算されます。
+- **空白文字（スペース等）の送り幅**: ドットが存在しない文字には、指定された空白幅（デフォルトはセル切り出し有効幅の最小値）を割り当てます。
+- **フォントヘッダ設定**: 等幅フラグ（`post.isFixedPitch = 0`）および PANOSE 比率（`OS/2.panose.bProportion = 0`）がプロポーショナル用として適切に設定されます。
+
+---
+
+## メトリクス定義ファイル（`_proportional.txt`）の出力
+
+プロポーショナル指定時（`-p`）、出力TTFファイルと同階層・同名で **`{出力名}_proportional.txt`** が自動生成されます。自作ゲームエンジンや描画ルーチンで文字セルを直接テクスチャから切り出して描画する際に、そのまま配列データとして活用できます。
+
+### 出力書式（配列形式）
+
+PythonのリストやJSON（配列の配列）として扱いやすい角括弧形式です。行頭に `//` によるカラム説明ヘッダが付きます。
+
+```text
+// index, [cell_x, cell_y, pad_x, pad_y], offset_x, width, "char"
+[   0, [   0,   0, 0, 0], 1, 6, "!" ],
+[   1, [   8,   0, 0, 0], 1, 6, "\"" ],
+[   2, [  16,   0, 0, 0], 1, 6, "#" ],
+[   3, [  24,   0, 0, 0], 0, 8, "W" ],
+[  10, [  80,   0, 0, 0], 0, 0, " " ],
+[ 256, [   0,  64, 0, 0], 0, 8, "あ" ],
+[ 257, [   8,  64, 0, 0], 0, 8, "\u00A0"]
+```
+※最終行の末尾にはカンマ（`,`）が付きません。
+
+### カラム仕様
+
+| カラム | 内容 | 説明 |
+| :--- | :--- | :--- |
+| `index` | 通し番号 | 0から始まる文字インデックス（整数） |
+| `cell_x`, `cell_y` | セル左上座標 | 元画像上の該当セルの切り出し開始ピクセル座標 |
+| `pad_x`, `pad_y` | パディングサイズ | セル間隔と有効サイズの差分（`step_w - glyph_w`, `step_h - glyph_h`） |
+| `offset_x` | 切り出し横オフセット | セル内において実際にドットが始まる相対Xピクセル座標 |
+| `width` | 実文字幅 | ドットが存在する部分の横ピクセル幅（スペース等は `0`） |
+| `"char"` | 割り当て文字 | 文字列リテラル（ダブルクォートや制御文字はUnicodeエスケープ） |
+
+### Pythonでの読み込み例（JSONとしてパース）
+
+`//` で始まるコメント行を除外し、前後に `[` と `]` を補うだけで、標準の `json.loads` で「配列の配列」として読み込めます。
+
+```python
+import json
+
+with open("output_proportional.txt", "r", encoding="utf-8") as f:
+    lines = [line.strip() for line in f if not line.strip().startswith("//") and line.strip()]
+    data = json.loads("[\n" + "\n".join(lines) + "\n]")
+
+for item in data:
+    idx, (cx, cy, px, py), off_x, width, char = item
+    print(f"Index: {idx:3d} | 文字: {char} | 幅: {width}px | オフセット: {off_x}px")
+```
 
 ---
 
@@ -128,6 +205,9 @@ bmp2ttf2.exe -c config.json --enable-charmap
 | `-m`, `--margin` | 比率 | 上下共通の余白比率（例: `1/8`） |
 | `-mt`, `--margin-top` | 比率 | 上余白比率 |
 | `-mb`, `--margin-bottom` | 比率 | 下余白比率 |
+| **`-p`, `--proportional`** | なし | **プロポーショナルフォントとして生成し、`_proportional.txt` を出力** |
+| **`--char-spacing`** | 整数 | **字間スペース（ドット数、デフォルト: `1`）<br>※ `--proportional` 指定時のみ有効** |
+| **`--space-width`** | 整数 | **空白文字の送り幅（ドット数、デフォルト: セル切り出し有効幅の最小値）<br>※ `--proportional` 指定時のみ有効** |
 | `--scale-copy` | なし | 横50%縮小コピーを実行するフラグ |
 | `--scale-copy-src` | コード | 縮小コピー元の開始コードポイント（デフォルト: `0xE000`） |
 | `--scale-copy-dst` | コード | 縮小コピー先の開始コードポイント（デフォルト: `0xE100`） |
@@ -146,6 +226,9 @@ bmp2ttf2.exe -c config.json --enable-charmap
   "em": 1024,
   "baseline": "1/8",
   "margin": 0.0,
+  "proportional": true,
+  "char_spacing": 1,
+  "space_width": 4,
   "sets": [
     {
       "image": "font.png",
@@ -166,13 +249,24 @@ bmp2ttf2.exe -c config.json --enable-charmap
 }
 ```
 
-### `sets` 内の指定項目
+### JSON パラメータ項目
 
-- `image` (必須): 画像ファイルパス。
-- `step_size` または `cell_size` (必須): `[幅, 高さ]` のセル間隔ピッチ。
-- `glyph_size` (任意): `[幅, 高さ]` の切り出し・送り幅サイズ。省略時は `step_size` と同値。
-- `bbox` (任意): 画像内の走査領域 `[x1, y1, x2, y2]`。省略時は画像全体。
-- `start_cp` (必須): 開始コードポイント（`"0xE000"`, `57344` 等）。
+- `name`: フォントファミリー名。
+- `em`: EM値（`unitsPerEm`）。
+- `baseline`: ベースライン比率（分数文字列または数値）。
+- `margin` / `margin_top` / `margin_bottom`: 上下の余白比率。
+- **`proportional`**: `true` でプロポーショナルフォント化およびテキスト出力。
+- **`char_spacing`**: 字間ドット数（デフォルト: `1`。※ `proportional: true` 時のみ有効）。
+- **`space_width`**: 空白文字の送り幅ドット数（デフォルト: 切り出し最小幅。※ `proportional: true` 時のみ有効）。
+- `sets`: 画像切り出し設定の配列。
+  - `image` (必須): 画像ファイルパス。
+  - `step_size` または `cell_size` (必須): `[幅, 高さ]` のセル間隔ピッチ。
+  - `glyph_size` (任意): `[幅, 高さ]` の切り出し・送り幅サイズ。省略時は `step_size` と同値。
+  - `bbox` (任意): 画像内の走査領域 `[x1, y1, x2, y2]`。省略時は画像全体。
+  - `start_cp` (必須): 開始コードポイント（`"0xE000"`, `57344` 等）。
+- `enable_charmap`: 文字マップ適用の有効化フラグ。
+- `charmap_file`: 文字マップ定義ファイル（`.def`）のパス。
+- `charmap_source`: マッピング参照元の開始コードポイント。
 
 ---
 
@@ -186,9 +280,8 @@ bmp2ttf2.exe -c config.json --enable-charmap
 1. [`pat2bmp`](./pat2bmp.md)を使用して、`HYDL3MSX2.ROM` から `hydlide3_msx2_font.bmp` （幅256 × 高さ688 ピクセル）を作成し、
 2. 次に [`bmp2ttf2`](./bmp2ttf2.md) を使用して、`hydlide3_msx2_font.bmp` と `char_map_hydlide3_main.def` を渡してTrueTypeフォント(ttfファイル)を生成します。
 
-
 ### hydlide3_msx2.bat
-```
+```bat
 @set rom=hyd3m2v2.rom
 @set bmp=hydlide3_msx2_font.bmp
 @set cfg=hydlide3_msx2_font_extract.cfg
@@ -202,7 +295,7 @@ timeout /t 5
 
 書式：[pat2bmp.md](./pat2bmp.md) を参照
 
-```
+```text
 # =============================================================================
 # フォント定義ファイル (fonts.cfg)
 #
@@ -238,7 +331,7 @@ timeout /t 5
 
 全グリフを外字領域 `0xE000` 基準（`+20` は `0xE020`、`+80` は `0xE080`、`+100` は `0xE100`、`+200` は `0xE200`）へ取り込み、`.def` ファイルによって Unicode（ASCII、ひらがな、カタカナ、漢字）へ割り当てます。
 
-### bmp2ttf用 設定ファイル （`hydlide3_msx2.json`）
+### bmp2ttf2 用 設定ファイル （`hydlide3_msx2.json`）
 
 ```json
 {
@@ -251,30 +344,30 @@ timeout /t 5
       "image": "hydlide3_msx2_font.bmp",
       "bbox": [0, 0, 256, 48],
       "step_size": [8, 16],
-      "start_cp": "0xE020",
+      "start_cp": "0xE020"
     },
     {
       "image": "hydlide3_msx2_font.bmp",
       "bbox": [0, 48, 256, 176],
       "step_size": [16, 16],
-      "start_cp": "0xE080",
+      "start_cp": "0xE080"
     },
     {
       "image": "hydlide3_msx2_font.bmp",
       "bbox": [0, 176, 256, 432],
       "step_size": [16, 16],
-      "start_cp": "0xE100",
+      "start_cp": "0xE100"
     },
     {
       "image": "hydlide3_msx2_font.bmp",
-      "bbox": [0, 432, 256, 432],
+      "bbox": [0, 432, 256, 688],
       "step_size": [16, 16],
-      "start_cp": "0xE200",
-    },
+      "start_cp": "0xE200"
+    }
   ],
   "enable_charmap": true,
   "charmap_file": "char_map_hydlide3_main.def",
-  "charmap_source": "0xE000",
+  "charmap_source": "0xE000"
 }
 ```
 
@@ -284,7 +377,7 @@ timeout /t 5
 
 ![](bz_custom_test.png)
 
-### bmp2ttf 実行部
+### bmp2ttf2 実行部
 
 ```bash
 # exe 版の場合

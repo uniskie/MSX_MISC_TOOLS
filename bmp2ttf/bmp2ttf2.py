@@ -35,8 +35,10 @@ DEFAULT_FONT_NAME = "MSX-Font"
 DEFAULT_STYLE_NAME = "Regular"
 DEFAULT_FONT_VERSION = "Version 1.0"
 POST_IS_FIXED_PITCH_TRUE = 1
+POST_IS_FIXED_PITCH_FALSE = 0
 POST_TABLE_FORMAT = 2.0
 OS2_PANOSE_PROPORTION_MONO = 9
+OS2_PANOSE_PROPORTION_ANY = 0
 OS2_CP932_BIT_OFFSET = 17
 
 DEFAULT_CHAR_MAP_DEF = r"""; Normal chara map
@@ -86,7 +88,6 @@ def parse_char_map(lines: Iterable[str]) -> List[Optional[str]]:
         except ValueError:
             continue
 
-        # エスケープシーケンスの展開
         decoded_text = text_raw.encode("raw_unicode_escape").decode("unicode_escape")
 
         for i, char in enumerate(decoded_text):
@@ -109,9 +110,7 @@ def parse_char_map(lines: Iterable[str]) -> List[Optional[str]]:
 # ==============================================================================
 
 def load_json_relaxed(text: str, filepath: str = "") -> dict:
-    """リストやオブジェクト末尾の余計なカンマを許容してJSONを読み込む。構文エラー時は位置を表示"""
-    # 文字列リテラル内のカンマは保護し、オブジェクト/配列末尾のカンマのみを除去
-    # 改行数を変えないよう、カンマのみを削除して後続の空白や改行は維持する
+    """リストやオブジェクト末尾の余計なカンマを許容してJSONを読み込む"""
     pattern = re.compile(r'("(?:\\.|[^"\\])*")|(,)(\s*[}\]])', re.DOTALL)
     cleaned = pattern.sub(lambda m: m.group(1) if m.group(1) else m.group(3), text)
 
@@ -195,6 +194,19 @@ def parse_set_arg(arg_str: str) -> dict:
     }
 
 
+def format_char_literal(char: str) -> str:
+    """文字をJSON/C++互換のエスケープ文字列に整形"""
+    if char == '"':
+        return r'\"'
+    if char == '\\':
+        return r'\\'
+    cp = ord(char)
+    # 制御文字や不可視文字はUnicodeエスケープ
+    if cp < 0x20 or (0x7F <= cp <= 0x9F):
+        return f"\\u{cp:04X}"
+    return char
+
+
 # ==============================================================================
 # グリフ生成処理
 # ==============================================================================
@@ -225,7 +237,7 @@ def extract_horizontal_segments(pixels, char_x: int, char_y: int, w: int, h: int
     return segments
 
 
-def create_glyph_from_segments(segments, glyph_h: int, dot_scale: float, baseline_dots: int):
+def create_glyph_from_segments(segments, glyph_h: int, dot_scale: float, baseline_dots: int, shift_x: int = 0):
     pen = TTGlyphPen(None)
     if not segments:
         return pen.glyph(), 0
@@ -235,8 +247,8 @@ def create_glyph_from_segments(segments, glyph_h: int, dot_scale: float, baselin
         dot_y = (glyph_h - 1 - y) - baseline_dots
         y0 = round(dot_y * dot_scale)
         y1 = round((dot_y + 1) * dot_scale)
-        x0 = round(x_start * dot_scale)
-        x1 = round(x_end * dot_scale)
+        x0 = round((x_start - shift_x) * dot_scale)
+        x1 = round((x_end - shift_x) * dot_scale)
 
         if min_x0 is None or x0 < min_x0:
             min_x0 = x0
@@ -269,6 +281,9 @@ def build_font(
     enable_charmap: bool = False,
     charmap_file: str | None = None,
     charmap_source: int = 0xE100,
+    proportional: bool = False,
+    char_spacing: int = 1,
+    space_width: Optional[int] = None,
 ):
     if not (16 <= units_per_em <= 16384):
         raise ValueError(f"unitsPerEm ({units_per_em}) は 16 から 16384 の範囲で指定してください。")
@@ -291,11 +306,30 @@ def build_font(
 
     image_cache = {}
 
+    # 全セット中の最小有効幅を算出（未指定時の空白送り幅として使用）
+    all_glyph_widths = []
+    for s in sets_config:
+        step_sz = s.get("step_size") or s.get("cell_size")
+        glyph_sz = s.get("glyph_size") or step_sz
+        if glyph_sz:
+            all_glyph_widths.append(glyph_sz[0])
+
+    min_glyph_w = min(all_glyph_widths) if all_glyph_widths else 8
+    resolved_space_width = space_width if space_width is not None else min_glyph_w
+
     print(f"フォント設定:")
     print(f" - unitsPerEm (EM値): {units_per_em}")
+    print(f" - モード: {'プロポーショナル' if proportional else '等幅'}")
+    if proportional:
+        print(f"   - 字間スペース: {char_spacing} ドット")
+        print(f"   - 空白文字幅: {resolved_space_width} ドット (指定なし時: 最小有効幅 {min_glyph_w})")
     print(f" - ベースライン比率: {baseline_ratio}")
     print(f" - 上余白比率: {margin_top_ratio}, 下余白比率: {margin_bottom_ratio}")
     print(f" - Ascent: {ascent}, Descent: {descent} (総行高: {ascent - descent})")
+
+    # プロポーショナル用メタデータ記録リスト
+    proportional_records = []
+    global_index = 0
 
     # 各画像セットの読み込みとグリフ化
     for idx, s in enumerate(sets_config):
@@ -314,6 +348,8 @@ def build_font(
 
         step_w, step_h = step_size
         glyph_w, glyph_h = glyph_size
+        pad_x = step_w - glyph_w
+        pad_y = step_h - glyph_h
         start_cp = parse_code_point(s["start_cp"])
 
         bbox = s.get("bbox")
@@ -328,7 +364,6 @@ def build_font(
         rows = region_h // step_h
 
         dot_scale = units_per_em / glyph_h
-        advance_width = round(glyph_w * dot_scale)
         cell_baseline_dots = round(glyph_h * baseline_ratio)
 
         pixels = img.load()
@@ -344,18 +379,56 @@ def build_font(
             gname = f"uni{cp:04X}"
 
             segments = extract_horizontal_segments(pixels, cx, cy, glyph_w, glyph_h)
-            glyph, lsb = create_glyph_from_segments(segments, glyph_h, dot_scale, cell_baseline_dots)
+
+            if segments:
+                min_x = min(seg[0] for seg in segments)
+                max_x = max(seg[1] for seg in segments)
+                char_w = max_x - min_x
+                offset_x = min_x
+            else:
+                offset_x = 0
+                char_w = 0
+
+            # グリフの生成とメトリクスの決定
+            if proportional:
+                if char_w > 0:
+                    # ピクセルの最小Xを原点(X=0)へシフトして配置
+                    glyph, lsb = create_glyph_from_segments(segments, glyph_h, dot_scale, cell_baseline_dots, shift_x=offset_x)
+                    adv_w = round((char_w + char_spacing) * dot_scale)
+                else:
+                    # 空白（ドットなし）文字
+                    glyph = TTGlyphPen(None).glyph()
+                    lsb = 0
+                    adv_w = round(resolved_space_width * dot_scale)
+            else:
+                # 等幅
+                glyph, lsb = create_glyph_from_segments(segments, glyph_h, dot_scale, cell_baseline_dots)
+                adv_w = round(glyph_w * dot_scale)
 
             glyphs[gname] = glyph
-            metrics[gname] = (advance_width, lsb)
+            metrics[gname] = (adv_w, lsb)
             cmap[cp] = gname
             if gname not in glyph_order:
                 glyph_order.append(gname)
 
+            # プロポーショナル用レコード（実際の切り出しオフセットと実サイズ）
+            try:
+                char_str = chr(cp)
+            except (ValueError, OverflowError):
+                char_str = "?"
+            proportional_records.append({
+                "index": global_index,
+                "cell": [cx, cy, pad_x, pad_y],
+                "offset_x": offset_x,
+                "width": char_w,
+                "char": char_str,
+            })
+            global_index += 1
+
         size_info = f"間隔: {step_w}x{step_h}"
         if (step_w, step_h) != (glyph_w, glyph_h):
             size_info += f", 有効: {glyph_w}x{glyph_h}"
-        print(f"セット #{idx+1}: '{img_path}' ({cols}x{rows}={count}文字, {size_info} -> 送り幅 {advance_width}) 開始: U+{start_cp:04X}")
+        print(f"セット #{idx+1}: '{img_path}' ({cols}x{rows}={count}文字, {size_info}) 開始: U+{start_cp:04X}")
 
     # 半角スケーリングコピー (X軸50%縮小)
     if scale_copy:
@@ -442,14 +515,38 @@ def build_font(
     fb.setupPost(formatType=POST_TABLE_FORMAT)
 
     font = fb.font
-    font["OS/2"].xAvgCharWidth = units_per_em // 2
-    font["OS/2"].panose.bProportion = OS2_PANOSE_PROPORTION_MONO
+    # プロポーショナルと等幅でテーブルフラグを切り替え
+    if proportional:
+        font["OS/2"].xAvgCharWidth = round(units_per_em * (min_glyph_w / 8.0))
+        font["OS/2"].panose.bProportion = OS2_PANOSE_PROPORTION_ANY
+        font["post"].isFixedPitch = POST_IS_FIXED_PITCH_FALSE
+    else:
+        font["OS/2"].xAvgCharWidth = units_per_em // 2
+        font["OS/2"].panose.bProportion = OS2_PANOSE_PROPORTION_MONO
+        font["post"].isFixedPitch = POST_IS_FIXED_PITCH_TRUE
+
     font["OS/2"].ulCodePageRange1 = 1 << OS2_CP932_BIT_OFFSET
     font["OS/2"].ulCodePageRange2 = 0
-    font["post"].isFixedPitch = POST_IS_FIXED_PITCH_TRUE
 
     font.save(output_path)
     print(f"\n生成完了: '{output_path}' (総登録グリフ数: {len(glyph_order)})")
+
+    # プロポーショナル指定時: _proportional.txt を出力
+    if proportional:
+        out_p = Path(output_path)
+        txt_path = out_p.with_name(f"{out_p.stem}_proportional.txt")
+        with open(txt_path, "w", encoding="utf-8") as f:
+            f.write("// index, [cell_x, cell_y, pad_x, pad_y], offset_x, width, \"char\"\n")
+            total = len(proportional_records)
+            for i, rec in enumerate(proportional_records):
+                comma = "," if i < total - 1 else ""
+                escaped_ch = format_char_literal(rec["char"])
+                cx, cy, px, py = rec["cell"]
+                f.write(
+                    f"[{rec['index']:4d}, [{cx:4d}, {cy:4d}, {px:2d}, {py:2d}], "
+                    f"{rec['offset_x']:2d}, {rec['width']:2d}, \"{escaped_ch}\"]{comma}\n"
+                )
+        print(f"メトリクス書き出し完了: '{txt_path}' ({total} 文字分)")
 
 
 # ==============================================================================
@@ -458,7 +555,7 @@ def build_font(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="複数画像・領域・混在セルサイズから等幅 TrueType フォント (.ttf) を生成します。"
+        description="複数画像・領域・混在セルサイズから等幅／プロポーショナル TrueType フォント (.ttf) を生成します。"
     )
     parser.add_argument("-o", "--output", default=None, help="出力TTFファイル名 (省略時は設定ファイル名 / 画像名 / フォント名から自動決定)")
     parser.add_argument("-n", "--name", default=DEFAULT_FONT_NAME, help=f"フォント名 (デフォルト: {DEFAULT_FONT_NAME})")
@@ -489,13 +586,32 @@ def main():
     )
     parser.add_argument("-c", "--config", help="設定ファイル (JSON形式) のパス")
 
+    # プロポーショナルフォント設定
+    parser.add_argument(
+        "-p", "--proportional",
+        action="store_true",
+        help="プロポーショナルフォントとして生成し、メタデータ (出力名_proportional.txt) を出力する"
+    )
+    parser.add_argument(
+        "--char-spacing",
+        type=int,
+        default=1,
+        help="字間スペース (ドット数)。デフォルト: 1 (※ --proportional 指定時のみ有効)"
+    )
+    parser.add_argument(
+        "--space-width",
+        type=int,
+        default=None,
+        help="空白文字 (ドットなし) の送り幅 (ドット数)。指定なし時はセル切り出し設定の最小幅 (※ --proportional 指定時のみ有効)"
+    )
+
     # 半角スケーリングコピー設定
     parser.add_argument("--scale-copy", action="store_true", help="横50%%縮小コピーグリフを生成する")
     parser.add_argument("--scale-copy-src", default="0xE000", help="縮小コピー元開始コードポイント (デフォルト: 0xE000)")
     parser.add_argument("--scale-copy-dst", default="0xE100", help="縮小コピー先開始コードポイント (デフォルト: 0xE100)")
     parser.add_argument("--scale-copy-count", type=int, default=256, help="縮小コピーする文字数 (デフォルト: 256)")
 
-    # 文字マップ定義マッピング設定 (案A)
+    # 文字マップ定義マッピング設定
     parser.add_argument("--enable-charmap", action="store_true", help="文字マップ定義に基づくUnicodeへのマッピングを有効化")
     parser.add_argument("-cm", "--charmap-file", default=None, help="文字マップ定義ファイル (.def) のパス (省略時はデフォルト定義)")
     parser.add_argument("--charmap-source", default="0xE100", help="文字マップが参照するグリフの開始コードポイント (デフォルト: 0xE100)")
@@ -508,6 +624,10 @@ def main():
     margin_top_val = args.margin_top if args.margin_top is not None else args.margin
     margin_bottom_val = args.margin_bottom if args.margin_bottom is not None else args.margin
     font_name = args.name
+    proportional = args.proportional
+    char_spacing = args.char_spacing
+    space_width = args.space_width
+
     scale_copy = args.scale_copy
     scale_copy_src = args.scale_copy_src
     scale_copy_dst = args.scale_copy_dst
@@ -545,6 +665,12 @@ def main():
             margin_top_val = cfg["margin_top"]
         if "margin_bottom" in cfg and args.margin_bottom is None:
             margin_bottom_val = cfg["margin_bottom"]
+        if "proportional" in cfg and not args.proportional:
+            proportional = bool(cfg["proportional"])
+        if "char_spacing" in cfg and args.char_spacing == 1:
+            char_spacing = int(cfg["char_spacing"])
+        if "space_width" in cfg and args.space_width is None:
+            space_width = int(cfg["space_width"])
         if "scale_copy" in cfg:
             scale_copy = cfg["scale_copy"]
         if "scale_copy_src" in cfg:
@@ -604,6 +730,9 @@ def main():
             enable_charmap=enable_charmap,
             charmap_file=charmap_file,
             charmap_source=parse_code_point(charmap_source),
+            proportional=proportional,
+            char_spacing=char_spacing,
+            space_width=space_width,
         )
     except Exception as e:
         print(f"エラー: フォント生成に失敗しました: {e}", file=sys.stderr)
