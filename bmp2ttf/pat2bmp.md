@@ -1,8 +1,8 @@
-# extract_font
+# pat2bmp 取扱説明書
 
 ROMなどのバイナリデータから各種ビットマップフォントやパターンデータを抽出し、1bpp（白黒2値）のBMP画像を生成するコマンドラインツールです。
 
-Pythonスクリプト（`extract_font.py`）としての実行に加え、PyInstallerでビルドした実行ファイル（`extract_font.exe`）でも動作します。
+Pythonスクリプト（`pat2bmp.py`）としての実行に加え、PyInstallerでビルドした実行ファイル（`pat2bmp.exe`）でも動作します。
 
 ---
 
@@ -35,28 +35,28 @@ Pythonスクリプト（`extract_font.py`）としての実行に加え、PyInst
 
 **exeファイルの場合:**
 ```bat
-extract_font.exe <入力ROMファイル> <出力BMPファイル> [オプション]
+pat2bmp.exe <入力ROMファイル> <出力BMPファイル> [オプション]
 ```
 
 **Pythonスクリプトの場合:**
 ```bash
-python extract_font.py <入力ROMファイル> <出力BMPファイル> [オプション]
+python pat2bmp.py <入力ROMファイル> <出力BMPファイル> [オプション]
 ```
 
 ### 使用例
 
 ```bat
 # 組み込みのデフォルト設定で抽出（MSX BIOS フォント、横幅256px、等倍）
-extract_font.exe msxbios.rom output.bmp
+pat2bmp.exe msxbios.rom output.bmp
 
 # 外部設定ファイル (font.cfg) を使用し、横幅512px、縦2倍で出力
-extract_font.exe rom.bin output.bmp -c font.cfg -w 512 -v 2
+pat2bmp.exe rom.bin output.bmp -c font.cfg -w 512 -v 2
 
 # 外部設定ファイル (font.cfg) を使用し、横幅512px、横2倍で出力
-extract_font.exe rom.bin output.bmp -c font.cfg -w 512 -h 2
+pat2bmp.exe rom.bin output.bmp -c font.cfg -w 512 -h 2
 
 # JSON設定ファイルを使用
-extract_font.exe rom.bin output.bmp -c font.json
+pat2bmp.exe rom.bin output.bmp -c font.json
 ```
 
 ---

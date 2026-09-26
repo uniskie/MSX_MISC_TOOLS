@@ -182,7 +182,9 @@ bmp2ttf2.exe -c config.json --enable-charmap
 - 基本コード: `20H` 〜 `FFH`
 - 拡張文字（漢字等）: `FEH` と `FFH` をプレフィックスとし、それぞれ 256 文字分の拡張コード領域を持ちます。
 
-同梱の `hydlide3_msx2.bat` では `HYDL3MSX2.ROM` から `hydlide3_msx2_font.bmp` （幅256 × 高さ688 ピクセル）を作成し、 次に `bmp2ttf2` へ `hydlide3_msx2_font.bmp` と `char_map_hydlide3_main.def` を渡して、TTF フォントを生成します。
+同梱の `hydlide3_msx2.bat` では
+1. [`pat2bmp`](./pat2bmp.md)を使用して、`HYDL3MSX2.ROM` から `hydlide3_msx2_font.bmp` （幅256 × 高さ688 ピクセル）を作成し、
+2. 次に [`bmp2ttf2`](./bmp2ttf2.md) を使用して、`hydlide3_msx2_font.bmp` と `char_map_hydlide3_main.def` を渡してTrueTypeフォント(ttfファイル)を生成します。
 
 
 ### hydlide3_msx2.bat
@@ -191,12 +193,15 @@ bmp2ttf2.exe -c config.json --enable-charmap
 @set bmp=hydlide3_msx2_font.bmp
 @set cfg=hydlide3_msx2_font_extract.cfg
 @set json=hydlide3_msx2.json
-py extract_font.py %rom% %bmp% -c %cfg% --vscale 2
+py pat2bmp.py %rom% %bmp% -c %cfg% --vscale 2
 py bmp2ttf2.py -c %json%
 timeout /t 5
 ```
 
-### extract_font用 設定ファイル （`hydlide3_msx2_font_extract.cfg`）
+### pat2bmp用 設定ファイル （`hydlide3_msx2_font_extract.cfg`）
+
+書式：[pat2bmp.md](./pat2bmp.md) を参照
+
 ```
 # =============================================================================
 # フォント定義ファイル (fonts.cfg)
@@ -273,9 +278,9 @@ timeout /t 5
 }
 ```
 
-### バイナリエディターBZ CUSTOMエンコード対応テスト版
+### バイナリエディターBZ CUSTOMエンコード対応版(1.9.9.7以降)
 
-[BzTestMSX_custom_test.exe](https://raw.githubusercontent.com/uniskie/MSX_MISC_TOOLS/refs/heads/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.4-for-msx.exe)
+[BinaryEditorBz_for_MSX](https://raw.githubusercontent.com/uniskie/MSX_MISC_TOOLS/refs/heads/main/BinaryEditorBz_for_MSX/)
 
 ![](bz_custom_test.png)
 

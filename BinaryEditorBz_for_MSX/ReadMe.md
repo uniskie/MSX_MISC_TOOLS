@@ -50,9 +50,9 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 - **FontForDump.ttf**は、インストーラで当ソフトと一緒にインストールされます。  
   ![](Fonts/font_for_bz_msx_k.bmp)  
   ![](Fonts/font_for_bz_msx.bmp)
-  - ポータブル版の場合は同梱されている**Fonts/FontForDump.ttf**を手動でインストールしてください。
+  - ポータブル版の場合は同梱されている**Fonts/FontForDump.ttf** と **Fonts/FontForDumpN.ttf** を手動でインストールしてください。
 - **MSX-FONT**は**FontForDump**が存在しない場合に使用されます。
-- **FontForDump**も**MSX-FONT**もがインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
+- **FontForDump**も**MSX-FONT**もいずれもインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
 - 他のエンコードでは設定で指定したフォントになります。
 - **MSX-FONT.tff**はbugfireさんの [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
 に同梱されています。
