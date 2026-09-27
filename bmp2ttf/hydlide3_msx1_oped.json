@@ -24,7 +24,5 @@
       "start_cp": "0xE120",
     },
   ],
-  "enable_charmap": true,
-  "charmap_file": "char_map_hydlide3_oped.def",
-  "charmap_source": "0xE000",
+  "charmap": ["char_map_hydlide3_oped.def", "0xE000"]
 }

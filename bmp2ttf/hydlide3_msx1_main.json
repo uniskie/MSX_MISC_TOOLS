@@ -30,7 +30,5 @@
       "start_cp": "0xE200",
     },
   ],
-  "enable_charmap": true,
-  "charmap_file": "char_map_hydlide3_main.def",
-  "charmap_source": "0xE000",
+  "charmap": ["char_map_hydlide3_main.def", "0xE000"]
 }

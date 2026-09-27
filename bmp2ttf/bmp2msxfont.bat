@@ -8,6 +8,7 @@ rem --- 引数が指定されていれば環境変数に格納（前後の引用符除去） ---
 if not "%~1"=="" set "input=%~1"
 if not "%~2"=="" set "fontname=%~2"
 if not "%~3"=="" set "fontfamily=%~3"
+if not "%~4"=="" set "exopt=%~4"
 
 rem --- 環境変数の未定義チェック ---
 if "%input%"=="" (
@@ -39,36 +40,7 @@ if "%output%"=="" (
 echo "%input%" to "%output%"
 
 echo =====================================================
-echo bmp2tff
-rem usage: bmp2ttf.py [-h] [-o OUTPUT] [-n NAME] [-f FAMILY_NAME] [-s CELL_SIZE] [-cw CELL_WIDTH] [-ch CELL_HEIGHT]
-rem                   [-b BASELINE] [-mt MARGIN_TOP] [-mb MARGIN_BOTTOM] [-e UNITS_PER_EM]
-rem                   input
-rem 
-rem MSXフォント画像 (BMP/PNG) から等幅 TrueType フォント (.ttf) を生成します。
-rem 
-rem positional arguments:
-rem   input                 入力画像ファイルパス (BMP, PNGなど)
-rem 
-rem options:
-rem   -h, --help            show this help message and exit
-rem   -o, --output OUTPUT   出力TTFファイル名 (省略時は <画像名>.ttf)
-rem   -n, --name NAME       フォント名 (デフォルト: MSX-Font)
-rem   -f, --family, --family-name FAMILY_NAME
-rem                         フォントファミリー名 (省略時は --name と同じ)
-rem   -s, --cell-size CELL_SIZE
-rem                         文字のセルサイズ (例: 8x8, 16x16, 8)。デフォルト: 8x8
-rem   -cw, --cell-width CELL_WIDTH
-rem                         セル幅
-rem   -ch, --cell-height CELL_HEIGHT
-rem                         セル高
-rem   -b, --baseline BASELINE
-rem                         ベースライン位置 (セル下端からのドット数/ディセンダドット数。省略時はセル高さの1/8)
-rem   -mt, --margin-top MARGIN_TOP
-rem                         上余白ドット数 (アセンダ側の追加余白。デフォルト: 0)
-rem   -mb, --margin-bottom MARGIN_BOTTOM
-rem                         下余白ドット数 (ディセンダ側の追加余白。デフォルト: 0)
-rem   -e, --em, --units-per-em UNITS_PER_EM
-rem                         EMの高さ (Units per em。デフォルト: 1024)
+echo bmp2ttf2
 
 set "opt="
 set "opt=%opt% --name "%fontname%""
@@ -81,10 +53,16 @@ set "opt=%opt% --baseline 1"
 set "opt=%opt% --margin-top 1"
 set "opt=%opt% --margin-bottom 1"
 set "opt=%opt% --units-per-em 2048"
-set "opt=%opt% --output "%output%""
 
-echo ^> py bmp2ttf.py %opt% "%input%"
-py bmp2ttf.py %opt% "%input%"
+rem bmp2ttf互換
+set "opt=%opt% --scale-copy 0xE000,0xE100,256"
+set "opt=%opt% --charmap "char_map_msx.def",0xE100"
+
+set "opt=%opt% --output "%output%""
+set "opt=%opt% %exopt%"
+
+echo ^> py bmp2ttf2.py %opt% "%input%"
+py bmp2ttf2.py %opt% "%input%"
 if errorlevel 1 goto :err_python
 
 echo.
