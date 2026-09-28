@@ -35,17 +35,17 @@
       <div class="crossnote markdown-preview  ">
       
 <h1 id="binary-editor-bz---msx-custom">Binary Editor Bz - MSX Custom </h1>
-<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8</p>
+<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8a</p>
 <p><a href="http://www.vcraft.jp/">c.mosさん</a>作、<a href="http://www.vcraft.jp/soft/bz.html">Binary Editor Bz</a>の<a href="https://gitlab.com/devill.tamachan/binaryeditorbz">tamachanさんの改造版</a>をベースに、MSXユーザー向けの機能を追加した物です。</p>
 <p>Windows版のみの提供です。</p>
 <p>構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。</p>
 <p>Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。</p>
 <ul>
 <li>
-<p>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8-for-msx.exe">BzEditor-1.9.9.8-for-msx.exe</a></p>
+<p>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8a-for-msx.exe">BzEditor-1.9.9.8a-for-msx.exe</a></p>
 </li>
 <li>
-<p>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998Portable-for-MSX.zip">Bz1998Portable-for-MSX.zip</a></p>
+<p>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998aPortable-for-MSX.zip">Bz1998aPortable-for-MSX.zip</a></p>
 </li>
 <li>
 <p>改変版ソースコードリポジトリ<br>
@@ -180,7 +180,7 @@
 <p>各種コンシューマゲーム機（FC/GB/MD/PCE/SFC/GBA等）のキャラクタパターン・スプライト形式にも対応しています。</p>
 <ul>
 <li>2bit Plane (FC) / Interleave (GB)</li>
-<li>4bit 通常・縦優先 (MD) / Reverse bit order (GBA) / Plane (PCE) / Interleave Plane (SFC)</li>
+<li>4bit 通常・縦優先 (MD) / Reverse bit order (GBA) / Plane / Interleave (SMS/GG) / Interleave Plane (SFC/PCE)</li>
 <li>8bit 通常・縦優先 (GBA/SFC Mode 7等) / Interleave Plane (SFC)</li>
 </ul>
 <h3 id="ビットマップ表示msx向け指定例">ビットマップ表示：MSX向け指定例 </h3>
@@ -386,6 +386,24 @@
 <td>4プレーン形式 (16x16)</td>
 </tr>
 <tr>
+<td>tile/4bit color 8x8   (Interleave)</td>
+<td>MSX16/MIO/GRAY16等</td>
+<td>1行4バイト インターリーブ (4プレーン)</td>
+<td>セガ・マスターシステム／ゲームギア BG/スプライト等</td>
+</tr>
+<tr>
+<td>tile/4bit color 8x16  (Interleave)</td>
+<td>MSX16/MIO/GRAY16等</td>
+<td>1行4バイト インターリーブ (縦2タイル)</td>
+<td>セガ・マスターシステム等 8x16スプライト</td>
+</tr>
+<tr>
+<td>tile/4bit color 16x16 (Interleave)</td>
+<td>MSX16/MIO/GRAY16等</td>
+<td>1行4バイト インターリーブ (2x2タイル)</td>
+<td>4プレーン インターリーブ 16x16</td>
+</tr>
+<tr>
 <td>tile/4bit color 8x8   (Interleave Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
 <td>1行2バイト インターリーブ x 2プレーン</td>
@@ -486,11 +504,12 @@
 <h2 id="変更履歴">変更履歴 </h2>
 <ul>
 <li>
-<p>2026/09/28 version 1.9.9.8</p>
+<p>2026/09/28 version 1.9.9.8a</p>
 <ul>
 <li>(追加)ビットマップビューにメガドライブ等の縦優先スプライト向けタイル形式（8x24、8x32）を追加</li>
 <li>(追加)ビットマップビューにGBA等のビット逆順タイル（4bit Reverse bit order 8x8、8x16、16x16）を追加</li>
 <li>(追加)ビットマップビューに4プレーン形式（4bit Plane 8x8、8x16、16x16）を追加</li>
+<li>(追加)ビットマップビューにセガ・マスターシステム／ゲームギア等の行インターリーブ形式（4bit Interleave 8x8、8x16、16x16）を追加</li>
 <li>(追加)ビットマップビューにGBA 8bppやSFC Mode 7等に対応する8bit通常タイル形式（8x8、8x16、8x24、8x32、16x16）を追加</li>
 <li>(改善)タイルパターンのメニュー表記・ID体系を機種名依存からデータ構造に即した汎用形式名（Plane、Interleave、Reverse bit order等）に再整理</li>
 <li>(改善)ポータブルモード（EnablePortableMode.txt）でのタイル形式（BmpTileType）・カラー設定・カスタムエンコードの保持・復元に対応</li>
