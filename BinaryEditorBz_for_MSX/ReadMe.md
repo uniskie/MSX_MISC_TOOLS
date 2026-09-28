@@ -1,17 +1,17 @@
 #  Binary Editor Bz - MSX Custom
 
-Binary Editor Bz - MSX Users Custom Version 1.9.9.7
+Binary Editor Bz - MSX Users Custom Version 1.9.9.8
 
 [c.mosさん](http://www.vcraft.jp/)作、[Binary Editor Bz](http://www.vcraft.jp/soft/bz.html)の[tamachanさんの改造版](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加した物です。
 
 Windows版のみの提供です。
 
-構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。 
+構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。
 
 Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
 
-  - インストーラ―版 [BzEditor-1.9.9.7-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.7-for-msx.exe)
-  - ポータブル版 [Bz1997Portable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1997Portable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.8-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8-for-msx.exe)
+  - ポータブル版 [Bz1998Portable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998Portable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
@@ -104,7 +104,7 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 ### MSX向けビットマップ表示の概要
 
 - 1bit color 8x8 ... SCREEN 0,1,2,4 / SPRITE 8x8 / ANK FONT
-- 1bit color 8x16  ... SPRITE 61x16
+- 1bit color 8x16  ... SPRITE 16x16
 - 1bit color 16x8  ... ハイドライドⅢ MSX2版 FONT
 - 1bit color 16x16(Z-Swizzle)  ... 漢字ロム
 - 1bit color 12x12  ... MSX-Viewフォント
@@ -118,12 +118,11 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 - MSX256 (パレット)
 - MSX_logo (パレット)
 
-実験で以下のモードも実装しています。
+各種コンシューマゲーム機（FC/GB/MD/PCE/SFC/GBA等）のキャラクタパターン・スプライト形式にも対応しています。
 
-- 2bit color FC
-- 2bit color GB
-- 4BIT color SFC/PCE
-- 8BIT color SFC
+- 2bit Plane (FC) / Interleave (GB)
+- 4bit 通常・縦優先 (MD) / Reverse bit order (GBA) / Plane (PCE) / Interleave Plane (SFC)
+- 8bit 通常・縦優先 (GBA/SFC Mode 7等) / Interleave Plane (SFC)
 
 ### ビットマップ表示：MSX向け指定例
 
@@ -139,32 +138,50 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 | tile/1bit color 12x12 (Packed)    | ---      | width 192 | MSX-Viewフォント |
 | tile/1bit color 12x8  (Packed)    | ---      | width 192 | MSX-Viewフォント |
 | tile/1bit color 16x8              | ---      | width 256 | ハイドライド3 MSX2版 全角フォント |
-| 2bit color                        | MSX_logo |width 512 | SCREEN 6/9、MSX起動ロゴ等 |
+| 2bit color                        | MSX_logo | width 512 | SCREEN 6/9、MSX起動ロゴ等 |
 | 4bit color                        | MSX16    | width 256 | SCREEN 5 |
 | 4bit color                        | MSX16    | width 512 | SCREEN 7 |
 | 8bit color                        | MSX256   | width 256 | SCREEN 8 |
 | 8bit color YJK/RGB                | MSX16    | width 256 | SCREEN 10/11 |
 | 8bit color YJK                    | ---      | width 256 | SCREEN 12 |
 
-### おまけ：特殊タイルモード
+### コンシューマ機向けタイルパターン（Tiled Pattern）
+
+メニューの「ツール(T)」→「ビットマップ設定(B)」→「Tiled Pattern(L)」から選択します。  
+ハードウェア固有の名称ではなく、データ構造に即した汎用的な形式名で定義されています。
 
 | カラー形式 | カラーパレット | 変換処理 | 表示用途 |
 |---|---|---|---|
-| tile/2bit color 8x8   (FC)      | GB_GRAY/GB_GREEN/GRAY4等 | 8x8 pixel (1bpp 8byte) x2プレーン | ファミコン BG/スプライト |
-| tile/2bit color 8x16  (FC)      | GB_GRAY/GB_GREEN/GRAY4等 | 8x8 pixel (1bpp 8byte) x2プレーン | ファミコン BG/スプライト |
-| tile/2bit color 16x16 (FC)      | GB_GRAY/GB_GREEN/GRAY4等 | (1bitx2) 8x8 pixel x2プレーン | ファミコン BG/スプライト |
-| tile/2bit color 8x8   (GB)      | GB_GRAY/GB_GREEN/GRAY4等 | 行インターレース(1 line = 8bit x2) | ゲームボーイ BG/スプライト |
-| tile/2bit color 8x16  (GB)      | GB_GRAY/GB_GREEN/GRAY4等 | 行インターレース(1 line = 8bit x2) | ゲームボーイ BG/スプライト |
-| tile/2bit color 16x16 (GB)      | GB_GRAY/GB_GREEN/GRAY4等 | 行インターレース(1 line = 8bit x2) | ゲームボーイ BG/スプライト |
-| tile/4bit color 8x8             | MSX16/MIO/GRAY4等 | 2bpp 8x8 tile | メガドライブ等 BG/スプライト |
-| tile/4bit color 8x16            | MSX16/MIO/GRAY4等 | 2bpp 8x8 tile | メガドライブ等 BG/スプライト |
-| tile/4bit color 16x16           | MSX16/MIO/GRAY4等 | 2bpp 8x8 tile | メガドライブ等 BG/スプライト |
-| tile/4bit color 8x8   (SFC/PCE) | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン/PCエンジン BG/スプライト |
-| tile/4bit color 8x16  (SFC/PCE) | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン/PCエンジン BG/スプライト |
-| tile/4bit color 16x16 (SFC/PCE) | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン/PCエンジン BG/スプライト |
-| tile/8bit color 8x8   (SFC)     | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン BG/スプライト |
-| tile/8bit color 8x16  (SFC)     | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン BG/スプライト |
-| tile/8bit color 16x16 (SFC)     | MSX16/MIO/GRAY4等 | 行インターレース(1 line = 8bit x2) x 8x8 pixel x2プレーン | スーパーファミコン BG/スプライト |
+| tile/2bit color 8x8   (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x8 pixel (1bpp 8byte) x2プレーン | ファミコン BG/スプライト |
+| tile/2bit color 8x16  (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x16 pixel (1bpp 16byte) x2プレーン | ファミコン 8x16スプライト |
+| tile/2bit color 16x16 (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 16x16 pixel (8x8 4タイル) x2プレーン | ファミコン 16x16タイル |
+| tile/2bit color 8x8   (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (1 line = 8bit x2) | ゲームボーイ BG/スプライト |
+| tile/2bit color 8x16  (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (縦2タイル) | ゲームボーイ 8x16スプライト |
+| tile/2bit color 16x16 (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (2x2タイル) | ゲームボーイ 16x16タイル |
+| tile/4bit color 8x8                     | MSX16/MIO/GRAY16等       | 4bpp 8x8 タイル (通常) | メガドライブ BG/スプライト等 |
+| tile/4bit color 8x16                    | MSX16/MIO/GRAY16等       | 4bpp 8x16 (縦2タイル連続) | メガドライブ 8x16 / 16x16スプライト等 |
+| tile/4bit color 8x24                    | MSX16/MIO/GRAY16等       | 4bpp 8x24 (縦3タイル連続) | メガドライブ 24x24スプライト等 |
+| tile/4bit color 8x32                    | MSX16/MIO/GRAY16等       | 4bpp 8x32 (縦4タイル連続) | メガドライブ 32x32スプライト等 |
+| tile/4bit color 16x16 (Z-Swizzle)       | MSX16/MIO/GRAY16等       | 4bpp 16x16 (8x8 Z順4タイル) | 16x16タイル (Z順) |
+| tile/4bit color 8x8   (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 8x8 タイル (ビット逆順) | ゲームボーイアドバンス BG/OBJ等 |
+| tile/4bit color 8x16  (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 8x16 (ビット逆順/縦2タイル) | ゲームボーイアドバンス 8x16スプライト等 |
+| tile/4bit color 16x16 (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 16x16 (ビット逆順/Z順) | ゲームボーイアドバンス 16x16スプライト等 |
+| tile/4bit color 8x8   (Plane)           | MSX16/MIO/GRAY16等       | 8x8 pixel (1bpp 8byte) x4プレーン | 4プレーン形式 |
+| tile/4bit color 8x16  (Plane)           | MSX16/MIO/GRAY16等       | 8x16 pixel (1bpp 16byte) x4プレーン | 4プレーン形式 (縦2) |
+| tile/4bit color 16x16 (Plane)           | MSX16/MIO/GRAY16等       | 16x16 pixel (16line x2byte) x4プレーン | 4プレーン形式 (16x16) |
+| tile/4bit color 8x8   (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン | スーパーファミコン／PCエンジン BG |
+| tile/4bit color 8x16  (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (縦2) | スーパーファミコン スプライト |
+| tile/4bit color 16x16 (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (Z順) | スーパーファミコン／PCエンジン スプライト |
+| tile/8bit color 8x8                     | MSX256/GRAY256等         | 8bpp 8x8 タイル (通常) | ゲームボーイアドバンス 8bpp、SFC Mode 7等 |
+| tile/8bit color 8x16                    | MSX256/GRAY256等         | 8bpp 8x16 (縦2タイル連続) | 8bit 縦2タイル連続スプライト |
+| tile/8bit color 8x24                    | MSX256/GRAY256等         | 8bpp 8x24 (縦3タイル連続) | 8bit 縦3タイル連続スプライト |
+| tile/8bit color 8x32                    | MSX256/GRAY256等         | 8bpp 8x32 (縦4タイル連続) | 8bit 縦4タイル連続スプライト |
+| tile/8bit color 16x16 (Z-Swizzle)       | MSX256/GRAY256等         | 8bpp 16x16 (8x8 Z順4タイル) | ゲームボーイアドバンス 8bpp 16x16スプライト等 |
+| tile/8bit color 8x8   (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン | スーパーファミコン 8bit BG/スプライト |
+| tile/8bit color 8x16  (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (縦2) | スーパーファミコン 8bit スプライト |
+| tile/8bit color 16x16 (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (Z順) | スーパーファミコン 8bit 16x16タイル |
+
+※メガドライブ等のスプライトは縦優先（Column-major）でタイルが格納されるため、高さに合わせて `8x16` (2タイル高: 16x16等)、`8x24` (3タイル高: 24x24等)、`8x32` (4タイル高: 32x32等) を選択することで横に正しく連結表示されます。
 
 ### ビットマップ表示の表示更新について
 
@@ -195,7 +212,32 @@ MSX向けに`MSX16.txt`、`MSX256.txt`、`MSX_logo.txt`を用意しましたが�
 
 [追加パレットのみのセット](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BZPalettes-for-MSX.zip)
 
+## 謝辞
+
+元ソースコードはご厚意によって公開されている物です。  
+
+[オリジナル版Readme](ReadMe_org.md)
+
+Binary Editor BZ - original version -  
+[Binary Editor BZ 1.6.2 Win](http://www.vcraft.jp/soft/bz.html) (New BSD License) --- Copyright (c) 1996-2004 [c.mos](https://www.vcraft.jp/index.html)
+
+Binary Editor BZ - 改造版 -  
+[Binary Editor BZ 1.9.8 Win](https://gitlab.com/devill.tamachan/binaryeditorbz/) (New BSD License) --- modify 1996-2004, 2012-2022 [tamachan](https://devil-tamachan.github.io/BZDoc/)
+
+### ライセンス
+
+当ソフトも継承元に準じて New BSD License で提供されます。
+
 ## 変更履歴
+
+- 2026/09/28 version 1.9.9.8
+  - (追加)ビットマップビューにメガドライブ等の縦優先スプライト向けタイル形式（8x24、8x32）を追加
+  - (追加)ビットマップビューにGBA等のビット逆順タイル（4bit Reverse bit order 8x8、8x16、16x16）を追加
+  - (追加)ビットマップビューに4プレーン形式（4bit Plane 8x8、8x16、16x16）を追加
+  - (追加)ビットマップビューにGBA 8bppやSFC Mode 7等に対応する8bit通常タイル形式（8x8、8x16、8x24、8x32、16x16）を追加
+  - (改善)タイルパターンのメニュー表記・ID体系を機種名依存からデータ構造に即した汎用形式名（Plane、Interleave、Reverse bit order等）に再整理
+  - (改善)ポータブルモード（EnablePortableMode.txt）でのタイル形式（BmpTileType）・カラー設定・カスタムエンコードの保持・復元に対応
+  - (改善)ポップアップメニューおよびボタンメニューのステータスバーヘルプ表示に対応
 
 - 2026/09/26 version 1.9.9.7
   - (追加)ビットマップビューの設定をメニュー：ツールからアクセスできるようにした
@@ -264,19 +306,3 @@ MSX向けに`MSX16.txt`、`MSX256.txt`、`MSX_logo.txt`を用意しましたが�
   - 8bit coolor YJK/RGB
   - width 512
   - パレットにMSX16、MSX256を追加
-
-## 謝辞
-
-元ソースコードはご厚意によって公開されている物です。  
-
-[オリジナル版Readme](ReadMe_org.md)
-
-Binary Editor BZ - original version -  
-[Binary Editor BZ 1.6.2 Win](http://www.vcraft.jp/soft/bz.html) (New BSD License) --- Copyright (c) 1996-2004 [c.mos](https://www.vcraft.jp/index.html)
-
-Binary Editor BZ - 改造版 -  
-[Binary Editor BZ 1.9.8 Win](https://gitlab.com/devill.tamachan/binaryeditorbz/) (New BSD License) --- modify 1996-2004, 2012-2022 [tamachan](https://devil-tamachan.github.io/BZDoc/)
-
-### ライセンス
-
-当ソフトも継承元に準じて New BSD License で提供されます。
