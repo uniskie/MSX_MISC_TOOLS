@@ -35,17 +35,17 @@
       <div class="crossnote markdown-preview  ">
       
 <h1 id="binary-editor-bz---msx-custom">Binary Editor Bz - MSX Custom </h1>
-<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8a</p>
+<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8b</p>
 <p><a href="http://www.vcraft.jp/">c.mosさん</a>作、<a href="http://www.vcraft.jp/soft/bz.html">Binary Editor Bz</a>の<a href="https://gitlab.com/devill.tamachan/binaryeditorbz">tamachanさんの改造版</a>をベースに、MSXユーザー向けの機能を追加した物です。</p>
 <p>Windows版のみの提供です。</p>
 <p>構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。</p>
 <p>Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。</p>
 <ul>
 <li>
-<p>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8a-for-msx.exe">BzEditor-1.9.9.8a-for-msx.exe</a></p>
+<p>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8b-for-msx.exe">BzEditor-1.9.9.8b-for-msx.exe</a></p>
 </li>
 <li>
-<p>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998aPortable-for-MSX.zip">Bz1998aPortable-for-MSX.zip</a></p>
+<p>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998bPortable-for-MSX.zip">Bz1998bPortable-for-MSX.zip</a></p>
 </li>
 <li>
 <p>改変版ソースコードリポジトリ<br>
@@ -112,7 +112,7 @@
 </tbody>
 </table>
 <h2 id="msxエンコード用フォント">MSXエンコード用フォント </h2>
-<p>テキストエンコードが <strong>MSX</strong> の時、<strong>FontForDump</strong>か<strong>MSX-FONT</strong>で表示されます。</p>
+<p>テキストエンコードが <strong>MSX</strong> の時、<strong>MSXFontForDump</strong>、<strong>MSX-FONT</strong>、または <strong>MSX-FONT-Wide</strong> で表示されます。</p>
 <h3 id="msx風フォントファイル">MSX風フォントファイル </h3>
 <ul>
 <li><strong>FontForDump.ttf</strong>は、インストーラで当ソフトと一緒にインストールされます。<br>
@@ -122,15 +122,15 @@
 <li>ポータブル版の場合は同梱されている<strong>Fonts/FontForDump.ttf</strong> と <strong>Fonts/FontForDumpN.ttf</strong> を手動でインストールしてください。</li>
 </ul>
 </li>
-<li><strong>MSX-FONT</strong>は<strong>FontForDump</strong>が存在しない場合に使用されます。</li>
-<li><strong>FontForDump</strong>も<strong>MSX-FONT</strong>もいずれもインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。</li>
+<li><strong>MSX-FONT</strong>は<strong>MSXFontForDump</strong>が存在しない場合に使用されます。</li>
+<li><strong>MSXFontForDump</strong>も<strong>MSX-FONT</strong>もいずれもインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。</li>
 <li>他のエンコードでは設定で指定したフォントになります。</li>
-<li><strong>MSX-FONT.tff</strong>はbugfireさんの <a href="https://bugfire2009.ojaru.jp/download.html"><strong>DumpListEditor</strong></a>
+<li><strong>MSX-FONT.ttf</strong>はbugfireさんの <a href="https://bugfire2009.ojaru.jp/download.html"><strong>DumpListEditor</strong></a>
 に同梱されています。</li>
 </ul>
 <h2 id="customユーザー定義エンコード">CUSTOM：ユーザー定義エンコード </h2>
 <p>独自のマルチバイトエンコード形式を定義して使用できます。</p>
-<p><code>*.def</code> ファイルを作成し、<code>%APPDATA%BzEditor\CustomEncodes</code>  (ポータブル版は<code>CustomEncodes</code>) に配置してください。</p>
+<p><code>*.def</code> ファイルを作成し、<code>%APPDATA%\BzEditor\CustomEncodes</code>  (ポータブル版は<code>CustomEncodes</code>) に配置してください。</p>
 <p>メニューの「表示」 → 「文字コード」 → 「CUSTOM」 または、ミニツールバーの一番右にあるボタンから選べるようになります。</p>
 <h4 id="def-ファイル-書式">def ファイル 書式 </h4>
 <pre data-role="codeBlock" data-info="" class="language-text"><code>; コメント
@@ -144,8 +144,8 @@
 先頭キャラクタコード(16進数) (TABコード) 文字列
 ...
 先頭キャラクタコード(16進数) (TABコード) 文字列
-</code></pre><h4 id="customエンコード定義サンプル定義サンプル">CUSTOMエンコード定義サンプル定義サンプル </h4>
-<p><code>%APPDATA%BzEditor\CustomEncodes</code> (ポータブル版は<code>CustomEncodes</code>) には、サンプルファイルもインストールされています。</p>
+</code></pre><h4 id="customエンコード定義サンプル">CUSTOMエンコード定義サンプル </h4>
+<p><code>%APPDATA%\BzEditor\CustomEncodes</code> (ポータブル版は<code>CustomEncodes</code>) には、サンプルファイルもインストールされています。</p>
 <h5 id="例-hydlide3_maindef">例） HYDLIDE3_MAIN.def </h5>
 <p><img src="img/msx_sample2.png" alt=""></p>
 <h2 id="ビットマップ表示の追加機能">ビットマップ表示の追加機能 </h2>
@@ -170,9 +170,9 @@
 <li>1bit color 12x8  ... MSX-Viewフォント</li>
 <li>2bit color ... SCREEN 6,9</li>
 <li>4bit color ... SCREEN 5,7</li>
-<li>8bit coolor YJK ... SCREEN 10,11</li>
-<li>8bit coolor YJK/RGB ... SCREEN 12</li>
-<li>width 256 / 512</li>
+<li>8bit color YJK ... SCREEN 10,11</li>
+<li>8bit color YJK/RGB ... SCREEN 12</li>
+<li>width 128 / 192 / 256 / 384 / 512</li>
 <li>MSX16 (パレット)</li>
 <li>MSX256 (パレット)</li>
 <li>MSX_logo (パレット)</li>
@@ -490,7 +490,7 @@
 で開くフォルダーにあるテキストファイル が、カラーパレット定義ファイルです。</p>
 <p>（置いてあるファイル名がBITMAPビューの右クリックメニューから選べます。）</p>
 <p>MSX向けに<code>MSX16.txt</code>、<code>MSX256.txt</code>、<code>MSX_logo.txt</code>を用意しましたが、
-各自お好きな定義ファイルをを追加してください。</p>
+各自お好きな定義ファイルを追加してください。</p>
 <p><a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BZPalettes-for-MSX.zip">追加パレットのみのセット</a></p>
 <h2 id="謝辞">謝辞 </h2>
 <p>元ソースコードはご厚意によって公開されている物です。</p>
@@ -503,6 +503,13 @@
 <p>当ソフトも継承元に準じて New BSD License で提供されます。</p>
 <h2 id="変更履歴">変更履歴 </h2>
 <ul>
+<li>
+<p>2026/09/29 version 1.9.9.8b</p>
+<ul>
+<li>(バグ修正)画面復帰時にマルチビュー間で一時的なキャッシュの取り合いが発生してBZView が描画を途中で放棄して画面がブランクになる現象を修正</li>
+<li>(高速化)CUSTOMエンコード定義およびカスタムパレットのキャッシュ機構を実装し、ビュー切替・フォント変更・検索時などの不要なファイル読み込みと再パースを抑止</li>
+</ul>
+</li>
 <li>
 <p>2026/09/28 version 1.9.9.8a</p>
 <ul>

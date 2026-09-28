@@ -1,6 +1,6 @@
 #  Binary Editor Bz - MSX Custom
 
-Binary Editor Bz - MSX Users Custom Version 1.9.9.8a
+Binary Editor Bz - MSX Users Custom Version 1.9.9.8b
 
 [c.mosさん](http://www.vcraft.jp/)作、[Binary Editor Bz](http://www.vcraft.jp/soft/bz.html)の[tamachanさんの改造版](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加した物です。
 
@@ -10,8 +10,8 @@ Windows版のみの提供です。
 
 Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
 
-  - インストーラ―版 [BzEditor-1.9.9.8a-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8a-for-msx.exe)
-  - ポータブル版 [Bz1998aPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998aPortable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.8b-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8b-for-msx.exe)
+  - ポータブル版 [Bz1998bPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998bPortable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
@@ -43,7 +43,7 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 
 ## MSXエンコード用フォント
 
-テキストエンコードが **MSX** の時、**FontForDump**か**MSX-FONT**で表示されます。
+テキストエンコードが **MSX** の時、**MSXFontForDump**、**MSX-FONT**、または **MSX-FONT-Wide** で表示されます。
 
 ### MSX風フォントファイル
 
@@ -51,17 +51,17 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
   ![](Fonts/font_for_bz_msx_k.bmp)  
   ![](Fonts/font_for_bz_msx.bmp)
   - ポータブル版の場合は同梱されている**Fonts/FontForDump.ttf** と **Fonts/FontForDumpN.ttf** を手動でインストールしてください。
-- **MSX-FONT**は**FontForDump**が存在しない場合に使用されます。
-- **FontForDump**も**MSX-FONT**もいずれもインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
+- **MSX-FONT**は**MSXFontForDump**が存在しない場合に使用されます。
+- **MSXFontForDump**も**MSX-FONT**もいずれもインストールされていなければ設定で指定したフォント（半角全角混じり）を使用します。
 - 他のエンコードでは設定で指定したフォントになります。
-- **MSX-FONT.tff**はbugfireさんの [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
+- **MSX-FONT.ttf**はbugfireさんの [**DumpListEditor**](https://bugfire2009.ojaru.jp/download.html)
 に同梱されています。
 
 ## CUSTOM：ユーザー定義エンコード
 
 独自のマルチバイトエンコード形式を定義して使用できます。
 
- `*.def` ファイルを作成し、`%APPDATA%BzEditor\CustomEncodes`  (ポータブル版は`CustomEncodes`) に配置してください。
+ `*.def` ファイルを作成し、`%APPDATA%\BzEditor\CustomEncodes`  (ポータブル版は`CustomEncodes`) に配置してください。
 
 メニューの「表示」 → 「文字コード」 → 「CUSTOM」 または、ミニツールバーの一番右にあるボタンから選べるようになります。
 
@@ -82,9 +82,9 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 先頭キャラクタコード(16進数) (TABコード) 文字列
 ```
 
-#### CUSTOMエンコード定義サンプル定義サンプル
+#### CUSTOMエンコード定義サンプル
 
-`%APPDATA%BzEditor\CustomEncodes` (ポータブル版は`CustomEncodes`) には、サンプルファイルもインストールされています。
+`%APPDATA%\BzEditor\CustomEncodes` (ポータブル版は`CustomEncodes`) には、サンプルファイルもインストールされています。
 
 ##### 例） HYDLIDE3_MAIN.def
 
@@ -111,9 +111,9 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 - 1bit color 12x8  ... MSX-Viewフォント
 - 2bit color ... SCREEN 6,9
 - 4bit color ... SCREEN 5,7
-- 8bit coolor YJK ... SCREEN 10,11
-- 8bit coolor YJK/RGB ... SCREEN 12
-- width 256 / 512
+- 8bit color YJK ... SCREEN 10,11
+- 8bit color YJK/RGB ... SCREEN 12
+- width 128 / 192 / 256 / 384 / 512
 - MSX16 (パレット)
 - MSX256 (パレット)
 - MSX_logo (パレット)
@@ -211,7 +211,7 @@ Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造�
 （置いてあるファイル名がBITMAPビューの右クリックメニューから選べます。）
 
 MSX向けに`MSX16.txt`、`MSX256.txt`、`MSX_logo.txt`を用意しましたが、
-各自お好きな定義ファイルをを追加してください。
+各自お好きな定義ファイルを追加してください。
 
 [追加パレットのみのセット](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BZPalettes-for-MSX.zip)
 
@@ -232,6 +232,10 @@ Binary Editor BZ - 改造版 -
 当ソフトも継承元に準じて New BSD License で提供されます。
 
 ## 変更履歴
+
+- 2026/09/29 version 1.9.9.8b
+  - (バグ修正)画面復帰時にマルチビュー間で一時的なキャッシュの取り合いが発生してBZView が描画を途中で放棄して画面がブランクになる現象を修正
+  - (高速化)CUSTOMエンコード定義およびカスタムパレットのキャッシュ機構を実装し、ビュー切替・フォント変更・検索時などの不要なファイル読み込みと再パースを抑止
 
 - 2026/09/28 version 1.9.9.8a
   - (追加)ビットマップビューにメガドライブ等の縦優先スプライト向けタイル形式（8x24、8x32）を追加
