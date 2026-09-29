@@ -1,22 +1,29 @@
 #  Binary Editor Bz - MSX Custom
 
-Binary Editor Bz - MSX Users Custom Version 1.9.9.8b
+Binary Editor Bz - MSX Users Custom Version 1.9.9.8c
 
-[c.mosさん](http://www.vcraft.jp/)作、[Binary Editor Bz](http://www.vcraft.jp/soft/bz.html)の[tamachanさんの改造版](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加した物です。
+構造体表示機能や分割画面と比較、メモリのビットマップ表示機能など
+便利な機能を持つバイナリエディタBzのMSX向けビットマップビュー拡張改造版です。
 
-Windows版のみの提供です。
 
-構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。
 
-Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。
+[c.mosさん](http://www.vcraft.jp/)作、[Binary Edito Bz](http://www.vcraft.jp/soft/bz.html)とそれをtamachanさんが改造された[Binary Editor Bz 改 1.9](https://gitlab.com/devill.tamachan/binaryeditorbz)をベースに、MSXユーザー向けの機能を追加調整しています。
 
-  - インストーラ―版 [BzEditor-1.9.9.8b-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8b-for-msx.exe)
-  - ポータブル版 [Bz1998bPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998bPortable-for-MSX.zip)
+Windows版のみの提供で、Windows XPは非対応となっています。
+
+- MSXや幾つかのコンシューマ機向けの画像表示機能
+- 内部動作をいくつか調整
+
+- **追加機能以外の基本的な使い方/ オリジナルヘルプ**  
+  https://devil-tamachan.github.io/BZDoc/
+
+
+## ダウンロード
+
+  - インストーラ―版 [BzEditor-1.9.9.8c-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8c-for-msx.exe)
+  - ポータブル版 [Bz1998cPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998cPortable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
-
-- **追加機能以外の使い方/ オリジナルヘルプ**  
-  https://devil-tamachan.github.io/BZDoc/
 
 ![](img/msx_sample.png)
 
@@ -232,6 +239,11 @@ Binary Editor BZ - 改造版 -
 当ソフトも継承元に準じて New BSD License で提供されます。
 
 ## 変更履歴
+
+- 2026/09/29 version 1.9.9.8c
+  - (バグ修正)ビットマップビューのちらつき抑制
+  - (バグ修正)ビットマップビューのアドレス換算処理の適正化
+  - (バグ修正)通常ビルドでマニフェストファイルが無いためにツールチップが出なかった問題の修正（配布用ビルドは問題なし）
 
 - 2026/09/29 version 1.9.9.8b
   - (バグ修正)画面復帰時にマルチビュー間で一時的なキャッシュの取り合いが発生してBZView が描画を途中で放棄して画面がブランクになる現象を修正
