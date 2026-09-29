@@ -1373,8 +1373,11 @@ class VDP {
         sprgen_canvas:  null
     };
     offscreen = [null, null, null]; // disp, work, spr
-    imgData   = null;
-    sprData   = null;
+    imgData   = null; //
+    sprData   = null; // 
+    imgIndex  = null; // BG/ページ用インデックスバッファ
+    sprIndex  = null; // スプライト用インデックスバッファ
+    mainIndex = null; // 最終合成画面用インデックスバッファ
     //------------------------
     // screen 情報
     //------------------------
@@ -1789,6 +1792,10 @@ class VDP {
         var ctx = vdp.offscreen[1].getContext('2d');
         vdp.imgData = ctx.createImageData(vdp.offscreen[1].width, vdp.offscreen[1].height);
         vdp.sprData = ctx.createImageData(vdp.spr_buff_width, this.spr_buff_height);
+
+        vdp.imgIndex  = new Uint8Array(vdp.offscreen[1].width * vdp.offscreen[1].height);
+        vdp.sprIndex  = new Uint8Array(vdp.spr_buff_width * vdp.spr_buff_height);
+        vdp.mainIndex = new Uint8Array(vdp.img_width * vdp.img_height);
     }
     // ========================================================
     // VRAM配列変更
@@ -2223,6 +2230,63 @@ class VDP {
         }
 
         //--------------------------------
+        // インデックスプレーン 合成（SCREEN 0～7, 9）
+        //--------------------------------
+        if (vdp.screen_no <= 7 || vdp.screen_no === 9) {
+            const wWidth = work.width;
+            const mWidth = main.width;
+            const mHeight = vdp.img_height;
+            const scanLines = VDP.scan_line_count;
+            const xRatio = Math.floor(mWidth / wWidth); // 1 または 2
+
+            let srcIdx = vdp.imgIndex;
+            let dstIdx = vdp.mainIndex;
+            dstIdx.fill(0);
+
+            // インターレース / 表示ページのBG転送
+            for (let y = 0; y < scanLines; y++) {
+                let srcY0 = (disp_page * scanLines + y);
+                let srcY1 = (vdp.interlace_mode && (5 <= screen_no)) ? ((disp_page | 1) * scanLines + y) : srcY0;
+
+                for (let x = 0; x < mWidth; x++) {
+                    let sx = Math.floor(x / xRatio);
+                    let p0 = srcIdx[sx + srcY0 * wWidth];
+                    let p1 = srcIdx[sx + srcY1 * wWidth];
+
+                    if (vdp.interlace_mode && (5 <= screen_no)) {
+                        dstIdx[x + (y * 2) * mWidth] = p0;
+                        dstIdx[x + (y * 2 + 1) * mWidth] = p1;
+                    } else {
+                        dstIdx[x + (y * 2) * mWidth] = p0;
+                        dstIdx[x + (y * 2 + 1) * mWidth] = p0;
+                    }
+                }
+            }
+
+            // スプライト合成（スプライト有効時）
+            if (!vdp.sprite_disable && -1 < vdp.base.spratr && vdp.sprIndex) {
+                let sprIdxBuf = vdp.sprIndex;
+                let sprW = vdp.spr_scan_width;
+                let sprH = vdp.spr_scan_height;
+
+                for (let sy = 0; sy < sprH && (sy * 2 + 1) < mHeight; sy++) {
+                    for (let sx = 0; sx < sprW; sx++) {
+                        let sc = sprIdxBuf[sx + sy * sprW];
+                        if (sc !== 0) { // カラー0以外を不透明として上書き
+                            for (let mx = 0; mx < xRatio; mx++) {
+                                let dx = sx * xRatio + mx;
+                                if (dx < mWidth) {
+                                    dstIdx[dx + (sy * 2) * mWidth] = sc;
+                                    dstIdx[dx + (sy * 2 + 1) * mWidth] = sc;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //--------------------------------
         // スプライト 合成
         //--------------------------------
         if (-1 < vdp.base.spratr) {
@@ -2359,6 +2423,8 @@ class VDP {
         let sprh = (8 + 8 * x16) << chr_shift;
 
         let buf = vdp.sprData.data;
+        let sbuf_idx = vdp.sprIndex;
+        if (sbuf_idx) sbuf_idx.fill(0);
         let d = vdp.vram;
 
         const stop_y = mode2 ? 216 : 208; // 以降非表示
@@ -2486,6 +2552,7 @@ class VDP {
                             if (x < 0) continue;
                             if (255 < x) continue;
                             idx = x * dotw + ((y & 255) + pgofs) * line_size;
+                            let pixIndex = x + ((y & 255) + pgofs) * width;
                             if (pattern & bit_mask[ix]) {
                                 if ((!buf[ idx + 3 ])
                                  || (cc && (line_buff_i[x] == cur_line_cc0)) // CC=1のとき、直近のCC=0のピクセルならOK
@@ -2503,6 +2570,7 @@ class VDP {
                                     buf[ idx + 1 ] = c[1];
                                     buf[ idx + 2 ] = c[2];
                                     buf[ idx + 3 ] |= alpha;
+                                    if (sbuf_idx) sbuf_idx[pixIndex] = col;
                                 }
                             } else
                             if (write0bit) {
@@ -2510,6 +2578,7 @@ class VDP {
                                 buf[ idx + 1 ] = 0;
                                 buf[ idx + 2 ] = 0;
                                 buf[ idx + 3 ] = 255;
+                                if (sbuf_idx) sbuf_idx[pixIndex] = 0;
                             }
                         }
                         pa += 16; 
@@ -2564,6 +2633,7 @@ class VDP {
         const page_mask = 0xffffffff ^ page_size;
 
         let buf = vdp.imgData.data;
+        let ibuf = vdp.imgIndex;
         let d = vdp.vram;
         let cd = vdp.vram;
 
@@ -2628,6 +2698,7 @@ class VDP {
                             buf[ dx + 1 ] = c[1];
                             buf[ dx + 2 ] = c[2];
                             buf[ dx + 3 ] = c[3];
+                            ibuf[dx >> 2] = cid;
                             dx+=4;
                         }
                         dy += line_size;
@@ -2666,6 +2737,7 @@ class VDP {
         const page_mask = 0xffffffff ^ page_size;
 
         let buf = vdp.imgData.data;
+        let ibuf = vdp.imgIndex;
         let d = vdp.vram;
 
         let patnam = vdp.base.patnam & page_mask;
@@ -2709,6 +2781,7 @@ class VDP {
                                     buf[ ddx + 1 ] = c[1];
                                     buf[ ddx + 2 ] = c[2];
                                     buf[ ddx + 3 ] = c[3];
+                                    ibuf[ddx >> 2] = colIdx;
                                     ddx += 4;
                                 }
                             }
@@ -2743,6 +2816,7 @@ class VDP {
         const pg_count = vdp.canvas_max_page;
         const sz = vdp.width / 2 * VDP.scan_line_count;
         let buf = vdp.imgData.data;
+        let ibuf = vdp.imgIndex;
         let d = vdp.vram;
         let odx = 0, idx, px, c;
         let pg, i;
@@ -2752,16 +2826,20 @@ class VDP {
                     + vdp.mode_info.namsiz * pg;
             for (i = 0; i < sz; ++i) {
                 px = d[idx];
-                c = rgba[px >> 4];
+                let p1 = px >> 4;
+                let p2 = px & 15;
+                c = rgba[p1];
                 buf[ odx + 0 ] = c[0];
                 buf[ odx + 1 ] = c[1];
                 buf[ odx + 2 ] = c[2];
                 buf[ odx + 3 ] = c[3];
-                c = rgba[px & 15];
+                ibuf[odx >> 2] = p1;
+                c = rgba[p2];
                 buf[ odx + 4 ] = c[0];
                 buf[ odx + 5 ] = c[1];
                 buf[ odx + 6 ] = c[2];
                 buf[ odx + 7 ] = c[3];
+                ibuf[(odx + 4) >> 2] = p2;
                 odx += 8;
                 idx += 1;
             }
@@ -2787,6 +2865,7 @@ class VDP {
         const pg_count = vdp.canvas_max_page;
         const sz = vdp.width / 4 * VDP.scan_line_count;
         let buf = vdp.imgData.data;
+        let ibuf = vdp.imgIndex;
         let d = vdp.vram;
         let odx = 0, idx, px, c;
         let pg, i, ix;
@@ -2803,6 +2882,7 @@ class VDP {
                     buf[ odx + 1 ] = c[1];
                     buf[ odx + 2 ] = c[2];
                     buf[ odx + 3 ] = c[3];
+                    ibuf[odx >> 2] = colIdx;
                     odx += 4;
                 }
                 idx += 1;
@@ -2825,6 +2905,7 @@ class VDP {
         const pg_count = vdp.canvas_max_page;
         const sz = vdp.width * VDP.scan_line_count;
         let buf = vdp.imgData.data;
+        let ibuf = vdp.imgIndex;
         let d = vdp.vram;
         let odx = 0, idx, px, c;
         let pg, i;
@@ -2839,6 +2920,7 @@ class VDP {
                 buf[ odx + 1 ] = c[1];
                 buf[ odx + 2 ] = c[2];
                 buf[ odx + 3 ] = c[3];
+                ibuf[odx >> 2] = px;
                 odx += 4;
                 idx += 1;
             }
@@ -3433,6 +3515,7 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
     let srcCanvas;
     let width;
     let evenSrcData, oddSrcData;
+    let evenIndexData = null, oddIndexData = null;
     let xScale = 1;
     let yScale = 1;
     let outWidth, outHeight;
@@ -3450,6 +3533,7 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         const ctx = srcCanvas.getContext('2d', { willReadFrequently: true });
         evenSrcData = ctx.getImageData(0, 0, width, height).data;
         oddSrcData = null;
+        evenIndexData = vdp.sprIndex;
     } else if (page < 0) {
         // 合成スナップショット（offscreen[0]）も事前に拡大済みなのでそのまま
         srcCanvas = vdp.offscreen[0];
@@ -3461,6 +3545,7 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         const ctx = srcCanvas.getContext('2d', { willReadFrequently: true });
         evenSrcData = ctx.getImageData(0, 0, width, outHeight).data;
         oddSrcData = null;
+        evenIndexData = vdp.mainIndex;
     } else {
         // 通常ページ（offscreen[1]）は横を常に512へ自動拡大
         srcCanvas = vdp.offscreen[1];
@@ -3481,12 +3566,21 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
 
             evenSrcData = ctx.getImageData(0, evenY, width, height).data;
             oddSrcData = ctx.getImageData(0, oddY, width, height).data;
+
+            if (vdp.imgIndex) {
+                evenIndexData = vdp.imgIndex.subarray(evenY * width, (evenY + height) * width);
+                oddIndexData  = vdp.imgIndex.subarray(oddY * width, (oddY + height) * width);
+            }
         } else {
             // インターレース以外は縦も2倍拡大
             yScale = 2;
             const srcY = top + page * VDP.scan_line_count;
             evenSrcData = ctx.getImageData(0, srcY, width, height).data;
             oddSrcData = null;
+
+            if (vdp.imgIndex) {
+                evenIndexData = vdp.imgIndex.subarray(srcY * width, (srcY + height) * width);
+            }
         }
     }
 
@@ -3588,20 +3682,20 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         }
     }
 
-    // カラーパレット逆引き（誤差を許容して判定、一致しないときは0）
-    // （CANVASが乗算済みアルファなので半透明表示した物は誤差が出てしまう）
-    function findPaletteColor(r, g, b, a) {
-        if (!a) return 0;
-        for (let i = numColors - 1; i >= 0; i--) {
-            const c = paletteRGB[i];
-            if (Math.abs(c[0] - r) <= 3 &&
-                Math.abs(c[1] - g) <= 3 &&
-                Math.abs(c[2] - b) <= 3) {
-                return i;
-            }
-        }
-        return 0;
-    }
+    //  // カラーパレット逆引き（誤差を許容して判定、一致しないときは0）
+    //  // （CANVASが乗算済みアルファなので半透明表示した物は誤差が出てしまう）
+    //  function findPaletteColor(r, g, b, a) {
+    //      if (!a) return 0;
+    //      for (let i = numColors - 1; i >= 0; i--) {
+    //          const c = paletteRGB[i];
+    //          if (Math.abs(c[0] - r) <= 3 &&
+    //              Math.abs(c[1] - g) <= 3 &&
+    //              Math.abs(c[2] - b) <= 3) {
+    //              return i;
+    //          }
+    //      }
+    //      return 0;
+    //  }
 
     // ピクセルデータ書き込み
     let imgOffset = headerSize + paletteSize;
@@ -3609,37 +3703,37 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
     //for (let outY = 0; outY < outHeight; outY++) { // Top-down
     for (let outY = outHeight - 1; outY >= 0; outY--) { // Bottom-up
         let curSrcData;
+        let curIndexData = null;
         let srcLineY;
 
         if (isInterlace && !isSprite && page >= 0) {
             srcLineY = Math.floor(outY / 2);
             curSrcData = (outY % 2 === 1) ? oddSrcData : evenSrcData;
+            curIndexData = (outY % 2 === 1) ? oddIndexData : evenIndexData;
         } else {
             srcLineY = Math.floor(outY / yScale);
             curSrcData = evenSrcData;
+            curIndexData = evenIndexData;
         }
 
         const rowStart = srcLineY * width * 4;
+        const rowStartIndex = srcLineY * width;
 
         if (bmpBpp === 4) {
             for (let outX = 0; outX < outWidth; outX += 2) {
                 const srcX1 = Math.floor(outX / xScale);
-                const i1 = rowStart + srcX1 * 4;
-                const p1 = findPaletteColor(curSrcData[i1], curSrcData[i1 + 1], curSrcData[i1 + 2], curSrcData[i1 + 3]);
+                const srcX2 = Math.floor((outX + 1) / xScale);
 
-                let p2 = 0;
-                if (outX + 1 < outWidth) {
-                    const srcX2 = Math.floor((outX + 1) / xScale);
-                    const i2 = rowStart + srcX2 * 4;
-                    p2 = findPaletteColor(curSrcData[i2], curSrcData[i2 + 1], curSrcData[i2 + 2], curSrcData[i2 + 3]);
-                }
-                u8[imgOffset++] = (p1 << 4) | (p2 & 0x0F);
+                const p1 = curIndexData ? curIndexData[rowStartIndex + srcX1] : 0;
+                const p2 = (outX + 1 < outWidth && curIndexData) ? curIndexData[rowStartIndex + srcX2] : 0;
+
+                u8[imgOffset++] = ((p1 & 0x0F) << 4) | (p2 & 0x0F);
             }
         } else if (bmpBpp === 8) {
             for (let outX = 0; outX < outWidth; outX++) {
                 const srcX = Math.floor(outX / xScale);
-                const idx = rowStart + srcX * 4;
-                u8[imgOffset++] = findPaletteColor(curSrcData[idx], curSrcData[idx + 1], curSrcData[idx + 2], curSrcData[idx + 3]);
+                const p = curIndexData ? curIndexData[rowStartIndex + srcX] : 0;
+                u8[imgOffset++] = p & 0xFF;
             }
         } else if (bmpBpp === 32) {
             for (let outX = 0; outX < outWidth; outX++) {
@@ -4928,7 +5022,7 @@ function() {
         let m = VDP.getScreenModeSettingByIdx(i);
         if (!m) break;
         let o = addSelectOption(sel_screen_no, 
-            `SCREEN ${m.no}${(m.no==0) && (m.txw==80) ? '-2' : ''}`,  i);
+            `SCREEN ${m.no}${(m.no==0) && (m.txw==80) ? '-80' : ''}`,  i);
         // BASICでは区別されるがVDP上では同じモードを非表示
         if ((m.no==9) || (m.no==11)) {
             o.style.display = 'none'; // 表示は'block'

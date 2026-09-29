@@ -401,11 +401,15 @@ body h3 {
 body h4 {
   font-weight: var(--base-text-weight-semibold, 600);
   font-size: 1em;
+  background-color: var(--color-canvas-subtle);
+  border-top: 0.5px dashed var(--color-fg-subtle);
+  border-bottom: 0.5px dashed var(--color-fg-subtle);
 }
 
 body h5 {
   font-weight: var(--base-text-weight-semibold, 600);
   font-size: .875em;
+  border-bottom: 0.5px dotted var(--color-fg-subtle);
 }
 
 body h6 {

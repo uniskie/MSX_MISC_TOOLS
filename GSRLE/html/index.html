@@ -79,7 +79,7 @@
 	font-weight: bold;
 }
 </style>
-<link rel="stylesheet" href="file://d:\github\_uniskie\MSX_MISC_TOOLS\docs\GSRLE\img\markdown.css" type="text/css">
+<link rel="stylesheet" href="file://d:\github\_uniskie\MSX_MISC_TOOLS\GSRLE\html\img\markdown.css" type="text/css">
 <script src=""></script>
 </head>
 <body>
@@ -98,7 +98,7 @@
 <ul>
 <li><a href="gsrle.html">ブラウザから直接実行（ローカル）</a></li>
 <li><a href="https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html">ブラウザから直接実行（GithubPages）</a></li>
-<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_033.7z）</a></li>
+<li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_034.7z">ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_034.7z）</a></li>
 <li><a href="https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html">ソースコード（ファイル一式）</a></li>
 </ul>
 <p>ローカル実行用ファイル一式をダウンロード・展開して使用するのをお勧めします。</p>
@@ -117,11 +117,12 @@
 <p>メインターゲットはスクリーン5～12のMSX画像でしたが、結局SCREEN0～4のMSX画像も一通り対応しています。</p>
 <p>HTML5+javascript ES6の勉強+遊びの為に作成しているので、いつの間にか遊び機能が増えていくかもしれません。</p>
 <p><img src="img/gsrle_html_default.png" alt="プレビュー"></p>
+<hr>
 <h2 id="使い方">使い方</h2>
 <p><strong>ファイルをウィンドウにドロップ</strong>するか、<br>
 <strong>ファイルボタン</strong>でファイルを開いてください。</p>
 <p><strong>インターレースモード用画像</strong>かどうかは拡張子で判定されます。<br>
-（<a href="#%E5%AF%BE%E5%BF%9C%E6%8B%A1%E5%BC%B5%E5%AD%90">拡張子一覧</a>）</p>
+（<a href="#%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B%E6%8B%A1%E5%BC%B5%E5%AD%90%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">拡張子一覧</a>）</p>
 <p><strong>メイン画像ファイルと</strong>判定されると、読み込み済みファイルリストと画面をクリアしてから読み込みます。</p>
 <p>その為、複数ファイルで構成された画像の場合は順番に開く必要があります。</p>
 <p>順番は</p>
@@ -145,7 +146,6 @@
 <p>ビューアー・ローダーともに、
 ソースコードの再利用はご自由にどうぞ。</p>
 <p>ただし、<strong>画像ファイルの再利用はご遠慮ください。</strong></p>
-<hr>
 <hr>
 <h2 id="スプライトキャラジェネの表示ベースアドレス指定">スプライト・キャラジェネの表示ベースアドレス指定</h2>
 <ul>
@@ -1194,18 +1194,16 @@ PNGなどからの変換（読み込み）機能が欲しい場合は他のツ�
 <p>縦横比は、当時のCRT環境によってまちまちではありますが、幾つかの候補について分かっている情報を補足します。</p>
 <h3 id="ドットアスペクト比-設定値リスト">ドットアスペクト比 設定値リスト</h3>
 <p><img src="img/gsrle_html_config_dot_aspect.png" alt="ドットアスペクト比設定"></p>
-<h4 id="1177--1-1--0850"><strong>「1.177 : 1」</strong> (1 : 0.850)</h4>
-<pre><code> openMSXの**Horisontal stretch**で設定するなら **272 (Realistic)**。
-
- Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。
-</code></pre>
-<h4 id="1166--1--1--0858"><strong>「1.166 : 1」</strong>  (1 : 0.858)</h4>
+<h4 id="ドットアスペクト比-1177--1-1--0850">ドットアスペクト比 <strong>「1.177 : 1」</strong> (1 : 0.850)</h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>272 (Realistic)</strong>。</p>
+<p>Panasonic FS-A1GTのS端子出力をGV-USB2（映像キャプチャ）で取り込んで4:3表示した映像と一致。</p>
+<h4 id="ドットアスペクト比-1166--1--1--0858">ドットアスペクト比 <strong>「1.166 : 1」</strong>  (1 : 0.858)</h4>
 <p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>274</strong>。</p>
 <p>MSXのカラーサブキャリア（3.579545MHz）とドットクロック（5.3693175MHz）の比率（ちょうど1.5倍）から導き出される値。</p>
 <p>約1.15～約1.17で諸説あり、一旦、中間値を採用した物。</p>
 <p>MSXの解像度をそのまま4:3を覆うように広げた形。
 当時そのような基準で調整していた人が多いかもしれない。</p>
-<h4 id="1154--1--1--08866"><strong>「1.154 : 1」</strong>  (1 : 0.8866)</h4>
+<h4 id="ドットアスペクト比-1154--1--1--08866">ドットアスペクト比 <strong>「1.154 : 1」</strong>  (1 : 0.8866)</h4>
 <p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>277</strong></p>
 <p><a href="https://www.msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">TomHさんの計算</a>をもとにした設定値。</p>
 <blockquote>
@@ -1213,9 +1211,8 @@ PNGなどからの変換（読み込み）機能が欲しい場合は他のツ�
 <p>256サイクルのピクセル、1ピクセルあたり2/3の色サイクルは、ライン全体の75%に非常に近いピクセル数です。つまり、各ピクセルはラインの1/(227.5 * 1.5)です。ラインの約52/64が見えるということは、64 / (227.5 * 1.5 * 52) = 64 / 17745となります。&quot;</p>
 </blockquote>
 <p><code>(4 * (64 / 17745)) / (3 * (1 / 240)) ≒ 1.154127923358693</code></p>
-<h4 id="1133--1--1--0882"><strong>「1.133 : 1」</strong>  (1 : 0.882)</h4>
-<pre><code> openMSXの**Horisontal stretch**で設定するなら **282**か**283**
-</code></pre>
+<h4 id="ドットアスペクト比-1133--1--1--0882">ドットアスペクト比 <strong>「1.133 : 1」</strong>  (1 : 0.882)</h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>282</strong>か<strong>283</strong></p>
 <p><a href="https://msx.org/forum/msx-talk/emulation/the-real-v99x8-pixel-aspect-ratio-par">FRS氏の計算</a>を元にした設定値。</p>
 <blockquote>
 <ol>
@@ -1226,19 +1223,17 @@ PNGなどからの変換（読み込み）機能が欲しい場合は他のツ�
 <p>右境界の最後の 4.647799 ピクセルがオーバースキャンとして画面から外れてしまいます</p>
 </blockquote>
 <p><code>(4 ÷ 564.8522) ÷ (3 ÷ 480) = 1.133039756</code></p>
-<h4 id="113751-">1.1375:1 ？</h4>
-<p>他にPAL信号をベースに計算した1.1375:1(1:0.879)という<a href="https://x.com/spacemoai/status/1928869425014251590?s=20">説</a>もあるようです。<br>
-（openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>281</strong>か<strong>282</strong>）</p>
+<h4 id="ドットアスペクト比-113751-">ドットアスペクト比 「1.1375:1」 ？</h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>281</strong>か<strong>282</strong></p>
+<p>他にPAL信号をベースに計算した1.1375:1(1:0.879)という<a href="https://x.com/spacemoai/status/1928869425014251590?s=20">説</a>もあるようです。</p>
+<p><code>(284.75:4) : (243:3) ≈ 1.1375:1</code></p>
 <blockquote>
 <p>284.75ピクセル×243ラインは4:3のアスペクト比に収まらなければならないので、(284.75:4) : (243:3) ≈ 1.1375:1 となります。</p>
 </blockquote>
-<p><code>(284.75:4) : (243:3) ≈ 1.1375:1</code></p>
-<h4 id="1--1"><strong>「1 : 1」</strong></h4>
-<pre><code>openMSXの**Horisontal stretch**で設定するなら **320**。
-
-いわゆるドットバイドット。  
-モアレを除去したい場合に利用することがあるので用意。
-</code></pre>
+<h4 id="ドットアスペクト比-1--1">ドットアスペクト比 <strong>「1 : 1」</strong></h4>
+<p>openMSXの<strong>Horisontal stretch</strong>で設定するなら <strong>320</strong>。</p>
+<p>いわゆるドットバイドット。<br>
+モアレを除去したい場合に利用することがあるので用意。</p>
 <p>現在、リストからの選択になっています。</p>
 <p>要望が在れば任意の値を指定できるようにするかもしれませんが、各自でgsrle.htmlを弄って頂いた方が早いかと思います。</p>
 <hr>
@@ -1255,6 +1250,12 @@ PNGなどからの変換（読み込み）機能が欲しい場合は他のツ�
 <hr>
 <h2 id="更新履歴">更新履歴</h2>
 <ul>
+<li>
+<p>2026/09/30 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_034.7z">ver.0.34</a></p>
+<ul>
+<li>内部的にインデックスカラーでのレンダリングも併用して、BMP出力時の精度向上。</li>
+</ul>
+</li>
 <li>
 <p>2026/08/25 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_033.7z">ver.0.33</a></p>
 <ul>

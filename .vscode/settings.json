@@ -11,4 +11,8 @@
 	"markdown-pdf.includeDefaultStyles": false,
 	"dotnet.defaultSolution": "disable",
 	"markdown-pdf.mermaidServer": "",
+	"cmake.sourceDirectory": "D:/github/_uniskie/MSX_MISC_TOOLS/USB_GAMEPAD_BRIDGE_FOR_MSX_MOD",
+	"markdown.styles": [
+		"img/markdown.css"
+	],
 }
