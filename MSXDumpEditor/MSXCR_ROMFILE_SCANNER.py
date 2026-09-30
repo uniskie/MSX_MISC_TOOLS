@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # MSXCR_ROM_Scanner.py - MSX ROM File Scanner & DB Matcher
 # Purpose: Scan ROM files in a specified directory, calculate SHA-1,
-#          match with XML DB, and output/append to dump_list_log.csv.
+#          match with XML DB, output/append to dump_list_log.csv, and rename/deduplicate files.
+# Copyright @v9938 (Ported to Python by @uniskie with gemini3.5 flash pro)
 
 import os
 import sys
@@ -9,9 +10,10 @@ import datetime
 import hashlib
 import csv
 import html
+import uuid
 
 # ============================================================================
-# Utility Functions (same as MSXCR_ROMDumper.py)
+# Utility Functions
 # ============================================================================
 
 def GetDirectoryFromPath(path: str) -> str:
@@ -195,14 +197,8 @@ def GetCurrentDateTimeString() -> str:
 def AppendDumpListLogCsvWithIgnore(outputDir: str, dbStatus: str, romFileStatus: str, status: str,
                                     title: str, company: str, year: str, system: str, remark: str,
                                     romType: str, romSize: int, sha1: str, dumpDateTime: str) -> bool:
-    """
-    CSVファイルを一度メモリに読み込み、ヘッダーの有無や整合性をチェックします。
-    同一のSHA-1値と同一のダンプ日時の両方を持つ行が存在する場合は無視し、
-    存在しない場合はヘッダーを正常な状態に整えてから安全に一括保存します。
-    """
     csvPath = JoinPath(outputDir if outputDir else ".", "dump_list_log.csv")
     
-    # 想定される正しいヘッダー定義
     header_fields = [
         "DBステータス", "ROMファイルの状態", "ステータス", "タイトル",
         "メーカ", "年", "システム", "備考", "ROMタイプ", "容量", "SHA1値", "ダンプ日時"
@@ -211,51 +207,41 @@ def AppendDumpListLogCsvWithIgnore(outputDir: str, dbStatus: str, romFileStatus:
     existing_rows = []
     has_valid_header = False
 
-    # 1. 既存のCSVを完全に読み込んで解析（ヘッダーとデータ行を分解して格納）
     if os.path.exists(csvPath) and os.path.getsize(csvPath) > 0:
         try:
             with open(csvPath, "r", newline="", encoding="utf-8-sig") as f:
                 reader = csv.reader(f)
-                
-                # 1行目を検証
                 first_row = next(reader, None)
                 if first_row and len(first_row) >= 12 and first_row[0] == "DBステータス":
                     has_valid_header = True
                     existing_rows.append(first_row)
                 
-                # 2行目以降のデータ行を検証しながら追加
                 for row in reader:
                     if len(row) >= 12:
                         existing_rows.append(row)
         except Exception as e:
             print(f"CSV read warning: {e}")
 
-    # 2. 重複チェック（データ行が存在する場合のみ実行）
     if has_valid_header and len(existing_rows) > 1:
-        for row in existing_rows[1:]: # ヘッダー行を避けてデータ行のみループ
+        for row in existing_rows[1:]:
             existing_sha1 = row[10].strip().lower()
             existing_datetime = row[11].strip()
 
-            # 有効な40文字ハッシュのデータ行のみを比較対象とする
             if len(existing_sha1) == 40:
                 if existing_sha1 == sha1.strip().lower() and existing_datetime == dumpDateTime.strip():
-                    print(f"  -> Already exists in log (SHA1: {sha1}, DateTime: {dumpDateTime}). Skipped.")
+                    print("  Log entry already exists in dump_list_log.csv. Skipped.")
                     return True
 
-    # 3. 書き込み用データの構築
     new_row = [
         dbStatus, romFileStatus, status, title, company, year,
         system, remark, romType, str(romSize), sha1, dumpDateTime
     ]
 
-    # 有効なヘッダーが存在しなかった場合は、先頭にヘッダーを強制挿入して再構成
     if not has_valid_header:
         existing_rows = [header_fields]
     
-    # データを末尾に追加
     existing_rows.append(new_row)
 
-    # 4. "w"モード（上書き保存）で一括して綺麗に書き出し
     try:
         with open(csvPath, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f, quoting=csv.QUOTE_ALL)
@@ -264,6 +250,7 @@ def AppendDumpListLogCsvWithIgnore(outputDir: str, dbStatus: str, romFileStatus:
     except Exception as e:
         print(f"CSV write error: {e}")
         return False
+
 
 def CalcFileSHA1Hex(filePath: str) -> tuple[bool, str]:
     if not os.path.exists(filePath):
@@ -358,6 +345,7 @@ def FindROMInfoBySha1FromSoftwareDB(xmlPath: str, sha1: str) -> dict:
 
         searchPos = softwareEnd + 11
 
+    # 同じタイトルで異なる機種のデータが存在するかをチェック
     if dbInfo["found"] and matchedTitle and matchedSystem:
         searchPos = 0
         while True:
@@ -473,26 +461,42 @@ def SanitizeMapperNameForFileName(mapperName: str) -> str:
     return res_str
 
 
+def SafeRename(src_path: str, dst_path: str) -> bool:
+    """Windowsの大文字小文字のみの変更やリネームに対応する安全な関数"""
+    try:
+        # 大文字小文字のみの変更の場合、一度一時名を経由
+        if os.path.normcase(os.path.abspath(src_path)) == os.path.normcase(os.path.abspath(dst_path)):
+            temp_path = src_path + f".tmp_{uuid.uuid4().hex[:8]}"
+            os.rename(src_path, temp_path)
+            os.rename(temp_path, dst_path)
+        else:
+            os.rename(src_path, dst_path)
+        return True
+    except Exception as e:
+        print(f"\n[ERROR] Rename failed ({src_path} -> {dst_path}): {e}")
+        return False
+
+
 # ============================================================================
-# Core Directory Scanner
+# Core Directory Scanner & Renamer
 # ============================================================================
 
-def ScanDirectory(targetDir: str) -> int:
+def ScanDirectory(targetDir: str, renameMode: bool = False) -> int:
     if not os.path.isdir(targetDir):
         print(f"Error: Directory not found: {targetDir}")
         return 1
 
-    # XML データベースファイルの存在チェック
     softwareDbExists = os.path.isfile("softwaredb.xml")
     msxRomDbExists = os.path.isfile("msxromdb.xml")
     
     if not softwareDbExists and not msxRomDbExists:
         print("Warning: Neither softwaredb.xml nor msxromdb.xml was found in the current directory.")
 
-    print(f"Scanning directory: {targetDir}\n")
+    print(f"Scanning directory: {targetDir}")
+    print(f"Mode: {'RENAME & DEDUPLICATE' if renameMode else 'LOG ONLY (Dry run)'}\n")
 
-    # 指定フォルダ内のファイルを走査
     files = [f for f in os.listdir(targetDir) if os.path.isfile(os.path.join(targetDir, f))]
+    # 大文字・小文字を問わず .rom ファイルを抽出
     rom_files = [f for f in files if f.lower().endswith('.rom')]
 
     if not rom_files:
@@ -500,79 +504,148 @@ def ScanDirectory(targetDir: str) -> int:
         return 0
 
     processed_count = 0
+    renamed_count = 0
+    deleted_count = 0
+    unchanged_count = 0
 
     for filename in rom_files:
         filePath = os.path.join(targetDir, filename)
-        print(f"Processing: {filename}")
+        
+        # 既に他の重複処理等で削除されている場合はスキップ
+        if not os.path.exists(filePath):
+            continue
+
+        print("========================================")
+        print(f"File   : {filename}")
 
         # SHA-1 計算
         success, sha1 = CalcFileSHA1Hex(filePath)
         if not success:
-            print(f"  Failed to calculate SHA1 for {filename}")
+            print(f"Failed to calculate SHA1 for {filename}\n")
             continue
 
-        # ROMの内容確認 (AB / CD ヘッダの検出)
+        print("\n========== SHA1 ==========")
+        print(sha1)
+
+        # ROMデータ読み込み
         try:
             with open(filePath, "rb") as f:
                 romData = f.read()
             romSize = len(romData)
         except Exception as e:
-            print(f"  Failed to read file: {e}")
+            print(f"Failed to read file: {e}\n")
             continue
 
-        # --------------------------------------------------------------------
-        # ログ判定
-        # --------------------------------------------------------------------
+        # DB照合
         romFileStatus = "New"
-
-        # XMLデータベース突合
         dbInfo, usedXmlPath = FindROMInfoWithPriority(sha1)
 
-        # 本来あるべきファイル名（最終保存名）の決定
         if usedXmlPath:
             if dbInfo["found"]:
-                renamedFile = BuildAutoFileName(dbInfo)
+                print("\n========== DB MATCH ==========")
+                print(f"Title  : {dbInfo['title']}")
+                print(f"System : {dbInfo['system']}")
+                print(f"Company: {dbInfo['company']}")
+                print(f"Year   : {dbInfo['year']}")
+
+                if dbInfo["status"]:
+                    print(f"Status : {dbInfo['status']}")
+                if dbInfo["remark"]:
+                    print(f"Remark : {dbInfo['remark']}")
+
+                baseFileName = BuildAutoFileName(dbInfo)
             else:
-                mapperW = SanitizeMapperNameForFileName("Standard ROM")
-                renamedFile = f"Unknown_{sha1}[{mapperW}].rom"
+                print(f"\n========== DB MATCH ==========")
+                print(f"No match found in {usedXmlPath}")
+                mapperW = SanitizeMapperNameForFileName("UnknownMapper")
+                baseFileName = f"Unknown_{sha1}[{mapperW}].rom"
         else:
-            mapperW = SanitizeMapperNameForFileName("Standard ROM")
-            renamedFile = f"Unknown_{sha1}[{mapperW}].rom"
+            print("\nXML database not found: softwaredb.xml / msxromdb.xml")
+            mapperW = SanitizeMapperNameForFileName("UnknownMapper")
+            baseFileName = f"Unknown_{sha1}[{mapperW}].rom"
 
-        finalName = renamedFile
-
-        # ヘッダー検証
+        # ヘッダー検証 (AB / CD)
         if not IsSuccessfulROMImage(bytes(romData)):
-            finalName = "[unsuccessful]" + finalName
+            baseFileName = "[unsuccessful]" + baseFileName
             romFileStatus = "Unsuccessful"
 
-        finalOutputPath = JoinPath(targetDir, finalName)
+        # --------------------------------------------------------------------
+        # 重複・衝突判定ロジック
+        # --------------------------------------------------------------------
+        candidateName = baseFileName
+        candidatePath = JoinPath(targetDir, candidateName)
+        action = "RENAME"
+        other_index = 0
 
-        # 現在スキャンしているファイルが、想定出力ファイルと異なる場合のみ衝突判定
-        if os.path.normpath(filePath) != os.path.normpath(finalOutputPath):
-            if os.path.exists(finalOutputPath):
-                success_exist, existingSha1 = CalcFileSHA1Hex(finalOutputPath)
-                if success_exist:
-                    if existingSha1 == sha1:
-                        romFileStatus = "Same"
-                    else:
-                        romFileStatus = "Other"
-                else:
-                    romFileStatus = "Same"
+        abs_file = os.path.abspath(filePath)
+
+        while True:
+            abs_cand = os.path.abspath(candidatePath)
+
+            # 1. パス・大文字小文字ともに完全一致している場合
+            if abs_file == abs_cand:
+                action = "KEEP"
+                break
+
+            # 2. Windowsで大文字・小文字のみが異なる場合（自分自身）
+            if os.path.normcase(abs_file) == os.path.normcase(abs_cand):
+                action = "RENAME"
+                break
+
+            # 3. 候補先が存在しない場合（新規リネーム可能）
+            if not os.path.exists(candidatePath):
+                action = "RENAME"
+                break
+
+            # 4. 別の同名ファイルが既に存在する場合：ハッシュを比較
+            success_exist, existingSha1 = CalcFileSHA1Hex(candidatePath)
+            if success_exist and existingSha1.lower() == sha1.lower():
+                # 同一ハッシュのファイルが既にあるため、自分を重複削除
+                action = "DELETE"
+                romFileStatus = "Duplicate(Deleted)"
+                break
             else:
-                if not IsSuccessfulROMImage(bytes(romData)):
-                    romFileStatus = "Unsuccessful"
+                # ハッシュが異なる別ファイルが存在する ➔ [OTHER] / [OTHER(n)] を付与
+                romFileStatus = "Other"
+                if other_index == 0:
+                    candidateName = f"[OTHER]{baseFileName}"
                 else:
-                    romFileStatus = "New"
-        else:
-            # 既に正しい名前で存在している場合
-            if not IsSuccessfulROMImage(bytes(romData)):
-                romFileStatus = "Unsuccessful"
-            else:
-                romFileStatus = "New"
+                    candidateName = f"[OTHER({other_index})]{baseFileName}"
+                candidatePath = JoinPath(targetDir, candidateName)
+                other_index += 1
 
         # --------------------------------------------------------------------
-        # 各種メタデータ準備
+        # ファイル操作実行
+        # --------------------------------------------------------------------
+        if renameMode:
+            if action == "DELETE":
+                try:
+                    os.remove(filePath)
+                    print(f"\nIdentical file already exists: {candidateName}")
+                    print(f"Removed duplicate: {filename}")
+                    deleted_count += 1
+                except Exception as e:
+                    print(f"\n[ERROR] Failed to delete duplicate file: {e}")
+            elif action == "RENAME":
+                if SafeRename(filePath, candidatePath):
+                    print(f"\nRenamed output: {candidatePath}")
+                    renamed_count += 1
+            else:
+                print(f"\nFile name is already up to date: {candidateName}")
+                unchanged_count += 1
+        else:
+            if action == "DELETE":
+                print(f"\n[Plan] -> Duplicate of '{candidateName}' (Will be deleted if /rename is set)")
+                deleted_count += 1
+            elif action == "RENAME":
+                print(f"\n[Plan to Rename] -> {candidateName}")
+                renamed_count += 1
+            else:
+                print(f"\n[Plan to Rename] -> (No change needed: {candidateName})")
+                unchanged_count += 1
+
+        # --------------------------------------------------------------------
+        # CSV追記用メタデータ
         # --------------------------------------------------------------------
         dbStatus = "MATCH" if dbInfo["found"] else "Unknown"
         title = dbInfo["title"]
@@ -581,23 +654,14 @@ def ScanDirectory(targetDir: str) -> int:
         system = dbInfo["system"]
         status = dbInfo["status"]
         remark = dbInfo["remark"]
-        romType = "Standard ROM"
+        romType = "Unknown"
 
-        print(f"  -> SHA1: {sha1}")
-        if dbInfo["found"]:
-            print(f"  -> DB MATCH: {title} ({system})")
-        else:
-            print("  -> DB MATCH: No match found")
-        print(f"  -> romFileStatus: {romFileStatus}")
-
-        # 日時判定 (ファイル更新日時を優先)
         try:
-            mtime = os.path.getmtime(filePath)
+            mtime = os.path.getmtime(candidatePath if (renameMode and action != "DELETE" and os.path.exists(candidatePath)) else filePath)
             dumpDateTime = datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
             dumpDateTime = GetCurrentDateTimeString()
 
-        # CSVに追記（同一ファイル：SHA-1と日時の一致する物が既にあれば無視）
         csv_success = AppendDumpListLogCsvWithIgnore(
             targetDir,
             dbStatus,
@@ -614,12 +678,27 @@ def ScanDirectory(targetDir: str) -> int:
             dumpDateTime
         )
 
-        if csv_success:
-            processed_count += 1
-        else:
-            print("  Failed to write to CSV")
+        if not csv_success:
+            print("WARNING: Failed to append dump_list_log.csv")
 
-    print(f"\nScan completed. {processed_count} files processed and recorded in CSV.")
+        print()
+        processed_count += 1
+
+    # ------------------------------------------------------------------------
+    # 最終結果サマリー表示
+    # ------------------------------------------------------------------------
+    print("========================================")
+    print("Scan completed.")
+    print(f"  Total processed  : {processed_count}")
+    if renameMode:
+        print(f"  Renamed files    : {renamed_count}")
+        print(f"  Deleted files    : {deleted_count} (Duplicates)")
+        print(f"  Unchanged files  : {unchanged_count}")
+    else:
+        print(f"  Plan to Rename   : {renamed_count}")
+        print(f"  Plan to Delete   : {deleted_count} (Duplicates)")
+        print(f"  No change        : {unchanged_count}")
+    print()
     return 0
 
 
@@ -629,22 +708,37 @@ def ScanDirectory(targetDir: str) -> int:
 
 def main():
     print("MSX ROM Folder Scanner & DB Matcher")
+    print("Copyright @v9938")
     print(f"Run Date: {datetime.datetime.now().strftime('%b %d %Y %H:%M:%S')}")
     print()
 
     args = sys.argv[1:]
-    if not args:
+    renameMode = False
+    targetDir = None
+
+    for arg in args:
+        if arg.lower() in ("/rename", "-rename", "--rename"):
+            renameMode = True
+        else:
+            targetDir = arg
+
+    if not targetDir:
         prog_name = os.path.basename(sys.argv[0])
-        print(f"Usage: python {prog_name} <target_directory_path>")
+        print(f"Usage: python {prog_name} <target_directory_path> [/rename]")
+        print()
+        print("Options:")
+        print("  <target_directory_path>  Directory containing .rom files.")
+        print("  /rename                  Actually rename and deduplicate files.")
+        print("                           - Identical files (same SHA-1) will be removed.")
+        print("                           - Different files with same name will get [OTHER] / [OTHER(n)].")
+        print("                           (If omitted, only CSV logging is performed without file modification).")
         print()
         print("Description:")
-        print("  Scans all '.rom' files in the specified directory, calculates SHA-1,")
-        print("  queries softwaredb.xml / msxromdb.xml, and creates/append results")
-        print("  to 'dump_list_log.csv' inside the target directory (ignores duplicates).")
+        print("  Scans all '.rom' files, calculates SHA-1, queries softwaredb.xml / msxromdb.xml,")
+        print("  appends results to 'dump_list_log.csv', and cleans up/standardizes ROM names.")
         sys.exit(1)
 
-    targetDir = args[0]
-    result = ScanDirectory(targetDir)
+    result = ScanDirectory(targetDir, renameMode)
     sys.exit(result)
 
 
