@@ -8,7 +8,7 @@
 
 - [ブラウザから直接実行（ローカル）](gsrle.html)
 - [ブラウザから直接実行（GithubPages）](https://uniskie.github.io/MSX_MISC_TOOLS/GSRLE/gsrle.html)
-- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_034.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_034.7z)
+- [ローカル実行用ファイル一式 （HTML_MSX_GRAPHICS_Viewer_035.7z）](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_035.7z)
 - [ソースコード（ファイル一式）](https://github.com/uniskie/MSX_MISC_TOOLS/tree/main/GSRLE/html)  
 
 ローカル実行用ファイル一式をダウンロード・展開して使用するのをお勧めします。
@@ -593,6 +593,10 @@ openMSXの**Horisontal stretch**で設定するなら **320**。
 ----
 
 ## 更新履歴
+
+- 2026/09/30 [ver.0.35](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_035.7z)
+  - スプライトのBMP出力がSCREEN6/7/9でおかしくなっていたのを修正
+  - スプライトのBMP出力を、画面とパターンプレビューでファイルを分けて保存するように変更
 
 - 2026/09/30 [ver.0.34](https://github.com/uniskie/MSX_MISC_TOOLS/raw/main/GSRLE/html/archive/HTML_MSX_GRAPHICS_Viewer_034.7z)
   - 内部的にインデックスカラーでのレンダリングも併用して、BMP出力時の精度向上。

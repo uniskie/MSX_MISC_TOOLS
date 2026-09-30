@@ -3522,20 +3522,29 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
 
     // 描画元キャンバスと拡大率の決定
     if (isSprite) {
-        // スプライト（offscreen[2]）は事前に拡大済みなのでそのまま
-        srcCanvas = vdp.offscreen[2];
-        width = srcCanvas.width;
-        height = srcCanvas.height;
-        outWidth = width;
-        outHeight = height;
+        width = vdp.spr_buff_width;   // 256
+        xScale = vdp.spr_buff_mag;    // 2
+        yScale = vdp.spr_buff_mag;    // 2
+        outWidth = width * xScale;    // 512
+
+        if (isSprite === 2) {
+            // スプライトパターンジェネレータプレビュー（下部 64px）
+            top = 256;
+            height = 64;
+        } else {
+            // スプライト画面プレーン（上部 256px）
+            top = 0;
+            height = 256;
+        }
+
+        outHeight = height * yScale;  // 512 または 128
         isInterlace = 0;
 
-        const ctx = srcCanvas.getContext('2d', { willReadFrequently: true });
-        evenSrcData = ctx.getImageData(0, 0, width, height).data;
+        evenSrcData = null;
         oddSrcData = null;
         evenIndexData = vdp.sprIndex;
     } else if (page < 0) {
-        // 合成スナップショット（offscreen[0]）も事前に拡大済みなのでそのまま
+        // 合成スナップショット（offscreen[0]）
         srcCanvas = vdp.offscreen[0];
         width = srcCanvas.width;
         outWidth = width;
@@ -3547,7 +3556,7 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         oddSrcData = null;
         evenIndexData = vdp.mainIndex;
     } else {
-        // 通常ページ（offscreen[1]）は横を常に512へ自動拡大
+        // 通常ページ（offscreen[1]）
         srcCanvas = vdp.offscreen[1];
         width = vdp.width;
         outWidth = 512;
@@ -3557,7 +3566,6 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         const ctx = srcCanvas.getContext('2d', { willReadFrequently: true });
 
         if (isInterlace) {
-            // インターレース時は偶数ページと奇数ページを合成
             yScale = 1;
             const evenPage = page & ~1;
             const oddPage = evenPage | 1;
@@ -3572,7 +3580,6 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
                 oddIndexData  = vdp.imgIndex.subarray(oddY * width, (oddY + height) * width);
             }
         } else {
-            // インターレース以外は縦も2倍拡大
             yScale = 2;
             const srcY = top + page * VDP.scan_line_count;
             evenSrcData = ctx.getImageData(0, srcY, width, height).data;
@@ -3589,7 +3596,6 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
     let numColors = 16;
 
     if (!isSprite && page < 0) {
-        // 合成スナップショット時はSCREEN8を32bpp、SCREEN6と9は4bppで出力
         if (vdp.screen_no === 8 || vdp.screen_no === 10 || vdp.screen_no === 11 || vdp.screen_no === 12) {
             bmpBpp = 32;
             numColors = 0;
@@ -3618,7 +3624,10 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
 
     // カラーパレットの取得
     let palObj = palette_use ? vdp.palette : vdp.pal_def;
-    if (vdp.screen_no === 8) {
+    if (isSprite === 2) {
+        // パターンプレビューは白黒固定パレット
+        palObj = vdp.pal_bf;
+    } else if (vdp.screen_no === 8) {
         if (isSprite) {
             palObj = vdp.pal8spr;
         } else if (page >= 0) {
@@ -3626,7 +3635,7 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         }
     }
 
-    const paletteRGB = palObj ? ((use_grayscale ^ use_grayscale_tmp) ? palObj.gray :  palObj.rgba) : null;
+    const paletteRGB = palObj ? ((use_grayscale ^ use_grayscale_tmp) ? palObj.gray : palObj.rgba) : null;
 
     // サイズとパディングの計算
     let rowSize;
@@ -3658,10 +3667,9 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
     // BITMAPINFOHEADER (40 bytes)
     view.setUint32(14, 40, true);
     view.setInt32(18, outWidth, true);
-    //view.setInt32(22, -outHeight, true); // Top-down (負の高さ=非対応アプリが落ちたりする)
-    view.setInt32(22, outHeight, true); // Bottom-up（正の高さ）
+    view.setInt32(22, outHeight, true); // Bottom-up
     view.setUint16(26, 1, true);
-    view.setUint16(28, bmpBpp, true);   // 4, 8, or 32
+    view.setUint16(28, bmpBpp, true);
     view.setUint32(30, 0, true);        // BI_RGB
     view.setUint32(34, pixelDataSize, true);
     view.setUint32(38, 3780, true);
@@ -3682,36 +3690,20 @@ function createBmpImage( top, height, page, isSprite, isInterlace )
         }
     }
 
-    //  // カラーパレット逆引き（誤差を許容して判定、一致しないときは0）
-    //  // （CANVASが乗算済みアルファなので半透明表示した物は誤差が出てしまう）
-    //  function findPaletteColor(r, g, b, a) {
-    //      if (!a) return 0;
-    //      for (let i = numColors - 1; i >= 0; i--) {
-    //          const c = paletteRGB[i];
-    //          if (Math.abs(c[0] - r) <= 3 &&
-    //              Math.abs(c[1] - g) <= 3 &&
-    //              Math.abs(c[2] - b) <= 3) {
-    //              return i;
-    //          }
-    //      }
-    //      return 0;
-    //  }
-
-    // ピクセルデータ書き込み
+    // ピクセルデータ書き込み (Bottom-up)
     let imgOffset = headerSize + paletteSize;
 
-    //for (let outY = 0; outY < outHeight; outY++) { // Top-down
-    for (let outY = outHeight - 1; outY >= 0; outY--) { // Bottom-up
+    for (let outY = outHeight - 1; outY >= 0; outY--) {
         let curSrcData;
         let curIndexData = null;
         let srcLineY;
 
         if (isInterlace && !isSprite && page >= 0) {
-            srcLineY = Math.floor(outY / 2);
+            srcLineY = top + Math.floor(outY / 2);
             curSrcData = (outY % 2 === 1) ? oddSrcData : evenSrcData;
             curIndexData = (outY % 2 === 1) ? oddIndexData : evenIndexData;
         } else {
-            srcLineY = Math.floor(outY / yScale);
+            srcLineY = top + Math.floor(outY / yScale);
             curSrcData = evenSrcData;
             curIndexData = evenIndexData;
         }
@@ -3959,9 +3951,14 @@ function savePalette()
 // ========================================================
 function saveImage(file, page, save_image_type, with_pal, isSprite)
 {
-    f = file;
-    const isAll = (page < 0) ? 1 : 0;
+    let f = file;
+    if (!f || !f.name || !f.name.length) {
+        f = bmp_file.size ? bmp_file : (main_file.size ? main_file : sub_file);
+    }
+    if (!f || !f.name.length) return;
     
+    const isAll = (page < 0) ? 1 : 0; 
+
     if (f.size > BinHeader.HEADER_SIZE) {
         const ext_info = getExtInfo( getExt( f.name ) );
         if (!ext_info) return;
@@ -3978,13 +3975,20 @@ function saveImage(file, page, save_image_type, with_pal, isSprite)
             fname = getBasename( f.name ) + sav_ext;
             break;
         case ImageType.BMP:
-            sav_ext = ".BMP"
-            fname = getBasename( f.name ) + '_' + getExt(f.name)
-            if ((page >= 0) && isSprite) {
-                fname = fname + '_spr' + sav_ext;
+            sav_ext = ".BMP";
+            let baseName = f.name.replace(/\.([^.]+)$/, '_$1'); // TEST.SC7 -> TEST_SC7
+            if (isSprite === 1) {
+                fname = baseName + '_spr' + sav_ext;       // TEST_SC7_spr.BMP
+            } else if (isSprite === 2) {
+                fname = baseName + '_sprpat' + sav_ext;    // TEST_SC7_sprpat.BMP
+            } else if (page === 2 && vdp.screen_no < 5) {
+                fname = baseName + '_chrgen' + sav_ext;    // TEST_SC2_chrgen.BMP
+            } else if (page >= 0 && !isAll) {
+                fname = baseName + '_page' + page + sav_ext; // TEST_SC5_page0.BMP
             } else {
-                fname = fname + sav_ext;
+                fname = baseName + sav_ext;                // TEST_SC7.BMP
             }
+            break;
         }
 
         let start = 0; // vram address
@@ -4054,7 +4058,7 @@ function saveImage(file, page, save_image_type, with_pal, isSprite)
                     sprite_limit_mode = 3; // 半透明の時は一時的に網掛けにしてインデックスカラー化しやすくする
                     vdp.update();
                 }
-                out = createBmpImage( top, height, isAll ? -1 : page, isSprite ? 1 : 0, isAll & vdp.interlace_mode);
+                out = createBmpImage( top, height, isAll ? -1 : page, isSprite, isAll & vdp.interlace_mode);
                 add_log( '"' + fname + '": BMP出力' );
             } finally {
                 if (sprite_limit_mode != sprite_limit_mode_backup) {
@@ -4749,6 +4753,25 @@ function savePage(file, page, save_image_type, with_pal, isSprite)
     } else if (file != null) {
         saveImage(file, page, save_image_type, with_pal, isSprite);
     }
+}
+
+// ========================================================
+// スプライト BMP保存（スプライト画面とパターン一覧の2種）
+// ========================================================
+function saveSprite( file ) {
+    let f = file;
+    if (!f || !f.name || !f.name.length) {
+        f = bmp_file.size ? bmp_file : (main_file.size ? main_file : sub_file);
+    }
+    if (!f || !f.name.length) return;
+
+    // スプライト画面 (_spr.BMP)
+    saveImage( f, -1, ImageType.BMP, 1, 1 );
+
+    // スプライトパターン一覧 (_sprpat.BMP, 白黒固定パレット)
+    setTimeout(() => {
+        saveImage( f, -1, ImageType.BMP, 1, 2 );
+    }, 200);
 }
 
 // ========================================================
@@ -5671,7 +5694,7 @@ function() {
     // sprite bmp save
     // --------------------------------------------------------
     spr_save_bmp.addEventListener("click",
-    function(e) { savePage( null, -1, ImageType.BMP, 1, 1 ); });
+    function(e) { saveSprite( null ); });
    
     
     // ========================================================
