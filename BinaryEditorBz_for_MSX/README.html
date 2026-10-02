@@ -16,16 +16,181 @@
       
       
       <style>
-      @import url(https://fonts.googleapis.com/css?family=Roboto+Mono|Source+Sans+Pro:300,400,600);
-@import url(https://fonts.googleapis.com/css?family=Roboto+Mono|Source+Sans+Pro:300,400,600);
-*{-webkit-font-smoothing:antialiased;-webkit-overflow-scrolling:touch;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:none;-webkit-touch-callout:none;box-sizing:border-box}.markdown-preview code{border-radius:2px;color:#e96900;font-size:12.8px;font-size:.8rem;margin:0 2px;padding:3px 5px;white-space:pre-wrap}.markdown-preview code,.markdown-preview pre{background-color:#f8f8f8;font-family:Roboto Mono,Monaco,courier,monospace}.markdown-preview pre{-moz-osx-font-smoothing:initial;-webkit-font-smoothing:initial;line-height:24px;line-height:1.5rem;margin:1.2em 0;overflow:auto;padding:0 22.4px;padding:0 1.4rem;position:relative;word-wrap:normal}.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#8e908c}.token.namespace{opacity:.7}.token.boolean,.token.number{color:#c76b29}.token.punctuation{color:#525252}.token.property{color:#c08b30}.token.tag{color:#2973b7}.token.string{color:#42b983;color:var(--theme-color,#42b983)}.token.selector{color:#6679cc}.token.attr-name{color:#2973b7}.language-css .token.string,.style .token.string,.token.entity,.token.url{color:#22a2c9}.token.attr-value,.token.control,.token.directive,.token.unit{color:#42b983;color:var(--theme-color,#42b983)}.token.keyword{color:#e96900}.token.atrule,.token.regex,.token.statement{color:#22a2c9}.token.placeholder,.token.variable{color:#3d8fd1}.token.deleted{text-decoration:line-through}.token.inserted{border-bottom:1px dotted #202746;text-decoration:none}.token.italic{font-style:italic}.token.bold,.token.important{font-weight:700}.token.important{color:#c94922}.token.entity{cursor:help}.markdown-preview pre>code,.markdown-preview pre[class*=language]{-moz-osx-font-smoothing:initial;-webkit-font-smoothing:initial;background-color:#f8f8f8;border-radius:2px;color:#525252;display:block;font-family:Roboto Mono,Monaco,courier,monospace;font-size:12.8px;font-size:.8rem;line-height:2em;max-width:inherit;overflow:inherit;padding:.8em 1.4em;white-space:pre}.markdown-preview pre>code{padding-left:0;padding-right:0}.markdown-preview code:after,.markdown-preview code:before{letter-spacing:.8px;letter-spacing:.05rem}code .token{-moz-osx-font-smoothing:initial;-webkit-font-smoothing:initial;min-height:24px;min-height:1.5rem}pre:after{color:#ccc;content:attr(data-lang);font-size:9.6px;font-size:.6rem;font-weight:600;height:15px;line-height:15px;padding:5px 10px 0;position:absolute;right:0;text-align:right;top:0}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{box-shadow:0 1px #fff}*{-webkit-font-smoothing:antialiased;-webkit-overflow-scrolling:touch;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:none;-webkit-touch-callout:none;box-sizing:border-box}div#app{font-size:30px;font-weight:lighter;margin:40vh auto;text-align:center}div#app:empty:before{content:'Loading...'}.emoji{height:19.2px;height:1.2rem;vertical-align:middle}.progress{background-color:#42b983;background-color:var(--theme-color,#42b983);height:2px;left:0;position:fixed;right:0;top:0;transition:width .2s,opacity .4s;width:0;z-index:5}.search .search-keyword,.search a:hover{color:#42b983;color:var(--theme-color,#42b983)}.search .search-keyword{font-style:normal;font-weight:700}body,html{height:100%}body{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;color:#34495e;font-family:Source Sans Pro,Helvetica Neue,Arial,sans-serif;font-size:15px;letter-spacing:0;margin:0;overflow-x:hidden}img{max-width:100%}a[disabled]{cursor:not-allowed;opacity:.6}kbd{color:#34495e;border:1px solid #ccc;border-radius:3px;display:inline-block;font-size:12px!important;line-height:12px;margin-bottom:3px;padding:3px 5px;vertical-align:middle}.task-list-item{list-style-type:none}li input[type=checkbox]{margin:0 .2em .25em -1.6em;vertical-align:middle}.app-nav{left:0;margin:25px 60px 0 0;position:absolute;right:0;text-align:right;z-index:2}.app-nav p{margin:0}.app-nav>a{margin:0 16px;margin:0 1rem;padding:5px 0}.app-nav li,.app-nav ul{display:inline-block;list-style:none;margin:0}.app-nav a{color:inherit;font-size:16px;text-decoration:none;transition:color .3s}.app-nav a.active,.app-nav a:hover{color:#42b983;color:var(--theme-color,#42b983)}.app-nav a.active{border-bottom:2px solid #42b983;border-bottom:2px solid var(--theme-color,#42b983)}.app-nav li{display:inline-block;margin:0 16px;margin:0 1rem;padding:5px 0;position:relative}.app-nav li ul{background-color:#fff;border:1px solid #ddd;border-bottom-color:#ccc;border-radius:4px;box-sizing:border-box;display:none;max-height:calc(100vh - 61px);overflow-y:scroll;padding:10px 0;position:absolute;right:-15px;text-align:left;top:100%;white-space:nowrap}.app-nav li ul li{display:block;font-size:14px;line-height:16px;line-height:1rem;margin:0;margin:8px 14px;white-space:nowrap}.app-nav li ul a{display:block;font-size:inherit;margin:0;padding:0}.app-nav li ul a.active{border-bottom:0}.app-nav li:hover ul{display:block}.app-nav.no-badge{margin-right:25px}.github-corner{border-bottom:0;position:fixed;right:0;text-decoration:none;top:0;z-index:1}.github-corner svg{color:#fff;fill:#42b983;fill:var(--theme-color,#42b983);height:80px;width:80px}.github-corner:hover .octo-arm{-webkit-animation:a .56s ease-in-out;animation:a .56s ease-in-out}main{display:block;position:relative;width:100vw;height:100%;z-index:0}.anchor{display:inline-block;text-decoration:none;transition:all .3s}.anchor span{color:#34495e}.anchor:hover{text-decoration:underline}.sidebar{border-right:1px solid rgba(0,0,0,.07);overflow-y:auto;padding:40px 0 0;top:0;bottom:0;left:0;position:absolute;transition:-webkit-transform .25s ease-out;transition:transform .25s ease-out;transition:transform .25s ease-out,-webkit-transform .25s ease-out;width:300px;z-index:3}.sidebar>h1{margin:0 auto 16px;margin:0 auto 1rem;font-size:24px;font-size:1.5rem;font-weight:300;text-align:center}.sidebar>h1 a{color:inherit;text-decoration:none}.sidebar>h1 .app-nav{display:block;position:static}.sidebar .sidebar-nav{line-height:2em;padding-bottom:40px}.sidebar ul{margin:0;padding:0}.sidebar li>p{font-weight:700;margin:0}.sidebar ul,.sidebar ul li{list-style:none}.sidebar ul li a{border-bottom:none;display:block}.sidebar ul li ul{padding-left:20px}.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:0 0;border-radius:4px}.sidebar:hover::-webkit-scrollbar-thumb{background:hsla(0,0%,53%,.4)}.sidebar:hover::-webkit-scrollbar-track{background:hsla(0,0%,53%,.1)}.sidebar-toggle{background-color:transparent;background-color:hsla(0,0%,100%,.8);border:0;outline:0;padding:10px;bottom:0;left:0;position:absolute;text-align:center;transition:opacity .3s;width:30px;width:284px;z-index:4}.sidebar-toggle .sidebar-toggle-button:hover{opacity:.4}.sidebar-toggle span{background-color:#42b983;background-color:var(--theme-color,#42b983);display:block;margin-bottom:4px;width:16px;height:2px}body.sticky .sidebar,body.sticky .sidebar-toggle{position:fixed}.content{padding-top:60px;top:0;right:0;bottom:0;left:300px;position:absolute;transition:left .25s ease}.markdown-preview>*{box-sizing:border-box;font-size:inherit}.markdown-preview>:first-child{margin-top:0!important}.markdown-preview hr{border:none;border-bottom:1px solid #eee;margin:2em 0}.markdown-preview table{border-collapse:collapse;border-spacing:0;display:block;margin-bottom:16px;margin-bottom:1rem;overflow:auto;width:100%}.markdown-preview th{font-weight:700}.markdown-preview td,.markdown-preview th{border:1px solid #ddd;padding:6px 13px}.markdown-preview tr{border-top:1px solid #ccc}.markdown-preview p.tip,.markdown-preview tr:nth-child(2n){background-color:#f8f8f8}.markdown-preview p.tip{border-bottom-right-radius:2px;border-left:4px solid #f66;border-top-right-radius:2px;margin:2em 0;padding:12px 24px 12px 30px;position:relative}.markdown-preview p.tip code{background-color:#efefef}.markdown-preview p.tip em{color:#34495e}.markdown-preview p.tip:before{background-color:#f66;border-radius:100%;color:#fff;content:'!';font-family:Dosis,Source Sans Pro,Helvetica Neue,Arial,sans-serif;font-size:14px;font-weight:700;left:-12px;line-height:20px;position:absolute;width:20px;height:20px;text-align:center;top:14px}.markdown-preview p.warn{background:rgba(66,185,131,.1);border-radius:2px;padding:16px;padding:1rem}body.close .sidebar{-webkit-transform:translateX(-300px);transform:translateX(-300px)}body.close .sidebar-toggle{width:auto}body.close .content{left:0}@media print{.app-nav,.github-corner,.sidebar,.sidebar-toggle{display:none}}@media screen and (max-width:768px){.github-corner,.sidebar,.sidebar-toggle{position:fixed}.app-nav{margin-top:16px}.app-nav li ul{top:30px}main{height:auto;overflow-x:hidden}.sidebar{left:-300px;transition:-webkit-transform .25s ease-out;transition:transform .25s ease-out;transition:transform .25s ease-out,-webkit-transform .25s ease-out}.content{left:0;max-width:100vw;position:static;padding-top:20px;transition:-webkit-transform .25s ease;transition:transform .25s ease;transition:transform .25s ease,-webkit-transform .25s ease}.app-nav,.github-corner{transition:-webkit-transform .25s ease-out;transition:transform .25s ease-out;transition:transform .25s ease-out,-webkit-transform .25s ease-out}.sidebar-toggle{background-color:transparent;width:auto;padding:30px 30px 10px 10px}body.close .sidebar{-webkit-transform:translateX(300px);transform:translateX(300px)}body.close .sidebar-toggle{background-color:hsla(0,0%,100%,.8);transition:background-color 1s;width:284px;padding:10px}body.close .content{-webkit-transform:translateX(300px);transform:translateX(300px)}body.close .app-nav,body.close .github-corner{display:none}.github-corner .octo-arm{-webkit-animation:a .56s ease-in-out;animation:a .56s ease-in-out}.github-corner:hover .octo-arm{-webkit-animation:none;animation:none}}@-webkit-keyframes a{0%,to{-webkit-transform:rotate(0);transform:rotate(0)}20%,60%{-webkit-transform:rotate(-25deg);transform:rotate(-25deg)}40%,80%{-webkit-transform:rotate(10deg);transform:rotate(10deg)}}@keyframes a{0%,to{-webkit-transform:rotate(0);transform:rotate(0)}20%,60%{-webkit-transform:rotate(-25deg);transform:rotate(-25deg)}40%,80%{-webkit-transform:rotate(10deg);transform:rotate(10deg)}}section.cover{-webkit-box-align:center;-ms-flex-align:center;align-items:center;background-position:50%;background-repeat:no-repeat;background-size:cover;height:100vh;display:none}section.cover .cover-main{-webkit-box-flex:1;-ms-flex:1;flex:1;margin:-20px 16px 0;text-align:center;z-index:1}section.cover a{color:inherit}section.cover a,section.cover a:hover{text-decoration:none}section.cover p{line-height:24px;line-height:1.5rem;margin:1em 0}section.cover h1{color:inherit;font-size:40px;font-size:2.5rem;font-weight:300;margin:10px 0 40px;margin:.625rem 0 2.5rem;position:relative;text-align:center}section.cover h1 a{display:block}section.cover h1 small{bottom:-7px;bottom:-.4375rem;font-size:16px;font-size:1rem;position:absolute}section.cover blockquote{font-size:24px;font-size:1.5rem;text-align:center}section.cover ul{line-height:1.8;list-style-type:none;margin:1em auto;max-width:500px;padding:0}section.cover .cover-main>p:last-child a{border-color:#42b983;border:1px solid var(--theme-color,#42b983);border-radius:2rem;box-sizing:border-box;color:#42b983;color:var(--theme-color,#42b983);display:inline-block;font-size:16.8px;font-size:1.05rem;letter-spacing:1.6px;letter-spacing:.1rem;margin-right:16px;margin-right:1rem;padding:.75em 32px;padding:.75em 2rem;text-decoration:none;transition:all .15s ease}section.cover .cover-main>p:last-child a:last-child{background-color:#42b983;background-color:var(--theme-color,#42b983);color:#fff;margin-right:0}section.cover .cover-main>p:last-child a:last-child:hover{color:inherit;opacity:.8}section.cover .cover-main>p:last-child a:hover{color:inherit}section.cover blockquote>p>a{border-bottom:2px solid #42b983;border-bottom:2px solid var(--theme-color,#42b983);transition:color .3s}section.cover blockquote>p>a:hover{color:#42b983;color:var(--theme-color,#42b983)}section.cover.show{display:-webkit-box;display:-ms-flexbox;display:flex}section.cover.has-mask .mask{background-color:#fff;opacity:.8;position:absolute;width:100%;height:100%}.sidebar,body{background-color:#fff}.sidebar{color:#364149}.sidebar li{margin:6px 0 6px 15px}.sidebar ul li a{color:#505d6b;font-size:14px;font-weight:400;overflow:hidden;text-decoration:none;text-overflow:ellipsis;white-space:nowrap}.sidebar ul li a:hover{text-decoration:underline}.sidebar ul li ul{padding:0}.sidebar ul li.active>a{border-right:2px solid;color:#42b983;color:var(--theme-color,#42b983);font-weight:600}.app-sub-sidebar li:before{content:'-';padding-right:4px;float:left}.markdown-preview{background-color:#fff}.markdown-preview h1,.markdown-preview h2,.markdown-preview h3,.markdown-preview h4,.markdown-preview strong{color:#2c3e50;font-weight:600}.markdown-preview a{color:#42b983;color:var(--theme-color,#42b983);font-weight:600}.md-sidebar-toc a{color:#42b983;font-weight:600}.markdown-preview h1{font-size:32px;font-size:2rem;margin:0 0 16px;margin:0 0 1rem}.markdown-preview h2{font-size:28px;font-size:1.75rem;margin:45px 0 12.8px;margin:45px 0 .8rem}.markdown-preview h3{font-size:24px;font-size:1.5rem;margin:40px 0 9.6px;margin:40px 0 .6rem}.markdown-preview h4{font-size:20px;font-size:1.25rem}.markdown-preview h5,.markdown-preview h6{font-size:16px;font-size:1rem}.markdown-preview h6{color:#777}.markdown-preview figure,.markdown-preview p{margin:1.2em 0}.markdown-preview ol,.markdown-preview p,.markdown-preview ul{line-height:25.6px;line-height:1.6rem;word-spacing:.8px;word-spacing:.05rem}.markdown-preview ol,.markdown-preview ul{padding-left:24px;padding-left:1.5rem}.markdown-preview blockquote{border-left:4px solid #42b983;border-left:4px solid var(--theme-color,#42b983);color:#858585;background-color:#f0f0f0;margin:2em 0;padding-left:20px}.markdown-preview blockquote p{font-weight:600;margin-left:0}.markdown-preview iframe{margin:1em 0}.markdown-preview em{color:#7f8c8d}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview pre[data-line]{position:relative;padding:1em 0 1em 3em!important}.markdown-preview pre[data-line]>code{position:relative;z-index:1}.markdown-preview pre[data-line] .line-numbers-rows{z-index:1}.markdown-preview pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;pointer-events:none;display:block;width:100%}.markdown-preview pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:var(--line-highlight-background,linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0)));line-height:inherit;white-space:pre}.markdown-preview pre[data-line] .line-highlight:before,.markdown-preview pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none}.markdown-preview pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-details{margin:0;padding:0;border:none}.markdown-preview .md-toc ol.md-toc-ol{margin:0;padding-left:1.6em}.markdown-preview .md-toc summary.md-toc-link-wrapper{cursor:pointer;list-style-position:outside}.markdown-preview .md-toc summary.md-toc-link-wrapper::marker{font-size:.85em}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='0']{margin-left:12px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='1']{margin-left:28px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='2']{margin-left:44px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='3']{margin-left:60px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='4']{margin-left:76px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='5']{margin-left:80px}.markdown-preview a.tag,.markdown-preview a.tag:active,.markdown-preview a.tag:link,.markdown-preview a.tag:visited,.markdown-preview span.tag:not(.token){display:inline-block;background-color:var(--vscode-badge-background,rgba(127,127,127,.18));color:var(--vscode-badge-foreground,currentColor);border-radius:2em;font-size:.85em;font-weight:500;padding:.05em .55em;line-height:1.5;white-space:nowrap;text-decoration:none;text-shadow:none;box-shadow:none;transition:background-color .12s ease,opacity .12s ease}.markdown-preview a.tag{cursor:pointer}.markdown-preview a.tag:focus,.markdown-preview a.tag:hover{background-color:var(--vscode-badge-background,rgba(127,127,127,.32));color:var(--vscode-badge-foreground,currentColor);opacity:.85;text-decoration:none;outline:0}.markdown-preview .wikilink-embed-content{border-left:3px solid var(--vscode-textBlockQuote-border,rgba(128,128,128,.3));background:var(--vscode-textBlockQuote-background,rgba(128,128,128,.05));margin:.5em 0;padding:.5em .75em;border-radius:0 3px 3px 0}.markdown-preview .wikilink-embed-content.wikilink-embed-error{border-left-color:var(--vscode-errorForeground,#cf222e);color:var(--vscode-errorForeground,#cf222e);font-style:italic;opacity:.8}.markdown-preview .wikilink-embed-content h1:first-child,.markdown-preview .wikilink-embed-content h2:first-child,.markdown-preview .wikilink-embed-content h3:first-child,.markdown-preview .wikilink-embed-content h4:first-child,.markdown-preview .wikilink-embed-content h5:first-child,.markdown-preview .wikilink-embed-content h6:first-child{margin-top:.25em}.markdown-preview .wikilink-embed-content .wikilink-embed-content{margin:.25em 0;padding:.25em .5em}.markdown-preview .block-id{display:none}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}.scrollbar-style::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details{margin:0;padding:0;border:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc ol.md-toc-ol{margin:0;padding-left:1.6em}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0']{padding-left:0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1']{padding-left:16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2']{padding-left:32px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3']{padding-left:48px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4']{padding-left:64px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5']{padding-left:80px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+      pre{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;direction:ltr;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;padding:1em;margin:.5em 0;overflow:auto;line-height:1.5;tab-size:4;hyphens:none;color:#555;background-color:#f0f0f0!important;border:#d6d6d6;border-radius:3px}pre[class*=language-]{padding:1em}code[class*=language-] .token.cdata,code[class*=language-] .token.comment,code[class*=language-] .token.doctype,code[class*=language-] .token.prolog,pre[class*=language-] .token.cdata,pre[class*=language-] .token.comment,pre[class*=language-] .token.doctype,pre[class*=language-] .token.prolog{color:#998;font-style:italic}code[class*=language-] .token.punctuation,pre[class*=language-] .token.punctuation{color:#920b2d}code[class*=language-] .namespace,pre[class*=language-] .namespace{opacity:.7}code[class*=language-] .token.property,pre[class*=language-] .token.property{font-weight:700;color:#333}code[class*=language-] .token.boolean,code[class*=language-] .token.function-name,code[class*=language-] .token.number,pre[class*=language-] .token.boolean,pre[class*=language-] .token.function-name,pre[class*=language-] .token.number{color:#d14}code[class*=language-] .token.tag,pre[class*=language-] .token.tag{color:#d14}code[class*=language-] .token.symbol,pre[class*=language-] .token.symbol{color:#990073}code[class*=language-] .token.selector,pre[class*=language-] .token.selector{color:teal}code[class*=language-] .token.attr-name,pre[class*=language-] .token.attr-name{color:#458;font-weight:700}code[class*=language-] .token.string,pre[class*=language-] .token.string{color:#d14}code[class*=language-] .token.char,pre[class*=language-] .token.char{color:#606aa1}code[class*=language-] .token.url,pre[class*=language-] .token.url{color:#888}code[class*=language-] .token.atrule,code[class*=language-] .token.attr-value,code[class*=language-] .token.keyword,pre[class*=language-] .token.atrule,pre[class*=language-] .token.attr-value,pre[class*=language-] .token.keyword{color:#222;font-weight:700}code[class*=language-] .token.function,pre[class*=language-] .token.function{color:#900}code[class*=language-] .token.class-name,pre[class*=language-] .token.class-name{text-decoration:underline;color:#606aa1}code[class*=language-] .token.variable,pre[class*=language-] .token.variable{color:teal}code[class*=language-] .token.bold,code[class*=language-] .token.important,pre[class*=language-] .token.bold,pre[class*=language-] .token.important{font-weight:700}code[class*=language-] .token.italic,pre[class*=language-] .token.italic{font-style:italic}code[class*=language-] .token.entity,pre[class*=language-] .token.entity{cursor:help}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#555;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#030303}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#7e7e7e}html body strong{color:#030303}html body del{color:#7e7e7e}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#7e7e7e;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#030303}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#030303;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#030303;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#030303;page-break-after:avoid}html body blockquote{color:#7e7e7e}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview pre[data-line]{position:relative;padding:1em 0 1em 3em!important}.markdown-preview pre[data-line]>code{position:relative;z-index:1}.markdown-preview pre[data-line] .line-numbers-rows{z-index:1}.markdown-preview pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;pointer-events:none;display:block;width:100%}.markdown-preview pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:var(--line-highlight-background,linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0)));line-height:inherit;white-space:pre}.markdown-preview pre[data-line] .line-highlight:before,.markdown-preview pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none}.markdown-preview pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-details{margin:0;padding:0;border:none}.markdown-preview .md-toc ol.md-toc-ol{margin:0;padding-left:1.6em}.markdown-preview .md-toc summary.md-toc-link-wrapper{cursor:pointer;list-style-position:outside}.markdown-preview .md-toc summary.md-toc-link-wrapper::marker{font-size:.85em}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='0']{margin-left:12px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='1']{margin-left:28px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='2']{margin-left:44px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='3']{margin-left:60px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='4']{margin-left:76px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='5']{margin-left:80px}.markdown-preview a.tag,.markdown-preview a.tag:active,.markdown-preview a.tag:link,.markdown-preview a.tag:visited,.markdown-preview span.tag:not(.token){display:inline-block;background-color:var(--vscode-badge-background,rgba(127,127,127,.18));color:var(--vscode-badge-foreground,currentColor);border-radius:2em;font-size:.85em;font-weight:500;padding:.05em .55em;line-height:1.5;white-space:nowrap;text-decoration:none;text-shadow:none;box-shadow:none;transition:background-color .12s ease,opacity .12s ease}.markdown-preview a.tag{cursor:pointer}.markdown-preview a.tag:focus,.markdown-preview a.tag:hover{background-color:var(--vscode-badge-background,rgba(127,127,127,.32));color:var(--vscode-badge-foreground,currentColor);opacity:.85;text-decoration:none;outline:0}.markdown-preview .wikilink-embed-content{border-left:3px solid var(--vscode-textBlockQuote-border,rgba(128,128,128,.3));background:var(--vscode-textBlockQuote-background,rgba(128,128,128,.05));margin:.5em 0;padding:.5em .75em;border-radius:0 3px 3px 0}.markdown-preview .wikilink-embed-content.wikilink-embed-error{border-left-color:var(--vscode-errorForeground,#cf222e);color:var(--vscode-errorForeground,#cf222e);font-style:italic;opacity:.8}.markdown-preview .wikilink-embed-content h1:first-child,.markdown-preview .wikilink-embed-content h2:first-child,.markdown-preview .wikilink-embed-content h3:first-child,.markdown-preview .wikilink-embed-content h4:first-child,.markdown-preview .wikilink-embed-content h5:first-child,.markdown-preview .wikilink-embed-content h6:first-child{margin-top:.25em}.markdown-preview .wikilink-embed-content .wikilink-embed-content{margin:.25em 0;padding:.25em .5em}.markdown-preview .block-id{display:none}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}.scrollbar-style::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details{margin:0;padding:0;border:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc ol.md-toc-ol{margin:0;padding-left:1.6em}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0']{padding-left:0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1']{padding-left:16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2']{padding-left:32px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3']{padding-left:48px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4']{padding-left:64px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5']{padding-left:80px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
 /* Please visit the URL below for more information: */
 /*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
 .markdown-preview.markdown-preview pre,
 .markdown-preview.markdown-preview code,
 .markdown-preview.markdown-preview [class*="language-"] {
-  /*font-family: "Consolas", "Courier New", "BIZ UD Gothic", "Meiryo", monospace !important;*/
   font-family: "HackGen", "BIZ UD Gothic", "Meiryo", monospace !important;
+}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+.markdown-preview.markdown-preview pre,
+.markdown-preview.markdown-preview code,
+.markdown-preview.markdown-preview [class*="language-"] {
+  font-family: "HackGen", "BIZ UD Gothic", "Meiryo", monospace !important;
+}
+.markdown-preview.markdown-preview h1,
+.markdown-preview.markdown-preview h2,
+.markdown-preview.markdown-preview h3,
+.markdown-preview.markdown-preview h4,
+.markdown-preview.markdown-preview h5,
+.markdown-preview.markdown-preview h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  padding: 0.25em;
+  padding-left: 0.4em;
+  line-height: 1.25;
+}
+.markdown-preview.markdown-preview h1 {
+  background-color: #fff2e8;
+  border-top: 6px solid #ddcccc;
+  border-bottom: 6px solid #ddcccc;
+}
+.markdown-preview.markdown-preview h2 {
+  background-color: #fafafa;
+  border-top: 4px double #222222;
+  border-bottom: 4px double #222222;
+}
+.markdown-preview.markdown-preview h3 {
+  font-size: 1.25em;
+  background-color: #fbfbfb;
+  border-top: 1px solid #222222;
+  border-bottom: 1px solid #222222;
+}
+.markdown-preview.markdown-preview h4 {
+  background-color: #fdfdfd;
+  border-top: 0.5px dashed #222222;
+  border-bottom: 0.5px dashed #222222;
+}
+.markdown-preview.markdown-preview h5 {
+  font-size: 0.875em;
+  border-bottom: 0.5px dotted #222222;
+}
+.markdown-preview.markdown-preview h6 {
+  color: #222200;
+}
+.markdown-preview.markdown-preview table {
+  border-collapse: collapse;
+  border: 1px solid #d0d7de;
+}
+.markdown-preview.markdown-preview td {
+  border: 1px solid #444444;
+}
+.markdown-preview.markdown-preview th {
+  background-color: #f6f8fa;
+  border: 1px solid #444444;
+}
+.markdown-preview.markdown-preview tr:nth-child(even) {
+  background-color: #f6f8fa;
+}
+.markdown-preview.markdown-preview tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+.markdown-preview.markdown-preview tr:hover {
+  background-color: #e3ede6 !important;
+}
+.md-sidebar-toc div {
+  font-size: 0.85em;
+}
+.md-sidebar-toc {
+  width: auto !important;
+}
+/* =========================================
+   共通設定
+   ========================================= */
+.md-sidebar-toc div {
+  font-size: 0.85em;
+}
+.md-sidebar-toc {
+  padding-left: 0.725em !important;
+  padding-right: 0.125em !important;
+  box-sizing: border-box !important;
+}
+.md-sidebar-toc details details,
+.md-sidebar-toc details > *:not(summary),
+.md-sidebar-toc ul ul {
+  padding-left: 0.5em !important;
+  /* 字下げ */
+}
+/* トグルボタン（右上固定） */
+body[for="html-export"] #sidebar-toc-btn {
+  position: fixed !important;
+  top: 15px !important;
+  right: 15px !important;
+  left: auto !important;
+  width: 36px !important;
+  height: 36px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 10000 !important;
+}
+/* 本文の基本位置（MPEのtransform/leftをリセット） */
+body[for="html-export"] .markdown-preview {
+  transform: none !important;
+  left: 0 !important;
+  max-width: 1000px !important;
+  box-sizing: border-box !important;
+}
+/* =========================================
+   PC画面（901px以上）：初期状態で「開く」
+   ========================================= */
+@media screen and (min-width: 901px) {
+  /* 初期状態（属性あり）：目次を右に表示 */
+  body[for="html-export"][html-show-sidebar-toc] .md-sidebar-toc {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 300px !important;
+    height: 100% !important;
+  }
+  /* 初期状態（属性あり）：本文を目次幅分押し出す */
+  body[for="html-export"][html-show-sidebar-toc] .markdown-preview {
+    margin-left: auto !important;
+    margin-right: 300px !important;
+    padding: 0 5% !important;
+  }
+  /* 閉じた時（属性なし）：本文を中央揃え */
+  body[for="html-export"]:not([html-show-sidebar-toc]) .markdown-preview {
+    margin: 0 auto !important;
+    padding: 0 5% !important;
+  }
+}
+/* =========================================
+   狭い画面（900px以下）：初期状態で「閉じる」
+   ========================================= */
+@media screen and (max-width: 900px) {
+  /* 初期状態（属性あり）：目次を完全に非表示 */
+  body[for="html-export"][html-show-sidebar-toc] .md-sidebar-toc {
+    display: none !important;
+  }
+  /* ボタン押下時（属性なし）：目次をオーバーレイで開く */
+  body[for="html-export"]:not([html-show-sidebar-toc]) .md-sidebar-toc {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 280px !important;
+    max-width: 80% !important;
+    height: 100% !important;
+    background-color: #ffffff !important;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2) !important;
+    z-index: 9999 !important;
+  }
+  /* 本文：目次の状態に関わらず中央配置（左の不自然な余白を解消） */
+  body[for="html-export"] .markdown-preview {
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+    width: 100% !important;
+  }
 }
 
       </style>
@@ -35,26 +200,29 @@
       <div class="crossnote markdown-preview  ">
       
 <h1 id="binary-editor-bz---msx-custom">Binary Editor Bz - MSX Custom </h1>
-<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8c</p>
-<p><a href="http://www.vcraft.jp/">c.mosさん</a>作、<a href="http://www.vcraft.jp/soft/bz.html">Binary Editor Bz</a>の<a href="https://gitlab.com/devill.tamachan/binaryeditorbz">tamachanさんの改造版</a>をベースに、MSXユーザー向けの機能を追加した物です。</p>
-<p>Windows版のみの提供です。</p>
-<p>構造体表示機能や分割画面と比較、メモリのビットマップ表示機能があります。</p>
-<p>Binary Editor Bz for MSX は、MSX向けビットマップビュー拡張改造版です。</p>
+<p>Binary Editor Bz - MSX Users Custom Version 1.9.9.8d</p>
+<p>構造体表示機能や分割画面と比較、メモリのビットマップ表示機能など
+便利な機能を持つバイナリエディタBzのMSX向けビットマップビュー拡張改造版です。</p>
+<p><a href="http://www.vcraft.jp/">c.mosさん</a>作、<a href="http://www.vcraft.jp/soft/bz.html">Binary Edito Bz</a>とそれをtamachanさんが改造された<a href="https://gitlab.com/devill.tamachan/binaryeditorbz">Binary Editor Bz 改 1.9</a>をベースに、MSXユーザー向けの機能を追加調整しています。</p>
+<p>Windows版のみの提供で、Windows XPは非対応となっています。</p>
 <ul>
 <li>
-<p>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8c-for-msx.exe">BzEditor-1.9.9.8c-for-msx.exe</a></p>
+<p>MSXや幾つかのコンシューマ機向けの画像表示機能</p>
 </li>
 <li>
-<p>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998cPortable-for-MSX.zip">Bz1998cPortable-for-MSX.zip</a></p>
+<p>内部動作をいくつか調整</p>
 </li>
 <li>
-<p>改変版ソースコードリポジトリ<br>
-<a href="https://gitlab.com/uniskie/binaryeditorbz-for-msx">https://gitlab.com/uniskie/binaryeditorbz-for-msx</a></p>
-</li>
-<li>
-<p><strong>追加機能以外の使い方/ オリジナルヘルプ</strong><br>
+<p><strong>追加機能以外の基本的な使い方/ オリジナルヘルプ</strong><br>
 <a href="https://devil-tamachan.github.io/BZDoc/">https://devil-tamachan.github.io/BZDoc/</a></p>
 </li>
+</ul>
+<h2 id="ダウンロード">ダウンロード </h2>
+<ul>
+<li>インストーラ―版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8d-for-msx.exe">BzEditor-1.9.9.8d-for-msx.exe</a></li>
+<li>ポータブル版 <a href="https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998dPortable-for-MSX.zip">Bz1998dPortable-for-MSX.zip</a></li>
+<li>改変版ソースコードリポジトリ<br>
+<a href="https://gitlab.com/uniskie/binaryeditorbz-for-msx">https://gitlab.com/uniskie/binaryeditorbz-for-msx</a></li>
 </ul>
 <p><img src="img/msx_sample.png" alt=""></p>
 <h2 id="文字コードテキストエンコード">文字コード（テキストエンコード） </h2>
@@ -170,8 +338,8 @@
 <li>1bit color 12x8  ... MSX-Viewフォント</li>
 <li>2bit color ... SCREEN 6,9</li>
 <li>4bit color ... SCREEN 5,7</li>
-<li>8bit color YJK ... SCREEN 10,11</li>
-<li>8bit color YJK/RGB ... SCREEN 12</li>
+<li>8bit color YJK ... SCREEN 12</li>
+<li>8bit color YJK/RGB ... SCREEN 10,11</li>
 <li>width 128 / 192 / 256 / 384 / 512</li>
 <li>MSX16 (パレット)</li>
 <li>MSX256 (パレット)</li>
@@ -180,7 +348,7 @@
 <p>各種コンシューマゲーム機（FC/GB/MD/PCE/SFC/GBA等）のキャラクタパターン・スプライト形式にも対応しています。</p>
 <ul>
 <li>2bit Plane (FC) / Interleave (GB)</li>
-<li>4bit 通常・縦優先 (MD) / Reverse bit order (GBA) / Plane / Interleave (SMS/GG) / Interleave Plane (SFC/PCE)</li>
+<li>4bit 通常・縦優先 (MD) / 上位・下位4ビット逆順 (GBA) / Plane / Interleave (SMS/GG) / Interleave Plane (SFC/PCE)</li>
 <li>8bit 通常・縦優先 (GBA/SFC Mode 7等) / Interleave Plane (SFC)</li>
 </ul>
 <h3 id="ビットマップ表示msx向け指定例">ビットマップ表示：MSX向け指定例 </h3>
@@ -270,13 +438,14 @@
 </tr>
 </tbody>
 </table>
-<h3 id="コンシューマ機向けタイルパターンtiled-pattern">コンシューマ機向けタイルパターン（Tiled Pattern） </h3>
-<p>メニューの「ツール(T)」→「ビットマップ設定(B)」→「Tiled Pattern(L)」から選択します。<br>
+<h3 id="タイル形式tile-formats対応一覧">タイル形式（Tile Formats）対応一覧 </h3>
+<p>メニューの「ツール(T)」→「ビットマップ設定(B)」→「タイル形式(L)」から選択します。<br>
 ハードウェア固有の名称ではなく、データ構造に即した汎用的な形式名で定義されています。</p>
+<h4 id="1bit-color--tile">1bit color / tile </h4>
 <table>
 <thead>
 <tr>
-<th>カラー形式</th>
+<th>ピクセル形式</th>
 <th>カラーパレット</th>
 <th>変換処理</th>
 <th>表示用途</th>
@@ -284,194 +453,279 @@
 </thead>
 <tbody>
 <tr>
-<td>tile/2bit color 8x8   (Plane)</td>
+<td>8x8</td>
+<td>---</td>
+<td>8x8 pixel (1bpp 8byte)</td>
+<td>MSX SCREEN 0/1/2/4、8x8 SPRITE、8x8フォント等</td>
+</tr>
+<tr>
+<td>8x16</td>
+<td>---</td>
+<td>8x16 pixel (1bpp 16byte / 8x8が縦に2個)</td>
+<td>MSX 16x16 SPRITE 等</td>
+</tr>
+<tr>
+<td>16x16 (Z-Swizzle)</td>
+<td>---</td>
+<td>16x16 pixel (1bpp 32byte / 8x8が'Z'並びで4個)</td>
+<td>MSX 漢字ROM</td>
+</tr>
+<tr>
+<td>16x8</td>
+<td>---</td>
+<td>16x8 pixel (16byte)</td>
+<td>ハイドライド3 MSX2版 全角フォント</td>
+</tr>
+<tr>
+<td>16x16 (Linear)</td>
+<td>---</td>
+<td>16x16 pixel (1bpp 32byte)</td>
+<td>JIS規格16ドット漢字、PC-98・X68000フォント等</td>
+</tr>
+<tr>
+<td>12x12 (Packed)</td>
+<td>---</td>
+<td>12x12 pixel (2行3バイトパッキング/18byte)</td>
+<td>MSX-View 全角フォント (width 192推奨)</td>
+</tr>
+<tr>
+<td>12x8  (Packed)</td>
+<td>---</td>
+<td>12x8 pixel (2行3バイトパッキング/12byte)</td>
+<td>MSX-View 半角フォント (width 192推奨)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2bit-color--tile">2bit color / tile </h4>
+<table>
+<thead>
+<tr>
+<th>ピクセル形式</th>
+<th>カラーパレット</th>
+<th>変換処理</th>
+<th>表示用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8x8   (Plane)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
-<td>8x8 pixel (1bpp 8byte) x2プレーン</td>
+<td>8x8 pixel (1bpp 8byte x 2プレーン)</td>
 <td>ファミコン BG/スプライト</td>
 </tr>
 <tr>
-<td>tile/2bit color 8x16  (Plane)</td>
+<td>8x16  (Plane)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
-<td>8x16 pixel (1bpp 16byte) x2プレーン</td>
+<td>8x16 pixel (1bpp 16byte x 2プレーン / 8x8が縦に2個)</td>
 <td>ファミコン 8x16スプライト</td>
 </tr>
 <tr>
-<td>tile/2bit color 16x16 (Plane)</td>
+<td>16x16 (Plane)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
-<td>16x16 pixel (8x8 4タイル) x2プレーン</td>
-<td>ファミコン 16x16タイル</td>
+<td>16x16 pixel (16line x2byte x 2プレーン)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/2bit color 8x8   (Interleave)</td>
+<td>8x8   (Interleave)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
 <td>1行2バイト インターリーブ (1 line = 8bit x2)</td>
 <td>ゲームボーイ BG/スプライト</td>
 </tr>
 <tr>
-<td>tile/2bit color 8x16  (Interleave)</td>
+<td>8x16  (Interleave)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
-<td>1行2バイト インターリーブ (縦2タイル)</td>
+<td>1行2バイト インターリーブ (8x8が縦に2個)</td>
 <td>ゲームボーイ 8x16スプライト</td>
 </tr>
 <tr>
-<td>tile/2bit color 16x16 (Interleave)</td>
+<td>16x16 (Interleave)</td>
 <td>GB_GRAY/GB_GREEN/GRAY4等</td>
 <td>1行2バイト インターリーブ (2x2タイル)</td>
-<td>ゲームボーイ 16x16タイル</td>
+<td>---</td>
 </tr>
+</tbody>
+</table>
+<h4 id="4bit-color--tile">4bit color / tile </h4>
+<table>
+<thead>
 <tr>
-<td>tile/4bit color 8x8</td>
+<th>ピクセル形式</th>
+<th>カラーパレット</th>
+<th>変換処理</th>
+<th>表示用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8x8</td>
 <td>MSX16/MIO/GRAY16等</td>
 <td>4bpp 8x8 タイル (通常)</td>
 <td>メガドライブ BG/スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x16</td>
+<td>8x16</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 8x16 (縦2タイル連続)</td>
-<td>メガドライブ 8x16 / 16x16スプライト等</td>
+<td>4bpp 8x16 (8x8が縦に2個)</td>
+<td>メガドライブ 16x16スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x24</td>
+<td>8x24</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 8x24 (縦3タイル連続)</td>
+<td>4bpp 8x24 (8x8が縦に3個)</td>
 <td>メガドライブ 24x24スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x32</td>
+<td>8x32</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 8x32 (縦4タイル連続)</td>
+<td>4bpp 8x32 (8x8が縦に4個)</td>
 <td>メガドライブ 32x32スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 16x16 (Z-Swizzle)</td>
+<td>16x16 (Z-Swizzle)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 16x16 (8x8 Z順4タイル)</td>
-<td>16x16タイル (Z順)</td>
+<td>4bpp 16x16 (8x8が'Z'並びで4個)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x8   (Reverse bit order)</td>
+<td>8x8   (Low-first)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 8x8 タイル (ビット逆順)</td>
+<td>4bpp 8x8 (上位・下位4ビット逆順 / 32byte)</td>
 <td>ゲームボーイアドバンス BG/OBJ等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x16  (Reverse bit order)</td>
+<td>8x16  (Low-first)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 8x16 (ビット逆順/縦2タイル)</td>
+<td>4bpp 8x16 (上位・下位4ビット逆順・8x8が縦に2個 / 64byte)</td>
 <td>ゲームボーイアドバンス 8x16スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 16x16 (Reverse bit order)</td>
+<td>16x16 (Low-first)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>4bpp 16x16 (ビット逆順/Z順)</td>
+<td>4bpp 16x16 (上位・下位4ビット逆順・8x8が'Z'並びで4個 / 128byte)</td>
 <td>ゲームボーイアドバンス 16x16スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x8   (Plane)</td>
+<td>8x8   (Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>8x8 pixel (1bpp 8byte) x4プレーン</td>
-<td>4プレーン形式</td>
+<td>8x8 pixel (1bpp 8byte x 4プレーン)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x16  (Plane)</td>
+<td>8x16  (Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>8x16 pixel (1bpp 16byte) x4プレーン</td>
-<td>4プレーン形式 (縦2)</td>
+<td>8x16 pixel (1bpp 16byte x 4プレーン / 8x8が縦に2個)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 16x16 (Plane)</td>
+<td>16x16 (Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>16x16 pixel (16line x2byte) x4プレーン</td>
-<td>4プレーン形式 (16x16)</td>
+<td>16x16 pixel (16line x2byte x 4プレーン)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x8   (Interleave)</td>
+<td>8x8   (Interleave)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>1行4バイト インターリーブ (4プレーン)</td>
+<td>1行4バイト インターリーブ</td>
 <td>セガ・マスターシステム／ゲームギア BG/スプライト等</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x16  (Interleave)</td>
+<td>8x16  (Interleave)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>1行4バイト インターリーブ (縦2タイル)</td>
+<td>1行4バイト インターリーブ (8x8が縦に2個)</td>
 <td>セガ・マスターシステム等 8x16スプライト</td>
 </tr>
 <tr>
-<td>tile/4bit color 16x16 (Interleave)</td>
+<td>16x16 (Interleave)</td>
 <td>MSX16/MIO/GRAY16等</td>
 <td>1行4バイト インターリーブ (2x2タイル)</td>
-<td>4プレーン インターリーブ 16x16</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x8   (Interleave Plane)</td>
+<td>8x8   (Interleave Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
 <td>1行2バイト インターリーブ x 2プレーン</td>
 <td>スーパーファミコン／PCエンジン BG</td>
 </tr>
 <tr>
-<td>tile/4bit color 8x16  (Interleave Plane)</td>
+<td>8x16  (Interleave Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
-<td>1行2バイト インターリーブ x 2プレーン (縦2)</td>
-<td>スーパーファミコン スプライト</td>
+<td>1行2バイト インターリーブ x 2プレーン (8x8が縦に2個)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/4bit color 16x16 (Interleave Plane)</td>
+<td>16x16 (Interleave Plane)</td>
 <td>MSX16/MIO/GRAY16等</td>
 <td>1行2バイト インターリーブ x 2プレーン (Z順)</td>
-<td>スーパーファミコン／PCエンジン スプライト</td>
+<td>PCエンジン スプライト (16x16固定)</td>
 </tr>
 <tr>
-<td>tile/8bit color 8x8</td>
+<td>8x8</td>
 <td>MSX256/GRAY256等</td>
 <td>8bpp 8x8 タイル (通常)</td>
 <td>ゲームボーイアドバンス 8bpp、SFC Mode 7等</td>
 </tr>
+</tbody>
+</table>
+<h4 id="8bit-color--tile">8bit color / tile </h4>
+<table>
+<thead>
 <tr>
-<td>tile/8bit color 8x16</td>
+<th>ピクセル形式</th>
+<th>カラーパレット</th>
+<th>変換処理</th>
+<th>表示用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8x16</td>
 <td>MSX256/GRAY256等</td>
-<td>8bpp 8x16 (縦2タイル連続)</td>
-<td>8bit 縦2タイル連続スプライト</td>
+<td>8bpp 8x16 (8x8が縦に2個)</td>
+<td>GBA 8bpp 8x16スプライト等</td>
 </tr>
 <tr>
-<td>tile/8bit color 8x24</td>
+<td>8x24</td>
 <td>MSX256/GRAY256等</td>
-<td>8bpp 8x24 (縦3タイル連続)</td>
-<td>8bit 縦3タイル連続スプライト</td>
+<td>8bpp 8x24 (8x8が縦に3個)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/8bit color 8x32</td>
+<td>8x32</td>
 <td>MSX256/GRAY256等</td>
-<td>8bpp 8x32 (縦4タイル連続)</td>
-<td>8bit 縦4タイル連続スプライト</td>
+<td>8bpp 8x32 (8x8が縦に4個)</td>
+<td>GBA 8bpp 8x32スプライト等</td>
 </tr>
 <tr>
-<td>tile/8bit color 16x16 (Z-Swizzle)</td>
+<td>16x16 (Z-Swizzle)</td>
 <td>MSX256/GRAY256等</td>
-<td>8bpp 16x16 (8x8 Z順4タイル)</td>
+<td>8bpp 16x16 (8x8が'Z'並びで4個)</td>
 <td>ゲームボーイアドバンス 8bpp 16x16スプライト等</td>
 </tr>
 <tr>
-<td>tile/8bit color 8x8   (Interleave Plane)</td>
+<td>8x8   (Interleave Plane)</td>
 <td>MSX256/GRAY256等</td>
 <td>1行2バイト インターリーブ x 4プレーン</td>
-<td>スーパーファミコン 8bit BG/スプライト</td>
+<td>スーパーファミコン 8bit (Mode 3/4) BG</td>
 </tr>
 <tr>
-<td>tile/8bit color 8x16  (Interleave Plane)</td>
+<td>8x16  (Interleave Plane)</td>
 <td>MSX256/GRAY256等</td>
-<td>1行2バイト インターリーブ x 4プレーン (縦2)</td>
-<td>スーパーファミコン 8bit スプライト</td>
+<td>1行2バイト インターリーブ x 4プレーン (8x8が縦に2個)</td>
+<td>---</td>
 </tr>
 <tr>
-<td>tile/8bit color 16x16 (Interleave Plane)</td>
+<td>16x16 (Interleave Plane)</td>
 <td>MSX256/GRAY256等</td>
 <td>1行2バイト インターリーブ x 4プレーン (Z順)</td>
-<td>スーパーファミコン 8bit 16x16タイル</td>
+<td>---</td>
 </tr>
 </tbody>
 </table>
-<p>※メガドライブ等のスプライトは縦優先（Column-major）でタイルが格納されるため、高さに合わせて <code>8x16</code> (2タイル高: 16x16等)、<code>8x24</code> (3タイル高: 24x24等)、<code>8x32</code> (4タイル高: 32x32等) を選択することで横に正しく連結表示されます。</p>
+<ul>
+<li>※ MSXやメガドライブ等のスプライトは縦優先でタイルが格納されるため、高さに合わせて <code>8x16</code> (8x8が縦に2個: 16x16スプライト等)、<code>8x24</code> (8x8が縦に3個: 24x24スプライト等)、<code>8x32</code> (8x8が縦に4個: 32x32スプライト等) を選択することで横に正しく連結表示されます。</li>
+<li>※「上位・下位4ビット逆順」は、1バイト内に格納された2ピクセルのうち、下位4ビット（bit 3〜0）を左側のピクセルとして描画する形式（ゲームボーイアドバンス等）に対応します。</li>
+<li>※「8x8が'Z'並びで4個」は、16x16ドットの領域を4つの8x8タイルに分割し、左上 → 右上 → 左下 → 右下の順（アルファベットのZを描く順序）で格納するデータ形式です。</li>
+</ul>
 <h3 id="ビットマップ表示の表示更新について">ビットマップ表示の表示更新について </h3>
 <p>バイナリデータの編集時、ビットマップビューがリアルタイムで更新されるようにしました。
 重い場合はビットマップビューを閉じて編集してください。</p>
@@ -503,6 +757,16 @@
 <p>当ソフトも継承元に準じて New BSD License で提供されます。</p>
 <h2 id="変更履歴">変更履歴 </h2>
 <ul>
+<li>
+<p>2026/10/02 version 1.9.9.8d</p>
+<ul>
+<li>(表記統一) タイルパターンのメニュー名・UI表記を「タイル形式 / Tile Formats」に統一</li>
+<li>(命名改善) GBA等の4bitタイルの内部識別子・メニュー表記を「Low-first (LF)」、日本語説明を「上位・下位4ビット逆順」に整理</li>
+<li>(改善) ステータスバー説明文字列（日本語・英語）を大幅拡充し、各タイル形式のデータ構造（8x8が縦に〇個、8x8が'Z'並びで4個など）および対応機種・用途を明確化</li>
+<li>(バグ修正) リソース内のメニュー誤記を修正（Width 392 → Width 384、Liner → Linear）</li>
+<li>(ドキュメント修正) 説明書のMSX2+ YJK画面モード（SCREEN 10/11/12）の記載逆転を修正、タイル形式対応表の全形式網羅と表記ルール統一</li>
+</ul>
+</li>
 <li>
 <p>2026/09/29 version 1.9.9.8c</p>
 <ul>
@@ -629,13 +893,111 @@ MSX向け改造版公開</p>
 </ul>
 
       </div>
+      <div class="md-sidebar-toc"><div class="md-toc">
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="0">
+  <a href="#binary-editor-bz---msx-custom" class="md-toc-link">Binary Editor Bz - MSX Custom</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="1">
+  <a href="#ダウンロード" class="md-toc-link">ダウンロード</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="1">
+  <a href="#文字コードテキストエンコード" class="md-toc-link">文字コード（テキストエンコード）</a>
+</div>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="1">
+  <a href="#msxエンコード用フォント" class="md-toc-link">MSXエンコード用フォント</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#msx風フォントファイル" class="md-toc-link">MSX風フォントファイル</a>
+</div>
+</details>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="1">
+  <a href="#customユーザー定義エンコード" class="md-toc-link">CUSTOM：ユーザー定義エンコード</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="3">
+  <a href="#def-ファイル-書式" class="md-toc-link">def ファイル 書式</a>
+</div>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="3">
+  <a href="#customエンコード定義サンプル" class="md-toc-link">CUSTOMエンコード定義サンプル</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="4">
+  <a href="#例-hydlide3_maindef" class="md-toc-link">例） HYDLIDE3_MAIN.def</a>
+</div>
+</details>
+</details>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="1">
+  <a href="#ビットマップ表示の追加機能" class="md-toc-link">ビットマップ表示の追加機能</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#msx向けビットマップ表示の概要" class="md-toc-link">MSX向けビットマップ表示の概要</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#ビットマップ表示msx向け指定例" class="md-toc-link">ビットマップ表示：MSX向け指定例</a>
+</div>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="2">
+  <a href="#タイル形式tile-formats対応一覧" class="md-toc-link">タイル形式（Tile Formats）対応一覧</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="3">
+  <a href="#1bit-color--tile" class="md-toc-link">1bit color / tile</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="3">
+  <a href="#2bit-color--tile" class="md-toc-link">2bit color / tile</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="3">
+  <a href="#4bit-color--tile" class="md-toc-link">4bit color / tile</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="3">
+  <a href="#8bit-color--tile" class="md-toc-link">8bit color / tile</a>
+</div>
+</details>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#ビットマップ表示の表示更新について" class="md-toc-link">ビットマップ表示の表示更新について</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#ビットマップ表示のアドレスオフセットについて" class="md-toc-link">ビットマップ表示のアドレスオフセットについて</a>
+</div>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#パレットの編集" class="md-toc-link">パレットの編集</a>
+</div>
+</details>
+<details open="" class="md-toc-details">
+<summary class="md-toc-link-wrapper" data-level="1">
+  <a href="#謝辞" class="md-toc-link">謝辞</a>
+</summary>
+<div class="md-toc-link-wrapper" data-level="2">
+  <a href="#ライセンス" class="md-toc-link">ライセンス</a>
+</div>
+</details>
+<div class="md-toc-link-wrapper" data-level="1">
+  <a href="#変更履歴" class="md-toc-link">変更履歴</a>
+</div>
+</details>
+</div>
+</div>
+      <a id="sidebar-toc-btn">≡</a>
+    
+    
+    
+    
+    
+    
+<script>
+document.body.setAttribute('html-show-sidebar-toc', true)
+var sidebarTOCBtn = document.getElementById('sidebar-toc-btn')
+sidebarTOCBtn.addEventListener('click', function(event) {
+  event.stopPropagation()
+  if (document.body.hasAttribute('html-show-sidebar-toc')) {
+    document.body.removeAttribute('html-show-sidebar-toc')
+  } else {
+    document.body.setAttribute('html-show-sidebar-toc', true)
+  }
+})
+</script>
       
-      
-    
-    
-    
-    
-    
-    
   
     </body></html>

@@ -1,6 +1,11 @@
+---
+html:
+  toc: true
+---
+
 #  Binary Editor Bz - MSX Custom
 
-Binary Editor Bz - MSX Users Custom Version 1.9.9.8c
+Binary Editor Bz - MSX Users Custom Version 1.9.9.8d
 
 構造体表示機能や分割画面と比較、メモリのビットマップ表示機能など
 便利な機能を持つバイナリエディタBzのMSX向けビットマップビュー拡張改造版です。
@@ -20,8 +25,8 @@ Windows版のみの提供で、Windows XPは非対応となっています。
 
 ## ダウンロード
 
-  - インストーラ―版 [BzEditor-1.9.9.8c-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8c-for-msx.exe)
-  - ポータブル版 [Bz1998cPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998cPortable-for-MSX.zip)
+  - インストーラ―版 [BzEditor-1.9.9.8d-for-msx.exe](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/BzEditor-1.9.9.8d-for-msx.exe)
+  - ポータブル版 [Bz1998dPortable-for-MSX.zip](https://github.com/uniskie/MSX_MISC_TOOLS/blob/main/BinaryEditorBz_for_MSX/Bz1998dPortable-for-MSX.zip)
   - 改変版ソースコードリポジトリ   
     https://gitlab.com/uniskie/binaryeditorbz-for-msx
 
@@ -118,8 +123,8 @@ Windows版のみの提供で、Windows XPは非対応となっています。
 - 1bit color 12x8  ... MSX-Viewフォント
 - 2bit color ... SCREEN 6,9
 - 4bit color ... SCREEN 5,7
-- 8bit color YJK ... SCREEN 10,11
-- 8bit color YJK/RGB ... SCREEN 12
+- 8bit color YJK ... SCREEN 12
+- 8bit color YJK/RGB ... SCREEN 10,11
 - width 128 / 192 / 256 / 384 / 512
 - MSX16 (パレット)
 - MSX256 (パレット)
@@ -128,7 +133,7 @@ Windows版のみの提供で、Windows XPは非対応となっています。
 各種コンシューマゲーム機（FC/GB/MD/PCE/SFC/GBA等）のキャラクタパターン・スプライト形式にも対応しています。
 
 - 2bit Plane (FC) / Interleave (GB)
-- 4bit 通常・縦優先 (MD) / Reverse bit order (GBA) / Plane / Interleave (SMS/GG) / Interleave Plane (SFC/PCE)
+- 4bit 通常・縦優先 (MD) / 上位・下位4ビット逆順 (GBA) / Plane / Interleave (SMS/GG) / Interleave Plane (SFC/PCE)
 - 8bit 通常・縦優先 (GBA/SFC Mode 7等) / Interleave Plane (SFC)
 
 ### ビットマップ表示：MSX向け指定例
@@ -152,46 +157,68 @@ Windows版のみの提供で、Windows XPは非対応となっています。
 | 8bit color YJK/RGB                | MSX16    | width 256 | SCREEN 10/11 |
 | 8bit color YJK                    | ---      | width 256 | SCREEN 12 |
 
-### コンシューマ機向けタイルパターン（Tiled Pattern）
+### タイル形式（Tile Formats）対応一覧
 
-メニューの「ツール(T)」→「ビットマップ設定(B)」→「Tiled Pattern(L)」から選択します。  
+メニューの「ツール(T)」→「ビットマップ設定(B)」→「タイル形式(L)」から選択します。  
 ハードウェア固有の名称ではなく、データ構造に即した汎用的な形式名で定義されています。
 
-| カラー形式 | カラーパレット | 変換処理 | 表示用途 |
+#### 1bit color / tile
+| ピクセル形式 |カラーパレット | 変換処理 | 表示用途 |
 |---|---|---|---|
-| tile/2bit color 8x8   (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x8 pixel (1bpp 8byte) x2プレーン | ファミコン BG/スプライト |
-| tile/2bit color 8x16  (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x16 pixel (1bpp 16byte) x2プレーン | ファミコン 8x16スプライト |
-| tile/2bit color 16x16 (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 16x16 pixel (8x8 4タイル) x2プレーン | ファミコン 16x16タイル |
-| tile/2bit color 8x8   (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (1 line = 8bit x2) | ゲームボーイ BG/スプライト |
-| tile/2bit color 8x16  (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (縦2タイル) | ゲームボーイ 8x16スプライト |
-| tile/2bit color 16x16 (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (2x2タイル) | ゲームボーイ 16x16タイル |
-| tile/4bit color 8x8                     | MSX16/MIO/GRAY16等       | 4bpp 8x8 タイル (通常) | メガドライブ BG/スプライト等 |
-| tile/4bit color 8x16                    | MSX16/MIO/GRAY16等       | 4bpp 8x16 (縦2タイル連続) | メガドライブ 8x16 / 16x16スプライト等 |
-| tile/4bit color 8x24                    | MSX16/MIO/GRAY16等       | 4bpp 8x24 (縦3タイル連続) | メガドライブ 24x24スプライト等 |
-| tile/4bit color 8x32                    | MSX16/MIO/GRAY16等       | 4bpp 8x32 (縦4タイル連続) | メガドライブ 32x32スプライト等 |
-| tile/4bit color 16x16 (Z-Swizzle)       | MSX16/MIO/GRAY16等       | 4bpp 16x16 (8x8 Z順4タイル) | 16x16タイル (Z順) |
-| tile/4bit color 8x8   (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 8x8 タイル (ビット逆順) | ゲームボーイアドバンス BG/OBJ等 |
-| tile/4bit color 8x16  (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 8x16 (ビット逆順/縦2タイル) | ゲームボーイアドバンス 8x16スプライト等 |
-| tile/4bit color 16x16 (Reverse bit order) | MSX16/MIO/GRAY16等     | 4bpp 16x16 (ビット逆順/Z順) | ゲームボーイアドバンス 16x16スプライト等 |
-| tile/4bit color 8x8   (Plane)           | MSX16/MIO/GRAY16等       | 8x8 pixel (1bpp 8byte) x4プレーン | 4プレーン形式 |
-| tile/4bit color 8x16  (Plane)           | MSX16/MIO/GRAY16等       | 8x16 pixel (1bpp 16byte) x4プレーン | 4プレーン形式 (縦2) |
-| tile/4bit color 16x16 (Plane)           | MSX16/MIO/GRAY16等       | 16x16 pixel (16line x2byte) x4プレーン | 4プレーン形式 (16x16) |
-| tile/4bit color 8x8   (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ (4プレーン) | セガ・マスターシステム／ゲームギア BG/スプライト等 |
-| tile/4bit color 8x16  (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ (縦2タイル) | セガ・マスターシステム等 8x16スプライト |
-| tile/4bit color 16x16 (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ (2x2タイル) | 4プレーン インターリーブ 16x16 |
-| tile/4bit color 8x8   (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン | スーパーファミコン／PCエンジン BG |
-| tile/4bit color 8x16  (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (縦2) | スーパーファミコン スプライト |
-| tile/4bit color 16x16 (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (Z順) | スーパーファミコン／PCエンジン スプライト |
-| tile/8bit color 8x8                     | MSX256/GRAY256等         | 8bpp 8x8 タイル (通常) | ゲームボーイアドバンス 8bpp、SFC Mode 7等 |
-| tile/8bit color 8x16                    | MSX256/GRAY256等         | 8bpp 8x16 (縦2タイル連続) | 8bit 縦2タイル連続スプライト |
-| tile/8bit color 8x24                    | MSX256/GRAY256等         | 8bpp 8x24 (縦3タイル連続) | 8bit 縦3タイル連続スプライト |
-| tile/8bit color 8x32                    | MSX256/GRAY256等         | 8bpp 8x32 (縦4タイル連続) | 8bit 縦4タイル連続スプライト |
-| tile/8bit color 16x16 (Z-Swizzle)       | MSX256/GRAY256等         | 8bpp 16x16 (8x8 Z順4タイル) | ゲームボーイアドバンス 8bpp 16x16スプライト等 |
-| tile/8bit color 8x8   (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン | スーパーファミコン 8bit BG/スプライト |
-| tile/8bit color 8x16  (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (縦2) | スーパーファミコン 8bit スプライト |
-| tile/8bit color 16x16 (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (Z順) | スーパーファミコン 8bit 16x16タイル |
+| 8x8                     | ---                      | 8x8 pixel (1bpp 8byte) | MSX SCREEN 0/1/2/4、8x8 SPRITE、8x8フォント等 |
+| 8x16                    | ---                      | 8x16 pixel (1bpp 16byte / 8x8が縦に2個) | MSX 16x16 SPRITE 等 |
+| 16x16 (Z-Swizzle)       | ---                      | 16x16 pixel (1bpp 32byte / 8x8が'Z'並びで4個) | MSX 漢字ROM |
+| 16x8                    | ---                      | 16x8 pixel (16byte) | ハイドライド3 MSX2版 全角フォント |
+| 16x16 (Linear)          | ---                      | 16x16 pixel (1bpp 32byte) | JIS規格16ドット漢字、PC-98・X68000フォント等 |
+| 12x12 (Packed)          | ---                      | 12x12 pixel (2行3バイトパッキング/18byte) | MSX-View 全角フォント (width 192推奨) |
+| 12x8  (Packed)          | ---                      | 12x8 pixel (2行3バイトパッキング/12byte) | MSX-View 半角フォント (width 192推奨) |
 
-※メガドライブ等のスプライトは縦優先（Column-major）でタイルが格納されるため、高さに合わせて `8x16` (2タイル高: 16x16等)、`8x24` (3タイル高: 24x24等)、`8x32` (4タイル高: 32x32等) を選択することで横に正しく連結表示されます。
+#### 2bit color / tile
+| ピクセル形式 |カラーパレット | 変換処理 | 表示用途 |
+|---|---|---|---|
+| 8x8   (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x8 pixel (1bpp 8byte x 2プレーン) | ファミコン BG/スプライト |
+| 8x16  (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 8x16 pixel (1bpp 16byte x 2プレーン / 8x8が縦に2個) | ファミコン 8x16スプライト |
+| 16x16 (Plane)           | GB_GRAY/GB_GREEN/GRAY4等 | 16x16 pixel (16line x2byte x 2プレーン) | --- |
+| 8x8   (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (1 line = 8bit x2) | ゲームボーイ BG/スプライト |
+| 8x16  (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (8x8が縦に2個) | ゲームボーイ 8x16スプライト |
+| 16x16 (Interleave)      | GB_GRAY/GB_GREEN/GRAY4等 | 1行2バイト インターリーブ (2x2タイル) | --- |
+
+#### 4bit color / tile
+| ピクセル形式 |カラーパレット | 変換処理 | 表示用途 |
+|---|---|---|---|
+| 8x8                     | MSX16/MIO/GRAY16等       | 4bpp 8x8 タイル (通常) | メガドライブ BG/スプライト等 |
+| 8x16                    | MSX16/MIO/GRAY16等       | 4bpp 8x16 (8x8が縦に2個) | メガドライブ 16x16スプライト等 |
+| 8x24                    | MSX16/MIO/GRAY16等       | 4bpp 8x24 (8x8が縦に3個) | メガドライブ 24x24スプライト等 |
+| 8x32                    | MSX16/MIO/GRAY16等       | 4bpp 8x32 (8x8が縦に4個) | メガドライブ 32x32スプライト等 |
+| 16x16 (Z-Swizzle)       | MSX16/MIO/GRAY16等       | 4bpp 16x16 (8x8が'Z'並びで4個) | --- |
+| 8x8   (Low-first)       | MSX16/MIO/GRAY16等       | 4bpp 8x8 (上位・下位4ビット逆順 / 32byte) | ゲームボーイアドバンス BG/OBJ等 |
+| 8x16  (Low-first)       | MSX16/MIO/GRAY16等       | 4bpp 8x16 (上位・下位4ビット逆順・8x8が縦に2個 / 64byte) | ゲームボーイアドバンス 8x16スプライト等 |
+| 16x16 (Low-first)       | MSX16/MIO/GRAY16等       | 4bpp 16x16 (上位・下位4ビット逆順・8x8が'Z'並びで4個 / 128byte) | ゲームボーイアドバンス 16x16スプライト等 |
+| 8x8   (Plane)           | MSX16/MIO/GRAY16等       | 8x8 pixel (1bpp 8byte x 4プレーン) | --- |
+| 8x16  (Plane)           | MSX16/MIO/GRAY16等       | 8x16 pixel (1bpp 16byte x 4プレーン / 8x8が縦に2個) | --- |
+| 16x16 (Plane)           | MSX16/MIO/GRAY16等       | 16x16 pixel (16line x2byte x 4プレーン) | --- |
+| 8x8   (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ | セガ・マスターシステム／ゲームギア BG/スプライト等 |
+| 8x16  (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ (8x8が縦に2個) | セガ・マスターシステム等 8x16スプライト |
+| 16x16 (Interleave)      | MSX16/MIO/GRAY16等       | 1行4バイト インターリーブ (2x2タイル) | --- |
+| 8x8   (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン | スーパーファミコン／PCエンジン BG |
+| 8x16  (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (8x8が縦に2個) | --- |
+| 16x16 (Interleave Plane)| MSX16/MIO/GRAY16等       | 1行2バイト インターリーブ x 2プレーン (Z順) | PCエンジン スプライト (16x16固定) |
+| 8x8                     | MSX256/GRAY256等         | 8bpp 8x8 タイル (通常) | ゲームボーイアドバンス 8bpp、SFC Mode 7等 |
+
+#### 8bit color / tile
+| ピクセル形式 |カラーパレット | 変換処理 | 表示用途 |
+|---|---|---|---|
+| 8x16                    | MSX256/GRAY256等         | 8bpp 8x16 (8x8が縦に2個) | GBA 8bpp 8x16スプライト等 |
+| 8x24                    | MSX256/GRAY256等         | 8bpp 8x24 (8x8が縦に3個) | --- |
+| 8x32                    | MSX256/GRAY256等         | 8bpp 8x32 (8x8が縦に4個) | GBA 8bpp 8x32スプライト等 |
+| 16x16 (Z-Swizzle)       | MSX256/GRAY256等         | 8bpp 16x16 (8x8が'Z'並びで4個) | ゲームボーイアドバンス 8bpp 16x16スプライト等 |
+| 8x8   (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン | スーパーファミコン 8bit (Mode 3/4) BG |
+| 8x16  (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (8x8が縦に2個) | --- |
+| 16x16 (Interleave Plane)| MSX256/GRAY256等         | 1行2バイト インターリーブ x 4プレーン (Z順) | --- |
+
+- ※ MSXやメガドライブ等のスプライトは縦優先でタイルが格納されるため、高さに合わせて `8x16` (8x8が縦に2個: 16x16スプライト等)、`8x24` (8x8が縦に3個: 24x24スプライト等)、`8x32` (8x8が縦に4個: 32x32スプライト等) を選択することで横に正しく連結表示されます。  
+- ※「上位・下位4ビット逆順」は、1バイト内に格納された2ピクセルのうち、下位4ビット（bit 3〜0）を左側のピクセルとして描画する形式（ゲームボーイアドバンス等）に対応します。  
+- ※「8x8が'Z'並びで4個」は、16x16ドットの領域を4つの8x8タイルに分割し、左上 → 右上 → 左下 → 右下の順（アルファベットのZを描く順序）で格納するデータ形式です。
 
 ### ビットマップ表示の表示更新について
 
@@ -239,6 +266,15 @@ Binary Editor BZ - 改造版 -
 当ソフトも継承元に準じて New BSD License で提供されます。
 
 ## 変更履歴
+
+- 2026/10/02 version 1.9.9.8d
+  - (表記統一) タイルパターンのメニュー名・UI表記を「タイル形式 / Tile Formats」に統一
+  - (命名改善) 4ビット（ハーフバイト）の並び逆順のもの（GBA等）を英語では「Low-first (LF)」、日本語では「上位・下位4ビット逆順」に整理
+  - (命名改善) ラインインターリーブはインターリーブと同じなので統一
+  - (改善) ステータスバー説明文字列（日本語・英語）を分かりやすく整理
+  - (誤字修正) （Width 392 → Width 384、Liner → Linear）
+  - (ドキュメント修正) 説明書のMSX2+ YJK画面モード（SCREEN 10/11/12）の記載逆転を修正、タイル形式対応表の漏れや誤り訂正、表記ルール統一
+  - ReadMeのHTMLファイルに目次を追加・CSSスタイルを調整
 
 - 2026/09/29 version 1.9.9.8c
   - (バグ修正)ビットマップビューのちらつき抑制
