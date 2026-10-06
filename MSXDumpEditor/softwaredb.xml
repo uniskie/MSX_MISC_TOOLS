@@ -1280,7 +1280,7 @@ The Database is located at https://romdb.vampier.net/
     <rom sha1="953ac0569d5e82e1cb6b60412e56534d73e4ca42" type="Mirrored" />
   </software>
   <software title="Boulder Dash" system="MSX" company="First Star Software" year="1986" country="GB" genmsxid="2697">
-    <rom sha1="14fae375b81c86f71e872adca792c23aafac66a0" type="Mirrored" status="GoodMSX missed" remark="Champion Edition JP" />
+    <rom sha1="14fae375b81c86f71e872adca792c23aafac66a0" type="Mirrored" status="GoodMSX" remark="COMPTIQ/MSX1 Only" />
     <rom sha1="6097fb7194b64148287e654870c98eb0e2b33850" type="Mirrored" />
     <rom sha1="9b4b4d93bae38876ce095c35993553f962d26fda" />
     <rom sha1="a294f54da2be26f79020674616af95a25428bcd3" />
@@ -15251,6 +15251,6 @@ The Database is located at https://romdb.vampier.net/
   <software title="The Black Bass" system="MSX" company="GAMU/HOT-B" year="1985" country="JP">
     <rom sha1="4ebe0d87f11cb669779b8ddbfcda631fc43e71f6" type="Mirrored" remark="TAKERU ROM" status="Author" />
   </software>
-<!-- Roms in this XML file: 8651 - Created on Wed Sep 09 2026 - 21:55:44
+<!-- Roms in this XML file: 8651 - Created on Tue Oct 06 2026 - 19:47:51
       Per platform: ColecoVision: 692 | MSX: 6556 | MSX Turbo-R: 11 | MSX2: 1377 | MSX2Plus: 4 | SVI: 11 -->
 </softwaredb>

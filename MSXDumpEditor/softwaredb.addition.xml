@@ -35,7 +35,7 @@
   </software>
 
   <software title="Boulder Dash" system="MSX" company="First Star Software" year="1986" country="GB" genmsxid="2697">
-    <rom sha1="14fae375b81c86f71e872adca792c23aafac66a0" type="Mirrored" status="GoodMSX missed" remark="Champion Edition JP" />
+    <rom sha1="14fae375b81c86f71e872adca792c23aafac66a0" type="Mirrored" status="GoodMSX" remark="COMPTIQ/MSX1 Only" />
   </software>
 
   <software title="The Black Bass" system="MSX" company="GAMU/HOT-B" year="1985" country="JP">
