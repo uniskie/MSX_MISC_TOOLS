@@ -266,3 +266,74 @@ options:
 加工・再配布自由です。
 ただし、一切の責任は持ちませんし、サポートもありません。
 利用者が全責任を負うものとします。
+
+---
+
+# 付録: MSX Z80 インテリジェント逆アセンブラ 
+
+msx_disasm.py
+
+## 概要
+
+`msx_disasm.py` は、`com2rom.py` からROM化のためのリロケーション・コード置換処理（SMCパッチやBDOS代替処理など）を削ぎ落として構造を簡略化したうえで、インテリジェントなフロー解析機能を引き継ぎ、**純粋な逆アセンブルに特化**させた汎用ツールです。
+
+単なるリニア（先頭から機械的）な逆アセンブルではなく、エントリポイントからの実行パスを追跡して `CODE`（プログラムコード）、`DATA`（静的データ）、`WORK`（変数・ワークエリア）を自動識別し、分岐先やメモリ参照先をラベル化したアセンブリソースコードを出力します。
+
+## 主な特徴
+
+- **多彩なファイルフォーマット対応**
+  - **MSX カートリッジROM**: 標準ROMおよび各種メガROMマッパーに対応。
+  - **MSX BASIC BLOAD (BSAVE) バイナリ**: 先頭7バイトのヘッダ（`0xFE`, 開始アドレス, 終了アドレス, 実行アドレス）を解析し、実データとエントリポイントを自動抽出。
+  - **MSX-DOS COM ファイル**: `0100H` 開始の平坦な実行バイナリに対応。
+  - **フラットバイナリ (RAMイメージ等)**: 指定アドレス配置のバイナリをそのまま解析。
+- **メガROMマッパー対応**
+  - `KONAMI`, `KONAMI-SCC`, `ASCII8`, `ASCII16`, `NORMAL` に対応。バンクごとの分割・ORG配置を行います。
+- **ROMヘッダ自動認識 & エントリポイント自動トレース**
+  - ROMヘッダ（`"AB"`）を自動検出し、INIT（初期化ルーチン）、STATEMENT、DEVICE、TEXT の各エントリポイントから実行フローを自動追跡します。
+  - 逆アセンブルリスト上でも `ROM_HEADER:` として構造化出力します。
+- **WORKエリアのアクセスサイズ自動判定**
+  - 命令によるアクセス方法（1バイト単位か2バイト単位か）を追跡し、EQU定義部に注記（`; 1 byte`, `; 2 bytes (word)`）を出力します。
+- **Z80未定義命令 (Undocumented Opcodes) 対応**
+  - `SLL` 命令、IX/IYの8ビットレジスタ操作（`IXH`, `IXL`, `IYH`, `IYL` のLD/演算）、DDCB/FDCB複合命令、EDプレフィックス未定義命令（`IN (C)`, `OUT (C), 0`, 未定義NEG/RETI/RETN等）をデコードし、逆アセンブルリストに `; (undocumented)` 注記を付与します。
+- **msx_symbols.py 連動**
+  - MSXの公式BIOSルーチン、システムワークエリア、フックのアドレスを自動解決して標準シンボル名で出力します。
+
+## 使用方法
+
+```bash
+# 基本的な使用例 (ROMファイル)
+python msx_disasm.py game.rom -o game.asm
+
+# メガROM (ASCII 8KBマッパー) の逆アセンブル
+python msx_disasm.py mega.rom -m ASCII8 -o mega.asm
+
+# BLOADバイナリの逆アセンブル (自動判別、または -bload で強制)
+python msx_disasm.py graphic.bin -bload -o graphic.asm
+
+# MSX-DOS COMファイルの逆アセンブル (-com で強制)
+python msx_disasm.py tool.com -com -o tool.asm
+```
+
+## コマンドライン引数
+
+```
+usage: msx_disasm.py [file_pos] [-i INPUT] [-o OUTPUT] [-a ADDRESS] [-h HEADER]
+                     [-m {NORMAL,KONAMI,KONAMI-SCC,ASCII8,ASCII16,NONE}]
+                     [-com] [-bload] [--help]
+
+MSX Z80 Intelligent Disassembler (msx_disasm)
+
+positional arguments:
+  file_pos              入力ファイルパス
+
+options:
+  -i, --input INPUT     入力ファイルパス
+  -o, --output OUTPUT   出力アセンブリファイルパス (省略時: <入力名>.asm)
+  -a, --address ADDRESS ROM配置開始アドレス (16進数、デフォルト: 4000)
+  -h, --header HEADER   ROMヘッダアドレス (16進数、省略時は -a と同一)
+  -m, --mapper {NORMAL,KONAMI,KONAMI-SCC,ASCII8,ASCII16,NONE}
+                        マッパー種別 (デフォルト: NORMAL)
+  -com, --com           MSX-DOS COM形式として強制処理 (ORG 0100H)
+  -bload, --bload       MSX BASIC BLOAD形式として強制処理 (7バイトヘッダ自動解析)
+  --help                ヘルプを表示
+```
