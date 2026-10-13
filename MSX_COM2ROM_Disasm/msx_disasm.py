@@ -82,6 +82,46 @@ MSX_HOOK_ADDRS = {
     0xFD9F: "H_TIMI", 0xFDA0: "H_TIMI", 0xFDA1: "H_TIMI",
 }
 
+# -------------------------------------------------------------
+# 引数としてメモリアドレスを取る BIOS / DISK / フック一覧
+# -------------------------------------------------------------
+BIOS_MEM_ARGS = {
+    # VRAM / VDP 転送系
+    0x005C: ["HL"],        # LDIRVM (HL = 転送元データアドレス)
+    0x0059: ["DE"],        # LDIRMV (DE = 転送先バッファアドレス)
+    0x005F: ["HL"],        # WRTTVV (HL = 文字列アドレス)
+    # カセットテープ
+    0x00E1: ["HL"],        # TAPIN  (HL = 読込バッファ)
+    0x00ED: ["HL"],        # TAPOUT (HL = 書込バッファ)
+    # PHYDIO（物理ディスクセクタI/O）
+    0x0144: ["HL"],        # PHYDIO (MAIN ROM 未公開BIOSエントリ)
+    0xFFA7: ["HL"],        # H_PHYD (PHYDIO フック直接コール)
+    0x4010: ["HL"],        # DISK-ROM PHYDIO ジャンプテーブル先頭
+    # MSX2 SUB-ROM (パレット / 描画)
+    0x014D: ["HL"],        # SETPLT (HL = パレットデータ配列)
+    0x0150: ["HL"],        # GETPLT (HL = 格納バッファ)
+    0x0186: ["HL"],        # NVBGET (HL = 格納バッファ)
+    0x0189: ["HL"],        # NVBSET (HL = 転送元データ)
+    0x008D: ["HL"],        # GRPPRT (HL = 描画文字列バッファ)
+}
+
+# BDOSコールエントリ（MSX-DOS 0005H および Disk BASIC 0F37DH）
+BDOS_ENTRY_ADDRS = {0x0005, 0xF37D}
+
+# BDOSファンクション別の引数レジスタ定義
+BDOS_ARG_REGS = {
+    # DE のみをアドレス引数とするファンクション (DOS1 / DOS2共通)
+    0x09: ["DE"], 0x0A: ["DE"],
+    0x0F: ["DE"], 0x10: ["DE"], 0x11: ["DE"], 0x12: ["DE"],
+    0x13: ["DE"], 0x14: ["DE"], 0x15: ["DE"], 0x16: ["DE"], 0x17: ["DE"],
+    0x1A: ["DE"],
+    0x21: ["DE"], 0x22: ["DE"], 0x23: ["DE"], 0x24: ["DE"], 0x27: ["DE"], 0x28: ["DE"],
+    0x43: ["DE"], 0x48: ["DE"], 0x49: ["DE"],
+    0x6B: ["DE"], 0x6C: ["DE"],
+    # HL と DE の双方をアドレス引数とするファンクション (DOS2 環境変数等)
+    0x4B: ["HL", "DE"],  # _GENV (HL=名前文字列, DE=取得バッファ)
+    0x4C: ["HL", "DE"],  # _SENV (HL=名前文字列, DE=値文字列)
+}
 
 # =====================================================================
 # Z80 命令デコーダ & 逆アセンブラ
@@ -182,6 +222,7 @@ class Z80InstructionDecoder:
             pfx = "ix" if b0 == 0xDD else "iy"
             reg8_idx = REG8_IX if b0 == 0xDD else REG8_IY
             b1 = self.get_b(pc + 1)
+
             if b1 == 0x21:
                 target = self.get_w(pc + 2)
                 return 4, [], f"ld {pfx}, {lbl(target)}", False, None, 0, target
@@ -194,11 +235,18 @@ class Z80InstructionDecoder:
             if b1 in [0x09, 0x19, 0x29, 0x39]:
                 rp = {0x09: "bc", 0x19: "de", 0x29: pfx, 0x39: "sp"}[b1]
                 return 2, [], f"add {pfx}, {rp}", False, None, 0, None
+            if b1 in [0x23, 0x2B]:
+                op = "inc" if b1 == 0x23 else "dec"
+                return 2, [], f"{op} {pfx}", False, None, 0, None
             if b1 == 0xE9:
                 return 2, [], f"jp ({pfx})", True, None, 0, None
             if b1 in [0xE1, 0xE5]:
                 op = "pop" if b1 == 0xE1 else "push"
                 return 2, [], f"{op} {pfx}", False, None, 0, None
+            if b1 == 0xE3:
+                return 2, [], f"ex (sp), {pfx}", False, None, 0, None
+            if b1 == 0xF9:
+                return 2, [], f"ld sp, {pfx}", False, None, 0, None
 
             if b1 == 0xCB:
                 d = signed_byte(self.get_b(pc + 2))
@@ -388,6 +436,7 @@ class Z80InstructionDecoder:
             0x0B: "dec bc", 0x1B: "dec de", 0x2B: "dec hl", 0x3B: "dec sp",
             0x04: "inc b", 0x0C: "inc c", 0x14: "inc d", 0x1C: "inc e", 0x24: "inc h", 0x2C: "inc l", 0x3C: "inc a",
             0x05: "dec b", 0x0D: "dec c", 0x15: "dec d", 0x1D: "dec e", 0x25: "dec h", 0x2D: "dec l", 0x3D: "dec a",
+            0x34: "inc (hl)", 0x35: "dec (hl)",
             0x07: "rlca", 0x0F: "rrca", 0x17: "rla", 0x1F: "rra", 0x27: "daa", 0x2F: "cpl",
             0x37: "scf", 0x3F: "ccf", 0xD9: "exx", 0xE3: "ex (sp), hl", 0xEB: "ex de, hl",
             0xF3: "di", 0xFB: "ei", 0xF9: "ld sp, hl", 0x08: "ex af, af'",
@@ -434,12 +483,13 @@ class ROMBank:
                 self.attr[idx] = 'CODE'
 
     def trace_flow(self, entry_points):
-        """シミュレーション実行パスのトレース"""
         visited = set()
         stack = list(entry_points)
-        reg_tracker = {'HL': None, 'DE': None, 'BC': None, 'IX': None, 'IY': None, 'A': None}
-
-        # 最近実行した命令の履歴（直前最大10命令）
+        # 8ビット/16ビットレジスタの追跡バッファ
+        reg_tracker = {
+            'HL': None, 'DE': None, 'BC': None, 
+            'IX': None, 'IY': None, 'A': None, 'C': None
+        }
         recent_history = []
 
         while stack:
@@ -453,18 +503,51 @@ class ROMBank:
             opcode = self.get_byte(pc)
 
             # -------------------------------------------------------------
-            # 1. 16ビットレジスタ即値ロード (LD rp, nn) の追跡
+            # レジスタ即値ロードの追跡
             # -------------------------------------------------------------
+            # 16ビット即値ロード (LD rp, nn)
             if imm16 is not None:
                 if opcode in [0x01, 0x11, 0x21]:
                     rname = {0x01: "BC", 0x11: "DE", 0x21: "HL"}[opcode]
                     reg_tracker[rname] = (pc, imm16)
+                    if opcode == 0x01:
+                        # LD BC, nn の場合、下位バイトは C レジスタ
+                        reg_tracker['C'] = (pc, imm16 & 0xFF)
                 elif opcode in [0xDD, 0xFD]:
                     rname = "IX" if opcode == 0xDD else "IY"
                     reg_tracker[rname] = (pc, imm16)
 
+            # 8ビット即値ロード (LD C, n / LD A, n)
+            if opcode == 0x0E:  # ld c, n
+                n = self.get_byte(pc + 1)
+                reg_tracker['C'] = (pc, n)
+            elif opcode == 0x3E:  # ld a, n
+                n = self.get_byte(pc + 1)
+                reg_tracker['A'] = (pc, n)
+
             # -------------------------------------------------------------
-            # 2. MSXフック（H_TIMI等）へのハンドラ代入の検出
+            # システムコール・フック引数の検出（全経路）
+            # -------------------------------------------------------------
+            # 経路 A: RST 30H (CALSLT / CALLF インタースロットコール)
+            if opcode == 0xF7:
+                rst_target = self.get_w(pc + 2)
+                self._check_and_register_sys_args(rst_target, reg_tracker)
+
+            # 経路 B: CALSLT (001CH) 呼び出し時 (IX レジスタ経由)
+            if branch_targets and branch_targets[0] == 0x001C:
+                if reg_tracker.get('IX'):
+                    _, target_ix = reg_tracker['IX']
+                    self._check_and_register_sys_args(target_ix, reg_tracker)
+
+            # 経路 C: 通常の CALL / JP 分岐時
+            for tgt in branch_targets:
+                self._check_and_register_sys_args(tgt, reg_tracker)
+                self.register_symbol(tgt)
+                if self.is_in_bank(tgt):
+                    stack.append(tgt)
+
+            # -------------------------------------------------------------
+            # MSXフック（H_TIMI等）へのハンドラ代入の検出
             #    ld (0xFDA0), hl や ld (0xFD9B), hl などをフック登録と認識
             # -------------------------------------------------------------
             if access_addr in MSX_HOOK_ADDRS:
@@ -483,14 +566,14 @@ class ROMBank:
                             stack.append(handler_addr)
 
             # -------------------------------------------------------------
-            # 3. 間接ジャンプ JP (HL) / JP (IX) のテーブル検出
+            # 間接ジャンプ JP (HL) / JP (IX) のテーブル検出
             #    パターン: ld hl, TABLE / add hl, de / ld e, (hl) / inc hl / ld d, (hl) / ex de, hl / jp (hl)
             # -------------------------------------------------------------
             if opcode == 0xE9:  # jp (hl)
                 self._detect_and_expand_jump_table(recent_history, stack)
 
             # -------------------------------------------------------------
-            # 4. 間接参照 (HL) 等によるポインタ確定
+            # 間接参照 (HL) 等によるポインタ確定
             # -------------------------------------------------------------
             is_ind_hl = (0x40 <= opcode <= 0x7F and (opcode & 7) == 6 and opcode != 0x76) or \
                         (0x80 <= opcode <= 0xBF and (opcode & 7) == 6)
@@ -531,7 +614,7 @@ class ROMBank:
                 stack.append(pc + length)
 
     def _detect_and_expand_jump_table(self, history, stack):
-        """直前の命令履歴からテーブルアドレスを特定し、エントリポイントを展開する"""
+        # 直前の命令履歴からテーブルアドレスを特定し、エントリポイントを展開する
         table_base = None
         # 履歴を遡り、直近で ld hl, nn された nn を取得
         for h_pc, h_op, h_imm in reversed(history):
@@ -539,30 +622,57 @@ class ROMBank:
                 table_base = h_imm
                 break
 
-        if table_base is not None and self.is_in_bank(table_base):
-            self.logger(f"[+] ジャンプテーブルを検出: BASE={format_asm_hex(table_base)}")
-            self.register_symbol(table_base)
+        if table_base is None or not self.is_in_bank(table_base):
+            return
 
-            # テーブルからワード（ポインタ）を連続読み取り
-            cur_ptr = table_base
-            valid_count = 0
-            while self.is_in_bank(cur_ptr):
-                tgt_addr = self.get_word(cur_ptr)
-                # ポインタ先がバンク内の有効なアドレスか判定
-                if self.is_in_bank(tgt_addr):
-                    first_byte = self.get_byte(tgt_addr)
-                    # 飛び先の先頭が 0x00(NOP) または 0xFF で埋まっている場合はテーブル終了と判定
-                    if first_byte == 0xFF and self.get_byte(tgt_addr + 1) == 0xFF:
-                        break
-                    self.logger(f"    - テーブル分岐先回収: {format_asm_hex(tgt_addr)} (from {format_asm_hex(cur_ptr)})")
-                    self.register_symbol(tgt_addr)
-                    stack.append(tgt_addr)
-                    cur_ptr += 2
-                    valid_count += 1
-                    if valid_count >= 32:  # 無限ループ防止リミット
-                        break
-                else:
+        self.register_symbol(table_base)
+
+        cur_ptr = table_base
+        invalid_consecutive = 0
+        collected_targets = []
+
+        while self.is_in_bank(cur_ptr):
+            # テーブル開始位置直後で、既存ラベルまたは確定したCODE領域に達したら終了
+            if cur_ptr > table_base:
+                if cur_ptr in self.global_labels:
                     break
+                if self.attr[cur_ptr - self.base_addr] == 'CODE':
+                    break
+
+            # 安全のための最大エントリ数リミット (8ビットインデックス上限 = 256エントリ = 512バイト)
+            # ※ 厳密にしたければ、ポインタアドレス計算処理のANDマスク命令や
+            #    HLへの加算値について、2倍する前の元の値を格納しているレジスタを見る必要がある。
+            if (cur_ptr - table_base) >= 512:
+                break
+
+            tgt_addr = self.get_word(cur_ptr)
+            is_valid = self.is_in_bank(tgt_addr) and tgt_addr not in [0x0000, 0xFFFF]
+
+            if is_valid:
+                invalid_consecutive = 0
+                self.register_symbol(tgt_addr)
+                stack.append(tgt_addr)
+                collected_targets.append(tgt_addr)
+            else:
+                invalid_consecutive += 1
+                # 0000H, FFFFH, バンク外などの無効値が2回連続したらテーブル終了
+                if invalid_consecutive >= 2:
+                    break
+
+            cur_ptr += 2
+
+        # まとめて1〜2行で範囲ログを出力
+        if collected_targets:
+            tbl_end = cur_ptr - 1
+            min_tgt = min(collected_targets)
+            max_tgt = max(collected_targets)
+            self.logger(
+                f"[+] ジャンプテーブルを自動検出: {format_asm_hex(table_base)} - {format_asm_hex(tbl_end)} "
+                f"({len(collected_targets)} エントリ)"
+            )
+            self.logger(
+                f"    - 分岐先範囲: {format_asm_hex(min_tgt)} - {format_asm_hex(max_tgt)}"
+            )
 
     def run_gap_sweep(self):
         """
@@ -624,13 +734,44 @@ class ROMBank:
                 else:
                     self.global_labels[addr] = f"EXT_{addr:04X}H"
 
+    def _check_and_register_sys_args(self, target_addr, reg_tracker):
+        # 通常の BIOS / PHYDIO / SUB-ROM / H_PHYD 呼び出し
+        if target_addr in BIOS_MEM_ARGS:
+            req_regs = BIOS_MEM_ARGS[target_addr]
+            for rname in req_regs:
+                if reg_tracker.get(rname):
+                    _, arg_addr = reg_tracker[rname]
+                    if self.is_in_bank(arg_addr):
+                        self.logger(
+                            f"[+] システム引数参照を検出: {format_asm_hex(target_addr)} 用 "
+                            f"{rname}={format_asm_hex(arg_addr)}"
+                        )
+                        self.register_symbol(arg_addr)
+
+        # BDOSコール (MSX-DOS 0005H または Disk BASIC 0F37DH)
+        elif target_addr in BDOS_ENTRY_ADDRS:
+            func_no = reg_tracker.get("C", (None, None))[1]
+            if func_no in BDOS_ARG_REGS:
+                req_regs = BDOS_ARG_REGS[func_no]
+                entry_name = "0005H" if target_addr == 0x0005 else "F37DH(H_BDOS)"
+                for rname in req_regs:
+                    if reg_tracker.get(rname):
+                        _, arg_addr = reg_tracker[rname]
+                        if self.is_in_bank(arg_addr):
+                            self.logger(
+                                f"[+] BDOS Fn {format_asm_hex(func_no, 2)} ({entry_name}) 引数参照を検出: "
+                                f"{rname}={format_asm_hex(arg_addr)}"
+                            )
+                            self.register_symbol(arg_addr)
+
 
 # =====================================================================
 # メインクラス
 # =====================================================================
 class MsxDisassembler:
     def __init__(self, input_file, output_file, base_addr=0x4000, header_addr=None, 
-                 mapper="NORMAL", format_override=None, extra_entries=None, enable_gap_scan=False):
+                 mapper="NORMAL", format_override=None, extra_entries=None, 
+                 extra_tables=None, enable_gap_scan=False):
         self.input_file = input_file
         self.output_file = output_file
         self.log_file = os.path.splitext(output_file)[0] + ".log"
@@ -639,6 +780,7 @@ class MsxDisassembler:
         self.mapper = mapper.upper()
         self.format_override = format_override
         self.extra_entries = extra_entries or []
+        self.extra_tables = extra_tables or []
         self.enable_gap_scan = enable_gap_scan  # オプション保持
 
         self.global_labels = {}
@@ -776,11 +918,39 @@ class MsxDisassembler:
             elif not is_rom_header:
                 entries.append(bank.base_addr)
 
-            # ユーザー指定の追加エントリポイント
+            # ユーザー指定の追加エントリポイント (-e)
             for extra in self.extra_entries:
                 if bank.is_in_bank(extra):
                     entries.append(extra)
                     self.global_labels[extra] = f"ENTRY_{extra:04X}H"
+
+            # ユーザー指定の手動ジャンプテーブル (-t) の展開
+            for t_base, t_count in self.extra_tables:
+                if bank.is_in_bank(t_base):
+                    bank.register_symbol(t_base)
+                    cur_ptr = t_base
+                    manual_targets = []
+                    for _ in range(t_count):
+                        if not bank.is_in_bank(cur_ptr):
+                            break
+                        tgt = bank.get_word(cur_ptr)
+                        if bank.is_in_bank(tgt) and tgt not in [0x0000, 0xFFFF]:
+                            bank.register_symbol(tgt)
+                            entries.append(tgt)
+                            manual_targets.append(tgt)
+                        cur_ptr += 2
+
+                    if manual_targets:
+                        tbl_end = cur_ptr - 1
+                        min_tgt = min(manual_targets)
+                        max_tgt = max(manual_targets)
+                        self.log(
+                            f"[+] 手動指定ジャンプテーブルを展開: {format_asm_hex(t_base)} - {format_asm_hex(tbl_end)} "
+                            f"({len(manual_targets)}/{t_count} エントリ回収)"
+                        )
+                        self.log(
+                            f"    - 分岐先範囲: {format_asm_hex(min_tgt)} - {format_asm_hex(max_tgt)}"
+                        )
 
             if entries:
                 bank.trace_flow(entries)
@@ -953,6 +1123,7 @@ def parse_arguments():
     parser.add_argument("-h", "--header", default=None, help="ROMヘッダアドレス")
     parser.add_argument("-m", "--mapper", default="NORMAL", help="マッパー種別")
     parser.add_argument("-e", "--entry", action="append", default=[], help="追加エントリポイント (16進数、複数指定可)")
+    parser.add_argument("-t", "--table", action="append", default=[], help="ジャンプテーブル手動指定 (書式: ADDR:COUNT 例: -t 7859H:9)")
     parser.add_argument("--gap-scan", action="store_true", help="CODEブロック間の未参照領域を追加走査する")
     parser.add_argument("-c", "--com", action="store_true", help="COM形式指定")
     parser.add_argument("-b", "--bload", action="store_true", help="BLOAD形式指定")
@@ -969,6 +1140,17 @@ def parse_arguments():
     base_addr = parse_hex_val(args.address)
     header_addr = parse_hex_val(args.header) if args.header else None
     extra_entries = [parse_hex_val(e) for e in args.entry if parse_hex_val(e) is not None]
+    extra_tables = []
+    for t_str in args.table:
+        if ":" in t_str:
+            a_part, c_part = t_str.split(":", 1)
+            t_addr = parse_hex_val(a_part)
+            try:
+                t_count = int(c_part, 16) if c_part.lower().endswith("h") else int(c_part, 10)
+                if t_addr is not None and t_count > 0:
+                    extra_tables.append((t_addr, t_count))
+            except ValueError:
+                pass
 
     mapper_type = args.mapper.upper()
     format_override = None
@@ -982,12 +1164,12 @@ def parse_arguments():
         mapper_type = "NORMAL"
 
     return (input_path, output_path, base_addr, header_addr, 
-            mapper_type, format_override, extra_entries, args.gap_scan)
+            mapper_type, format_override, extra_entries, extra_tables, args.gap_scan)
 
 
 if __name__ == "__main__":
     (in_f, out_f, base_a, hdr_a, 
-     map_t, fmt_o, extra_e, gap_scan_opt) = parse_arguments()
+     map_t, fmt_o, extra_e, extra_t, gap_scan_opt) = parse_arguments()
 
     disasm = MsxDisassembler(
         in_f, out_f, 
@@ -996,6 +1178,7 @@ if __name__ == "__main__":
         mapper=map_t, 
         format_override=fmt_o, 
         extra_entries=extra_e,
+        extra_tables=extra_t,
         enable_gap_scan=gap_scan_opt
     )
     disasm.run()
