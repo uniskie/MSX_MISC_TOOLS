@@ -401,6 +401,7 @@ BDOS_SUB_UNSUPPORTED:
 # =====================================================================
 
 def center_text(text, cols):
+    """全角文字の幅を考慮してテキストを指定桁数の中央に配置する"""
     return text.center(cols + len(text) - len(text.encode('cp932')))
 
 def format_asm_hex(val, width=4):
@@ -463,6 +464,7 @@ def get_standard_len(opcode):
 class Z80Logger:
     """コンソールへのログ表示およびログファイルへの保存を管理するクラス"""
     def __init__(self, log_filepath):
+        """ロガーを初期化し、ログファイルを新規作成する"""
         self.log_filepath = log_filepath
         try:
             with open(self.log_filepath, 'w', encoding='utf-8') as f:
@@ -471,6 +473,7 @@ class Z80Logger:
             print("[-] エラー: ログファイルの初期化に失敗しました。")
 
     def log(self, message):
+        """コンソールにログを表示し、ログファイルへ追記する"""
         print(message)
         try:
             with open(self.log_filepath, 'a', encoding='utf-8') as f:
@@ -482,6 +485,7 @@ class Z80Logger:
 class Z80Config:
     """アドレス設定やファイルパスなどの動作環境パラメータを管理するクラス"""
     def __init__(self):
+        """設定パラメータをデフォルト値で初期化する"""
         self.input_file = INPUT_PATH
         self.output_asm = OUTPUT_ASM_PATH
         self.output_log = OUTPUT_LOG_PATH
@@ -496,6 +500,7 @@ class Z80Config:
 class Z80MemoryImage:
     """仮想Z80メモリ空間におけるバイナリデータと、アドレスごとの属性情報を保持・管理するクラス"""
     def __init__(self, config: Z80Config, logger: Z80Logger):
+        """64KBの仮想メモリバッファおよび属性マップを初期化する"""
         self.config = config
         self.logger = logger
         self.raw_bytes = bytearray(65536)
@@ -609,6 +614,7 @@ class Z80MemoryImage:
 class SectionRange:
     """CODEやWORKなど、連続するメモリセグメントの開始と終了アドレスを管理する構造体"""
     def __init__(self, start_addr, end_addr, attr_type):
+        """セクションの範囲と属性タイプを初期化する"""
         self.start_addr = start_addr
         self.end_addr = end_addr
         self.attr_type = attr_type
@@ -617,6 +623,7 @@ class SectionRange:
 class Z80AddressRecord:
     """リロケーション（再配置）前後のアドレス対応マップと、シンボルの属性情報を保持するクラス"""
     def __init__(self, old_address, label_name, new_address=0, is_code=False, is_work=False, is_bios=False):
+        """アドレスレコードの属性情報および再配置先アドレスを初期化する"""
         self.old_address = old_address
         self.label_name = label_name
         self.new_address = new_address
@@ -629,6 +636,7 @@ class Z80AddressRecord:
 class Z80AddressRegistry:
     """ラベル情報の登録・検索、およびリロケーション時のアドレス変換を一括で管理するクラス"""
     def __init__(self, config: Z80Config, mem: Z80MemoryImage, logger: Z80Logger):
+        """アドレスレジストリを初期化し、システム共通シンボルを先行登録する"""
         self.config = config
         self.mem = mem
         self.logger = logger
@@ -961,20 +969,25 @@ class Z80AddressRegistry:
 
 
 def get_reg8_sss(opcode):
+    """オペコードの下位3ビットから転送元8ビットレジスタ名を取得する"""
     return {0:"B", 1:"C", 2:"D", 3:"E", 4:"H", 5:"L", 7:"A"}.get(opcode & 0x7, "")
 
 def get_reg8_ddd(opcode):
+    """オペコードのビット5-3から転送先8ビットレジスタ名を取得する"""
     return get_reg8_sss(opcode >> 3)
 
 def get_reg16_rp(opcode):
+    """オペコードのビット5-4から16ビットレジスタペア名(BC, DE, HL, SP)を取得する"""
     return {0x00:"BC", 0x10:"DE", 0x20:"HL", 0x30:"SP"}.get(opcode & 0x30, "")
 
 def get_reg16_af(opcode):
+    """オペコードのビット5-4から16ビットレジスタペア名(BC, DE, HL, AF)を取得する"""
     return {0x00:"B", 0x10:"DE", 0x20:"HL", 0x30:"AF"}.get(opcode & 0x30, "")
 
 class Z80OpcodeClassifier:
     """Z80命令をデコードし、各命令の構成（バイト長、分岐ターゲット、アドレッシング特性）を判別する解析クラス"""
     def __init__(self, mem: Z80MemoryImage, db: Z80AddressRegistry):
+        """オペコード分類器のテーブル定義を初期化する"""
         self.mem = mem
         self.db = db
 
@@ -1130,6 +1143,7 @@ class Z80OpcodeClassifier:
 class Z80FlowAnalyser:
     """CPUシミュレーションによりプログラムの実行経路を解析し、属性や自己書き換えコード（SMC）を検出するクラス"""
     def __init__(self, config: Z80Config, mem: Z80MemoryImage):
+        """フロー解析用の内部バッファおよびトラッカーを初期化する"""
         self.config = config
         self.mem = mem
         self.db = None
@@ -1193,7 +1207,7 @@ class Z80FlowAnalyser:
         self.analyze_flow_from_entries([self.config.old_start], db, logger, reset_sections=True)
 
     def _get_register_state_key(self, regs):
-        # ポインタ追跡に関わる主要レジスタの現在値を抽出してタプル化
+        """ポインタ追跡に関わる主要レジスタの現在値を抽出してタプル化する"""
         return (
             regs['HL']['source_pc'],
             regs['DE']['source_pc'],
@@ -1358,6 +1372,7 @@ class Z80FlowAnalyser:
         return False
     
     def _set_reg8_val(self, reg8, val, pc=None):
+        """8ビットレジスタの追跡値を更新し、対応する16ビットレジスタの値にも反映する"""
         self.register_tracker[reg8]['val'] = val
         if pc is not None:
             self.register_tracker[reg8]['source_val'] = val
@@ -1383,6 +1398,7 @@ class Z80FlowAnalyser:
                 reg16t['val'] = (val16 & 0xFF00) | val
 
     def _set_reg16_val(self, reg16, val, pc=None):
+        """16ビットレジスタの追跡値を更新し、対応する上位/下位8ビットレジスタにも反映する"""
         self.register_tracker[reg16]['val'] = val
         if pc is not None:
             self.register_tracker[reg16]['source_val'] = val
@@ -2085,6 +2101,7 @@ class Z80FlowAnalyser:
                 self.mem.mark_attribute(ptr_val, 'WORK' if reg_name in ["DE", "BC"] else 'DATA')
 
     def _check_and_register_ram(self, addr):
+        """アクセス対象アドレスがRAM領域内であれば最大使用アドレスを更新する"""
         if addr < SYSYTEM_WORK:
             if addr > self.max_existing_ram:
                 self.max_existing_ram = addr
@@ -2114,6 +2131,7 @@ class Z80FlowAnalyser:
 class Z80SmartRelocator:
     """逆アセンブル前に命令を一巡走査して、必要なすべての参照先ラベルを仮登録するクラス"""
     def __init__(self, config: Z80Config, mem: Z80MemoryImage, db: Z80AddressRegistry, analyser: Z80FlowAnalyser):
+        """スマートリロケータの解析環境参照を初期化する"""
         self.config = config
         self.mem = mem
         self.db = db
@@ -2164,6 +2182,7 @@ class Z80SmartRelocator:
 class Z80Disassembler:
     """Z80の機械語データを、対応するアセンブリ言語のテキスト表現に変換するデコーダクラス"""
     def __init__(self, mem: Z80MemoryImage, db: Z80AddressRegistry, analyser: Z80FlowAnalyser, logger: Z80Logger):
+        """逆アセンブラのレジスタマップおよび演算子テーブルを初期化する"""
         self.mem = mem
         self.db = db
         self.analyser = analyser
@@ -2417,6 +2436,7 @@ class Z80Disassembler:
         return self._fallback_dissolve(pc, length)
 
     def relocator_translate(self, addr, is_code=False, is_bios=False):
+        """アドレスを再配置後のアドレスへ変換する"""
         return self.db.translate_address(addr, is_code=is_code, is_bios=is_bios)
 
     def _fallback_dissolve(self, pc, length):
@@ -2666,6 +2686,7 @@ class Z80Disassembler:
 class TransferBlock:
     """初期化用にROMからRAMに一括転送するデータの情報を保持する構造体"""
     def __init__(self, src_label, dest_label, size_val):
+        """転送ブロック情報を初期化する"""
         self.src_label = src_label
         self.dest_label = dest_label
         self.size_val = size_val
@@ -2674,6 +2695,7 @@ class TransferBlock:
 class Z80OutputGenerator:
     """結果のアセンブリファイルを書き出す出力生成クラス"""
     def __init__(self, config: Z80Config, mem: Z80MemoryImage, db: Z80AddressRegistry, analyser: Z80FlowAnalyser, decoder: Z80Disassembler, logger: Z80Logger):
+        """アセンブリ出力生成器を初期化する"""
         self.config = config
         self.mem = mem
         self.db = db
@@ -2682,6 +2704,7 @@ class Z80OutputGenerator:
         self.analyser = analyser
 
     def write_assembly_file(self):
+        """解析結果に基づき、再配置されたアセンブリソースコードファイルを生成・出力する"""
         self.logger.log(f"[*] アセンブリコードをASMファイル '{self.config.output_asm}' へ出力中...")
         
         transfer_blocks = []
@@ -2897,6 +2920,7 @@ class Z80OutputGenerator:
             out.write("    END\n")
 
     def _write_db_sequence(self, pc, out):
+        """非コード領域の連続するバイト列をDB疑似命令形式で書き出す"""
         db_bytes = []
         temp_pc = pc
         while temp_pc < self.config.old_end:
@@ -2919,7 +2943,9 @@ class Z80OutputGenerator:
 
 
 class MsxComToRomRelocator:
+    """COMファイルをMSX用ROMバイナリ形式にリロケート・逆アセンブルするメイン実行クラス"""
     def __init__(self):
+        """各解析・生成モジュールのインスタンスを生成して初期化する"""
         self.config = Z80Config()
         self.logger = Z80Logger(self.config.output_log)
         self.mem = Z80MemoryImage(self.config, self.logger)
@@ -2932,6 +2958,7 @@ class MsxComToRomRelocator:
         self.generator.analyser = self.analyser
 
     def execute(self):
+        """リロケーションおよび逆アセンブルの全解析パイプラインを実行する"""
         global COPY_CODE_TO_RAM
         if not self.mem.load_file():
             return
