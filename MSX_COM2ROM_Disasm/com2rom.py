@@ -1083,7 +1083,7 @@ class Z80OpcodeClassifier:
         """EDプレフィックス（拡張仕様命令）におけるアドレッシングと命令長判定を行う。"""
         sub_op = self.mem.get_byte(pc + 1)
         # LD (nn), rp / LD rp, (nn) 形式の16ビットレジスタ対とメモリ間の間接ロード命令は4バイト構成
-        if sub_op in [0x43, 0x53, 0x73, 0x4B, 0x5B, 0x7B]:
+        if sub_op in [0x43, 0x53, 0x63, 0x73, 0x4B, 0x5B, 0x6B, 0x7B]:
             target = self.mem.get_word(pc + 2)
             return 4, target, "ED_LD"
         # その他の命令（ブロック転送 LDI/LDIR, I/OポートC間接, 16ビット加減算等）はプレフィックス含め2バイト構成
@@ -1113,7 +1113,7 @@ class Z80OpcodeClassifier:
 
         # Z80命令表における「(HL)」指定箇所（レジスタフィールド 110b）の有無を特定する。
         # ビット5-3（転送先）またはビット2-0（転送元）が 110b である場合、ディスプレースメント付き間接参照（IX+d/IY+d）となる。
-        is_indirect_hl = ((op >> 3) & 7) == 6 or (op & 7) == 6
+        is_indirect_hl = (0x40 <= op <= 0xBF and (((op >> 3) & 7) == 6 or (op & 7) == 6))
 
         # インデックス相対間接参照 (IX+d / IY+d) を伴う演算・転送命令の解析
         if op in [0x34, 0x35, 0x36] or is_indirect_hl:
@@ -1400,8 +1400,8 @@ class Z80FlowAnalyser:
         self.register_tracker[reg8h]['val'] = val >> 8
         self.register_tracker[reg8l]['val'] = val & 0xFF
         if pc is not None:
-            self.register_tracker[reg8h]['source_val'] = val
-            self.register_tracker[reg8l]['source_val'] = val
+            self.register_tracker[reg8h]['source_val'] = (val >> 8) & 0xFF
+            self.register_tracker[reg8l]['source_val'] = val & 0xFF
             self.register_tracker[reg8h]['source_pc'] = pc
             self.register_tracker[reg8l]['source_pc'] = pc
 
@@ -1747,27 +1747,27 @@ class Z80FlowAnalyser:
             self._set_reg16_val('HL', (val + par) & 0xFFFF)
         elif opcode == 0xDD:
             sub_op = self.mem.get_byte(pc + 1)
-            if sub_op == [0x23, 0x2B]: # inc ix / dec ix
+            if sub_op in [0x23, 0x2B]: # inc ix / dec ix
                 #self.memory_load_tracker.pop('IX', None)
                 val = self.register_tracker['IX']['val']
                 diff = -1 if sub_op & 8 else 1
-                self._set_reg16_val(reg16, (val + diff) & 0xFFFF)
+                self._set_reg16_val('IX', (val + diff) & 0xFFFF)
             elif sub_op in [0x09, 0x19, 0x29, 0x39]: # add ix,rp
                 #self.memory_load_tracker.pop('IX', None)
-                reg16 = get_reg16_rp(opcode)
+                reg16 = get_reg16_rp(sub_op)
                 val = self.register_tracker['IX']['val']
                 par = self.register_tracker[reg16]['val']
                 self._set_reg16_val('IX', (val + par) & 0xFFFF)
         elif opcode == 0xFD:
             sub_op = self.mem.get_byte(pc + 1)
-            if sub_op == [0x23, 0x2B]: # inc iy / dec iy
+            if sub_op in [0x23, 0x2B]: # inc iy / dec iy
                 #self.memory_load_tracker.pop('IY', None)
                 val = self.register_tracker['IY']['val']
                 diff = -1 if sub_op & 8 else 1
-                self._set_reg16_val(reg16, (val + diff) & 0xFFFF)
+                self._set_reg16_val('IY', (val + diff) & 0xFFFF)
             elif sub_op in [0x09, 0x19, 0x29, 0x39]: # add iy,rp
                 #self.memory_load_tracker.pop('IY', None)
-                reg16 = get_reg16_rp(opcode)
+                reg16 = get_reg16_rp(sub_op)
                 val = self.register_tracker['IY']['val']
                 par = self.register_tracker[reg16]['val']
                 self._set_reg16_val('IY', (val + par) & 0xFFFF)
@@ -1852,6 +1852,9 @@ class Z80FlowAnalyser:
                 elif sub_op == 0x5B:  # ld de, (nn)
                     self.memory_load_tracker.pop('DE', None)
                     self.memory_load_tracker['DE'] = target_work
+                elif sub_op == 0x6B:  # ld hl, (nn) ; (undocumented)
+                    self.memory_load_tracker.pop('HL', None)
+                    self.memory_load_tracker['HL'] = target_work
         elif opcode in [0xDD, 0xFD]:
             sub_op = self.mem.get_byte(pc + 1)
             target_work = self.mem.get_word(pc + 2)
@@ -1879,7 +1882,10 @@ class Z80FlowAnalyser:
             elif sub_op == 0x53:
                 self._check_interrupt_hook_write(target, "DE", pc)
                 self._check_pointer_work_write(target, "DE", pc)
-            if sub_op in [0x43, 0x53, 0x73]:
+            elif sub_op == 0x63:
+                self._check_interrupt_hook_write(target, "HL", pc)
+                self._check_pointer_work_write(target, "HL", pc)
+            if sub_op in [0x43, 0x53, 0x63, 0x73]:
                 self._mark_memory_write(target, pc)
 
         elif inst_type == "INDEX_LD":
@@ -2314,11 +2320,17 @@ class Z80Disassembler:
         if inst_type == "ED_LD":
             sub_op = self.mem.get_byte(pc + 1)
             label = self.db.get_label(target, format_asm_hex(target), is_code=is_target_bios, is_bios=is_target_bios)
-            if sub_op in [0x43, 0x53, 0x73]:
-                reg = {0x43: "bc", 0x53: "de", 0x73: "sp"}[sub_op]
-                return 4, f"ld ({label}), {reg}"
-            reg = {0x4B: "bc", 0x5B: "de", 0x7B: "sp"}[sub_op]
-            return 4, f"ld {reg}, ({label})"
+            if sub_op in [0x43, 0x53, 0x63, 0x73]:
+                reg = {0x43: "bc", 0x53: "de", 0x63: "hl", 0x73: "sp"}[sub_op]
+                comment = ""
+                if sub_op == 0x63:
+                    comment = " ; (undocumented)"
+                return 4, f"ld ({label}), {reg}{comment}"
+            reg = {0x4B: "bc", 0x5B: "de", 0x6B: "hl", 0x7B: "sp"}[sub_op]
+            comment = ""
+            if sub_op == 0x6B:
+                comment = " ; (undocumented)"
+            return 4, f"ld {reg}, ({label}){comment}"
 
         if inst_type == "INDEX_LD":
             sub_op = self.mem.get_byte(pc + 1)
@@ -2339,23 +2351,40 @@ class Z80Disassembler:
             sub_op = self.mem.get_byte(pc + 3)
             d_str = f"+0{d:02X}H" if d < 128 else f"-0{256-d:02X}H"
             
-            reg = self.get_reg_8bit(6, prefix_reg, d_str)
+            operand = self.get_reg_8bit(6, prefix_reg, d_str)
             bit = (sub_op >> 3) & 7
-            
-            cb_inst = ""
-            if 0x00 <= sub_op <= 0x07: cb_inst = f"rlc {reg}"
-            elif 0x08 <= sub_op <= 0x0F: cb_inst = f"rrc {reg}"
-            elif 0x10 <= sub_op <= 0x17: cb_inst = f"rl {reg}"
-            elif 0x18 <= sub_op <= 0x1F: cb_inst = f"rr {reg}"
-            elif 0x20 <= sub_op <= 0x27: cb_inst = f"sla {reg}"
-            elif 0x28 <= sub_op <= 0x2F: cb_inst = f"sra {reg}"
-            elif 0x30 <= sub_op <= 0x37: cb_inst = f"sll {reg}"
-            elif 0x38 <= sub_op <= 0x3F: cb_inst = f"srl {reg}"
-            elif 0x40 <= sub_op <= 0x7F: cb_inst = f"bit {bit}, {reg}"
-            elif 0x80 <= sub_op <= 0xBF: cb_inst = f"res {bit}, {reg}"
-            elif 0xC0 <= sub_op <= 0xFF: cb_inst = f"set {bit}, {reg}"
-            
-            return 4, cb_inst
+            reg_code = sub_op & 7
+            reg_name = self.Z80_REG_MAP_8BIT[reg_code]
+
+            cb_ops = ["rlc", "rrc", "rl", "rr", "sla", "sra", "sll", "srl"]
+
+            op_hex = format_asm_hex(opcode, 2)
+            d_hex = format_asm_hex(d, 2)
+            sub_hex = format_asm_hex(sub_op, 2)
+
+            if 0x00 <= sub_op <= 0x3F:
+                op_name = cb_ops[bit]
+                if reg_code == 6:
+                    if bit == 6:
+                        return 4, f"db {op_hex}, 0CBH, {d_hex}, {sub_hex} ; sll {operand} (undocumented)"
+                    return 4, f"{op_name} {operand}"
+                else:
+                    return 4, f"db {op_hex}, 0CBH, {d_hex}, {sub_hex} ; {op_name} {operand}, {reg_name} (undocumented)"
+            elif 0x40 <= sub_op <= 0x7F:
+                if reg_code == 6:
+                    return 4, f"bit {bit}, {operand}"
+                else:
+                    return 4, f"db {op_hex}, 0CBH, {d_hex}, {sub_hex} ; bit {bit}, {operand} (undocumented)"
+            elif 0x80 <= sub_op <= 0xBF:
+                if reg_code == 6:
+                    return 4, f"res {bit}, {operand}"
+                else:
+                    return 4, f"db {op_hex}, 0CBH, {d_hex}, {sub_hex} ; res {bit}, {operand}, {reg_name} (undocumented)"
+            elif 0xC0 <= sub_op <= 0xFF:
+                if reg_code == 6:
+                    return 4, f"set {bit}, {operand}"
+                else:
+                    return 4, f"db {op_hex}, 0CBH, {d_hex}, {sub_hex} ; set {bit}, {operand}, {reg_name} (undocumented)"
 
         if inst_type == "2BYTE":
             n_val = self.mem.get_byte(pc + 1)
@@ -2449,14 +2478,19 @@ class Z80Disassembler:
         sub_op = self.mem.get_byte(pc + 1)
         
         # rp（レジスタペア）とアドレス間における各種ロード命令のデコード
-        if sub_op in [0x43, 0x53, 0x73, 0x4B, 0x5B, 0x7B]:
+        if sub_op in [0x43, 0x53, 0x63, 0x73, 0x4B, 0x5B, 0x6B, 0x7B]:
             val = self.mem.get_word(pc + 2)
             is_target_bios = self.get_context_is_bios(pc, val)
-            reg = {0x43: "bc", 0x53: "de", 0x73: "sp"}[sub_op]
+            reg_map = {
+                0x43: "bc", 0x53: "de", 0x63: "hl", 0x73: "sp",
+                0x4B: "bc", 0x5B: "de", 0x6B: "hl", 0x7B: "sp"
+            }
+            reg = reg_map[sub_op]
             label = self.db.get_label(val, format_asm_hex(val), is_code=is_target_bios, is_bios=is_target_bios)
-            if sub_op in [0x43, 0x53, 0x73]:
-                return 4, f"ld ({label}), {reg}"
-            return 4, f"ld {reg}, ({label})"
+            comment = " ; (undocumented)" if sub_op in [0x63, 0x6B] else ""
+            if sub_op in [0x43, 0x53, 0x63, 0x73]:
+                return 4, f"ld ({label}), {reg}{comment}"
+            return 4, f"ld {reg}, ({label}){comment}"
 
         # ポート入力 IN r, (C) および ポート出力 OUT (C), r 命令のデコード
         # 機械語配置 01xxx000B(IN) および 01xxx001B(OUT) にマッピングされている
@@ -2477,13 +2511,20 @@ class Z80Disassembler:
         # 拡張ブロック転送（LDI/LDIR等）、ブロック比較、符号反転、割り込みモード設定、16ビット加減算の処理
         ed_insts = {
             0x79: "out (c), a", 0x78: "in a, (c)",
+            0x47: "ld i, a", 0x57: "ld a, i", 0x4F: "ld r, a", 0x5F: "ld a, r",
+            0x67: "rrd", 0x6F: "rld",
             0xA0: "ldi", 0xA1: "cpi", 0xA2: "ini", 0xA3: "outi",
             0xB0: "ldir", 0xB1: "cpir", 0xB2: "inir", 0xB3: "otir",
             0xA8: "ldd", 0xA9: "cpd", 0xAA: "ind", 0xAB: "outd",
-            0xBB: "otdr", 0x44: "neg", 
-            0x45: "retn", 0x55: "retn", 0x65: "retn", 0x75: "retn",
-            0x4D: "reti", 0x5D: "reti", 0x6D: "reti", 0x7D: "reti",
+            0xB8: "lddr", 0xB9: "cpdr", 0xBA: "indr", 0xBB: "otdr",
+            0x44: "neg", 0x4C: "neg ; (undocumented)", 0x54: "neg ; (undocumented)",
+            0x5C: "neg ; (undocumented)", 0x64: "neg ; (undocumented)", 0x6C: "neg ; (undocumented)",
+            0x74: "neg ; (undocumented)", 0x7C: "neg ; (undocumented)",
+            0x45: "retn", 0x55: "retn ; (undocumented)", 0x65: "retn ; (undocumented)", 0x75: "retn ; (undocumented)",
+            0x4D: "reti", 0x5D: "reti ; (undocumented)", 0x6D: "reti ; (undocumented)", 0x7D: "reti ; (undocumented)",
             0x46: "im 0", 0x56: "im 1", 0x5E: "im 2",
+            0x4E: "im 0 ; (undocumented)", 0x66: "im 0 ; (undocumented)", 0x6E: "im 0 ; (undocumented)",
+            0x76: "im 1 ; (undocumented)", 0x7E: "im 2 ; (undocumented)",
             0x42: "sbc hl, bc", 0x52: "sbc hl, de", 0x62: "sbc hl, hl", 0x72: "sbc hl, sp",
             0x4A: "adc hl, bc", 0x5A: "adc hl, de", 0x6A: "adc hl, hl", 0x7A: "adc hl, sp"
         }
@@ -2552,10 +2593,10 @@ class Z80Disassembler:
             return 2, f"add {reg}, {r_pair}"
 
         # (IX+d) / (IY+d) のアドレッシング構成パターンを抽出
-        is_indirect_hl = ((op >> 3) & 7) == 6 or (op & 7) == 6
+        is_indirect_hl = (0x40 <= op <= 0xBF and (((op >> 3) & 7) == 6 or (op & 7) == 6))
 
         # ディスプレースメントを伴うインデックス相対アドレッシング命令
-        if op in [0x34, 0x35, 0x36] or is_indirect_hl:  
+        if op in [0x34, 0x35, 0x36] or is_indirect_hl: 
             d = self.mem.get_byte(pc + 2)
             # ディスプレースメントバイトを16進の符号付き相対オフセットとしてアセンブラ書式化
             d_str = "+00H" if d == 0 else (f"+0{d:02X}H" if d < 128 else f"-0{256-d:02X}H")
@@ -2577,27 +2618,44 @@ class Z80Disassembler:
 
         # プレフィックス付きながらディスプレースメント無しの命令（非公式なIXH/IXL演算等）の解析
         length = 1 + get_standard_len(op)
+        pfx_byte = self.mem.get_byte(pc)
 
         if 0x40 <= op <= 0x7F and op != 0x76:
-            dest = self.get_reg_8bit((op >> 3) & 7, reg)
-            src = self.get_reg_8bit(op & 7, reg)
-            return length, f"ld {dest}, {src}"
+            d_idx = (op >> 3) & 7
+            s_idx = op & 7
+            dest = self.get_reg_8bit(d_idx, reg)
+            src = self.get_reg_8bit(s_idx, reg)
+            if d_idx in [4, 5] or s_idx in [4, 5]:
+                return length, f"ld {dest}, {src} ; (undocumented)"
+            return length, f"db {format_asm_hex(pfx_byte, 2)}, {format_asm_hex(op, 2)} ; ld {dest}, {src} (undocumented: prefix ignored)"
 
-        if op in [0x24, 0x25, 0x2C, 0x2D, 0x3C]:
-            dest = self.get_reg_8bit(op & 7, reg)
-            inst = "inc" if op in [0x24, 0x2C, 0x3C] else "dec"
-            return length, f"{inst} {dest}"
+        if op == 0x24:
+            return length, f"inc {reg}h ; (undocumented)"
+        if op == 0x2C:
+            return length, f"inc {reg}l ; (undocumented)"
+        if op == 0x25:
+            return length, f"dec {reg}h ; (undocumented)"
+        if op == 0x2D:
+            return length, f"dec {reg}l ; (undocumented)"
 
-        if op in [0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E]:
+        if op in [0x26, 0x2E]:
             dest = self.get_reg_8bit((op >> 3) & 7, reg)
             n_val = self.mem.get_byte(pc + 2)
-            return length, f"ld {dest}, {format_asm_hex(n_val, 2)}"
+            return length, f"ld {dest}, {format_asm_hex(n_val, 2)} ; (undocumented)"
+
+        if op in [0x06, 0x0E, 0x16, 0x1E, 0x3E]:
+            dest = self.Z80_REG_MAP_8BIT[(op >> 3) & 7]
+            n_val = self.mem.get_byte(pc + 2)
+            return length, f"db {format_asm_hex(pfx_byte, 2)}, {format_asm_hex(op, 2)}, {format_asm_hex(n_val, 2)} ; ld {dest}, {format_asm_hex(n_val, 2)} (undocumented: prefix ignored)"
 
         # プレフィックスに続くIXH/IXLを用いたディスプレースメントなしの非公式算術演算命令のサポート
         if 0x80 <= op <= 0xBF:
-            src = self.get_reg_8bit(op & 7, reg)
+            s_idx = op & 7
+            src = self.get_reg_8bit(s_idx, reg)
             alu_op = self.Z80_ALU_OPS_8BIT[(op >> 3) & 7]
-            return length, f"{alu_op} {src}"
+            if s_idx in [4, 5]:
+                return length, f"{alu_op} {src} ; (undocumented)"
+            return length, f"db {format_asm_hex(pfx_byte, 2)}, {format_asm_hex(op, 2)} ; {alu_op} {src} (undocumented: prefix ignored)"
 
         tokens = []
         for i in range(length):

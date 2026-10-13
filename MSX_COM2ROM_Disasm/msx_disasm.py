@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-=====================================================================
-MSX Z80 Intelligent Disassembler (msx_disasm) - Enhanced Flow Edition
-=====================================================================
-- ROM/COM/RAM/BLOAD バイナリのフロー解析型 逆アセンブラ
-- メガROMマッパー（Konami, Konami-SCC, ASCII8, ASCII16, NORMAL）対応
-- MSXフック（H_TIMI等）へのハンドラ登録を自動検出して追跡
-- JP (HL) / JP (IX) ジャンプテーブルパターンの自動認識と展開追跡
-- CODEギャップ（未参照ブロック）の自動回収フェーズ（Phase 2）
-- 外部エントリポイント手動指定 (-e / --entry) 対応
-=====================================================================
-"""
+# =====================================================================
+# MSX Z80 Intelligent Disassembler (msx_disasm)
+# =====================================================================
+# - ROM / COM / BLOAD バイナリ対応の実行フロー解析型逆アセンブラ
+# - CODE / DATA / WORK / MERGE 属性の自動分類
+# - レジスタ追跡による間接参照ポインタ・ワークエリアの逆引き特定
+# - MSX ROMヘッダ (ABヘッダ) および割り込みフック登録の自動検出
+# - JP (HL) / JP (IX) ジャンプテーブルパターンの検出と追跡
+# - CODEギャップ (未参照ブロック) の走査回収
+# =====================================================================
 
 import os
 import sys
+import copy
 import argparse
 
 try:
@@ -24,6 +23,9 @@ except ImportError:
     HAS_MSX_SYMBOLS = False
 
 
+# =====================================================================
+# 共通ユーティリティ関数
+# =====================================================================
 def format_asm_hex(val, width=4):
     hex_str = f"{val:0{width}X}"
     if hex_str[0] in "ABCDEF":
@@ -55,19 +57,14 @@ def get_symbol_name(addr):
             labels = msx_symbols.search_labels(addr)
             if labels:
                 return labels[0].replace(".", "_")
+        if hasattr(msx_symbols, "search_labels_dos"):
+            labels = msx_symbols.search_labels_dos(addr)
+            if labels:
+                return labels[0].replace(".", "_")
     except Exception:
         pass
     return None
 
-
-MAPPER_CONFIGS = {
-    "NORMAL": {"name": "Standard ROM (No Mapper)", "bank_size": 0, "is_rom": True, "default_base": 0x4000},
-    "KONAMI": {"name": "Konami 8KB (No SCC)", "bank_size": 0x2000, "page_addrs": [0x4000, 0x6000, 0x8000, 0xA000], "is_rom": True, "default_base": 0x4000},
-    "KONAMI-SCC": {"name": "Konami 8KB with SCC", "bank_size": 0x2000, "page_addrs": [0x4000, 0x6000, 0x8000, 0xA000], "is_rom": True, "default_base": 0x4000},
-    "ASCII8": {"name": "ASCII 8KB", "bank_size": 0x2000, "page_addrs": [0x4000, 0x6000, 0x8000, 0xA000], "is_rom": True, "default_base": 0x4000},
-    "ASCII16": {"name": "ASCII 16KB", "bank_size": 0x4000, "page_addrs": [0x4000, 0x8000], "is_rom": True, "default_base": 0x4000},
-    "NONE": {"name": "Flat Binary (COM / RAM)", "bank_size": 0, "is_rom": False, "default_base": 0x0100}
-}
 
 REG8 = ["b", "c", "d", "e", "h", "l", "(hl)", "a"]
 REG8_IX = ["b", "c", "d", "e", "ixh", "ixl", "(ix+d)", "a"]
@@ -75,42 +72,34 @@ REG8_IY = ["b", "c", "d", "e", "iyh", "iyl", "(iy+d)", "a"]
 ALU = ["add a,", "adc a,", "sub", "sbc a,", "and", "xor", "or", "cp"]
 ROT = ["rlc", "rrc", "rl", "rr", "sla", "sra", "sll", "srl"]
 
-
-# MSX代表フックアドレス一覧
+# 代表的なMSX割り込みフックアドレス
 MSX_HOOK_ADDRS = {
     0xFD9A: "H_KEYI", 0xFD9B: "H_KEYI",
     0xFD9F: "H_TIMI", 0xFDA0: "H_TIMI", 0xFDA1: "H_TIMI",
 }
 
-# -------------------------------------------------------------
 # 引数としてメモリアドレスを取る BIOS / DISK / フック一覧
-# -------------------------------------------------------------
 BIOS_MEM_ARGS = {
-    # VRAM / VDP 転送系
-    0x005C: ["HL"],        # LDIRVM (HL = 転送元データアドレス)
-    0x0059: ["DE"],        # LDIRMV (DE = 転送先バッファアドレス)
-    0x005F: ["HL"],        # WRTTVV (HL = 文字列アドレス)
-    # カセットテープ
-    0x00E1: ["HL"],        # TAPIN  (HL = 読込バッファ)
-    0x00ED: ["HL"],        # TAPOUT (HL = 書込バッファ)
-    # PHYDIO（物理ディスクセクタI/O）
-    0x0144: ["HL"],        # PHYDIO (MAIN ROM 未公開BIOSエントリ)
-    0xFFA7: ["HL"],        # H_PHYD (PHYDIO フック直接コール)
-    0x4010: ["HL"],        # DISK-ROM PHYDIO ジャンプテーブル先頭
-    # MSX2 SUB-ROM (パレット / 描画)
-    0x014D: ["HL"],        # SETPLT (HL = パレットデータ配列)
-    0x0150: ["HL"],        # GETPLT (HL = 格納バッファ)
-    0x0186: ["HL"],        # NVBGET (HL = 格納バッファ)
-    0x0189: ["HL"],        # NVBSET (HL = 転送元データ)
-    0x008D: ["HL"],        # GRPPRT (HL = 描画文字列バッファ)
+    0x005C: ["HL"],  # LDIRVM (HL = 転送元データアドレス)
+    0x0059: ["DE"],  # LDIRMV (DE = 転送先バッファアドレス)
+    0x005F: ["HL"],  # WRTTVV (HL = 文字列アドレス)
+    0x00E1: ["HL"],  # TAPIN  (HL = 読込バッファ)
+    0x00ED: ["HL"],  # TAPOUT (HL = 書込バッファ)
+    0x0144: ["HL"],  # PHYDIO (未公開BIOSエントリ)
+    0xFFA7: ["HL"],  # H_PHYD (PHYDIO フック)
+    0x4010: ["HL"],  # DISK-ROM PHYDIO
+    0x014D: ["HL"],  # SETPLT (HL = パレットデータ配列)
+    0x0150: ["HL"],  # GETPLT (HL = 格納バッファ)
+    0x0186: ["HL"],  # NVBGET (HL = 格納バッファ)
+    0x0189: ["HL"],  # NVBSET (HL = 転送元データ)
+    0x008D: ["HL"],  # GRPPRT (HL = 描画文字列バッファ)
 }
 
-# BDOSコールエントリ（MSX-DOS 0005H および Disk BASIC 0F37DH）
+# BDOSコールエントリ (MSX-DOS 0005H および Disk BASIC 0F37DH)
 BDOS_ENTRY_ADDRS = {0x0005, 0xF37D}
 
 # BDOSファンクション別の引数レジスタ定義
 BDOS_ARG_REGS = {
-    # DE のみをアドレス引数とするファンクション (DOS1 / DOS2共通)
     0x09: ["DE"], 0x0A: ["DE"],
     0x0F: ["DE"], 0x10: ["DE"], 0x11: ["DE"], 0x12: ["DE"],
     0x13: ["DE"], 0x14: ["DE"], 0x15: ["DE"], 0x16: ["DE"], 0x17: ["DE"],
@@ -118,32 +107,93 @@ BDOS_ARG_REGS = {
     0x21: ["DE"], 0x22: ["DE"], 0x23: ["DE"], 0x24: ["DE"], 0x27: ["DE"], 0x28: ["DE"],
     0x43: ["DE"], 0x48: ["DE"], 0x49: ["DE"],
     0x6B: ["DE"], 0x6C: ["DE"],
-    # HL と DE の双方をアドレス引数とするファンクション (DOS2 環境変数等)
     0x4B: ["HL", "DE"],  # _GENV (HL=名前文字列, DE=取得バッファ)
     0x4C: ["HL", "DE"],  # _SENV (HL=名前文字列, DE=値文字列)
 }
 
+
 # =====================================================================
-# Z80 命令デコーダ & 逆アセンブラ
+# ログ管理クラス
+# =====================================================================
+class DisasmLogger:
+    def __init__(self, log_filepath):
+        self.log_filepath = log_filepath
+        try:
+            with open(self.log_filepath, "w", encoding="utf-8") as f:
+                pass
+        except IOError:
+            print("[-] エラー: ログファイルの初期化に失敗しました。")
+
+    def log(self, message):
+        print(message)
+        try:
+            with open(self.log_filepath, "a", encoding="utf-8") as f:
+                f.write(message + "\n")
+        except IOError:
+            pass
+
+
+# =====================================================================
+# メモリイメージクラス (旧 ROMBank のデータ保持責務を純化)
+# =====================================================================
+class BinaryImage:
+    def __init__(self, raw_bytes, base_addr, logger):
+        self.raw_bytes = bytearray(raw_bytes)
+        self.base_addr = base_addr
+        self.end_addr = base_addr + len(raw_bytes)
+        self.logger = logger
+        # 属性フラグ: CODE, DATA, WORK, MERGE
+        self.attributes = [set(["DATA"]) for _ in range(len(raw_bytes))]
+
+    def is_valid_address(self, addr):
+        return self.base_addr <= addr < self.end_addr
+
+    def get_byte(self, addr):
+        if not self.is_valid_address(addr):
+            return 0
+        return self.raw_bytes[addr - self.base_addr]
+
+    def get_word(self, addr):
+        return self.get_byte(addr) | (self.get_byte(addr + 1) << 8)
+
+    def mark_attribute(self, addr, attr):
+        if self.is_valid_address(addr):
+            self.attributes[addr - self.base_addr].add(attr)
+
+    def discard_attribute(self, addr, attr):
+        if self.is_valid_address(addr):
+            self.attributes[addr - self.base_addr].discard(attr)
+
+    def has_attribute(self, addr, attr):
+        if not self.is_valid_address(addr):
+            return False
+        return attr in self.attributes[addr - self.base_addr]
+
+
+# =====================================================================
+# Z80 命令デコーダ
 # =====================================================================
 class Z80InstructionDecoder:
-    def __init__(self, get_byte_fn, get_word_fn):
-        self.get_b = get_byte_fn
-        self.get_w = get_word_fn
+    # 仮想メモリ上の機械語データを解析し、命令長・分岐先・参照アドレス・アセンブラ文字列を生成する
+    def __init__(self, mem: BinaryImage):
+        self.mem = mem
 
     def decode(self, pc, get_label_fn=None):
-        b0 = self.get_b(pc)
+        # プログラムカウンタ位置から1命令をデコードする
+        # 戻り値: (命令長, 分岐先リスト, アセンブラ文字列, 終端命令フラグ, メモリアクセスアドレス, アクセスサイズ, 16ビット即値)
+        b0 = self.mem.get_byte(pc)
 
         def lbl(addr):
+            # 登録済みラベルがあればラベル名を返し、なければ16進表記を返す
             if get_label_fn:
                 return get_label_fn(addr)
             return format_asm_hex(addr)
 
-        # ---------------- ED プレフィックス ----------------
+        # ED プレフィックス: 拡張仕様命令群 (16ビット入出力、ブロック転送、レジスタ間間接ロード等)
         if b0 == 0xED:
-            b1 = self.get_b(pc + 1)
+            b1 = self.mem.get_byte(pc + 1)
             if b1 in [0x43, 0x53, 0x73, 0x4B, 0x5B, 0x7B]:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 reg = {0x43: "bc", 0x53: "de", 0x73: "sp", 0x4B: "bc", 0x5B: "de", 0x7B: "sp"}[b1]
                 if b1 in [0x43, 0x53, 0x73]:
                     return 4, [], f"ld ({lbl(target)}), {reg}", False, target, 2, None
@@ -151,10 +201,10 @@ class Z80InstructionDecoder:
                     return 4, [], f"ld {reg}, ({lbl(target)})", False, target, 2, None
 
             if b1 == 0x63:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 return 4, [], f"ld ({lbl(target)}), hl ; (undocumented)", False, target, 2, None
             if b1 == 0x6B:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 return 4, [], f"ld hl, ({lbl(target)}) ; (undocumented)", False, target, 2, None
 
             if 0x40 <= b1 <= 0x7F:
@@ -199,9 +249,9 @@ class Z80InstructionDecoder:
 
             return 2, [], f"db 0EDH, {format_asm_hex(b1, 2)}", False, None, 0, None
 
-        # ---------------- CB プレフィックス ----------------
+        # CB プレフィックス
         if b0 == 0xCB:
-            b1 = self.get_b(pc + 1)
+            b1 = self.mem.get_byte(pc + 1)
             reg_idx = b1 & 7
             bit_idx = (b1 >> 3) & 7
             reg_str = REG8[reg_idx]
@@ -217,20 +267,20 @@ class Z80InstructionDecoder:
             elif 0xC0 <= b1 <= 0xFF:
                 return 2, [], f"set {bit_idx}, {reg_str}", False, None, 0, None
 
-        # ---------------- DD / FD プレフィックス ----------------
+        # DD / FD プレフィックス
         if b0 in [0xDD, 0xFD]:
             pfx = "ix" if b0 == 0xDD else "iy"
             reg8_idx = REG8_IX if b0 == 0xDD else REG8_IY
-            b1 = self.get_b(pc + 1)
+            b1 = self.mem.get_byte(pc + 1)
 
             if b1 == 0x21:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 return 4, [], f"ld {pfx}, {lbl(target)}", False, None, 0, target
             if b1 == 0x22:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 return 4, [], f"ld ({lbl(target)}), {pfx}", False, target, 2, None
             if b1 == 0x2A:
-                target = self.get_w(pc + 2)
+                target = self.mem.get_word(pc + 2)
                 return 4, [], f"ld {pfx}, ({lbl(target)})", False, target, 2, None
             if b1 in [0x09, 0x19, 0x29, 0x39]:
                 rp = {0x09: "bc", 0x19: "de", 0x29: pfx, 0x39: "sp"}[b1]
@@ -248,44 +298,62 @@ class Z80InstructionDecoder:
             if b1 == 0xF9:
                 return 2, [], f"ld sp, {pfx}", False, None, 0, None
 
+            # DDCB / FDCB プレフィックス: インデックス相対ビット操作・シフト命令 (4バイト構成: DD/FD CB d op)
+            # 未定義命令(reg_code != 6 や SLL)は、アセンブラ依存のエラーやバイナリ化けを防ぐためコメント付きdbで出力する
             if b1 == 0xCB:
-                d = signed_byte(self.get_b(pc + 2))
-                b3 = self.get_b(pc + 3)
+                raw_d = self.mem.get_byte(pc + 2)
+                d = signed_byte(raw_d)
+                b3 = self.mem.get_byte(pc + 3)
                 d_str = f"+{d}" if d >= 0 else f"{d}"
                 bit = (b3 >> 3) & 7
                 reg_code = b3 & 7
                 operand = f"({pfx}{d_str})"
+                b0_hex = format_asm_hex(b0, 2)
+                d_hex = format_asm_hex(raw_d, 2)
+                b3_hex = format_asm_hex(b3, 2)
 
+                # シフト・ローテート命令群 (00H - 3FH)
                 if 0x00 <= b3 <= 0x3F:
                     rot = ROT[bit]
                     if reg_code == 6:
                         if bit == 6:
-                            return 4, [], f"sll {operand} ; (undocumented)", False, None, 0, None
+                            # SLL (未定義命令: 最下位ビットを1にして左シフト)
+                            return 4, [], f"db {b0_hex}, 0CBH, {d_hex}, {b3_hex} ; sll {operand} (undocumented)", False, None, 0, None
                         return 4, [], f"{rot} {operand}", False, None, 0, None
                     else:
-                        return 4, [], f"{rot} {operand}, {REG8[reg_code]} ; (undocumented)", False, None, 0, None
+                        # 未定義命令: シフト結果を8ビットレジスタにも書き戻す複合動作
+                        return 4, [], f"db {b0_hex}, 0CBH, {d_hex}, {b3_hex} ; {rot} {operand}, {REG8[reg_code]} (undocumented)", False, None, 0, None
+                # BIT 命令群 (40H - 7FH)
                 elif 0x40 <= b3 <= 0x7F:
-                    return 4, [], f"bit {bit}, {operand}", False, None, 0, None
+                    if reg_code == 6:
+                        return 4, [], f"bit {bit}, {operand}", False, None, 0, None
+                    else:
+                        # 未定義命令: 実機ではレジスタ書き戻しは起きないが、第4バイト値の完全復元のためdb出力する
+                        return 4, [], f"db {b0_hex}, 0CBH, {d_hex}, {b3_hex} ; bit {bit}, {operand} (undocumented)", False, None, 0, None
+                # RES 命令群 (80H - BFH)
                 elif 0x80 <= b3 <= 0xBF:
                     if reg_code == 6:
                         return 4, [], f"res {bit}, {operand}", False, None, 0, None
                     else:
-                        return 4, [], f"res {bit}, {operand}, {REG8[reg_code]} ; (undocumented)", False, None, 0, None
+                        # 未定義命令: ビットリセット結果を8ビットレジスタにも書き戻す複合動作
+                        return 4, [], f"db {b0_hex}, 0CBH, {d_hex}, {b3_hex} ; res {bit}, {operand}, {REG8[reg_code]} (undocumented)", False, None, 0, None
+                # SET 命令群 (C0H - FFH)
                 elif 0xC0 <= b3 <= 0xFF:
                     if reg_code == 6:
                         return 4, [], f"set {bit}, {operand}", False, None, 0, None
                     else:
-                        return 4, [], f"set {bit}, {operand}, {REG8[reg_code]} ; (undocumented)", False, None, 0, None
+                        # 未定義命令: ビットセット結果を8ビットレジスタにも書き戻す複合動作
+                        return 4, [], f"db {b0_hex}, 0CBH, {d_hex}, {b3_hex} ; set {bit}, {operand}, {REG8[reg_code]} (undocumented)", False, None, 0, None
 
-            is_ind = ((b1 >> 3) & 7) == 6 or (b1 & 7) == 6
+            is_ind = (0x40 <= b1 <= 0xBF and (((b1 >> 3) & 7) == 6 or (b1 & 7) == 6))
             if is_ind or b1 in [0x34, 0x35, 0x36]:
-                d = signed_byte(self.get_b(pc + 2))
+                d = signed_byte(self.mem.get_byte(pc + 2))
                 d_str = f"+{d}" if d >= 0 else f"{d}"
                 operand = f"({pfx}{d_str})"
                 if b1 == 0x34: return 3, [], f"inc {operand}", False, None, 0, None
                 if b1 == 0x35: return 3, [], f"dec {operand}", False, None, 0, None
                 if b1 == 0x36:
-                    val = self.get_b(pc + 3)
+                    val = self.mem.get_byte(pc + 3)
                     return 4, [], f"ld {operand}, {format_asm_hex(val, 2)}", False, None, 0, None
                 if 0x40 <= b1 <= 0x7F and b1 != 0x76:
                     dest = operand if ((b1 >> 3) & 7) == 6 else REG8[(b1 >> 3) & 7]
@@ -302,8 +370,12 @@ class Z80InstructionDecoder:
                 return 2, [], f"dec {r} ; (undocumented)", False, None, 0, None
             if b1 in [0x26, 0x2E]:
                 r = f"{pfx}h" if b1 == 0x26 else f"{pfx}l"
-                n = self.get_b(pc + 2)
+                n = self.mem.get_byte(pc + 2)
                 return 3, [], f"ld {r}, {format_asm_hex(n, 2)} ; (undocumented)", False, None, 0, None
+            if b1 in [0x06, 0x0E, 0x16, 0x1E, 0x3E]:
+                n = self.mem.get_byte(pc + 2)
+                r = REG8[(b1 >> 3) & 7]
+                return 3, [], f"db {format_asm_hex(b0, 2)}, {format_asm_hex(b1, 2)}, {format_asm_hex(n, 2)} ; ld {r}, {format_asm_hex(n, 2)} (undocumented: prefix ignored)", False, None, 0, None
 
             if 0x40 <= b1 <= 0x7F and b1 != 0x76:
                 d_idx = (b1 >> 3) & 7
@@ -313,7 +385,7 @@ class Z80InstructionDecoder:
                 if d_idx in [4, 5] or s_idx in [4, 5]:
                     return 2, [], f"ld {dest}, {src} ; (undocumented)", False, None, 0, None
                 else:
-                    return 2, [], f"ld {dest}, {src} ; (undocumented: prefix ignored)", False, None, 0, None
+                    return 2, [], f"db {format_asm_hex(b0, 2)}, {format_asm_hex(b1, 2)} ; ld {dest}, {src} (undocumented: prefix ignored)", False, None, 0, None
 
             if 0x80 <= b1 <= 0xBF:
                 s_idx = b1 & 7
@@ -321,14 +393,14 @@ class Z80InstructionDecoder:
                 if s_idx in [4, 5]:
                     return 2, [], f"{ALU[(b1 >> 3) & 7]} {src} ; (undocumented)", False, None, 0, None
                 else:
-                    return 2, [], f"{ALU[(b1 >> 3) & 7]} {src} ; (undocumented: prefix ignored)", False, None, 0, None
+                    return 2, [], f"db {format_asm_hex(b0, 2)}, {format_asm_hex(b1, 2)} ; {ALU[(b1 >> 3) & 7]} {src} (undocumented: prefix ignored)", False, None, 0, None
 
             return 2, [], f"db {format_asm_hex(b0, 2)}, {format_asm_hex(b1, 2)}", False, None, 0, None
 
-        # ---------------- 標準命令 ----------------
+        # 標準命令
         if b0 == 0xF7:  # RST 30H (MSX CALSLT)
-            slot = self.get_b(pc + 1)
-            target = self.get_w(pc + 2)
+            slot = self.mem.get_byte(pc + 1)
+            target = self.mem.get_word(pc + 2)
             return 4, [target], f"rst 30H\n    db  {format_asm_hex(slot, 2)}\n    dw  {lbl(target)}", False, None, 0, None
 
         if b0 == 0xC9: return 1, [], "ret", True, None, 0, None
@@ -336,54 +408,54 @@ class Z80InstructionDecoder:
         if b0 == 0x76: return 1, [], "halt", False, None, 0, None
 
         if b0 == 0xC3:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             return 3, [target], f"jp {lbl(target)}", True, None, 0, None
 
         if b0 == 0xCD:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             return 3, [target], f"call {lbl(target)}", False, None, 0, None
 
         if b0 in [0xC2, 0xCA, 0xD2, 0xDA, 0xE2, 0xEA, 0xF2, 0xFA]:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             cond = {0xC2: "nz", 0xCA: "z", 0xD2: "nc", 0xDA: "c", 0xE2: "po", 0xEA: "pe", 0xF2: "p", 0xFA: "m"}[b0]
             return 3, [target], f"jp {cond}, {lbl(target)}", False, None, 0, None
 
         if b0 in [0xC4, 0xCC, 0xD4, 0xDC, 0xE4, 0xEC, 0xF4, 0xFC]:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             cond = {0xC4: "nz", 0xCC: "z", 0xD4: "nc", 0xDC: "c", 0xE4: "po", 0xEC: "pe", 0xF4: "p", 0xFC: "m"}[b0]
             return 3, [target], f"call {cond}, {lbl(target)}", False, None, 0, None
 
         if b0 == 0x18:
-            offset = self.get_b(pc + 1)
+            offset = self.mem.get_byte(pc + 1)
             if offset & 0x80: offset -= 256
             target = (pc + 2 + offset) & 0xFFFF
             return 2, [target], f"jr {lbl(target)}", True, None, 0, None
 
         if b0 in [0x20, 0x28, 0x30, 0x38]:
-            offset = self.get_b(pc + 1)
+            offset = self.mem.get_byte(pc + 1)
             if offset & 0x80: offset -= 256
             target = (pc + 2 + offset) & 0xFFFF
             names = {0x20: "jr nz,", 0x28: "jr z,", 0x30: "jr nc,", 0x38: "jr c,"}
             return 2, [target], f"{names[b0]} {lbl(target)}", False, None, 0, None
 
         if b0 == 0x10:
-            offset = self.get_b(pc + 1)
+            offset = self.mem.get_byte(pc + 1)
             if offset & 0x80: offset -= 256
             target = (pc + 2 + offset) & 0xFFFF
             return 2, [target], f"djnz {lbl(target)}", False, None, 0, None
 
         if b0 in [0x32, 0x3A]:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             if b0 == 0x32: return 3, [], f"ld ({lbl(target)}), a", False, target, 1, None
             if b0 == 0x3A: return 3, [], f"ld a, ({lbl(target)})", False, target, 1, None
 
         if b0 in [0x22, 0x2A]:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             if b0 == 0x22: return 3, [], f"ld ({lbl(target)}), hl", False, target, 2, None
             if b0 == 0x2A: return 3, [], f"ld hl, ({lbl(target)})", False, target, 2, None
 
         if b0 in [0x01, 0x11, 0x21, 0x31]:
-            target = self.get_w(pc + 1)
+            target = self.mem.get_word(pc + 1)
             r = {0x01: "bc", 0x11: "de", 0x21: "hl", 0x31: "sp"}[b0]
             return 3, [], f"ld {r}, {lbl(target)}", False, None, 0, target
 
@@ -399,25 +471,25 @@ class Z80InstructionDecoder:
             return 1, [], f"pop {r}", False, None, 0, None
 
         if b0 in [0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E]:
-            n = self.get_b(pc + 1)
+            n = self.mem.get_byte(pc + 1)
             r = REG8[(b0 >> 3) & 7]
             return 2, [], f"ld {r}, {format_asm_hex(n, 2)}", False, None, 0, None
 
         if b0 in [0xC6, 0xCE, 0xD6, 0xDE, 0xE6, 0xEE, 0xF6, 0xFE]:
-            n = self.get_b(pc + 1)
+            n = self.mem.get_byte(pc + 1)
             op = ALU[(b0 >> 3) & 7]
             return 2, [], f"{op} {format_asm_hex(n, 2)}", False, None, 0, None
 
         if b0 == 0xD3:
-            n = self.get_b(pc + 1)
+            n = self.mem.get_byte(pc + 1)
             return 2, [], f"out ({format_asm_hex(n, 2)}), a", False, None, 0, None
 
         if b0 == 0xDB:
-            n = self.get_b(pc + 1)
+            n = self.mem.get_byte(pc + 1)
             return 2, [], f"in a, ({format_asm_hex(n, 2)})", False, None, 0, None
 
         if b0 == 0x36:
-            n = self.get_b(pc + 1)
+            n = self.mem.get_byte(pc + 1)
             return 2, [], f"ld (hl), {format_asm_hex(n, 2)}", False, None, 0, None
 
         if b0 in [0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xFF]:
@@ -449,355 +521,676 @@ class Z80InstructionDecoder:
 
 
 # =====================================================================
-# バンク管理クラス
+# アドレスおよびシンボル管理クラス
 # =====================================================================
-class ROMBank:
-    def __init__(self, bank_id, raw_bytes, base_addr, global_labels, var_sizes, logger):
-        self.bank_id = bank_id
-        self.raw_bytes = raw_bytes
-        self.base_addr = base_addr
-        self.end_addr = base_addr + len(raw_bytes)
-        self.attr = ['DATA'] * len(raw_bytes)
-        self.global_labels = global_labels
-        self.var_sizes = var_sizes
+class AddressRegistry:
+    def __init__(self, mem: BinaryImage, logger: DisasmLogger):
+        self.mem = mem
         self.logger = logger
-        self.decoder = Z80InstructionDecoder(self.get_byte, self.get_word)
+        self.labels = {}
+        self.var_sizes = {}
+        self.byte_to_instruction_start = {}
+        self.uncalled_entries = set()
+
+    def populate_instruction_map(self):
+        self.byte_to_instruction_start.clear()
+        pc = self.mem.base_addr
+        decoder = Z80InstructionDecoder(self.mem)
+        while pc < self.mem.end_addr:
+            if self.mem.has_attribute(pc, "CODE"):
+                length, _, _, _, _, _, _ = decoder.decode(pc)
+                for i in range(length):
+                    addr = pc + i
+                    if self.mem.is_valid_address(addr):
+                        self.byte_to_instruction_start[addr] = pc
+                pc += length
+            else:
+                pc += 1
+
+    def register_address(self, addr, size=0, is_code=False, is_work=False):
+        if size > 0:
+            cur_sz = self.var_sizes.get(addr, 0)
+            if size > cur_sz:
+                self.var_sizes[addr] = size
+
+        if addr in self.labels:
+            return
+
+        sym_name = get_symbol_name(addr)
+        if sym_name:
+            self.labels[addr] = sym_name
+            return
+
+        if self.mem.is_valid_address(addr):
+            if is_code or self.mem.has_attribute(addr, "CODE"):
+                self.labels[addr] = f"CODE_{addr:04X}H"
+            elif is_work or self.mem.has_attribute(addr, "WORK"):
+                self.labels[addr] = f"WORK_{addr:04X}H"
+            elif self.mem.has_attribute(addr, "MERGE"):
+                self.labels[addr] = f"DATA_{addr:04X}H"
+            else:
+                self.labels[addr] = f"DATA_{addr:04X}H"
+        elif addr >= 0xC000:
+            self.labels[addr] = f"WORK_{addr:04X}H"
+        else:
+            self.labels[addr] = f"EXT_{addr:04X}H"
+
+    def get_label(self, addr):
+        # FCC0H へのアクセスを EXPTBL(FCC1H) - 1 として表記する
+        if addr == 0xFCC0:
+            if 0xFCC1 not in self.labels:
+                self.register_address(0xFCC1)
+            base_lbl = self.labels.get(0xFCC1, "EXPTBL")
+            return f"{base_lbl} - 1"
+
+        # 命令の途中オフセット対応:
+        # 自己書き換えコード(SMC)や複数バイト命令の即値部分を参照している場合、「命令先頭ラベル + オフセット」形式で出力する
+        if addr in self.byte_to_instruction_start:
+            inst_start = self.byte_to_instruction_start[addr]
+            offset = addr - inst_start
+            if offset > 0:
+                if inst_start not in self.labels:
+                    self.register_address(inst_start, is_code=True)
+                base_lbl = self.labels[inst_start]
+                return f"{base_lbl} + {offset}"
+
+        if addr in self.labels:
+            return self.labels[addr]
+        return format_asm_hex(addr)
+
+
+# =====================================================================
+# フロー解析クラス (com2rom.py の精密シミュレーションを継承)
+# =====================================================================
+class Z80FlowAnalyser:
+    # 実行パスのシミュレーションを行い、コード・データ・ワークエリアの属性判別とポインタ逆引きを行う
+    def __init__(self, mem: BinaryImage, registry: AddressRegistry, logger: DisasmLogger, max_merge_limit=2):
+        self.mem = mem
+        self.registry = registry
+        self.logger = logger
+        self.max_merge_limit = max_merge_limit
+        self.decoder = Z80InstructionDecoder(mem)
+
+        # ポインタ(アドレス)を保持するRAMワークエリアのアドレス集合
+        self.pointer_work_addresses = set()
+        # ポインタアドレスをレジスタへロードしている命令のPC集合
         self.pointer_load_pcs = set()
+        # 探索済み経路のキー集合 (PCと主要レジスタ状態のタプル)
+        self.traced_paths = set()
 
-    def is_in_bank(self, addr):
-        return self.base_addr <= addr < self.end_addr
+        # ログ重複防止用セット (Pass 1 と Pass 2 を跨いで保持)
+        self.logged_pointer_writes = set()
+        self.logged_pointer_works = set()
+        self.logged_interrupt_hooks = set()
+        self.logged_jump_tables = set()
+        self.logged_sys_args = set()
 
-    def get_byte(self, pc):
-        idx = pc - self.base_addr
-        if 0 <= idx < len(self.raw_bytes):
-            return self.raw_bytes[idx]
-        return 0
+    def analyze_flow(self, entry_points):
+        # ログ重複防止セットを全体の解析開始時にリセット
+        self.logged_pointer_writes.clear()
+        self.logged_pointer_works.clear()
+        self.logged_interrupt_hooks.clear()
+        self.logged_jump_tables.clear()
+        self.logged_sys_args.clear()
 
-    def get_word(self, pc):
-        return self.get_byte(pc) | (self.get_byte(pc + 1) << 8)
+        # パス1: 基本フロー解析とワーク・間接参照の識別
+        self.logger.log("=" * 70)
+        self.logger.log("[*] 解析 Pass 1: 実行フローおよびレジスタ・ポインタの追跡を開始...")
+        self.logger.log("=" * 70)
+        self._trace_from_entries(entry_points)
 
-    def mark_code(self, pc, length):
-        for i in range(length):
-            idx = (pc + i) - self.base_addr
-            if 0 <= idx < len(self.attr):
-                self.attr[idx] = 'CODE'
+        # パス2: ポインタワークへのロード命令逆引き追跡
+        self.logger.log("=" * 70)
+        self.logger.log("[*] 解析 Pass 2: 間接参照ポインタの再走査シミュレーション...")
+        self.logger.log("=" * 70)
+        self.traced_paths.clear()
+        self._trace_from_entries(entry_points)
 
-    def trace_flow(self, entry_points):
-        visited = set()
-        stack = list(entry_points)
-        # 8ビット/16ビットレジスタの追跡バッファ
-        reg_tracker = {
-            'HL': None, 'DE': None, 'BC': None, 
-            'IX': None, 'IY': None, 'A': None, 'C': None
-        }
+    def _trace_from_entries(self, entries):
+        stack = []
+        for e in entries:
+            if self.mem.is_valid_address(e):
+                stack.append((e, {
+                    "regs": {
+                        "BC": {"val": 0, "source_pc": None, "source_val": 0},
+                        "DE": {"val": 0, "source_pc": None, "source_val": 0},
+                        "HL": {"val": 0, "source_pc": None, "source_val": 0},
+                        "IX": {"val": 0, "source_pc": None, "source_val": 0},
+                        "IY": {"val": 0, "source_pc": None, "source_val": 0},
+                        "A":  {"val": 0, "source_pc": None, "source_val": 0},
+                        "C":  {"val": 0, "source_pc": None, "source_val": 0},
+                    },
+                    "mem_loads": {}
+                }))
+
         recent_history = []
 
         while stack:
-            pc = stack.pop()
-            if pc in visited or not self.is_in_bank(pc):
+            pc, tracker_state = stack.pop()
+            if not self.mem.is_valid_address(pc):
                 continue
-            visited.add(pc)
+
+            state_key = (
+                pc,
+                tracker_state["regs"]["HL"]["source_pc"],
+                tracker_state["regs"]["DE"]["source_pc"],
+                tracker_state["regs"]["BC"]["source_pc"],
+                tracker_state["regs"]["IX"]["source_pc"],
+                tracker_state["regs"]["IY"]["source_pc"]
+            )
+            if state_key in self.traced_paths:
+                continue
+            self.traced_paths.add(state_key)
+
+            regs = copy.deepcopy(tracker_state["regs"])
+            mem_loads = copy.deepcopy(tracker_state["mem_loads"])
 
             length, branch_targets, _, is_terminal, access_addr, access_sz, imm16 = self.decoder.decode(pc)
-            self.mark_code(pc, length)
-            opcode = self.get_byte(pc)
 
-            # -------------------------------------------------------------
-            # レジスタ即値ロードの追跡
-            # -------------------------------------------------------------
-            # 16ビット即値ロード (LD rp, nn)
+            for i in range(length):
+                cur_a = pc + i
+                self.mem.discard_attribute(cur_a, "DATA")
+                self.mem.mark_attribute(cur_a, "CODE")
+
+            opcode = self.mem.get_byte(pc)
+
+            # 16ビット即値ロードの追跡
             if imm16 is not None:
                 if opcode in [0x01, 0x11, 0x21]:
                     rname = {0x01: "BC", 0x11: "DE", 0x21: "HL"}[opcode]
-                    reg_tracker[rname] = (pc, imm16)
+                    regs[rname] = {"val": imm16, "source_pc": pc, "source_val": imm16}
+                    mem_loads.pop(rname, None)
                     if opcode == 0x01:
-                        # LD BC, nn の場合、下位バイトは C レジスタ
-                        reg_tracker['C'] = (pc, imm16 & 0xFF)
+                        regs["C"] = {"val": imm16 & 0xFF, "source_pc": pc, "source_val": imm16 & 0xFF}
                 elif opcode in [0xDD, 0xFD]:
                     rname = "IX" if opcode == 0xDD else "IY"
-                    reg_tracker[rname] = (pc, imm16)
+                    regs[rname] = {"val": imm16, "source_pc": pc, "source_val": imm16}
+                    mem_loads.pop(rname, None)
 
-            # 8ビット即値ロード (LD C, n / LD A, n)
-            if opcode == 0x0E:  # ld c, n
-                n = self.get_byte(pc + 1)
-                reg_tracker['C'] = (pc, n)
-            elif opcode == 0x3E:  # ld a, n
-                n = self.get_byte(pc + 1)
-                reg_tracker['A'] = (pc, n)
+            # 8ビット即値ロードの追跡
+            if opcode in [0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E]:
+                r_map = {0x06: "B", 0x0E: "C", 0x16: "D", 0x1E: "E", 0x26: "H", 0x2E: "L", 0x3E: "A"}
+                r_name = r_map[opcode]
+                n = self.mem.get_byte(pc + 1)
+                regs[r_name] = {"val": n, "source_pc": pc, "source_val": n}
 
-            # -------------------------------------------------------------
-            # システムコール・フック引数の検出（全経路）
-            # -------------------------------------------------------------
-            # 経路 A: RST 30H (CALSLT / CALLF インタースロットコール)
-            if opcode == 0xF7:
-                rst_target = self.get_w(pc + 2)
-                self._check_and_register_sys_args(rst_target, reg_tracker)
+            # ワークエリアからのロード追跡
+            if opcode == 0x2A:  # ld hl, (nn)
+                mem_loads["HL"] = access_addr
+            elif opcode == 0xED:
+                sub_op = self.mem.get_byte(pc + 1)
+                if sub_op == 0x4B:    # ld bc, (nn)
+                    mem_loads["BC"] = access_addr
+                elif sub_op == 0x5B:  # ld de, (nn)
+                    mem_loads["DE"] = access_addr
+            elif opcode in [0xDD, 0xFD]:
+                sub_op = self.mem.get_byte(pc + 1)
+                if sub_op == 0x2A:
+                    rname = "IX" if opcode == 0xDD else "IY"
+                    mem_loads[rname] = access_addr
 
-            # 経路 B: CALSLT (001CH) 呼び出し時 (IX レジスタ経由)
-            if branch_targets and branch_targets[0] == 0x001C:
-                if reg_tracker.get('IX'):
-                    _, target_ix = reg_tracker['IX']
-                    self._check_and_register_sys_args(target_ix, reg_tracker)
-
-            # 経路 C: 通常の CALL / JP 分岐時
-            for tgt in branch_targets:
-                self._check_and_register_sys_args(tgt, reg_tracker)
-                self.register_symbol(tgt)
-                if self.is_in_bank(tgt):
-                    stack.append(tgt)
-
-            # -------------------------------------------------------------
-            # MSXフック（H_TIMI等）へのハンドラ代入の検出
-            #    ld (0xFDA0), hl や ld (0xFD9B), hl などをフック登録と認識
-            # -------------------------------------------------------------
-            if access_addr in MSX_HOOK_ADDRS:
-                if opcode == 0x22 and reg_tracker['HL']:  # ld (nn), hl
-                    handler_pc, handler_addr = reg_tracker['HL']
-                    self.logger(f"[+] MSX割り込みフック登録を検出: {format_asm_hex(access_addr)} <- ハンドラ: {format_asm_hex(handler_addr)} (PC: {format_asm_hex(pc)})")
-                    self.register_symbol(handler_addr)
-                    if self.is_in_bank(handler_addr):
-                        stack.append(handler_addr)
-                elif opcode == 0xED:
-                    sub_op = self.get_byte(pc + 1)
-                    if sub_op == 0x53 and reg_tracker['DE']:  # ld (nn), de
-                        handler_pc, handler_addr = reg_tracker['DE']
-                        self.register_symbol(handler_addr)
-                        if self.is_in_bank(handler_addr):
-                            stack.append(handler_addr)
-
-            # -------------------------------------------------------------
-            # 間接ジャンプ JP (HL) / JP (IX) のテーブル検出
-            #    パターン: ld hl, TABLE / add hl, de / ld e, (hl) / inc hl / ld d, (hl) / ex de, hl / jp (hl)
-            # -------------------------------------------------------------
-            if opcode == 0xE9:  # jp (hl)
-                self._detect_and_expand_jump_table(recent_history, stack)
-
-            # -------------------------------------------------------------
-            # 間接参照 (HL) 等によるポインタ確定
-            # -------------------------------------------------------------
-            is_ind_hl = (0x40 <= opcode <= 0x7F and (opcode & 7) == 6 and opcode != 0x76) or \
-                        (0x80 <= opcode <= 0xBF and (opcode & 7) == 6)
-            if is_ind_hl and reg_tracker['HL']:
-                src_pc, val = reg_tracker['HL']
-                self.pointer_load_pcs.add(src_pc)
-                self.register_symbol(val, size=1)
-
-            # CALSLT (0x001C) 呼び出し時の IX 追跡
-            if opcode == 0xCD and branch_targets and branch_targets[0] == 0x001C and reg_tracker['IX']:
-                src_pc, val = reg_tracker['IX']
-                self.pointer_load_pcs.add(src_pc)
-                self.register_symbol(val)
-
-            # メモリアクセス
+            # メモリへの書き込み追跡
             if access_addr is not None:
-                self.register_symbol(access_addr, size=access_sz)
+                is_write = False
+                w_reg = None
+                if opcode in [0x32, 0x22]:
+                    is_write = True
+                    w_reg = "A" if opcode == 0x32 else "HL"
+                elif opcode == 0xED:
+                    sub_op = self.mem.get_byte(pc + 1)
+                    if sub_op in [0x43, 0x53, 0x73]:
+                        is_write = True
+                        w_reg = {0x43: "BC", 0x53: "DE", 0x73: "SP"}[sub_op]
+                elif opcode in [0xDD, 0xFD]:
+                    sub_op = self.mem.get_byte(pc + 1)
+                    if sub_op == 0x22:
+                        is_write = True
+                        w_reg = "IX" if opcode == 0xDD else "IY"
 
-            # 分岐命令（JP, CALL, JR, RST）の飛び先をスタックへ
+                if is_write:
+                    self.mem.mark_attribute(access_addr, "WORK")
+                    self.mem.discard_attribute(access_addr, "DATA")
+                    self.registry.register_address(access_addr, size=access_sz, is_work=True)
+
+                    # MSX 割り込みフック登録の検出
+                    if access_addr in MSX_HOOK_ADDRS and w_reg in regs:
+                        h_addr = regs[w_reg]["val"]
+                        h_src_pc = regs[w_reg]["source_pc"]
+                        if self.mem.is_valid_address(h_addr):
+                            log_key = (access_addr, h_addr, h_src_pc)
+                            if log_key not in self.logged_interrupt_hooks:
+                                self.logged_interrupt_hooks.add(log_key)
+                                self.logger.log(
+                                    f"[+] 割り込みフック登録を検出: {format_asm_hex(access_addr)} <- ハンドラ: "
+                                    f"{format_asm_hex(h_addr)} (PC: {format_asm_hex(pc)})"
+                                )
+                            self.registry.register_address(h_addr, is_code=True)
+                            stack.append((h_addr, {"regs": copy.deepcopy(regs), "mem_loads": copy.deepcopy(mem_loads)}))
+
+                    # ポインタワークへの書き込み検出
+                    if access_addr in self.pointer_work_addresses and w_reg in regs:
+                        s_pc = regs[w_reg]["source_pc"]
+                        s_val = regs[w_reg]["source_val"]
+                        if s_pc is not None and self.mem.is_valid_address(s_val):
+                            self.pointer_load_pcs.add(s_pc)
+                            self.registry.register_address(s_val)
+                            log_key = (access_addr, s_val, s_pc)
+                            if log_key not in self.logged_pointer_writes:
+                                self.logged_pointer_writes.add(log_key)
+                                self.logger.log(
+                                    f"[+] 間接参照アドレス用WORK代入を検出: WORK: {format_asm_hex(access_addr)} "
+                                    f"<- 値: {format_asm_hex(s_val)} (ロード位置: {format_asm_hex(s_pc)})"
+                                )
+                else:
+                    self.registry.register_address(access_addr, size=access_sz)
+
+            # 間接参照ポインタの検出 (HL, DE, BC, IX, IY)
+            is_ind_hl = (0x40 <= opcode <= 0x7F and (opcode & 7) == 6 and opcode != 0x76) or \
+                        (0x80 <= opcode <= 0xBF and (opcode & 7) == 6) or (opcode == 0x36)
+            # CBプレフィックスによる (hl) 間接参照の追加
+            if opcode == 0xCB:
+                sub_cb = self.mem.get_byte(pc + 1)
+                if (sub_cb & 7) == 6:
+                    is_ind_hl = True
+
+            if is_ind_hl:
+                self._handle_pointer_dereference("HL", pc, regs, mem_loads)
+            elif opcode in [0x0A, 0x02]:
+                self._handle_pointer_dereference("BC", pc, regs, mem_loads)
+            elif opcode in [0x1A, 0x12]:
+                self._handle_pointer_dereference("DE", pc, regs, mem_loads)
+            elif opcode in [0xDD, 0xFD]:
+                sub_op = self.mem.get_byte(pc + 1)
+                reg_name = "IX" if opcode == 0xDD else "IY"
+                is_ind_idx = False
+                if sub_op == 0xCB:
+                    is_ind_idx = True
+                elif sub_op in [0x34, 0x35, 0x36]:
+                    is_ind_idx = True
+                elif 0x40 <= sub_op <= 0xBF and sub_op != 0x76:
+                    if ((sub_op >> 3) & 7) == 6 or (sub_op & 7) == 6:
+                        is_ind_idx = True
+                if is_ind_idx:
+                    self._handle_pointer_dereference(reg_name, pc, regs, mem_loads)
+            elif opcode == 0xED:
+                sub_op = self.mem.get_byte(pc + 1)
+                # ブロック転送命令 (LDI, LDIR, LDD, LDDR) による HL / DE 参照
+                if sub_op in [0xA0, 0xB0, 0xA8, 0xB8]:
+                    self._handle_pointer_dereference("HL", pc, regs, mem_loads)
+                    self._handle_pointer_dereference("DE", pc, regs, mem_loads)
+
+            # システムコール引数の検出
+            if opcode == 0xF7:  # RST 30H
+                target_sys = self.mem.get_word(pc + 2)
+                self._check_system_args(target_sys, regs)
             for tgt in branch_targets:
-                self.register_symbol(tgt)
-                if self.is_in_bank(tgt):
-                    stack.append(tgt)
+                self._check_system_args(tgt, regs)
+                self.registry.register_address(tgt, is_code=True)
+                if self.mem.is_valid_address(tgt):
+                    stack.append((tgt, {"regs": copy.deepcopy(regs), "mem_loads": copy.deepcopy(mem_loads)}))
 
-            # 連続するJPテーブル (JP xxxx が並んでいる場合)
+            # JP (HL) / JP (IX) / JP (IY) によるジャンプテーブル検出
+            if opcode == 0xE9:
+                self._detect_and_expand_jump_table("HL", recent_history, stack, regs, mem_loads)
+            elif opcode in [0xDD, 0xFD] and self.mem.get_byte(pc + 1) == 0xE9:
+                target_reg = "IX" if opcode == 0xDD else "IY"
+                self._detect_and_expand_jump_table(target_reg, recent_history, stack, regs, mem_loads)
+
+            # 連続するJPテーブル (JP xxxx が並んでいる箇所)
             if opcode == 0xC3:
                 next_pc = pc + 3
-                if self.is_in_bank(next_pc) and self.get_byte(next_pc) == 0xC3:
-                    stack.append(next_pc)
+                if self.mem.is_valid_address(next_pc) and self.mem.get_byte(next_pc) == 0xC3:
+                    stack.append((next_pc, {"regs": copy.deepcopy(regs), "mem_loads": copy.deepcopy(mem_loads)}))
 
-            # 履歴の更新
+            # 履歴管理
             recent_history.append((pc, opcode, imm16))
             if len(recent_history) > 12:
                 recent_history.pop(0)
 
-            # 終端命令でなければ、フォールスルー
+            # フォールスルー
             if not is_terminal:
-                stack.append(pc + length)
+                stack.append((pc + length, {"regs": copy.deepcopy(regs), "mem_loads": copy.deepcopy(mem_loads)}))
 
-    def _detect_and_expand_jump_table(self, history, stack):
-        # 直前の命令履歴からテーブルアドレスを特定し、エントリポイントを展開する
+    def _handle_pointer_dereference(self, reg_name, pc, regs, mem_loads):
+        if reg_name in mem_loads:
+            w_addr = mem_loads[reg_name]
+            if w_addr not in self.pointer_work_addresses:
+                self.pointer_work_addresses.add(w_addr)
+                if w_addr not in self.logged_pointer_works:
+                    self.logged_pointer_works.add(w_addr)
+                    self.logger.log(f"[*] アドレス格納用WORKを検出: [{format_asm_hex(w_addr)}] (reg: {reg_name}, PC: {format_asm_hex(pc)})")
+
+        reg_info = regs.get(reg_name)
+        if reg_info and reg_info["source_pc"] is not None:
+            src_pc = reg_info["source_pc"]
+            ptr_val = reg_info["val"]
+            self.pointer_load_pcs.add(src_pc)
+            # バイナリ内、またはRAM領域(0xC000以上)や有効アドレスならシンボル登録する
+            if self.mem.is_valid_address(ptr_val) or ptr_val >= 0xC000:
+                is_work = (ptr_val >= 0xC000)
+                self.registry.register_address(ptr_val, size=1, is_work=is_work)
+
+    def _check_system_args(self, target_addr, regs):
+        if target_addr in BIOS_MEM_ARGS:
+            for rname in BIOS_MEM_ARGS[target_addr]:
+                if regs.get(rname) and regs[rname]["source_pc"] is not None:
+                    arg_addr = regs[rname]["val"]
+                    if self.mem.is_valid_address(arg_addr):
+                        log_key = (target_addr, rname, arg_addr)
+                        if log_key not in self.logged_sys_args:
+                            self.logged_sys_args.add(log_key)
+                            self.logger.log(
+                                f"[+] システム引数参照を検出: {format_asm_hex(target_addr)} 用 "
+                                f"{rname}={format_asm_hex(arg_addr)}"
+                            )
+                        self.registry.register_address(arg_addr)
+                        self.pointer_load_pcs.add(regs[rname]["source_pc"])
+
+        elif target_addr in BDOS_ENTRY_ADDRS:
+            fn_code = regs.get("C", {}).get("val")
+            if fn_code in BDOS_ARG_REGS:
+                for rname in BDOS_ARG_REGS[fn_code]:
+                    if regs.get(rname) and regs[rname]["source_pc"] is not None:
+                        arg_addr = regs[rname]["val"]
+                        if self.mem.is_valid_address(arg_addr):
+                            log_key = (target_addr, fn_code, rname, arg_addr)
+                            if log_key not in self.logged_sys_args:
+                                self.logged_sys_args.add(log_key)
+                                self.logger.log(
+                                    f"[+] BDOS Fn {format_asm_hex(fn_code, 2)} 引数参照を検出: "
+                                    f"{rname}={format_asm_hex(arg_addr)}"
+                                )
+                            self.registry.register_address(arg_addr)
+                            self.pointer_load_pcs.add(regs[rname]["source_pc"])
+
+    def _detect_and_expand_jump_table(self, target_reg, history, stack, regs, mem_loads):
         table_base = None
-        # 履歴を遡り、直近で ld hl, nn された nn を取得
         for h_pc, h_op, h_imm in reversed(history):
-            if h_op == 0x21 and h_imm is not None:  # ld hl, nn
+            if target_reg == "HL" and h_op == 0x21 and h_imm is not None:  # ld hl, nn
+                table_base = h_imm
+                break
+            elif target_reg == "IX" and h_op == 0xDD and h_imm is not None:  # ld ix, nn
+                table_base = h_imm
+                break
+            elif target_reg == "IY" and h_op == 0xFD and h_imm is not None:  # ld iy, nn
                 table_base = h_imm
                 break
 
-        if table_base is None or not self.is_in_bank(table_base):
+        if table_base is None or not self.mem.is_valid_address(table_base):
             return
 
-        self.register_symbol(table_base)
-
+        self.registry.register_address(table_base)
         cur_ptr = table_base
         invalid_consecutive = 0
         collected_targets = []
 
-        while self.is_in_bank(cur_ptr):
-            # テーブル開始位置直後で、既存ラベルまたは確定したCODE領域に達したら終了
+        while self.mem.is_valid_address(cur_ptr):
             if cur_ptr > table_base:
-                if cur_ptr in self.global_labels:
+                if cur_ptr in self.registry.labels:
                     break
-                if self.attr[cur_ptr - self.base_addr] == 'CODE':
+                if self.mem.has_attribute(cur_ptr, "CODE"):
                     break
 
-            # 安全のための最大エントリ数リミット (8ビットインデックス上限 = 256エントリ = 512バイト)
-            # ※ 厳密にしたければ、ポインタアドレス計算処理のANDマスク命令や
-            #    HLへの加算値について、2倍する前の元の値を格納しているレジスタを見る必要がある。
             if (cur_ptr - table_base) >= 512:
                 break
 
-            tgt_addr = self.get_word(cur_ptr)
-            is_valid = self.is_in_bank(tgt_addr) and tgt_addr not in [0x0000, 0xFFFF]
+            tgt_addr = self.mem.get_word(cur_ptr)
+            is_valid = self.mem.is_valid_address(tgt_addr) and tgt_addr not in [0x0000, 0xFFFF]
 
             if is_valid:
                 invalid_consecutive = 0
-                self.register_symbol(tgt_addr)
-                stack.append(tgt_addr)
+                self.registry.register_address(tgt_addr, is_code=True)
+                stack.append((tgt_addr, {"regs": copy.deepcopy(regs), "mem_loads": copy.deepcopy(mem_loads)}))
                 collected_targets.append(tgt_addr)
             else:
                 invalid_consecutive += 1
-                # 0000H, FFFFH, バンク外などの無効値が2回連続したらテーブル終了
                 if invalid_consecutive >= 2:
                     break
-
             cur_ptr += 2
 
-        # まとめて1〜2行で範囲ログを出力
-        if collected_targets:
+        if collected_targets and table_base not in self.logged_jump_tables:
+            self.logged_jump_tables.add(table_base)
             tbl_end = cur_ptr - 1
             min_tgt = min(collected_targets)
             max_tgt = max(collected_targets)
-            self.logger(
+            self.logger.log(
                 f"[+] ジャンプテーブルを自動検出: {format_asm_hex(table_base)} - {format_asm_hex(tbl_end)} "
                 f"({len(collected_targets)} エントリ)"
             )
-            self.logger(
+            self.logger.log(
                 f"    - 分岐先範囲: {format_asm_hex(min_tgt)} - {format_asm_hex(max_tgt)}"
             )
 
     def run_gap_sweep(self):
-        """
-        CODEに挟まれた未参照領域を走査し、エントリポイントに追加する。
-        領域内に既存の参照（ラベル）が存在する場合はデータとして除外する。
-        """
+        # CODE属性の間に挟まれた未参照ブロック(間接コール等で通常の追跡から漏れたルーチン)を検出し、追加解析を行う
         new_entries = []
         in_gap = False
         gap_start = None
 
-        # 登録済み参照アドレスの一覧
-        referenced = set(self.global_labels.keys())
+        referenced = set(self.registry.labels.keys())
 
-        for addr in range(self.base_addr, self.end_addr):
-            idx = addr - self.base_addr
-            is_code = (self.attr[idx] == 'CODE')
+        for addr in range(self.mem.base_addr, self.mem.end_addr):
+            is_code = self.mem.has_attribute(addr, "CODE")
+            is_work = self.mem.has_attribute(addr, "WORK")
 
-            if not is_code:
+            if not is_code and not is_work:
+                # 直前がCODEで、現在地がDATA(未確定)の場合、ギャップの開始とみなす
                 if not in_gap:
-                    # 直前がCODEであればギャップ開始
-                    if addr > self.base_addr and self.attr[idx - 1] == 'CODE':
+                    if addr > self.mem.base_addr and self.mem.has_attribute(addr - 1, "CODE"):
                         in_gap = True
                         gap_start = addr
             else:
                 if in_gap:
                     gap_end = addr - 1
-                    # 直後がCODE（両端がCODEで挟まれている）
-                    if gap_end >= gap_start:
-                        # ギャップ区間内に既存参照が存在するか判定
-                        has_reference = any(a in referenced for a in range(gap_start, gap_end + 1))
-
-                        if not has_reference:
-                            # 0x00, 0xFF の連続パディングは除外
-                            first_b = self.get_byte(gap_start)
+                    # ギャップの終端が再びCODEに接続しており、かつ内部にラベル参照が存在しない場合
+                    if is_code and gap_end >= gap_start:
+                        has_ref = any(a in referenced for a in range(gap_start, gap_end + 1))
+                        if not has_ref:
+                            first_b = self.mem.get_byte(gap_start)
+                            # パディング(00HやFFHの連続)でなければ未呼び出しコードエントリとして回収する
                             if first_b not in [0x00, 0xFF]:
-                                self.logger(f"[*] 未参照ブロック検出: {format_asm_hex(gap_start)} - {format_asm_hex(gap_end)}")
+                                self.logger.log(f"[*] 未参照コードブロックを検出: {format_asm_hex(gap_start)} - {format_asm_hex(gap_end)}")
                                 new_entries.append(gap_start)
-
+                                self.registry.register_address(gap_start, is_code=True)
+                                self.registry.uncalled_entries.add(gap_start)
                     in_gap = False
 
+        # 発見した未参照ブロックの先頭から再度フロー解析を実行する
         if new_entries:
-            self.trace_flow(new_entries)
+            self._trace_from_entries(new_entries)
 
-    def register_symbol(self, addr, size=0):
-        if size > 0:
-            current_sz = self.var_sizes.get(addr, 0)
-            if size > current_sz:
-                self.var_sizes[addr] = size
+    def merge_unreferenced_work_data(self):
+        if self.max_merge_limit < 1:
+            return
 
-        if addr not in self.global_labels:
-            sym_name = get_symbol_name(addr)
-            if sym_name:
-                self.global_labels[addr] = sym_name
-            else:
-                if self.is_in_bank(addr):
-                    self.global_labels[addr] = f"LABEL_{self.bank_id:02X}_{addr:04X}H"
-                elif addr >= 0xC000:
-                    self.global_labels[addr] = f"WORK_{addr:04X}H"
-                else:
-                    self.global_labels[addr] = f"EXT_{addr:04X}H"
-
-    def _check_and_register_sys_args(self, target_addr, reg_tracker):
-        # 通常の BIOS / PHYDIO / SUB-ROM / H_PHYD 呼び出し
-        if target_addr in BIOS_MEM_ARGS:
-            req_regs = BIOS_MEM_ARGS[target_addr]
-            for rname in req_regs:
-                if reg_tracker.get(rname):
-                    _, arg_addr = reg_tracker[rname]
-                    if self.is_in_bank(arg_addr):
-                        self.logger(
-                            f"[+] システム引数参照を検出: {format_asm_hex(target_addr)} 用 "
-                            f"{rname}={format_asm_hex(arg_addr)}"
-                        )
-                        self.register_symbol(arg_addr)
-
-        # BDOSコール (MSX-DOS 0005H または Disk BASIC 0F37DH)
-        elif target_addr in BDOS_ENTRY_ADDRS:
-            func_no = reg_tracker.get("C", (None, None))[1]
-            if func_no in BDOS_ARG_REGS:
-                req_regs = BDOS_ARG_REGS[func_no]
-                entry_name = "0005H" if target_addr == 0x0005 else "F37DH(H_BDOS)"
-                for rname in req_regs:
-                    if reg_tracker.get(rname):
-                        _, arg_addr = reg_tracker[rname]
-                        if self.is_in_bank(arg_addr):
-                            self.logger(
-                                f"[+] BDOS Fn {format_asm_hex(func_no, 2)} ({entry_name}) 引数参照を検出: "
-                                f"{rname}={format_asm_hex(arg_addr)}"
-                            )
-                            self.register_symbol(arg_addr)
+        for addr in range(self.mem.base_addr, self.mem.end_addr):
+            if self.mem.has_attribute(addr, "WORK"):
+                next_addr = addr + 1
+                merge_count = 0
+                while next_addr < self.mem.end_addr:
+                    if next_addr in self.registry.labels or self.mem.has_attribute(next_addr, "WORK"):
+                        break
+                    if merge_count >= self.max_merge_limit:
+                        break
+                    if (self.mem.has_attribute(next_addr, "DATA") and
+                            not self.mem.has_attribute(next_addr, "CODE") and
+                            not self.mem.has_attribute(next_addr, "WORK")):
+                        self.mem.mark_attribute(next_addr, "MERGE")
+                        self.mem.discard_attribute(next_addr, "DATA")
+                        merge_count += 1
+                        next_addr += 1
+                    else:
+                        break
 
 
 # =====================================================================
-# メインクラス
+# 出力生成クラス
+# =====================================================================
+class DisassemblyOutputGenerator:
+    def __init__(self, mem: BinaryImage, registry: AddressRegistry, logger: DisasmLogger,
+                 input_file, file_format, base_addr, end_addr, header_addr, entry_addr, output_path):
+        self.mem = mem
+        self.registry = registry
+        self.logger = logger
+        self.input_file = input_file
+        self.file_format = file_format
+        self.base_addr = base_addr
+        self.end_addr = end_addr
+        self.header_addr = header_addr
+        self.entry_addr = entry_addr
+        self.output_path = output_path
+        self.decoder = Z80InstructionDecoder(mem)
+
+    def generate(self):
+        self.logger.log(f"[*] アセンブリソースを出力中: {self.output_path}")
+
+        bios_symbols = []
+        system_work_symbols = []
+        user_work_symbols = []
+        external_symbols = []
+
+        for addr, name in self.registry.labels.items():
+            if self.mem.is_valid_address(addr):
+                continue
+            if addr < 0x4000:
+                bios_symbols.append((addr, name))
+            elif addr >= 0xF380:
+                system_work_symbols.append((addr, name))
+            elif name.startswith("WORK_") or (0xC000 <= addr < 0xF380):
+                user_work_symbols.append((addr, name))
+            else:
+                external_symbols.append((addr, name))
+
+        with open(self.output_path, "w", encoding="utf-8") as out:
+            range_str = f"{format_asm_hex(self.base_addr)} - {format_asm_hex(self.end_addr)}"
+
+            out.write("; " + "=" * 70 + "\n")
+            out.write("; MSX Z80 Intelligent Disassembler Output\n")
+            #out.write(f"; Source: {self.input_file}\n")
+            out.write(f"; Source: {os.path.basename(self.input_file)}\n") 
+            out.write(f"; Format: {self.file_format}\n")
+            out.write(f"; Range : {range_str}\n")
+            if self.header_addr is not None:
+                out.write(f"; Header: {format_asm_hex(self.header_addr)}\n")
+            if self.entry_addr is not None:
+                out.write(f"; Entry : {format_asm_hex(self.entry_addr)}\n")
+            out.write("; " + "=" * 70 + "\n\n")
+
+            if bios_symbols:
+                out.write("; === MSX BIOS & System Hooks ===\n")
+                for addr, name in sorted(bios_symbols, key=lambda x: x[0]):
+                    out.write(f"{name:16} EQU {format_asm_hex(addr)}\n")
+                out.write("\n")
+
+            if system_work_symbols:
+                out.write("; === System Work Area ===\n")
+                for addr, name in sorted(system_work_symbols, key=lambda x: x[0]):
+                    sz = self.registry.var_sizes.get(addr, 0)
+                    sz_cmt = f" ; {sz} byte{'s' if sz > 1 else ''}" if sz > 0 else ""
+                    out.write(f"{name:16} EQU {format_asm_hex(addr)}{sz_cmt}\n")
+                out.write("\n")
+
+            if user_work_symbols:
+                out.write("; === User Work Area (RAM) ===\n")
+                sorted_uw = sorted(user_work_symbols, key=lambda x: x[0])
+                for i, (addr, name) in enumerate(sorted_uw):
+                    size = self.registry.var_sizes.get(addr, 0)
+                    diff = None
+                    if i + 1 < len(sorted_uw):
+                        diff = sorted_uw[i + 1][0] - addr
+                    if size == 2: comment = "; 2 bytes (word)"
+                    elif size == 1: comment = "; 1 byte"
+                    elif diff and diff > 1: comment = f"; {diff} bytes"
+                    else: comment = "; 1 byte"
+                    out.write(f"{name:16} EQU {format_asm_hex(addr)}    {comment}\n")
+                out.write("\n")
+
+            if external_symbols:
+                out.write("; === External Symbols ===\n")
+                for addr, name in sorted(external_symbols, key=lambda x: x[0]):
+                    out.write(f"{name:16} EQU {format_asm_hex(addr)}\n")
+                out.write("\n")
+
+            out.write(f"    ORG {format_asm_hex(self.base_addr)}\n\n")
+
+            pc = self.base_addr
+            while pc < self.mem.end_addr:
+                # ROM 'AB' ヘッダ構造の出力
+                if self.header_addr is not None and pc == self.header_addr:
+                    if self.mem.get_byte(pc) == 0x41 and self.mem.get_byte(pc + 1) == 0x42:
+                        out.write("\nROM_HEADER:\n")
+                        out.write('    db  "AB"\n')
+                        init_p = self.mem.get_word(pc + 2)
+                        stmt_p = self.mem.get_word(pc + 4)
+                        dev_p  = self.mem.get_word(pc + 6)
+                        text_p = self.mem.get_word(pc + 8)
+
+                        def get_l(a):
+                            return self.registry.get_label(a) if a else "0000H"
+
+                        out.write(f"    dw  {get_l(init_p)} ; INIT\n")
+                        out.write(f"    dw  {get_l(stmt_p)} ; STATEMENT\n")
+                        out.write(f"    dw  {get_l(dev_p)}  ; DEVICE\n")
+                        out.write(f"    dw  {get_l(text_p)} ; TEXT\n")
+                        reserved = [format_asm_hex(self.mem.get_byte(pc + 10 + i), 2) for i in range(6)]
+                        out.write(f"    db  {', '.join(reserved)} ; Reserved\n\n")
+                        pc += 16
+                        continue
+
+                # 行頭ラベル
+                if pc in self.registry.labels:
+                    label_name = self.registry.labels[pc]
+                    comment = " ; [Uncalled code]" if pc in self.registry.uncalled_entries else ""
+                    out.write(f"\n{label_name}:{comment}\n")
+
+                if self.mem.has_attribute(pc, "CODE"):
+                    length, _, text, _, _, _, _ = self.decoder.decode(pc, self.registry.get_label)
+                    out.write(f"    {text}\n")
+                    pc += length
+                else:
+                    db_bytes = [self.mem.get_byte(pc)]
+                    pc += 1
+                    while pc < self.mem.end_addr and not self.mem.has_attribute(pc, "CODE"):
+                        if self.header_addr is not None and pc == self.header_addr:
+                            break
+                        if pc in self.registry.labels:
+                            break
+                        if len(db_bytes) >= 16:
+                            break
+                        db_bytes.append(self.mem.get_byte(pc))
+                        pc += 1
+
+                    tokens = [format_asm_hex(b, 2) for b in db_bytes]
+                    out.write(f"    db  {', '.join(tokens)}\n")
+
+
+# =====================================================================
+# メイン処理統括クラス
 # =====================================================================
 class MsxDisassembler:
-    def __init__(self, input_file, output_file, base_addr=0x4000, header_addr=None, 
-                 mapper="NORMAL", format_override=None, extra_entries=None, 
-                 extra_tables=None, enable_gap_scan=False):
+    def __init__(self, input_file, output_file, base_addr=0x4000, header_addr=None,
+                 format_override=None, extra_entries=None, extra_tables=None,
+                 enable_gap_scan=False, merge_limit=2):
         self.input_file = input_file
         self.output_file = output_file
         self.log_file = os.path.splitext(output_file)[0] + ".log"
         self.base_addr = base_addr
         self.header_addr = header_addr
-        self.mapper = mapper.upper()
         self.format_override = format_override
         self.extra_entries = extra_entries or []
         self.extra_tables = extra_tables or []
-        self.enable_gap_scan = enable_gap_scan  # オプション保持
+        self.enable_gap_scan = enable_gap_scan
+        self.merge_limit = merge_limit
 
-        self.global_labels = {}
-        self.var_sizes = {}
-        self.banks = []
+        self.logger = DisasmLogger(self.log_file)
         self.file_format = "ROM"
         self.end_addr = None
         self.primary_entry = None
 
-    def log(self, msg):
-        print(msg)
-        with open(self.log_file, "a", encoding="utf-8") as f:
-            f.write(msg + "\n")
-
     def run(self):
-        with open(self.log_file, "w", encoding="utf-8") as f:
-            f.write(f"MSX Disassembler Log - {self.input_file}\n\n")
+        if not os.path.exists(self.input_file):
+            print(f"[-] エラー: 入力ファイル '{self.input_file}' が存在しません。")
+            sys.exit(1)
 
         with open(self.input_file, "rb") as f:
             raw_data = bytearray(f.read())
@@ -812,7 +1205,7 @@ class MsxDisassembler:
             is_bload = True
         elif self.format_override == "COM":
             is_com = True
-        elif self.mapper == "NORMAL" and self.header_addr is None:
+        else:
             _, ext = os.path.splitext(self.input_file.lower())
             if ext == ".com":
                 is_com = True
@@ -830,7 +1223,6 @@ class MsxDisassembler:
             self.base_addr = b_start
             self.end_addr = b_end
             self.primary_entry = b_exec
-            self.mapper = "NONE"
             data = raw_data[7: 7 + (b_end - b_start + 1)]
             file_size = len(data)
         elif is_com:
@@ -838,266 +1230,143 @@ class MsxDisassembler:
             self.base_addr = 0x0100
             self.end_addr = 0x0100 + file_size - 1
             self.primary_entry = 0x0100
-            self.mapper = "NONE"
         else:
             self.file_format = "ROM"
             self.end_addr = self.base_addr + file_size - 1
 
-        cfg = MAPPER_CONFIGS.get(self.mapper, MAPPER_CONFIGS["NORMAL"])
         range_str = f"{format_asm_hex(self.base_addr)} - {format_asm_hex(self.end_addr)}"
 
-        self.log("=" * 70)
-        self.log(" MSX Z80 Intelligent Disassembler (msx_disasm)")
-        self.log("=" * 70)
-        self.log(f"[*] 入力ファイル    : {self.input_file} ({file_size} bytes)")
-        self.log(f"[*] フォーマット    : {self.file_format}")
-        self.log(f"[*] アドレス範囲    : {range_str}")
-        self.log(f"[*] 出力ファイル    : {self.output_file}")
-        self.log(f"[*] マッパータイプ  : {cfg['name']}")
+        self.logger.log("=" * 70)
+        self.logger.log(" MSX Z80 Intelligent Disassembler (msx_disasm)")
+        self.logger.log("=" * 70)
+        self.logger.log(f"[*] 入力ファイル    : {self.input_file} ({file_size} bytes)")
+        self.logger.log(f"[*] フォーマット    : {self.file_format}")
+        self.logger.log(f"[*] アドレス範囲    : {range_str}")
+        self.logger.log(f"[*] 出力ファイル    : {self.output_file}")
+
+        # メモリイメージとシンボルレジストリの生成
+        mem = BinaryImage(data, self.base_addr, self.logger)
+        registry = AddressRegistry(mem, self.logger)
+        analyser = Z80FlowAnalyser(mem, registry, self.logger, max_merge_limit=self.merge_limit)
 
         header_entries = []
         is_rom_header = False
 
-        if self.file_format == "ROM" and cfg["is_rom"]:
+        if self.file_format == "ROM":
             actual_header_addr = self.header_addr if self.header_addr is not None else self.base_addr
-            self.header_addr = actual_header_addr
             hdr_offset = actual_header_addr - self.base_addr
-            self.log(f"[*] ROMヘッダ指定   : {format_asm_hex(actual_header_addr)} (オフセット: {format_asm_hex(hdr_offset)})")
-            if 0 <= hdr_offset <= file_size - 16 and data[hdr_offset:hdr_offset+2] == b'AB':
+            self.logger.log(f"[*] ROMヘッダ検査   : {format_asm_hex(actual_header_addr)} (オフセット: {format_asm_hex(hdr_offset)})")
+            if 0 <= hdr_offset <= file_size - 16 and data[hdr_offset:hdr_offset+2] == b"AB":
                 is_rom_header = True
+                self.header_addr = actual_header_addr
                 init_p = data[hdr_offset + 2] | (data[hdr_offset + 3] << 8)
                 stmt_p = data[hdr_offset + 4] | (data[hdr_offset + 5] << 8)
                 dev_p  = data[hdr_offset + 6] | (data[hdr_offset + 7] << 8)
                 text_p = data[hdr_offset + 8] | (data[hdr_offset + 9] << 8)
 
-                self.log("[+] MSX ROMヘッダ ('AB') を検出:")
+                self.logger.log("[+] MSX ROMヘッダ ('AB') を検出:")
                 if init_p:
-                    self.log(f"    - INIT ルーチン   : {format_asm_hex(init_p)}")
+                    self.logger.log(f"    - INIT ルーチン   : {format_asm_hex(init_p)}")
                     header_entries.append((init_p, "INIT"))
                     self.primary_entry = init_p
                 if stmt_p:
-                    self.log(f"    - STATEMENT コール: {format_asm_hex(stmt_p)}")
+                    self.logger.log(f"    - STATEMENT コール: {format_asm_hex(stmt_p)}")
                     header_entries.append((stmt_p, "STATEMENT"))
                 if dev_p:
-                    self.log(f"    - DEVICE コール   : {format_asm_hex(dev_p)}")
+                    self.logger.log(f"    - DEVICE コール   : {format_asm_hex(dev_p)}")
                     header_entries.append((dev_p, "DEVICE"))
                 if text_p:
-                    self.log(f"    - BASIC TEXT      : {format_asm_hex(text_p)}")
-            else:
-                self.log(f"[-] 警告: 指定アドレス {format_asm_hex(actual_header_addr)} に'AB'ヘッダが存在しません。")
+                    self.logger.log(f"    - BASIC TEXT      : {format_asm_hex(text_p)}")
 
-        # バンク構築
-        bank_size = cfg["bank_size"]
-        if bank_size == 0 or file_size <= bank_size:
-            b = ROMBank(0, data, self.base_addr, self.global_labels, self.var_sizes, self.log)
-            self.banks.append(b)
+        # 初期エントリポイント設定
+        initial_entries = []
+        if is_rom_header:
+            for addr, lbl in header_entries:
+                registry.labels[addr] = lbl
+                initial_entries.append(addr)
         else:
-            num_banks = file_size // bank_size
-            page_addrs = cfg["page_addrs"]
-            self.log(f"[*] {num_banks} 個のバンクに分割します。")
-            for i in range(num_banks):
-                b_data = data[i * bank_size : (i + 1) * bank_size]
-                b_base = page_addrs[i % len(page_addrs)]
-                b = ROMBank(i, b_data, b_base, self.global_labels, self.var_sizes, self.log)
-                self.banks.append(b)
+            entry = self.primary_entry if self.primary_entry else self.base_addr
+            initial_entries.append(entry)
+            registry.labels[entry] = "START"
 
-        # -----------------------------------------------------------------
-        # エントリポイント設定とトレース (Phase 1: メインフロー解析)
-        # -----------------------------------------------------------------
-        for bank in self.banks:
-            entries = []
-            if is_rom_header and bank.is_in_bank(self.header_addr):
-                for addr, label in header_entries:
-                    self.global_labels[addr] = label
-                    entries.append(addr)
-            elif not is_rom_header and bank.bank_id == 0:
-                entry = self.primary_entry if self.primary_entry else bank.base_addr
-                if bank.is_in_bank(entry):
-                    entries.append(entry)
-                    self.global_labels[entry] = "START"
-            elif not is_rom_header:
-                entries.append(bank.base_addr)
+        # 外部指定エントリポイント
+        for extra in self.extra_entries:
+            if mem.is_valid_address(extra):
+                initial_entries.append(extra)
+                registry.register_address(extra, is_code=True)
 
-            # ユーザー指定の追加エントリポイント (-e)
-            for extra in self.extra_entries:
-                if bank.is_in_bank(extra):
-                    entries.append(extra)
-                    self.global_labels[extra] = f"ENTRY_{extra:04X}H"
+        # 手動指定ジャンプテーブル
+        for t_base, t_count in self.extra_tables:
+            if mem.is_valid_address(t_base):
+                registry.register_address(t_base)
+                cur_ptr = t_base
+                manual_targets = []
+                for _ in range(t_count):
+                    if not mem.is_valid_address(cur_ptr):
+                        break
+                    tgt = mem.get_word(cur_ptr)
+                    if mem.is_valid_address(tgt) and tgt not in [0x0000, 0xFFFF]:
+                        registry.register_address(tgt, is_code=True)
+                        initial_entries.append(tgt)
+                        manual_targets.append(tgt)
+                    cur_ptr += 2
+                if manual_targets:
+                    tbl_end = cur_ptr - 1
+                    min_tgt = min(manual_targets)
+                    max_tgt = max(manual_targets)
+                    self.logger.log(
+                        f"[+] 手動指定ジャンプテーブルを展開: {format_asm_hex(t_base)} - {format_asm_hex(tbl_end)} "
+                        f"({len(manual_targets)}/{t_count} エントリ回収)"
+                    )
+                    self.logger.log(
+                        f"    - 分岐先範囲: {format_asm_hex(min_tgt)} - {format_asm_hex(max_tgt)}"
+                    )
 
-            # ユーザー指定の手動ジャンプテーブル (-t) の展開
-            for t_base, t_count in self.extra_tables:
-                if bank.is_in_bank(t_base):
-                    bank.register_symbol(t_base)
-                    cur_ptr = t_base
-                    manual_targets = []
-                    for _ in range(t_count):
-                        if not bank.is_in_bank(cur_ptr):
-                            break
-                        tgt = bank.get_word(cur_ptr)
-                        if bank.is_in_bank(tgt) and tgt not in [0x0000, 0xFFFF]:
-                            bank.register_symbol(tgt)
-                            entries.append(tgt)
-                            manual_targets.append(tgt)
-                        cur_ptr += 2
+        # フロー解析の実行
+        analyser.analyze_flow(initial_entries)
 
-                    if manual_targets:
-                        tbl_end = cur_ptr - 1
-                        min_tgt = min(manual_targets)
-                        max_tgt = max(manual_targets)
-                        self.log(
-                            f"[+] 手動指定ジャンプテーブルを展開: {format_asm_hex(t_base)} - {format_asm_hex(tbl_end)} "
-                            f"({len(manual_targets)}/{t_count} エントリ回収)"
-                        )
-                        self.log(
-                            f"    - 分岐先範囲: {format_asm_hex(min_tgt)} - {format_asm_hex(max_tgt)}"
-                        )
-
-            if entries:
-                bank.trace_flow(entries)
-
-        # -----------------------------------------------------------------
-        # Phase 2: CODEギャップスキャン（孤立サブルーチンの回収）
-        # -----------------------------------------------------------------
+        # 未参照コードブロック (CODEギャップ) の走査回収
         if self.enable_gap_scan:
-            self.log("[*] Phase 2: 未到達コードブロックのスキャンを実行...")
-            for bank in self.banks:
-                bank.run_gap_sweep()
+            self.logger.log("[*] Phase 2: 未到達コードブロックのスキャンを実行...")
+            analyser.run_gap_sweep()
 
-        # 出力
-        self.output_assembly(is_rom_header)
+        # 命令先頭マップの構築 (命令内オフセットラベル解決用)
+        registry.populate_instruction_map()
 
-    def output_assembly(self, is_rom_header):
-        self.log(f"[*] アセンブリソースを生成中: {self.output_file}")
-        with open(self.output_file, "w", encoding="utf-8") as out:
-            range_str = f"{format_asm_hex(self.base_addr)} - {format_asm_hex(self.end_addr)}"
+        # WORKに隣接する未参照DATAのマージ処理
+        analyser.merge_unreferenced_work_data()
 
-            out.write("; " + "=" * 70 + "\n")
-            out.write(f"; MSX Z80 Intelligent Disassembler Output\n")
-            out.write(f"; Source: {self.input_file}\n")
-            out.write(f"; Format: {self.file_format}\n")
-            out.write(f"; Range : {range_str}\n")
-            if is_rom_header and self.header_addr is not None:
-                out.write(f"; Header: {format_asm_hex(self.header_addr)}\n")
-            if self.primary_entry is not None:
-                out.write(f"; Entry : {format_asm_hex(self.primary_entry)}\n")
-            out.write(f"; Mapper: {MAPPER_CONFIGS.get(self.mapper, {}).get('name', self.mapper)}\n")
-            out.write("; " + "=" * 70 + "\n\n")
+        # レポート出力
+        self._print_report(mem)
 
-            bios_symbols = []
-            work_symbols = []
-            user_work_symbols = []
-            other_symbols = []
+        # アセンブリ出力
+        generator = DisassemblyOutputGenerator(
+            mem, registry, self.logger,
+            self.input_file, self.file_format, self.base_addr, self.end_addr,
+            self.header_addr, self.primary_entry, self.output_file
+        )
+        generator.generate()
+        self.logger.log(f"[+] 完了しました: {self.output_file}")
 
-            for addr, name in self.global_labels.items():
-                if any(b.is_in_bank(addr) for b in self.banks):
-                    continue
+    def _print_report(self, mem: BinaryImage):
+        code_bytes = sum(1 for a in range(mem.base_addr, mem.end_addr) if mem.has_attribute(a, "CODE"))
+        work_bytes = sum(1 for a in range(mem.base_addr, mem.end_addr) if mem.has_attribute(a, "WORK"))
+        merge_bytes = sum(1 for a in range(mem.base_addr, mem.end_addr) if mem.has_attribute(a, "MERGE"))
+        data_bytes = sum(
+            1 for a in range(mem.base_addr, mem.end_addr)
+            if mem.has_attribute(a, "DATA") and not mem.has_attribute(a, "CODE")
+            and not mem.has_attribute(a, "WORK") and not mem.has_attribute(a, "MERGE")
+        )
 
-                if addr < 0x4000:
-                    bios_symbols.append((addr, name))
-                elif addr >= 0xF380:
-                    work_symbols.append((addr, name))
-                elif name.startswith("WORK_") or (0xC000 <= addr < 0xF380):
-                    user_work_symbols.append((addr, name))
-                else:
-                    other_symbols.append((addr, name))
-
-            if bios_symbols:
-                out.write("; === MSX BIOS & System Hooks ===\n")
-                for addr, name in sorted(bios_symbols, key=lambda x: x[0]):
-                    out.write(f"{name:16} EQU {format_asm_hex(addr)}\n")
-                out.write("\n")
-
-            if work_symbols:
-                out.write("; === System Work Area ===\n")
-                for addr, name in sorted(work_symbols, key=lambda x: x[0]):
-                    sz = self.var_sizes.get(addr, 0)
-                    sz_comment = f" ; {sz} byte{'s' if sz > 1 else ''}" if sz > 0 else ""
-                    out.write(f"{name:16} EQU {format_asm_hex(addr)}{sz_comment}\n")
-                out.write("\n")
-
-            if user_work_symbols:
-                out.write("; === User Work Area (RAM) ===\n")
-                sorted_user_work = sorted(user_work_symbols, key=lambda x: x[0])
-                for i, (addr, name) in enumerate(sorted_user_work):
-                    size = self.var_sizes.get(addr, 0)
-                    diff_to_next = None
-                    if i + 1 < len(sorted_user_work):
-                        diff_to_next = sorted_user_work[i + 1][0] - addr
-
-                    if size == 2: comment = "; 2 bytes (word)"
-                    elif size == 1: comment = "; 1 byte"
-                    elif diff_to_next and diff_to_next > 1: comment = f"; {diff_to_next} bytes"
-                    else: comment = "; 1 byte"
-
-                    out.write(f"{name:16} EQU {format_asm_hex(addr)}    {comment}\n")
-                out.write("\n")
-
-            if other_symbols:
-                out.write("; === Other External Symbols ===\n")
-                for addr, name in sorted(other_symbols, key=lambda x: x[0]):
-                    out.write(f"{name:16} EQU {format_asm_hex(addr)}\n")
-                out.write("\n")
-
-            # 各バンク出力
-            for bank in self.banks:
-                out.write("; " + "=" * 70 + "\n")
-                out.write(f"; BANK {bank.bank_id:02X} (ORG {format_asm_hex(bank.base_addr)})\n")
-                out.write("; " + "=" * 70 + "\n")
-                out.write(f"    ORG {format_asm_hex(bank.base_addr)}\n\n")
-
-                pc = bank.base_addr
-
-                while pc < bank.end_addr:
-                    if is_rom_header and pc == self.header_addr and bank.is_in_bank(self.header_addr):
-                        out.write("\nROM_HEADER:\n")
-                        out.write('    db  "AB"\n')
-                        init_p = bank.get_word(pc + 2)
-                        stmt_p = bank.get_word(pc + 4)
-                        dev_p  = bank.get_word(pc + 6)
-                        text_p = bank.get_word(pc + 8)
-
-                        def get_lbl(a):
-                            return self.global_labels.get(a, format_asm_hex(a))
-
-                        out.write(f"    dw  {get_lbl(init_p)} ; INIT\n")
-                        out.write(f"    dw  {get_lbl(stmt_p) if stmt_p else '0000H'} ; STATEMENT\n")
-                        out.write(f"    dw  {get_lbl(dev_p)  if dev_p  else '0000H'} ; DEVICE\n")
-                        out.write(f"    dw  {get_lbl(text_p) if text_p else '0000H'} ; TEXT\n")
-                        reserved = [format_asm_hex(bank.get_byte(pc + 10 + i), 2) for i in range(6)]
-                        out.write(f"    db  {', '.join(reserved)} ; Reserved\n\n")
-                        pc += 16
-                        continue
-
-                    if pc in self.global_labels:
-                        out.write(f"\n{self.global_labels[pc]}:\n")
-
-                    idx = pc - bank.base_addr
-                    if bank.attr[idx] == 'CODE':
-                        def get_lbl(a):
-                            return self.global_labels.get(a, format_asm_hex(a))
-
-                        length, _, text, _, _, _, _ = bank.decoder.decode(pc, get_lbl)
-                        out.write(f"    {text}\n")
-                        pc += length
-                    else:
-                        db_bytes = [bank.get_byte(pc)]
-                        pc += 1
-                        while pc < bank.end_addr and bank.attr[pc - bank.base_addr] != 'CODE':
-                            if is_rom_header and pc == self.header_addr:
-                                break
-                            if pc in self.global_labels:
-                                break
-                            if len(db_bytes) >= 16:
-                                break
-                            db_bytes.append(bank.get_byte(pc))
-                            pc += 1
-
-                        tokens = [format_asm_hex(b, 2) for b in db_bytes]
-                        out.write(f"    db  {', '.join(tokens)}\n")
-
-                out.write("\n")
-
-        self.log(f"[+] 完了しました: {self.output_file}")
+        self.logger.log("=" * 70)
+        self.logger.log(" 解析レポート")
+        self.logger.log("=" * 70)
+        self.logger.log(f"    - 命令コード (CODE) サイズ総計 : {code_bytes:6} bytes ({format_asm_hex(code_bytes)})")
+        self.logger.log(f"    - 静的データ (DATA) サイズ総計 : {data_bytes:6} bytes ({format_asm_hex(data_bytes)})")
+        self.logger.log(f"    - ワーク領域 (WORK) サイズ総計 : {work_bytes:6} bytes ({format_asm_hex(work_bytes)})")
+        if self.merge_limit > 0:
+            self.logger.log(f"    - DATA統合 (MERGE) サイズ総計  : {merge_bytes:6} bytes ({format_asm_hex(merge_bytes)})")
+        self.logger.log("=" * 70)
 
 
 # =====================================================================
@@ -1115,17 +1384,16 @@ def parse_arguments():
         description="MSX Z80 Intelligent Disassembler (msx_disasm)",
         add_help=False
     )
-    # (既存の引数定義...)
     parser.add_argument("file_pos", nargs="?", default=None, help="入力ファイルパス")
     parser.add_argument("-i", "--input", dest="file_opt", help="入力ファイルパス")
     parser.add_argument("-o", "--output", default=None, help="出力ファイルパス")
-    parser.add_argument("-a", "--address", default="4000", help="配置開始アドレス")
-    parser.add_argument("-h", "--header", default=None, help="ROMヘッダアドレス")
-    parser.add_argument("-m", "--mapper", default="NORMAL", help="マッパー種別")
+    parser.add_argument("-a", "--address", default="4000", help="配置開始アドレス (16進数、デフォルト: 4000)")
+    parser.add_argument("-h", "--header", default=None, help="ROMヘッダアドレス (16進数)")
     parser.add_argument("-e", "--entry", action="append", default=[], help="追加エントリポイント (16進数、複数指定可)")
     parser.add_argument("-t", "--table", action="append", default=[], help="ジャンプテーブル手動指定 (書式: ADDR:COUNT 例: -t 7859H:9)")
     parser.add_argument("--gap-scan", action="store_true", help="CODEブロック間の未参照領域を追加走査する")
-    parser.add_argument("-c", "--com", action="store_true", help="COM形式指定")
+    parser.add_argument("--merge-limit", type=int, default=2, help="WORK末尾の無参照DATAマージ上限バイト数 (デフォルト: 2)")
+    parser.add_argument("-c", "--com", action="store_true", help="COM形式指定 (0100H配置)")
     parser.add_argument("-b", "--bload", action="store_true", help="BLOAD形式指定")
     parser.add_argument("--help", action="help", help="ヘルプを表示")
 
@@ -1140,6 +1408,7 @@ def parse_arguments():
     base_addr = parse_hex_val(args.address)
     header_addr = parse_hex_val(args.header) if args.header else None
     extra_entries = [parse_hex_val(e) for e in args.entry if parse_hex_val(e) is not None]
+
     extra_tables = []
     for t_str in args.table:
         if ":" in t_str:
@@ -1152,33 +1421,28 @@ def parse_arguments():
             except ValueError:
                 pass
 
-    mapper_type = args.mapper.upper()
     format_override = None
     if args.com:
         format_override = "COM"
-        mapper_type = "NONE"
     elif args.bload:
         format_override = "BLOAD"
-        mapper_type = "NONE"
-    elif args.header is not None and mapper_type == "NONE":
-        mapper_type = "NORMAL"
 
-    return (input_path, output_path, base_addr, header_addr, 
-            mapper_type, format_override, extra_entries, extra_tables, args.gap_scan)
+    return (input_path, output_path, base_addr, header_addr,
+            format_override, extra_entries, extra_tables, args.gap_scan, args.merge_limit)
 
 
 if __name__ == "__main__":
-    (in_f, out_f, base_a, hdr_a, 
-     map_t, fmt_o, extra_e, extra_t, gap_scan_opt) = parse_arguments()
+    (in_f, out_f, base_a, hdr_a,
+     fmt_o, extra_e, extra_t, gap_scan_opt, merge_lim) = parse_arguments()
 
     disasm = MsxDisassembler(
-        in_f, out_f, 
-        base_addr=base_a, 
-        header_addr=hdr_a, 
-        mapper=map_t, 
-        format_override=fmt_o, 
+        in_f, out_f,
+        base_addr=base_a,
+        header_addr=hdr_a,
+        format_override=fmt_o,
         extra_entries=extra_e,
         extra_tables=extra_t,
-        enable_gap_scan=gap_scan_opt
+        enable_gap_scan=gap_scan_opt,
+        merge_limit=merge_lim
     )
     disasm.run()
